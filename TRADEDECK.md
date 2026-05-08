@@ -118,8 +118,7 @@ TradeDeck is an AI-powered admin tool for contractors and tradespeople. Drafts p
 - API key visible in browser devtools (acceptable for trusted testers only)
 - No persistence of past quotes or follow-ups (no backend yet)
 - Convert-to-invoice and PDF download buttons are placeholders
-- `TRADE_GUIDANCE` object has duplicate `Painting` and `Flooring` keys (no functional bug, but should be cleaned up)
-- `clearForm()` doesn't reset measurement-based pricing inputs (painting, flooring, roofing, logistics)
+
 
 ## Architectural Path Forward
 
