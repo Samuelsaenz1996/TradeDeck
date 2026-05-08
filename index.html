@@ -412,6 +412,30 @@
     border-color: var(--ink);
   }
 
+  .signature-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    margin-bottom: 12px;
+  }
+  .signature-summary-text {
+    color: var(--ink-2);
+    font-size: 13px;
+  }
+  .action-btn.small {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  #followupSignatureFields.hidden,
+  #followupSignatureActions.hidden {
+    display: none;
+  }
+
   /* === Tax Panel === */
   .tax-toggle {
     display: flex;
@@ -1394,8 +1418,36 @@
           </div>
 
           <div class="field">
-            <label class="label">Original job description</label>
-            <textarea class="textarea" id="followupJobDesc" placeholder="Replaced kitchen sink and repaired drywall"></textarea>
+            <label class="label">Original job reference</label>
+            <input type="text" class="input" id="followupJobDesc" placeholder="Kitchen sink replacement + drywall repair" maxlength="80" />
+          </div>
+
+          <div class="field">
+            <label class="label">Your details</label>
+            <div class="signature-panel">
+              <div class="signature-summary" id="followupSignatureSummary">
+                <div class="signature-summary-text" id="followupSigPreview">No signature saved yet</div>
+                <button class="action-btn small" id="followupSigEditBtn">Edit</button>
+              </div>
+              <div class="field-row cols-3 hidden" id="followupSignatureFields">
+                <div>
+                  <label class="label">Name</label>
+                  <input type="text" class="input" id="followupSigName" placeholder="Jordan Lee" />
+                </div>
+                <div>
+                  <label class="label">Business</label>
+                  <input type="text" class="input" id="followupSigBusiness" placeholder="TradeDeck Services" />
+                </div>
+                <div>
+                  <label class="label">Contact</label>
+                  <input type="text" class="input" id="followupSigContact" placeholder="(555) 123-4567" />
+                </div>
+              </div>
+              <div class="actions-row hidden" id="followupSignatureActions">
+                <button class="btn-secondary" id="followupSigSaveBtn">Save</button>
+                <button class="btn-secondary" id="followupSigCancelBtn">Cancel</button>
+              </div>
+            </div>
           </div>
 
           <div class="field">
@@ -1412,8 +1464,13 @@
 
           <div class="field-row cols-3">
             <div>
-              <label class="label">Days since quote sent</label>
-              <input type="number" class="input" id="followupDaysAgo" value="3" min="0" />
+              <label class="label">Quote age</label>
+              <div class="timeline-pills" id="followupDaysAgoPills">
+                <button data-days="1" data-label="1 day ago">1 day</button>
+                <button data-days="3" data-label="3 days ago" class="active">3 days</button>
+                <button data-days="5" data-label="5 days ago">5 days</button>
+                <button data-days="7" data-label="about a week ago">1 week</button>
+              </div>
             </div>
             <div>
               <label class="label">Tone</label>
@@ -1518,6 +1575,10 @@ let timeline = 'Standard';
 let followupScenario = 'No reply yet';
 let followupTone = 'Friendly';
 let followupChannel = 'Email';
+let followupQuoteAgePhrase = '3 days ago';
+let followupSigName = localStorage.getItem('tdSigName') || '';
+let followupSigBusiness = localStorage.getItem('tdSigBusiness') || '';
+let followupSigContact = localStorage.getItem('tdSigContact') || '';
 let quoteUsed = parseInt(localStorage.getItem('quoteUsed') || '0', 10);
 let apiKey = localStorage.getItem('anthropicKey') || '';
 
@@ -1538,6 +1599,8 @@ function init() {
   bindFollowupScenarioPills();
   bindFollowupTonePills();
   bindFollowupChannelToggle();
+  bindFollowupDaysAgoPills();
+  bindFollowupSignature();
   bindFollowupInputs();
   bindNav();
   bindApiKey();
@@ -1765,6 +1828,62 @@ function bindFollowupChannelToggle() {
   });
 }
 
+function bindFollowupDaysAgoPills() {
+  document.querySelectorAll('#followupDaysAgoPills button').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('#followupDaysAgoPills button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      followupQuoteAgePhrase = btn.dataset.label;
+    };
+  });
+}
+
+function bindFollowupSignature() {
+  document.getElementById('followupSigEditBtn').onclick = () => {
+    document.getElementById('followupSignatureFields').classList.toggle('hidden');
+    document.getElementById('followupSignatureActions').classList.toggle('hidden');
+  };
+  document.getElementById('followupSigSaveBtn').onclick = saveFollowupSignature;
+  document.getElementById('followupSigCancelBtn').onclick = cancelFollowupSignatureEdit;
+  initFollowupSignature();
+}
+
+function initFollowupSignature() {
+  document.getElementById('followupSigName').value = followupSigName;
+  document.getElementById('followupSigBusiness').value = followupSigBusiness;
+  document.getElementById('followupSigContact').value = followupSigContact;
+  updateFollowupSignatureSummary();
+  const hasSignature = followupSigName || followupSigBusiness || followupSigContact;
+  document.getElementById('followupSignatureFields').classList.toggle('hidden', hasSignature);
+  document.getElementById('followupSignatureActions').classList.toggle('hidden', hasSignature);
+}
+
+function saveFollowupSignature() {
+  followupSigName = document.getElementById('followupSigName').value.trim();
+  followupSigBusiness = document.getElementById('followupSigBusiness').value.trim();
+  followupSigContact = document.getElementById('followupSigContact').value.trim();
+  localStorage.setItem('tdSigName', followupSigName);
+  localStorage.setItem('tdSigBusiness', followupSigBusiness);
+  localStorage.setItem('tdSigContact', followupSigContact);
+  updateFollowupSignatureSummary();
+  document.getElementById('followupSignatureFields').classList.add('hidden');
+  document.getElementById('followupSignatureActions').classList.add('hidden');
+  showToast('Signature saved');
+}
+
+function cancelFollowupSignatureEdit() {
+  document.getElementById('followupSigName').value = followupSigName;
+  document.getElementById('followupSigBusiness').value = followupSigBusiness;
+  document.getElementById('followupSigContact').value = followupSigContact;
+  document.getElementById('followupSignatureFields').classList.add('hidden');
+  document.getElementById('followupSignatureActions').classList.add('hidden');
+}
+
+function updateFollowupSignatureSummary() {
+  const summary = [followupSigName, followupSigBusiness, followupSigContact].filter(Boolean).join(' · ');
+  document.getElementById('followupSigPreview').textContent = summary || 'No signature saved yet';
+}
+
 function bindFollowupInputs() {
   const body = document.getElementById('followupBody');
   body.addEventListener('input', updateTextCharCount);
@@ -1803,15 +1922,22 @@ async function generateFollowup() {
   txt.innerHTML = '<span class="spinner"></span> Drafting…';
 
   try {
+    const signature = {
+      name: document.getElementById('followupSigName').value.trim(),
+      business: document.getElementById('followupSigBusiness').value.trim(),
+      contact: document.getElementById('followupSigContact').value.trim(),
+    };
+
     const prompt = buildFollowupPrompt({
       trade: selectedFollowupTrade,
       customerName,
       jobDesc,
       quoteAmount,
       scenario: followupScenario,
-      daysAgo: parseInt(document.getElementById('followupDaysAgo').value, 10) || 0,
+      quoteAge: followupQuoteAgePhrase,
       tone: followupTone,
       channel: followupChannel,
+      signature,
     });
 
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
@@ -1881,7 +2007,7 @@ function copyFollowupMessage() {
   });
 }
 
-function buildFollowupPrompt({ trade, customerName, jobDesc, quoteAmount, scenario, daysAgo, tone, channel }) {
+function buildFollowupPrompt({ trade, customerName, jobDesc, quoteAmount, scenario, quoteAge, tone, channel, signature }) {
   const rawTrade = trade.replace(/^[^A-Za-z0-9]+/, '').trim();
   const tradeGuidance = TRADE_GUIDANCE[rawTrade] || '';
   const guidanceSection = tradeGuidance ? `\nTRADE-SPECIFIC GUIDANCE:\n${tradeGuidance}\n` : '';
@@ -1901,8 +2027,12 @@ function buildFollowupPrompt({ trade, customerName, jobDesc, quoteAmount, scenar
   const channelInstruction = channel === 'Text'
     ? 'Return subject as an empty string and body as a single short SMS-friendly message under 160 characters.'
     : 'Return a subject line and body with 2-3 short paragraphs.';
+  const signatureParts = [signature.name, signature.business, signature.contact].filter(Boolean);
+  const signatureInstruction = signatureParts.length
+    ? `If possible, close the message with the saved signature: ${signatureParts.join(', ')}.`
+    : 'If no signature is provided, close with a simple professional sign-off.';
 
-  return `You are drafting a contractor follow-up message for a customer. Use first-person voice (I, not we). Never use corporate filler like "circle back," "just touching base," or "hope this finds you well."\n\nTRADE: ${trade}\nCUSTOMER: ${customerName}\nORIGINAL JOB DESCRIPTION: ${jobDesc}\nQUOTE AMOUNT: ${amountText}\nSCENARIO: ${scenario}\nDAYS SINCE QUOTE SENT: ${daysAgo}\nTONE: ${tone}\nCHANNEL: ${channel}${guidanceSection}\n${scenarioInstructions}\n${toneInstruction}\n${channelInstruction}\n\nReturn strict JSON only with this exact shape (no preamble, no code fences):\n{\n  "subject": "...",\n  "body": "..."\n}`;
+  return `You are drafting a contractor follow-up message for a customer. Use first-person voice (I, not we). Never use corporate filler like "circle back," "just touching base," or "hope this finds you well."\n\nTRADE: ${trade}\nCUSTOMER: ${customerName}\nORIGINAL JOB REFERENCE: ${jobDesc}\nQUOTE AMOUNT: ${amountText}\nQUOTE AGE: ${quoteAge}\nTONE: ${tone}\nCHANNEL: ${channel}${guidanceSection}\n${scenarioInstructions}\n${toneInstruction}\n${channelInstruction}\n${signatureInstruction}\n\nReturn strict JSON only with this exact shape (no preamble, no code fences):\n{\n  "subject": "...",\n  "body": "..."\n}`;
 }
 
 function updateTextCharCount() {
