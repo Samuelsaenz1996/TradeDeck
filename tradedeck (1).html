@@ -1061,6 +1061,155 @@
               <span class="trucking-subtotal-amt" id="logisticsSubtotal">$500.00</span>
             </div>
           </div>
+
+          <div id="paintingPanel" class="trucking-panel hidden">
+            <div class="field-row cols-2">
+              <div>
+                <label class="label">Wall area (sq ft)</label>
+                <input type="number" class="input" id="paintArea" value="800" min="0" />
+              </div>
+              <div>
+                <label class="label">Number of coats</label>
+                <select class="select" id="paintCoats">
+                  <option value="1">1</option>
+                  <option value="2" selected>2</option>
+                  <option value="3">3</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-row cols-3">
+              <div>
+                <label class="label">Rate per sq ft per coat ($)</label>
+                <input type="number" class="input" id="paintRate" value="1.50" min="0" step="0.01" />
+              </div>
+              <div>
+                <label class="label">Paint cost ($)</label>
+                <input type="number" class="input" id="paintCost" value="200" min="0" step="0.01" />
+                <small style="color: var(--ink-3); font-size: 11px;">Total paint and supplies</small>
+              </div>
+              <div>
+                <label class="label">Surface prep ($)</label>
+                <input type="number" class="input" id="paintPrep" value="0" min="0" step="0.01" />
+                <small style="color: var(--ink-3); font-size: 11px;">Sanding, patching, caulking, masking</small>
+              </div>
+            </div>
+            <div class="field-row cols-2">
+              <div>
+                <label class="label">Trim and detail work ($)</label>
+                <input type="number" class="input" id="paintTrim" value="0" min="0" step="0.01" />
+              </div>
+            </div>
+            <div class="trucking-subtotal">
+              <span class="trucking-subtotal-label">Live subtotal</span>
+              <span class="trucking-subtotal-amt" id="paintingSubtotal">$0.00</span>
+            </div>
+          </div>
+
+          <div id="flooringPanel" class="trucking-panel hidden">
+            <div class="field-row cols-2">
+              <div>
+                <label class="label">Floor area (sq ft)</label>
+                <input type="number" class="input" id="floorArea" value="400" min="0" step="0.1" />
+              </div>
+              <div>
+                <label class="label">Material type</label>
+                <select class="select" id="floorMaterialType">
+                  <option>Laminate</option>
+                  <option>Vinyl/LVP</option>
+                  <option>Hardwood</option>
+                  <option>Engineered</option>
+                  <option>Tile</option>
+                  <option>Carpet</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-row cols-3">
+              <div>
+                <label class="label">Material cost per sq ft ($)</label>
+                <input type="number" class="input" id="floorMaterialRate" value="4.00" min="0" step="0.01" />
+              </div>
+              <div>
+                <label class="label">Installation rate per sq ft ($)</label>
+                <input type="number" class="input" id="floorInstallRate" value="3.50" min="0" step="0.01" />
+              </div>
+              <div>
+                <label class="label">Waste factor (%)</label>
+                <input type="number" class="input" id="floorWasteFactor" value="10" min="0" step="0.1" />
+                <small style="color: var(--ink-3); font-size: 11px;">Typically 10% (standard) or 15% (diagonal patterns)</small>
+              </div>
+            </div>
+            <div class="field-row cols-2">
+              <div>
+                <label class="label">Tear-out and disposal ($)</label>
+                <input type="number" class="input" id="floorTearOut" value="0" min="0" step="0.01" />
+              </div>
+              <div>
+                <label class="label">Subfloor prep ($)</label>
+                <input type="number" class="input" id="floorSubfloorPrep" value="0" min="0" step="0.01" />
+              </div>
+            </div>
+            <div class="field-row cols-2">
+              <div>
+                <label class="label">Transitions and finish work ($)</label>
+                <input type="number" class="input" id="floorTransitions" value="0" min="0" step="0.01" />
+              </div>
+            </div>
+            <div class="trucking-subtotal">
+              <span class="trucking-subtotal-label">Live subtotal</span>
+              <span class="trucking-subtotal-amt" id="flooringSubtotal">$0.00</span>
+            </div>
+          </div>
+
+          <div id="roofingPanel" class="trucking-panel hidden">
+            <div class="field-row cols-2">
+              <div>
+                <label class="label">Roof area (squares)</label>
+                <input type="number" class="input" id="roofSquares" value="25" min="0" step="0.1" />
+                <small style="color: var(--ink-3); font-size: 11px;">1 square = 100 sq ft</small>
+              </div>
+              <div>
+                <label class="label">Roofing material</label>
+                <select class="select" id="roofMaterialType">
+                  <option>Asphalt shingles</option>
+                  <option>Metal</option>
+                  <option>Tile</option>
+                  <option>Flat/Membrane</option>
+                  <option>Wood shake</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-row cols-3">
+              <div>
+                <label class="label">Material cost per square ($)</label>
+                <input type="number" class="input" id="roofMaterialRate" value="250" min="0" step="0.01" />
+              </div>
+              <div>
+                <label class="label">Labor per square ($)</label>
+                <input type="number" class="input" id="roofLaborRate" value="200" min="0" step="0.01" />
+              </div>
+              <div>
+                <label class="label">Tear-off per square ($)</label>
+                <input type="number" class="input" id="roofTearOffRate" value="75" min="0" step="0.01" />
+              </div>
+            </div>
+            <div class="field-row cols-2">
+              <div>
+                <label class="label">Disposal / dump fees ($)</label>
+                <input type="number" class="input" id="roofDisposal" value="350" min="0" step="0.01" />
+              </div>
+              <div>
+                <label class="label">Underlayment, flashing, accessories ($)</label>
+                <input type="number" class="input" id="roofAccessories" value="400" min="0" step="0.01" />
+                <small style="color: var(--ink-3); font-size: 11px;">Ice & water shield, drip edge, ridge vent, flashing</small>
+              </div>
+            </div>
+            <div class="trucking-subtotal">
+              <span class="trucking-subtotal-label">Live subtotal</span>
+              <span class="trucking-subtotal-amt" id="roofingSubtotal">$0.00</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1259,7 +1408,7 @@ function updateJobDescriptionPlaceholder(tradeName) {
 }
 
 let selectedTrade = '🔧 Plumbing';
-let pricingMode = 'hourly';      // 'hourly' | 'flat' | 'trucking' | 'logistics'
+let pricingMode = 'hourly';      // 'hourly' | 'flat' | 'trucking' | 'logistics' | 'painting' | 'flooring' | 'roofing'
 let taxMode = 'none';            // 'none' | 'custom'
 let timeline = 'Standard';
 let quoteUsed = parseInt(localStorage.getItem('quoteUsed') || '0', 10);
@@ -1275,6 +1424,9 @@ function init() {
   bindTaxToggle();
   bindTruckingInputs();
   bindLogisticsInputs();
+  bindPaintingInputs();
+  bindFlooringInputs();
+  bindRoofingInputs();
   bindApiKey();
   updateUsageDisplay();
 }
@@ -1291,12 +1443,18 @@ function renderTrades() {
       chip.classList.add('active');
       selectedTrade = `${t.emoji} ${t.name}`;
       updateJobDescriptionPlaceholder(t.name);
-      // Auto-switch to trucking mode if trucking trade selected
+      // Auto-switch to the correct custom pricing mode if selected
       if (t.name === 'Hauling & Trucking') {
         setPricingMode('trucking');
       } else if (t.name === 'Logistics') {
         setPricingMode('logistics');
-      } else if (pricingMode === 'trucking' || pricingMode === 'logistics') {
+      } else if (t.name === 'Painting') {
+        setPricingMode('painting');
+      } else if (t.name === 'Flooring') {
+        setPricingMode('flooring');
+      } else if (t.name === 'Roofing') {
+        setPricingMode('roofing');
+      } else if (['trucking','logistics','painting','flooring','roofing'].includes(pricingMode)) {
         setPricingMode('hourly');
       }
     };
@@ -1313,9 +1471,9 @@ function bindPricingToggle() {
 
 function setPricingMode(mode) {
   pricingMode = mode;
-  // hide toggle when trucking or logistics
+  // hide toggle when transportation or measurement-based modes are active
   const toggle = document.getElementById('pricingToggle');
-  toggle.style.display = (mode === 'trucking' || mode === 'logistics') ? 'none' : 'inline-flex';
+  toggle.style.display = (['trucking','logistics','painting','flooring','roofing'].includes(mode)) ? 'none' : 'inline-flex';
 
   document.querySelectorAll('#pricingToggle button').forEach(b =>
     b.classList.toggle('active', b.dataset.mode === mode)
@@ -1325,6 +1483,9 @@ function setPricingMode(mode) {
   document.getElementById('flatPanel').classList.toggle('hidden', mode !== 'flat');
   document.getElementById('truckingPanel').classList.toggle('hidden', mode !== 'trucking');
   document.getElementById('logisticsPanel').classList.toggle('hidden', mode !== 'logistics');
+  document.getElementById('paintingPanel').classList.toggle('hidden', mode !== 'painting');
+  document.getElementById('flooringPanel').classList.toggle('hidden', mode !== 'flooring');
+  document.getElementById('roofingPanel').classList.toggle('hidden', mode !== 'roofing');
 }
 
 function bindTimelinePills() {
@@ -1393,6 +1554,27 @@ function bindLogisticsInputs() {
   updateLogisticsSubtotal();
 }
 
+function bindPaintingInputs() {
+  ['paintArea','paintCoats','paintRate','paintCost','paintPrep','paintTrim'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updatePaintingSubtotal);
+  });
+  updatePaintingSubtotal();
+}
+
+function bindFlooringInputs() {
+  ['floorArea','floorMaterialRate','floorInstallRate','floorWasteFactor','floorTearOut','floorSubfloorPrep','floorTransitions'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateFlooringSubtotal);
+  });
+  updateFlooringSubtotal();
+}
+
+function bindRoofingInputs() {
+  ['roofSquares','roofMaterialRate','roofLaborRate','roofTearOffRate','roofDisposal','roofAccessories'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateRoofingSubtotal);
+  });
+  updateRoofingSubtotal();
+}
+
 function updateTruckSubtotal() {
   const count = parseFloat(document.getElementById('truckCount').value) || 0;
   const rate = parseFloat(document.getElementById('truckRate').value) || 0;
@@ -1413,6 +1595,41 @@ function updateLogisticsSubtotal() {
     sub = rate * qty * days + accessorials;
   }
   document.getElementById('logisticsSubtotal').textContent = fmt(sub);
+}
+
+function updatePaintingSubtotal() {
+  const area = parseFloat(document.getElementById('paintArea').value) || 0;
+  const coats = parseFloat(document.getElementById('paintCoats').value) || 1;
+  const rate = parseFloat(document.getElementById('paintRate').value) || 0;
+  const paintCost = parseFloat(document.getElementById('paintCost').value) || 0;
+  const prep = parseFloat(document.getElementById('paintPrep').value) || 0;
+  const trim = parseFloat(document.getElementById('paintTrim').value) || 0;
+  const sub = (area * coats * rate) + paintCost + prep + trim;
+  document.getElementById('paintingSubtotal').textContent = fmt(sub);
+}
+
+function updateFlooringSubtotal() {
+  const area = parseFloat(document.getElementById('floorArea').value) || 0;
+  const materialRate = parseFloat(document.getElementById('floorMaterialRate').value) || 0;
+  const installRate = parseFloat(document.getElementById('floorInstallRate').value) || 0;
+  const waste = parseFloat(document.getElementById('floorWasteFactor').value) || 0;
+  const tearOut = parseFloat(document.getElementById('floorTearOut').value) || 0;
+  const subfloor = parseFloat(document.getElementById('floorSubfloorPrep').value) || 0;
+  const transitions = parseFloat(document.getElementById('floorTransitions').value) || 0;
+  const base = area * (materialRate + installRate);
+  const sub = (base * (1 + waste / 100)) + tearOut + subfloor + transitions;
+  document.getElementById('flooringSubtotal').textContent = fmt(sub);
+}
+
+function updateRoofingSubtotal() {
+  const squares = parseFloat(document.getElementById('roofSquares').value) || 0;
+  const materialRate = parseFloat(document.getElementById('roofMaterialRate').value) || 0;
+  const laborRate = parseFloat(document.getElementById('roofLaborRate').value) || 0;
+  const tearOffRate = parseFloat(document.getElementById('roofTearOffRate').value) || 0;
+  const disposal = parseFloat(document.getElementById('roofDisposal').value) || 0;
+  const accessories = parseFloat(document.getElementById('roofAccessories').value) || 0;
+  const sub = (squares * (materialRate + laborRate + tearOffRate)) + disposal + accessories;
+  document.getElementById('roofingSubtotal').textContent = fmt(sub);
 }
 
 function bindApiKey() {
@@ -1601,6 +1818,76 @@ function buildPricingContext() {
       total: logisticsTotal,
     };
   }
+  if (pricingMode === 'painting') {
+    const area = parseFloat(document.getElementById('paintArea').value) || 0;
+    const coats = parseFloat(document.getElementById('paintCoats').value) || 1;
+    const rate = parseFloat(document.getElementById('paintRate').value) || 0;
+    const paintCost = parseFloat(document.getElementById('paintCost').value) || 0;
+    const prep = parseFloat(document.getElementById('paintPrep').value) || 0;
+    const trim = parseFloat(document.getElementById('paintTrim').value) || 0;
+    const labor = area * coats * rate;
+    const total = labor + paintCost + prep + trim + surcharge;
+    return {
+      mode: 'painting',
+      summary: `${area} sq ft of painting at ${coats} coat(s) and $${rate}/sq ft/coat = $${labor.toFixed(2)}. Paint and supplies: $${paintCost}. Surface prep: $${prep}. Trim/detail work: $${trim}. ${surcharge ? `Rush surcharge: $${surcharge}.` : ''} Total: $${total.toFixed(2)}.`,
+      area,
+      coats,
+      rate,
+      paintCost,
+      prep,
+      trim,
+      surcharge,
+      total,
+    };
+  }
+  if (pricingMode === 'flooring') {
+    const area = parseFloat(document.getElementById('floorArea').value) || 0;
+    const materialRate = parseFloat(document.getElementById('floorMaterialRate').value) || 0;
+    const installRate = parseFloat(document.getElementById('floorInstallRate').value) || 0;
+    const waste = parseFloat(document.getElementById('floorWasteFactor').value) || 0;
+    const tearOut = parseFloat(document.getElementById('floorTearOut').value) || 0;
+    const subfloor = parseFloat(document.getElementById('floorSubfloorPrep').value) || 0;
+    const transitions = parseFloat(document.getElementById('floorTransitions').value) || 0;
+    const base = area * (materialRate + installRate);
+    const wasteCost = base * (waste / 100);
+    const subtotal = base + wasteCost + tearOut + subfloor + transitions;
+    const total = subtotal + surcharge;
+    return {
+      mode: 'flooring',
+      summary: `${area} sq ft flooring with ${waste}% waste factor. Materials: $${materialRate}/sq ft, installation: $${installRate}/sq ft. Base cost $${base.toFixed(2)}, waste $${wasteCost.toFixed(2)}. Tear-out: $${tearOut}, subfloor prep: $${subfloor}, transitions/finish: $${transitions}. ${surcharge ? `Rush surcharge: $${surcharge}.` : ''} Total: $${total.toFixed(2)}.`,
+      area,
+      materialRate,
+      installRate,
+      waste,
+      tearOut,
+      subfloor,
+      transitions,
+      surcharge,
+      total,
+    };
+  }
+  if (pricingMode === 'roofing') {
+    const squares = parseFloat(document.getElementById('roofSquares').value) || 0;
+    const materialRate = parseFloat(document.getElementById('roofMaterialRate').value) || 0;
+    const laborRate = parseFloat(document.getElementById('roofLaborRate').value) || 0;
+    const tearOffRate = parseFloat(document.getElementById('roofTearOffRate').value) || 0;
+    const disposal = parseFloat(document.getElementById('roofDisposal').value) || 0;
+    const accessories = parseFloat(document.getElementById('roofAccessories').value) || 0;
+    const materialTotal = squares * (materialRate + laborRate + tearOffRate);
+    const total = materialTotal + disposal + accessories + surcharge;
+    return {
+      mode: 'roofing',
+      summary: `${squares} squares at $${materialRate} material, $${laborRate} labor, and $${tearOffRate} tear-off per square = $${materialTotal.toFixed(2)}. Disposal: $${disposal}, accessories: $${accessories}. ${surcharge ? `Rush surcharge: $${surcharge}.` : ''} Total: $${total.toFixed(2)}.`,
+      squares,
+      materialRate,
+      laborRate,
+      tearOffRate,
+      disposal,
+      accessories,
+      surcharge,
+      total,
+    };
+  }
   return { mode: pricingMode, summary: '', total: 0 };
 }
 
@@ -1609,9 +1896,12 @@ const TRADE_GUIDANCE = {
   Electrical: 'Electrical quote conventions: Use electrical terminology: circuit, panel, amperage, GFCI/AFCI, breakers, code compliance, inspection. Always note permit and inspection responsibility (whose burden — typically the contractor pulls and includes). Materials should reflect realistic costs (wire, devices, breakers, fixtures). Typical payment: deposit common on panel upgrades or larger jobs (30-50%), NET 15-30 on service work. Typical warranty: 1-year labor, manufacturer warranty on devices. Common line items: Labor, Materials (wire/devices/fixtures), Permits & inspection, Trip charge if applicable.',
   HVAC: 'HVAC quote conventions: Distinguish between service work and equipment installation in the language used. Use HVAC terminology: tonnage, SEER rating, refrigerant, ductwork, load calculation, condenser, evaporator coil, thermostat. For installations, separate equipment cost, installation labor, refrigerant, disposal of old unit, and startup/commissioning. Typical payment: 50% deposit on system installs, NET 30 on service. Typical warranty: 10-year manufacturer (parts), 1-year labor. For service work, mention diagnostic fee. Suggest a maintenance contract in notes when appropriate.',
   Roofing: 'Roofing quote conventions: Bid in squares (1 square = 100 sq ft) when possible. Use roofing terminology: tear-off, decking, underlayment, ice & water shield, drip edge, ridge vent, flashing, valleys, step flashing. Always include disposal/dump fees as a separate line. Typical payment structure: 1/3 deposit, 1/3 on material delivery, 1/3 on completion. Typical warranty: manufacturer warranty on materials (20-50 years on shingles), 5-10 year labor warranty. Mention weather contingency in scope.',
+  Painting: 'Painting quote conventions: Distinguish between surface prep (often the bulk of labor), primer, paint coats, and detail/trim work. Use painting terminology: cut-in, rolling, spray vs brush, coats, prep work (sanding/scraping/patching), caulking, masking. Specify number of coats and paint quality/brand if relevant. Typical payment: 50% deposit on residential, NET on commercial. Typical warranty: 1-2 years on workmanship, manufacturer warranty on paint. Common line items: Surface preparation, Primer, Paint and supplies, Labor, Trim and detail work.',
+  Flooring: 'Flooring quote conventions: Use flooring terminology: subfloor, underlayment, acclimation (hardwood), transitions/T-molding, baseboards, waste factor. Always include a waste factor (typically 10% for most materials, 15% for diagonal patterns). Distinguish material cost from installation labor. Mention tear-out and disposal of existing flooring as a separate line. Typical payment: 50% on materials, balance on completion. Typical warranty: manufacturer warranty on materials, 1-year labor. Common line items: Tear-out and disposal, Subfloor prep, Materials (with waste factor), Installation labor, Transitions and finish work.',
   General: 'General contracting conventions: Scope tends to span multiple trades and may include subcontractors. Use construction terminology: scope, change orders, subcontractors, permits, project management/supervision. Mention how change orders are handled in payment terms. For larger jobs, structure payments as progress milestones (e.g., 25% deposit, 25% at rough-in, 25% at substantial completion, 25% retainage on final). Typical warranty: 1 year on workmanship, longer on structural elements. Common line items vary widely by job — break out by major scope area.',
   Painting: 'Painting quote conventions: Distinguish between surface prep (often the bulk of labor), primer, paint coats, and detail/trim work. Use painting terminology: cut-in, rolling, spray vs brush, coats, prep work (sanding/scraping/patching), caulking, masking. Specify number of coats and paint quality/brand if relevant. Typical payment: 50% deposit on residential, NET on commercial. Typical warranty: 1-2 years on workmanship, manufacturer warranty on paint. Common line items: Surface preparation, Primer, Paint and supplies, Labor, Trim and detail work.',
   Flooring: 'Flooring quote conventions: Use flooring terminology: subfloor, underlayment, acclimation (hardwood), transitions/T-molding, baseboards, waste factor. Always include a waste factor (typically 10% for most materials, 15% for diagonal patterns). Distinguish material cost from installation labor. Mention tear-out and disposal of existing flooring as a separate line. Typical payment: 50% on materials, balance on completion. Typical warranty: manufacturer warranty on materials, 1-year labor. Common line items: Tear-out and disposal, Subfloor prep, Materials (with waste factor), Installation labor, Transitions and finish work.',
+  Logistics: 'Logistics quote conventions: Use logistics terminology like BOL, pallet positions, accessorials, dock-to-dock, and freight class. Distinguish linehaul/transportation from accessorial fees and handling charges. Mention standard commercial payment terms such as NET 30 and include cargo claims/ liability language when appropriate. Common line items: Linehaul, Accessorials, Handling & labor, Storage or special services.',
   Landscaping: 'Landscaping quote conventions: Use landscaping terminology: hardscape, softscape, irrigation runs, drainage, grading, specimen plants, mulch, soil amendments, edging. Distinguish between hardscape (pavers, walls, patios) and softscape (plants, sod, mulch). Mention plant warranty (typically 1 year / one growing season — must be cared for per instructions). Typical payment: 50% deposit on installs, NET 30 on maintenance. Typical warranty: 1 year on plants, longer on hardscape. Common line items: Site prep and grading, Materials (plants/hardscape/mulch), Installation labor, Cleanup and haul-off.',
 };
 
@@ -1625,6 +1915,15 @@ function buildPrompt({ trade, desc, pricingDetails, timeline, taxRate, taxLabel,
   const logisticsNote = pricingDetails.mode === 'logistics'
     ? `\nThis is a LOGISTICS job. Use logistics industry terminology naturally (BOL, pallet positions, accessorials, dock-to-dock, dimensional weight, freight class where appropriate). Generate 4 line items reflecting how logistics jobs actually break down. Examples by service type: Freight reworking: Labor (palletizing/sorting), Materials (pallets, shrink wrap, labels), Equipment usage, Disposal of waste materials. Storage: Pallet positions × duration, Inbound receiving fee, Inventory management, Outbound staging. Delivery: Linehaul, Fuel surcharge, Accessorials (lift gate, residential, etc.), Driver labor. Pick & Pack: Pick fee per piece, Packing materials, Order processing, Outbound shipping prep. For accessorials, list them as their own line item if any are present (do not bury them in linehaul or labor). In scope and payment terms, mention BOL/proof of delivery, claims process, and standard logistics terms (NET 30 is common in this industry, vs. deposit + balance for other trades). Warranty for logistics typically focuses on cargo claims, damage limits, and carrier liability — phrase appropriately.`
     : '';
+  const paintingNote = pricingDetails.mode === 'painting'
+    ? `\nThis is a PAINTING job. Use painting terminology like surface prep, cut-in, rolling, primer, coats, masking, and trim/detail work. Highlight prep and the number of coats, and break line items into paint/supplies, prep, labor, and trim/detail work.`
+    : '';
+  const flooringNote = pricingDetails.mode === 'flooring'
+    ? `\nThis is a FLOORING job. Use flooring terminology like subfloor prep, waste factor, transitions, tear-out, underlayment, and finish work. Break line items into material, installation, tear-out/disposal, and transitions/finish.`
+    : '';
+  const roofingNote = pricingDetails.mode === 'roofing'
+    ? `\nThis is a ROOFING job. Use roofing terminology like squares, tear-off, underlayment, flashing, disposal fees, and accessories. Break line items into material, labor, tear-off/disposal, and accessories/cleanup. Mention weather contingency and warranty expectations.`
+    : '';
 
   return `You are drafting a professional contractor quote for a tradesperson. Be clear, confident, specific.
 
@@ -1632,7 +1931,7 @@ TRADE: ${trade}
 JOB DESCRIPTION: ${desc}${guidanceSection}
 CLIENT: ${clientName}${clientAddr ? ' at ' + clientAddr : ''}
 TIMELINE: ${timeline}
-PRICING: ${pricingDetails.summary}${truckingNote}${logisticsNote}
+PRICING: ${pricingDetails.summary}${truckingNote}${logisticsNote}${paintingNote}${flooringNote}${roofingNote}
 
 Return your output as STRICT JSON with this exact structure (no preamble, no code fences, just the JSON):
 
