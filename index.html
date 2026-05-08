@@ -844,11 +844,11 @@
     </div>
 
     <div class="nav-section">Workspace</div>
-    <div class="nav-item active">
+    <div id="navQuotes" class="nav-item active">
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 13h6M9 17h6"/></svg>
       Quotes
     </div>
-    <div class="nav-item">
+    <div id="navFollowups" class="nav-item">
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       Follow-ups
     </div>
@@ -883,11 +883,12 @@
   <!-- Main -->
   <main class="main">
     <div class="topbar">
-      <h1>New <em>quote</em></h1>
+      <h1 id="topbarTitle">New <em>quote</em></h1>
       <div class="topbar-meta" id="topbarMeta">Draft</div>
     </div>
 
     <div class="container">
+      <div id="quotesView">
 
       <!-- Form Card -->
       <div class="card" id="formCard">
@@ -1366,6 +1367,108 @@
         </div>
       </div>
 
+      </div>
+
+      <div id="followupView" class="hidden">
+        <div class="card">
+          <div class="card-title">
+            <span class="card-title-num">1</span>
+            Follow-up details
+          </div>
+          <div class="card-sub">Draft a customer follow-up message based on the quote status and communication channel.</div>
+
+          <div class="field">
+            <label class="label">Trade</label>
+            <div class="trades-grid" id="followupTradesGrid"></div>
+          </div>
+
+          <div class="field-row cols-2">
+            <div>
+              <label class="label">Customer name</label>
+              <input type="text" class="input" id="followupCustomerName" placeholder="Sarah Chen" />
+            </div>
+            <div>
+              <label class="label">Quote amount ($)</label>
+              <input type="number" class="input" id="followupQuoteAmount" value="2400" min="0" step="0.01" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">Original job description</label>
+            <textarea class="textarea" id="followupJobDesc" placeholder="Replaced kitchen sink and repaired drywall"></textarea>
+          </div>
+
+          <div class="field">
+            <label class="label">Scenario</label>
+            <div class="timeline-pills" id="followupScenarioPills">
+              <button data-scenario="No reply yet" class="active">No reply yet</button>
+              <button data-scenario="Still thinking it over">Still thinking it over</button>
+              <button data-scenario="Said yes, no deposit yet">Said yes, no deposit yet</button>
+              <button data-scenario="Declined the quote">Declined the quote</button>
+              <button data-scenario="Job complete, asking for review">Job complete, asking for review</button>
+              <button data-scenario="Past customer check-in">Past customer check-in</button>
+            </div>
+          </div>
+
+          <div class="field-row cols-3">
+            <div>
+              <label class="label">Days since quote sent</label>
+              <input type="number" class="input" id="followupDaysAgo" value="3" min="0" />
+            </div>
+            <div>
+              <label class="label">Tone</label>
+              <div class="timeline-pills" id="followupTonePills">
+                <button data-tone="Friendly" class="active">Friendly</button>
+                <button data-tone="Professional">Professional</button>
+                <button data-tone="Direct">Direct</button>
+              </div>
+            </div>
+            <div>
+              <label class="label">Channel</label>
+              <div class="timeline-pills" id="followupChannelPills">
+                <button data-channel="Email" class="active">Email</button>
+                <button data-channel="Text">Text</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions-row">
+            <button class="btn-primary" id="generateFollowupBtn" onclick="generateFollowup()">
+              <span id="followupGenBtnText">✦ Generate message</span>
+            </button>
+            <button class="btn-secondary" id="regenerateFollowupBtn" onclick="regenerateFollowup()" disabled>
+              Regenerate
+            </button>
+          </div>
+        </div>
+
+        <div class="quote-wrap" id="followupWrap">
+          <div class="quote-actions-bar">
+            <div class="left">
+              <div class="status-chip">Draft</div>
+              <span class="topbar-meta" id="followupMetaLine">Follow-up message</span>
+            </div>
+            <div class="right">
+              <button class="action-btn" onclick="copyFollowupMessage()">📋 Copy message</button>
+              <button class="action-btn primary" onclick="regenerateFollowup()">♻ Regenerate</button>
+            </div>
+          </div>
+
+          <div class="quote" id="followupDoc">
+            <div class="quote-section" id="followupSubjectSection">
+              <div class="quote-section-title">Subject</div>
+              <div class="quote-scope editable" contenteditable="true" id="followupSubject">—</div>
+            </div>
+
+            <div class="quote-section">
+              <div class="quote-section-title">Message</div>
+              <div class="quote-scope editable" contenteditable="true" id="followupBody">—</div>
+              <div class="topbar-meta" id="textCharCount" style="margin-top: 10px; display: none;">0 / 160 chars</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </main>
 </div>
@@ -1408,9 +1511,13 @@ function updateJobDescriptionPlaceholder(tradeName) {
 }
 
 let selectedTrade = '🔧 Plumbing';
+let selectedFollowupTrade = '🔧 Plumbing';
 let pricingMode = 'hourly';      // 'hourly' | 'flat' | 'trucking' | 'logistics' | 'painting' | 'flooring' | 'roofing'
 let taxMode = 'none';            // 'none' | 'custom'
 let timeline = 'Standard';
+let followupScenario = 'No reply yet';
+let followupTone = 'Friendly';
+let followupChannel = 'Email';
 let quoteUsed = parseInt(localStorage.getItem('quoteUsed') || '0', 10);
 let apiKey = localStorage.getItem('anthropicKey') || '';
 
@@ -1427,6 +1534,12 @@ function init() {
   bindPaintingInputs();
   bindFlooringInputs();
   bindRoofingInputs();
+  renderFollowupTrades();
+  bindFollowupScenarioPills();
+  bindFollowupTonePills();
+  bindFollowupChannelToggle();
+  bindFollowupInputs();
+  bindNav();
   bindApiKey();
   updateUsageDisplay();
 }
@@ -1439,7 +1552,7 @@ function renderTrades() {
     chip.className = 'trade-chip' + (t.name === 'Plumbing' ? ' active' : '');
     chip.innerHTML = `<span class="trade-emoji">${t.emoji}</span>${t.name}`;
     chip.onclick = () => {
-      document.querySelectorAll('.trade-chip').forEach(c => c.classList.remove('active'));
+      grid.querySelectorAll('.trade-chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       selectedTrade = `${t.emoji} ${t.name}`;
       updateJobDescriptionPlaceholder(t.name);
@@ -1573,6 +1686,235 @@ function bindRoofingInputs() {
     document.getElementById(id).addEventListener('input', updateRoofingSubtotal);
   });
   updateRoofingSubtotal();
+}
+
+function bindNav() {
+  document.getElementById('navQuotes').onclick = () => switchView('quotes');
+  document.getElementById('navFollowups').onclick = () => switchView('followups');
+}
+
+function switchView(view) {
+  document.getElementById('quotesView').classList.toggle('hidden', view !== 'quotes');
+  document.getElementById('followupView').classList.toggle('hidden', view !== 'followups');
+  document.getElementById('navQuotes').classList.toggle('active', view === 'quotes');
+  document.getElementById('navFollowups').classList.toggle('active', view === 'followups');
+
+  const title = document.getElementById('topbarTitle');
+  const meta = document.getElementById('topbarMeta');
+  if (view === 'quotes') {
+    title.innerHTML = 'New <em>quote</em>';
+    meta.textContent = 'Draft';
+  } else {
+    title.innerHTML = 'New <em>follow-up</em>';
+    meta.textContent = 'Draft follow-up';
+  }
+}
+
+function renderFollowupTrades() {
+  const grid = document.getElementById('followupTradesGrid');
+  grid.innerHTML = '';
+  TRADES.forEach((t) => {
+    const chip = document.createElement('button');
+    chip.className = 'trade-chip' + (t.name === 'Plumbing' ? ' active' : '');
+    chip.innerHTML = `<span class="trade-emoji">${t.emoji}</span>${t.name}`;
+    chip.onclick = () => {
+      grid.querySelectorAll('.trade-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      selectedFollowupTrade = `${t.emoji} ${t.name}`;
+      updateFollowupJobDescriptionPlaceholder(t.name);
+    };
+    grid.appendChild(chip);
+  });
+  updateFollowupJobDescriptionPlaceholder('Plumbing');
+}
+
+function updateFollowupJobDescriptionPlaceholder(tradeName) {
+  const example = TRADE_DESC_EXAMPLES[tradeName] || TRADE_DESC_EXAMPLES.Plumbing;
+  document.getElementById('followupJobDesc').placeholder = example.replace(/^(e\.g\.\s*)?/i, '');
+}
+
+function bindFollowupScenarioPills() {
+  document.querySelectorAll('#followupScenarioPills button').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('#followupScenarioPills button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      followupScenario = btn.dataset.scenario;
+    };
+  });
+}
+
+function bindFollowupTonePills() {
+  document.querySelectorAll('#followupTonePills button').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('#followupTonePills button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      followupTone = btn.dataset.tone;
+    };
+  });
+}
+
+function bindFollowupChannelToggle() {
+  document.querySelectorAll('#followupChannelPills button').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('#followupChannelPills button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      followupChannel = btn.dataset.channel;
+      document.getElementById('followupSubjectSection').classList.toggle('hidden', followupChannel === 'Text');
+      updateTextCharCount();
+    };
+  });
+}
+
+function bindFollowupInputs() {
+  const body = document.getElementById('followupBody');
+  body.addEventListener('input', updateTextCharCount);
+  updateTextCharCount();
+}
+
+async function generateFollowup() {
+  if (!apiKey) {
+    showToast('Save your API key first', true);
+    document.getElementById('apiKeyInput').focus();
+    return;
+  }
+  if (quoteUsed >= 5) {
+    showToast('Free plan limit reached. Upgrade to Pro.', true);
+    return;
+  }
+
+  const customerName = document.getElementById('followupCustomerName').value.trim();
+  const jobDesc = document.getElementById('followupJobDesc').value.trim();
+  const quoteAmount = parseFloat(document.getElementById('followupQuoteAmount').value) || 0;
+  if (!customerName) {
+    showToast('Add a customer name first', true);
+    document.getElementById('followupCustomerName').focus();
+    return;
+  }
+  if (!jobDesc) {
+    showToast('Add the original job description first', true);
+    document.getElementById('followupJobDesc').focus();
+    return;
+  }
+
+  const btn = document.getElementById('generateFollowupBtn');
+  const txt = document.getElementById('followupGenBtnText');
+  btn.disabled = true;
+  document.getElementById('regenerateFollowupBtn').disabled = true;
+  txt.innerHTML = '<span class="spinner"></span> Drafting…';
+
+  try {
+    const prompt = buildFollowupPrompt({
+      trade: selectedFollowupTrade,
+      customerName,
+      jobDesc,
+      quoteAmount,
+      scenario: followupScenario,
+      daysAgo: parseInt(document.getElementById('followupDaysAgo').value, 10) || 0,
+      tone: followupTone,
+      channel: followupChannel,
+    });
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 800,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+
+    if (!resp.ok) {
+      const err = await resp.text();
+      throw new Error(`API error ${resp.status}: ${err.slice(0, 200)}`);
+    }
+
+    const data = await resp.json();
+    const text = data.content?.[0]?.text || '';
+    const parsed = parseModelOutput(text);
+    renderFollowupMessage(parsed);
+
+    quoteUsed += 1;
+    localStorage.setItem('quoteUsed', String(quoteUsed));
+    updateUsageDisplay();
+
+    document.getElementById('followupWrap').classList.add('visible');
+    document.getElementById('followupWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    showToast('Follow-up drafted ✓');
+  } catch (e) {
+    console.error(e);
+    showToast(e.message || 'Generation failed', true);
+  } finally {
+    btn.disabled = false;
+    document.getElementById('regenerateFollowupBtn').disabled = false;
+    txt.innerHTML = '✦ Generate message';
+  }
+}
+
+function regenerateFollowup() {
+  generateFollowup();
+}
+
+function renderFollowupMessage(data) {
+  document.getElementById('followupSubjectSection').classList.toggle('hidden', followupChannel === 'Text');
+  document.getElementById('followupSubject').textContent = followupChannel === 'Text' ? '' : (data.subject || '').trim();
+  document.getElementById('followupBody').textContent = (data.body || '').trim();
+  document.getElementById('followupMetaLine').textContent = `Follow-up · ${followupChannel}`;
+  updateTextCharCount();
+}
+
+function copyFollowupMessage() {
+  const subject = document.getElementById('followupSubject').textContent.trim();
+  const body = document.getElementById('followupBody').textContent.trim();
+  const text = followupChannel === 'Email'
+    ? `Subject: ${subject}\n\n${body}`
+    : body;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Message copied to clipboard ✓');
+  }).catch(() => {
+    showToast('Copy failed', true);
+  });
+}
+
+function buildFollowupPrompt({ trade, customerName, jobDesc, quoteAmount, scenario, daysAgo, tone, channel }) {
+  const rawTrade = trade.replace(/^[^A-Za-z0-9]+/, '').trim();
+  const tradeGuidance = TRADE_GUIDANCE[rawTrade] || '';
+  const guidanceSection = tradeGuidance ? `\nTRADE-SPECIFIC GUIDANCE:\n${tradeGuidance}\n` : '';
+  const amountText = isNaN(quoteAmount) ? '' : `$${quoteAmount.toFixed(2)}`;
+  const scenarioInstructions = scenario === 'Declined the quote'
+    ? 'For a declined follow-up, do not sound bitter or pushy. Thank them, ask briefly whether it was price, timing, or scope, and leave the door open for future work.'
+    : scenario === 'Job complete, asking for review'
+      ? 'For a review request, be specific about the completed work and mention Google reviews in a brief, sincere way that highlights how much it means to a small business.'
+      : scenario === 'Past customer check-in'
+        ? 'For a past customer check-in, reference the original work clearly and avoid sounding salesy.'
+        : '';
+  const toneInstruction = tone === 'Friendly'
+    ? 'Write warm, conversational copy with contractions allowed.'
+    : tone === 'Professional'
+      ? 'Write polished, businesslike copy with no slang.'
+      : 'Write short, direct copy with no filler.';
+  const channelInstruction = channel === 'Text'
+    ? 'Return subject as an empty string and body as a single short SMS-friendly message under 160 characters.'
+    : 'Return a subject line and body with 2-3 short paragraphs.';
+
+  return `You are drafting a contractor follow-up message for a customer. Use first-person voice (I, not we). Never use corporate filler like "circle back," "just touching base," or "hope this finds you well."\n\nTRADE: ${trade}\nCUSTOMER: ${customerName}\nORIGINAL JOB DESCRIPTION: ${jobDesc}\nQUOTE AMOUNT: ${amountText}\nSCENARIO: ${scenario}\nDAYS SINCE QUOTE SENT: ${daysAgo}\nTONE: ${tone}\nCHANNEL: ${channel}${guidanceSection}\n${scenarioInstructions}\n${toneInstruction}\n${channelInstruction}\n\nReturn strict JSON only with this exact shape (no preamble, no code fences):\n{\n  "subject": "...",\n  "body": "..."\n}`;
+}
+
+function updateTextCharCount() {
+  const counter = document.getElementById('textCharCount');
+  const body = document.getElementById('followupBody').textContent || '';
+  const count = body.length;
+  if (followupChannel === 'Text') {
+    counter.style.display = 'block';
+    counter.textContent = `${count} / 160 chars` + (count > 160 ? ' — may split into multiple texts' : '');
+  } else {
+    counter.style.display = 'none';
+  }
 }
 
 function updateTruckSubtotal() {
