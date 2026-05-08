@@ -2926,8 +2926,6 @@ const TRADE_GUIDANCE = {
   Painting: 'Painting quote conventions: Distinguish between surface prep (often the bulk of labor), primer, paint coats, and detail/trim work. Use painting terminology: cut-in, rolling, spray vs brush, coats, prep work (sanding/scraping/patching), caulking, masking. Specify number of coats and paint quality/brand if relevant. Typical payment: 50% deposit on residential, NET on commercial. Typical warranty: 1-2 years on workmanship, manufacturer warranty on paint. Common line items: Surface preparation, Primer, Paint and supplies, Labor, Trim and detail work.',
   Flooring: 'Flooring quote conventions: Use flooring terminology: subfloor, underlayment, acclimation (hardwood), transitions/T-molding, baseboards, waste factor. Always include a waste factor (typically 10% for most materials, 15% for diagonal patterns). Distinguish material cost from installation labor. Mention tear-out and disposal of existing flooring as a separate line. Typical payment: 50% on materials, balance on completion. Typical warranty: manufacturer warranty on materials, 1-year labor. Common line items: Tear-out and disposal, Subfloor prep, Materials (with waste factor), Installation labor, Transitions and finish work.',
   General: 'General contracting conventions: Scope tends to span multiple trades and may include subcontractors. Use construction terminology: scope, change orders, subcontractors, permits, project management/supervision. Mention how change orders are handled in payment terms. For larger jobs, structure payments as progress milestones (e.g., 25% deposit, 25% at rough-in, 25% at substantial completion, 25% retainage on final). Typical warranty: 1 year on workmanship, longer on structural elements. Common line items vary widely by job — break out by major scope area.',
-  Painting: 'Painting quote conventions: Distinguish between surface prep (often the bulk of labor), primer, paint coats, and detail/trim work. Use painting terminology: cut-in, rolling, spray vs brush, coats, prep work (sanding/scraping/patching), caulking, masking. Specify number of coats and paint quality/brand if relevant. Typical payment: 50% deposit on residential, NET on commercial. Typical warranty: 1-2 years on workmanship, manufacturer warranty on paint. Common line items: Surface preparation, Primer, Paint and supplies, Labor, Trim and detail work.',
-  Flooring: 'Flooring quote conventions: Use flooring terminology: subfloor, underlayment, acclimation (hardwood), transitions/T-molding, baseboards, waste factor. Always include a waste factor (typically 10% for most materials, 15% for diagonal patterns). Distinguish material cost from installation labor. Mention tear-out and disposal of existing flooring as a separate line. Typical payment: 50% on materials, balance on completion. Typical warranty: manufacturer warranty on materials, 1-year labor. Common line items: Tear-out and disposal, Subfloor prep, Materials (with waste factor), Installation labor, Transitions and finish work.',
   Logistics: 'Logistics quote conventions: Use logistics terminology like BOL, pallet positions, accessorials, dock-to-dock, and freight class. Distinguish linehaul/transportation from accessorial fees and handling charges. Mention standard commercial payment terms such as NET 30 and include cargo claims/ liability language when appropriate. Common line items: Linehaul, Accessorials, Handling & labor, Storage or special services.',
   Landscaping: 'Landscaping quote conventions: Use landscaping terminology: hardscape, softscape, irrigation runs, drainage, grading, specimen plants, mulch, soil amendments, edging. Distinguish between hardscape (pavers, walls, patios) and softscape (plants, sod, mulch). Mention plant warranty (typically 1 year / one growing season — must be cared for per instructions). Typical payment: 50% deposit on installs, NET 30 on maintenance. Typical warranty: 1 year on plants, longer on hardscape. Common line items: Site prep and grading, Materials (plants/hardscape/mulch), Installation labor, Cleanup and haul-off.',
 };
@@ -3186,14 +3184,68 @@ function showToast(msg, isError = false) {
 
 function clearForm() {
   if (!confirm('Clear the form and quote?')) return;
-  document.getElementById('jobDesc').value = '';
-  document.getElementById('clientName').value = '';
-  document.getElementById('clientAddr').value = '';
-  document.getElementById('hours').value = '8';
-  document.getElementById('rate').value = '125';
-  document.getElementById('materials').value = '450';
-  document.getElementById('flatPrice').value = '2400';
-  document.getElementById('flatIncludes').value = '';
+
+  const FIELD_DEFAULTS = [
+    // Common
+    ['jobDesc', ''], ['clientName', ''], ['clientAddr', ''],
+    ['hours', '8'], ['rate', '125'], ['materials', '450'],
+    ['flatPrice', '2400'], ['flatIncludes', ''],
+    // Trucking
+    ['truckType', 'Dump truck'], ['truckCount', '1'],
+    ['billingMethod', 'load'], ['truckRate', '180'], ['truckQty', '6'],
+    ['disposalFee', '120'], ['materialHauled', ''],
+    // Logistics
+    ['serviceType', 'Freight reworking'], ['logisticsBillingMethod', 'pallet'],
+    ['logisticsRate', '50'], ['logisticsQty', '10'], ['logisticsDays', '7'],
+    ['accessorialFees', '0'], ['specialHandling', ''],
+    // Painting
+    ['paintArea', '800'], ['paintCoats', '2'], ['paintRate', '1.50'],
+    ['paintCost', '200'], ['paintPrep', '0'], ['paintTrim', '0'],
+    // Flooring
+    ['floorArea', '400'], ['floorMaterialType', 'Laminate'],
+    ['floorMaterialRate', '4.00'], ['floorInstallRate', '3.50'],
+    ['floorWasteFactor', '10'], ['floorTearOut', '0'],
+    ['floorSubfloorPrep', '0'], ['floorTransitions', '0'],
+    // Roofing
+    ['roofSquares', '25'], ['roofMaterialType', 'Asphalt shingles'],
+    ['roofMaterialRate', '250'], ['roofLaborRate', '200'],
+    ['roofTearOffRate', '75'], ['roofDisposal', '350'], ['roofAccessories', '400'],
+    // Rush surcharge
+    ['rushSurcharge', '0'],
+  ];
+  FIELD_DEFAULTS.forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  });
+
+  // Timeline → Standard, hide rush surcharge field
+  timeline = 'Standard';
+  document.querySelectorAll('#timelinePills button').forEach(b => {
+    b.classList.toggle('active', b.dataset.tl === 'Standard');
+  });
+  document.getElementById('timelineSurchargeField').classList.add('hidden');
+
+  // Tax → none, hide custom tax fields
+  taxMode = 'none';
+  document.querySelectorAll('input[name="taxMode"]').forEach(r => {
+    r.checked = (r.value === 'none');
+  });
+  document.getElementById('taxCustomFields').classList.add('hidden');
+
+  // Trade → Plumbing, pricing mode → hourly
+  selectedTrade = '🔧 Plumbing';
+  document.querySelectorAll('#tradesGrid .trade-chip').forEach(chip => {
+    chip.classList.toggle('active', chip.textContent.includes('Plumbing'));
+  });
+  setPricingMode('hourly');
+
+  // Refresh live subtotals
+  updateTruckSubtotal();
+  updateLogisticsSubtotal();
+  updatePaintingSubtotal();
+  updateFlooringSubtotal();
+  updateRoofingSubtotal();
+
   document.getElementById('quoteWrap').classList.remove('visible');
   showToast('Cleared');
 }
