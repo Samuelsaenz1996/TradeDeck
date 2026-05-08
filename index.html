@@ -170,6 +170,107 @@
   .nav-item-icon { width: 16px; height: 16px; opacity: 0.85; }
   .nav-item.active .nav-item-icon { opacity: 1; }
 
+  .nav-preview-badge {
+    margin-left: auto;
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    border-radius: 999px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .info-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    border-radius: var(--radius-sm);
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    border: 1px solid rgba(196, 90, 26, 0.18);
+    font-size: 13px;
+  }
+  .info-banner button {
+    background: transparent;
+    border: none;
+    color: var(--accent-ink);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+    box-shadow: var(--shadow-sm);
+  }
+  .stat-card-title {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .stat-card-value {
+    font-family: var(--display);
+    font-size: 24px;
+    font-weight: 700;
+  }
+  .table-avatar {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .table-avatar span {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    color: var(--ink-2);
+    font-size: 12px;
+  }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .status-active { background: rgba(47, 122, 77, 0.12); color: #2F7A4D; }
+  .status-past { background: rgba(138, 143, 156, 0.12); color: #8A8F9C; }
+  .status-lead { background: rgba(196, 90, 26, 0.14); color: #A04C10; }
+  .status-quoted { background: rgba(16, 103, 229, 0.12); color: #1067E5; }
+  .status-in-progress { background: rgba(196, 90, 26, 0.12); color: #A04C10; }
+  .status-complete { background: rgba(47, 122, 77, 0.12); color: #2F7A4D; }
+  .status-paid { background: rgba(47, 122, 77, 0.12); color: #2F7A4D; }
+  .status-pending { background: rgba(255, 182, 45, 0.16); color: #B8731F; }
+  .status-overdue { background: rgba(179, 58, 42, 0.14); color: #B33A2A; }
+  .overdue-row { background: rgba(179, 58, 42, 0.06); }
+  .payment-chart {
+    width: 100%;
+    height: 210px;
+  }
+  .payment-chart .chart-bar { fill: var(--accent); }
+  .payment-chart .chart-grid { stroke: var(--line); stroke-width: 1; }
+  .job-table-row:hover,
+  .payment-table-row:hover,
+  .clients-table-row:hover { background: var(--surface-2); }
+
   .sidebar-bottom { margin-top: auto; }
   .usage-card {
     background: var(--surface);
@@ -876,9 +977,20 @@
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       Follow-ups
     </div>
-    <div class="nav-item">
-      <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 10h10M7 14h6"/></svg>
-      Invoices
+    <div id="navClients" class="nav-item">
+      <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"/></svg>
+      Clients
+      <span class="nav-preview-badge">Preview</span>
+    </div>
+    <div id="navJobs" class="nav-item">
+      <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>
+      Jobs
+      <span class="nav-preview-badge">Preview</span>
+    </div>
+    <div id="navPayments" class="nav-item">
+      <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      Payments
+      <span class="nav-preview-badge">Preview</span>
     </div>
 
     <div class="nav-section">Account</div>
@@ -1526,6 +1638,173 @@
         </div>
       </div>
 
+      <div id="clientsView" class="hidden">
+        <div class="info-banner" id="clientsPreviewBanner">
+          <span>👀 Preview — this section is a mockup with sample data. Fully working version coming soon.</span>
+          <button onclick="this.closest('.info-banner').style.display='none'">×</button>
+        </div>
+        <div class="card">
+          <div class="field-row cols-3">
+            <div>
+              <div class="card-title">Clients</div>
+            </div>
+            <div>
+              <input class="input" placeholder="Search clients..." disabled />
+            </div>
+            <div style="display:flex; justify-content:flex-end; align-items:flex-end;">
+              <button class="btn-primary" disabled>+ Add client</button>
+            </div>
+          </div>
+          <div class="field-row cols-3">
+            <div class="stat-card">
+              <div class="stat-card-title">Total clients</div>
+              <div class="stat-card-value">24</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-title">Active this month</div>
+              <div class="stat-card-value">8</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-title">Repeat customers</div>
+              <div class="stat-card-value">11</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <table class="line-table">
+            <thead>
+              <tr>
+                <th>Client</th>
+                <th>Contact</th>
+                <th>Jobs</th>
+                <th>Total revenue</th>
+                <th>Last contact</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="clientsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="jobsView" class="hidden">
+        <div class="info-banner" id="jobsPreviewBanner">
+          <span>👀 Preview — this section is a mockup with sample data. Fully working version coming soon.</span>
+          <button onclick="this.closest('.info-banner').style.display='none'">×</button>
+        </div>
+        <div class="card">
+          <div class="field-row cols-2">
+            <div>
+              <div class="card-title">Jobs</div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; align-items:flex-end;">
+              <button class="btn-primary" disabled>+ New job</button>
+            </div>
+          </div>
+          <div class="field">
+            <div class="timeline-pills" id="jobFilterPills">
+              <button class="active" disabled>All</button>
+              <button disabled>Quoted</button>
+              <button disabled>In Progress</button>
+              <button disabled>Complete</button>
+              <button disabled>Paid</button>
+            </div>
+          </div>
+        </div>
+        <div class="field-row cols-4">
+          <div class="stat-card">
+            <div class="stat-card-title">Open quotes</div>
+            <div class="stat-card-value">6</div>
+            <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$14,200</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-title">In progress</div>
+            <div class="stat-card-value">4</div>
+            <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$28,500</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-title">Awaiting payment</div>
+            <div class="stat-card-value">3</div>
+            <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$9,800</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-title">Completed this month</div>
+            <div class="stat-card-value">11</div>
+            <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$42,300</div>
+          </div>
+        </div>
+        <div class="card">
+          <table class="line-table">
+            <thead>
+              <tr>
+                <th>Job</th>
+                <th>Client</th>
+                <th>Trade</th>
+                <th>Quote</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="jobsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="paymentsView" class="hidden">
+        <div class="info-banner" id="paymentsPreviewBanner">
+          <span>👀 Preview — this section is a mockup with sample data. Fully working version coming soon.</span>
+          <button onclick="this.closest('.info-banner').style.display='none'">×</button>
+        </div>
+        <div class="card">
+          <div class="field-row cols-2">
+            <div>
+              <div class="card-title">Payments</div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; align-items:flex-end;">
+              <div class="timeline-pills" style="width:auto;"><button class="active" disabled>Last 30 days ▼</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="field-row cols-4">
+          <div class="stat-card">
+            <div class="stat-card-title">Total invoiced</div>
+            <div class="stat-card-value">$42,300</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-title">Total received</div>
+            <div class="stat-card-value">$32,500</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-title">Outstanding</div>
+            <div class="stat-card-value">$9,800</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-title">Avg days to pay</div>
+            <div class="stat-card-value">18</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="stat-card-title" style="margin-bottom: 14px;">Cash received</div>
+          <svg class="payment-chart" viewBox="0 0 560 210" preserveAspectRatio="none" id="paymentChartSvg"></svg>
+        </div>
+        <div class="card">
+          <table class="line-table">
+            <thead>
+              <tr>
+                <th>Invoice #</th>
+                <th>Client</th>
+                <th>Job</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="paymentsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </main>
 </div>
@@ -1561,6 +1840,146 @@ const TRADE_DESC_EXAMPLES = {
   'Hauling & Trucking': 'e.g. Load and haul 12 cubic yards of construction debris to the dump, provide roll-off service, and handle site cleanup and disposal tickets.',
   Logistics: 'e.g. Rework freight pallets, stage shipments for cross-docking, coordinate last-mile delivery logistics, and manage accessorial handling.',
 };
+
+const MOCK_CLIENTS = [
+  { id: 'C001', name: 'Sarah Chen', contact: 'sarah@chenlandscaping.com', jobs: 4, revenue: 12500, lastContact: '2 days ago', status: 'Active' },
+  { id: 'C002', name: 'Mike Rodriguez', contact: '(555) 873-2105', jobs: 3, revenue: 9800, lastContact: '5 days ago', status: 'Active' },
+  { id: 'C003', name: 'Patel Construction LLC', contact: 'hello@patelconstruction.com', jobs: 5, revenue: 21800, lastContact: '1 day ago', status: 'Active' },
+  { id: 'C004', name: 'Riverside Hauling Co', contact: 'info@riversidehauling.com', jobs: 2, revenue: 6100, lastContact: '8 days ago', status: 'Active' },
+  { id: 'C005', name: 'Eastside Remodelers', contact: 'emily@eastsidebuild.com', jobs: 1, revenue: 3100, lastContact: '3 weeks ago', status: 'Active' },
+  { id: 'C006', name: 'Lakeview Interiors', contact: '(555) 412-9984', jobs: 2, revenue: 7800, lastContact: '12 days ago', status: 'Active' },
+  { id: 'C007', name: 'Hilltop Roofing', contact: 'team@hilltoproofing.com', jobs: 0, revenue: 0, lastContact: '10 days ago', status: 'Lead' },
+  { id: 'C008', name: 'Greenlane Landscaping', contact: 'sales@greenlane.co', jobs: 0, revenue: 0, lastContact: '7 days ago', status: 'Lead' },
+  { id: 'C009', name: 'Midtown Electric', contact: 'info@midtownelectric.com', jobs: 0, revenue: 0, lastContact: '13 days ago', status: 'Lead' },
+  { id: 'C010', name: 'Westport Plumbing', contact: 'westport@plumbingco.com', jobs: 1, revenue: 4400, lastContact: '2 months ago', status: 'Past' },
+  { id: 'C011', name: 'Summit Painting', contact: 'contact@summitpainting.com', jobs: 1, revenue: 5200, lastContact: '2 months ago', status: 'Past' },
+  { id: 'C012', name: 'Cedar Flooring', contact: 'service@cedarflooring.com', jobs: 1, revenue: 4600, lastContact: '4 months ago', status: 'Past' },
+];
+
+const MOCK_JOBS = [
+  { id: 'J001', clientId: 'C001', clientName: 'Sarah Chen', trade: 'Plumbing', description: 'Replace 50ft drain line + repair drywall', amount: 7200, status: 'Quoted', date: '2 days ago' },
+  { id: 'J002', clientId: 'C002', clientName: 'Mike Rodriguez', trade: 'Electrical', description: 'Install outdoor lighting package + new outlets', amount: 4200, status: 'Quoted', date: '5 days ago' },
+  { id: 'J003', clientId: 'C004', clientName: 'Riverside Hauling Co', trade: 'Hauling & Trucking', description: 'Haul 10yd of debris + site cleanup', amount: 3100, status: 'Quoted', date: '8 days ago' },
+  { id: 'J004', clientId: 'C005', clientName: 'Eastside Remodelers', trade: 'Painting', description: 'Prime and paint kitchen + trim', amount: 2600, status: 'Quoted', date: '1 week ago' },
+  { id: 'J005', clientId: 'C003', clientName: 'Patel Construction LLC', trade: 'Roofing', description: 'Replace worn shingles + flashings', amount: 9800, status: 'In Progress', date: '2 weeks ago' },
+  { id: 'J006', clientId: 'C006', clientName: 'Lakeview Interiors', trade: 'Flooring', description: 'Install engineered hardwood in living room', amount: 14500, status: 'In Progress', date: '3 weeks ago' },
+  { id: 'J007', clientId: 'C001', clientName: 'Sarah Chen', trade: 'Plumbing', description: 'Install new cleanout and kitchen sink drain', amount: 5200, status: 'In Progress', date: '4 weeks ago' },
+  { id: 'J008', clientId: 'C010', clientName: 'Westport Plumbing', trade: 'Plumbing', description: 'Replace bathroom pipe routing + trap', amount: 3800, status: 'In Progress', date: '5 weeks ago' },
+  { id: 'J009', clientId: 'C011', clientName: 'Summit Painting', trade: 'Painting', description: 'Complete hallway repaint + door trim', amount: 3100, status: 'Complete', date: '3 weeks ago' },
+  { id: 'J010', clientId: 'C012', clientName: 'Cedar Flooring', trade: 'Flooring', description: 'Install vinyl plank on first floor', amount: 4600, status: 'Complete', date: '4 weeks ago' },
+  { id: 'J011', clientId: 'C004', clientName: 'Riverside Hauling Co', trade: 'Logistics', description: 'Move materials to offsite storage', amount: 2200, status: 'Complete', date: '5 weeks ago' },
+  { id: 'J012', clientId: 'C003', clientName: 'Patel Construction LLC', trade: 'Roofing', description: 'Repair flashing and replace ridge cap', amount: 6300, status: 'Paid', date: '1 day ago' },
+  { id: 'J013', clientId: 'C002', clientName: 'Mike Rodriguez', trade: 'Electrical', description: 'Upgrade panel + install new breakers', amount: 9100, status: 'Paid', date: '1 week ago' },
+  { id: 'J014', clientId: 'C001', clientName: 'Sarah Chen', trade: 'Landscaping', description: 'Install irrigation risers + mulch beds', amount: 5400, status: 'Paid', date: '2 weeks ago' },
+  { id: 'J015', clientId: 'C006', clientName: 'Lakeview Interiors', trade: 'HVAC', description: 'Service furnace + replace air filter', amount: 3800, status: 'Paid', date: '4 weeks ago' },
+];
+
+const MOCK_PAYMENTS = [
+  { id: 'INV-1042', jobId: 'J003', clientId: 'C004', clientName: 'Riverside Hauling Co', job: 'Haul 10yd of debris + site cleanup', amount: 8200, status: 'Paid', date: '3 days ago' },
+  { id: 'INV-1043', jobId: 'J006', clientId: 'C006', clientName: 'Lakeview Interiors', job: 'Install engineered hardwood in living room', amount: 5900, status: 'Paid', date: '5 days ago' },
+  { id: 'INV-1044', jobId: 'J013', clientId: 'C002', clientName: 'Mike Rodriguez', job: 'Upgrade panel + install new breakers', amount: 9100, status: 'Paid', date: '1 week ago' },
+  { id: 'INV-1045', jobId: 'J014', clientId: 'C001', clientName: 'Sarah Chen', job: 'Install irrigation risers + mulch beds', amount: 5400, status: 'Paid', date: '2 weeks ago' },
+  { id: 'INV-1046', jobId: 'J012', clientId: 'C003', clientName: 'Patel Construction LLC', job: 'Repair flashing and replace ridge cap', amount: 6300, status: 'Paid', date: '9 days ago' },
+  { id: 'INV-1047', jobId: 'J015', clientId: 'C006', clientName: 'Lakeview Interiors', job: 'Service furnace + replace air filter', amount: 3800, status: 'Paid', date: '4 weeks ago' },
+  { id: 'INV-1048', jobId: 'J009', clientId: 'C011', clientName: 'Summit Painting', job: 'Complete hallway repaint + door trim', amount: 3100, status: 'Paid', date: '3 weeks ago' },
+  { id: 'INV-1049', jobId: 'J010', clientId: 'C012', clientName: 'Cedar Flooring', job: 'Install vinyl plank on first floor', amount: 1700, status: 'Paid', date: '5 weeks ago' },
+  { id: 'INV-1050', jobId: 'J001', clientId: 'C001', clientName: 'Sarah Chen', job: 'Replace 50ft drain line + repair drywall', amount: 2500, status: 'Pending', date: '11 days ago' },
+  { id: 'INV-1051', jobId: 'J002', clientId: 'C002', clientName: 'Mike Rodriguez', job: 'Install outdoor lighting package + new outlets', amount: 2100, status: 'Pending', date: '9 days ago' },
+  { id: 'INV-1052', jobId: 'J004', clientId: 'C005', clientName: 'Eastside Remodelers', job: 'Prime and paint kitchen + trim', amount: 1600, status: 'Pending', date: '6 days ago' },
+  { id: 'INV-1053', jobId: 'J008', clientId: 'C010', clientName: 'Westport Plumbing', job: 'Replace bathroom pipe routing + trap', amount: 2600, status: 'Overdue', date: '35 days ago' },
+];
+
+const MOCK_PAYMENT_WEEKS = [
+  { label: 'Wk 1', amount: 3200 },
+  { label: 'Wk 2', amount: 4100 },
+  { label: 'Wk 3', amount: 2700 },
+  { label: 'Wk 4', amount: 5600 },
+  { label: 'Wk 5', amount: 4900 },
+  { label: 'Wk 6', amount: 3300 },
+  { label: 'Wk 7', amount: 4700 },
+  { label: 'Wk 8', amount: 4300 },
+];
+
+function getClientInitials(name) {
+  return name.split(' ').map(part => part[0]).slice(0, 2).join('').toUpperCase();
+}
+
+function getTradeEmoji(trade) {
+  return (TRADES.find(t => t.name === trade) || {}).emoji || '';
+}
+
+function renderClientsView() {
+  const body = document.getElementById('clientsTableBody');
+  body.innerHTML = MOCK_CLIENTS.map(client => `
+    <tr class="clients-table-row">
+      <td>
+        <div class="table-avatar">
+          <span>${getClientInitials(client.name)}</span>
+          <div>
+            <div>${client.name}</div>
+          </div>
+        </div>
+      </td>
+      <td>${client.contact}</td>
+      <td>${client.jobs} jobs</td>
+      <td>${fmt(client.revenue)}</td>
+      <td>${client.lastContact}</td>
+      <td><span class="status-pill status-${client.status.toLowerCase()}">${client.status}</span></td>
+      <td style="text-align:right; color: var(--ink-3);">⋯</td>
+    </tr>
+  `).join('');
+}
+
+function renderJobsView() {
+  const body = document.getElementById('jobsTableBody');
+  body.innerHTML = MOCK_JOBS.map(job => `
+    <tr class="job-table-row">
+      <td>${job.description}</td>
+      <td>${job.clientName}</td>
+      <td>${getTradeEmoji(job.trade)} ${job.trade}</td>
+      <td>${fmt(job.amount)}</td>
+      <td><span class="status-pill status-${job.status.toLowerCase().replace(/ /g, '-')}">${job.status}</span></td>
+      <td>${job.date}</td>
+    </tr>
+  `).join('');
+}
+
+function renderPaymentsView() {
+  const body = document.getElementById('paymentsTableBody');
+  body.innerHTML = MOCK_PAYMENTS.map(payment => `
+    <tr class="payment-table-row ${payment.status === 'Overdue' ? 'overdue-row' : ''}">
+      <td>${payment.id}</td>
+      <td>${payment.clientName}</td>
+      <td>${payment.job.length > 40 ? payment.job.slice(0, 37) + '...' : payment.job}</td>
+      <td>${fmt(payment.amount)}</td>
+      <td><span class="status-pill status-${payment.status.toLowerCase()}">${payment.status}</span></td>
+      <td>${payment.date}</td>
+    </tr>
+  `).join('');
+  renderPaymentChart();
+}
+
+function renderPaymentChart() {
+  const svg = document.getElementById('paymentChartSvg');
+  const width = 560;
+  const height = 210;
+  const padding = 38;
+  const max = Math.max(...MOCK_PAYMENT_WEEKS.map(w => w.amount));
+  const stepX = (width - padding * 2) / (MOCK_PAYMENT_WEEKS.length - 1);
+  let content = '';
+  for (let i = 0; i < 4; i += 1) {
+    const y = padding + ((height - padding * 2) / 3) * i;
+    content += `<line x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}" class="chart-grid" />`;
+  }
+  MOCK_PAYMENT_WEEKS.forEach((week, index) => {
+    const barHeight = ((week.amount / max) * (height - padding * 2));
+    const x = padding + index * stepX;
+    const y = height - padding - barHeight;
+    content += `<rect x="${x - 16}" y="${y}" width="32" height="${barHeight}" class="chart-bar" rx="8" />`;
+    content += `<text x="${x}" y="${height - 12}" fill="${'var(--ink-2)'}" font-size="10" text-anchor="middle">${week.label}</text>`;
+  });
+  svg.innerHTML = content;
+}
 
 function updateJobDescriptionPlaceholder(tradeName) {
   const example = TRADE_DESC_EXAMPLES[tradeName] || TRADE_DESC_EXAMPLES.Plumbing;
@@ -1603,6 +2022,9 @@ function init() {
   bindFollowupSignature();
   bindFollowupInputs();
   bindNav();
+  renderClientsView();
+  renderJobsView();
+  renderPaymentsView();
   bindApiKey();
   updateUsageDisplay();
 }
@@ -1754,22 +2176,39 @@ function bindRoofingInputs() {
 function bindNav() {
   document.getElementById('navQuotes').onclick = () => switchView('quotes');
   document.getElementById('navFollowups').onclick = () => switchView('followups');
+  document.getElementById('navClients').onclick = () => switchView('clients');
+  document.getElementById('navJobs').onclick = () => switchView('jobs');
+  document.getElementById('navPayments').onclick = () => switchView('payments');
 }
 
 function switchView(view) {
   document.getElementById('quotesView').classList.toggle('hidden', view !== 'quotes');
   document.getElementById('followupView').classList.toggle('hidden', view !== 'followups');
-  document.getElementById('navQuotes').classList.toggle('active', view === 'quotes');
-  document.getElementById('navFollowups').classList.toggle('active', view === 'followups');
+  document.getElementById('clientsView').classList.toggle('hidden', view !== 'clients');
+  document.getElementById('jobsView').classList.toggle('hidden', view !== 'jobs');
+  document.getElementById('paymentsView').classList.toggle('hidden', view !== 'payments');
+
+  ['navQuotes', 'navFollowups', 'navClients', 'navJobs', 'navPayments'].forEach(id => {
+    document.getElementById(id).classList.toggle('active', id === `nav${view.charAt(0).toUpperCase()}${view.slice(1)}`);
+  });
 
   const title = document.getElementById('topbarTitle');
   const meta = document.getElementById('topbarMeta');
   if (view === 'quotes') {
     title.innerHTML = 'New <em>quote</em>';
     meta.textContent = 'Draft';
-  } else {
+  } else if (view === 'followups') {
     title.innerHTML = 'New <em>follow-up</em>';
     meta.textContent = 'Draft follow-up';
+  } else if (view === 'clients') {
+    title.innerHTML = 'Clients';
+    meta.textContent = 'Preview only';
+  } else if (view === 'jobs') {
+    title.innerHTML = 'Jobs';
+    meta.textContent = 'Preview only';
+  } else if (view === 'payments') {
+    title.innerHTML = 'Payments';
+    meta.textContent = 'Preview only';
   }
 }
 
