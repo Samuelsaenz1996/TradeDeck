@@ -1000,6 +1000,67 @@
               <span class="trucking-subtotal-amt" id="truckSubtotal">$1,200.00</span>
             </div>
           </div>
+
+          <div id="logisticsPanel" class="trucking-panel hidden">
+            <div class="field-row cols-2">
+              <div>
+                <label class="label">Service type</label>
+                <select class="select" id="serviceType">
+                  <option>Freight reworking</option>
+                  <option>Storage / Warehousing</option>
+                  <option>Last-mile delivery</option>
+                  <option>Loading / Unloading</option>
+                  <option>Cross-docking</option>
+                  <option>Pick & Pack</option>
+                  <option>Returns processing</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div>
+                <label class="label">Billing method</label>
+                <select class="select" id="logisticsBillingMethod">
+                  <option value="pallet">Per pallet</option>
+                  <option value="palletDay">Per pallet per day</option>
+                  <option value="pound">Per pound</option>
+                  <option value="cwt">Per hundredweight (CWT)</option>
+                  <option value="cubicFoot">Per cubic foot</option>
+                  <option value="piece">Per piece / unit</option>
+                  <option value="hour">Per hour</option>
+                  <option value="mile">Per mile</option>
+                  <option value="flat">Flat rate</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-row cols-3">
+              <div>
+                <label class="label">Rate ($)</label>
+                <input type="number" class="input" id="logisticsRate" value="50" min="0" step="0.01" />
+              </div>
+              <div>
+                <label class="label" id="logisticsQtyLabel"># of pallets</label>
+                <input type="number" class="input" id="logisticsQty" value="10" min="0" step="0.1" />
+              </div>
+              <div id="logisticsDaysField" class="hidden">
+                <label class="label">Days</label>
+                <input type="number" class="input" id="logisticsDays" value="7" min="1" />
+              </div>
+            </div>
+            <div class="field-row cols-2">
+              <div>
+                <label class="label">Accessorial fees ($)</label>
+                <input type="number" class="input" id="accessorialFees" value="0" min="0" step="0.01" />
+                <small style="color: var(--ink-3); font-size: 11px;">Lift gate, waiting time, residential delivery, hazmat handling, etc.</small>
+              </div>
+              <div>
+                <label class="label">Special handling (optional)</label>
+                <input type="text" class="input" id="specialHandling" placeholder="Climate controlled, white glove, hazmat..." />
+              </div>
+            </div>
+            <div class="trucking-subtotal">
+              <span class="trucking-subtotal-label">Live subtotal</span>
+              <span class="trucking-subtotal-amt" id="logisticsSubtotal">$500.00</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1029,6 +1090,10 @@
             <button data-tl="Priority">Priority</button>
             <button data-tl="Emergency">Emergency</button>
           </div>
+        </div>
+        <div id="timelineSurchargeField" class="field hidden">
+          <label class="label" id="timelineSurchargeLabel">Rush surcharge ($)</label>
+          <input type="number" class="input" id="rushSurcharge" value="0" min="0" step="0.01" />
         </div>
 
         <div class="field">
@@ -1172,10 +1237,29 @@ const TRADES = [
   { emoji: '🪵', name: 'Flooring' },
   { emoji: '🌿', name: 'Landscaping' },
   { emoji: '🚛', name: 'Hauling & Trucking' },
+  { emoji: '📦', name: 'Logistics' },
 ];
 
+const TRADE_DESC_EXAMPLES = {
+  Plumbing: 'e.g. Replace 50ft of cast iron drain line under the kitchen, install new cleanouts, repair drywall after.',
+  Electrical: 'e.g. Replace a faulty panel subfeed, install new GFCI outlets in the kitchen, and upgrade lighting to LED fixtures.',
+  HVAC: 'e.g. Diagnose intermittent A/C shutdown, recharge refrigerant, replace the faulty condenser fan motor, and verify system airflow.',
+  Roofing: 'e.g. Replace 18 squares of worn asphalt shingles, install underlayment and ice & water shield, replace flashing around chimneys and vents.',
+  General: 'e.g. Demo the old bathroom, install new tub and tile surround, update plumbing fixtures, paint walls, and install trim and doors.',
+  Painting: 'e.g. Prep and paint the living room and hallway, patch drywall, prime bare spots, and apply two coats of premium interior paint.',
+  Flooring: 'e.g. Remove existing carpet, prep subfloor, install engineered hardwood with underlayment, and finish with transitions and quarter round.',
+  Landscaping: 'e.g. Install new irrigation risers, add mulch beds, plant shrubs and perennials, install stone edging, and grade for proper drainage.',
+  'Hauling & Trucking': 'e.g. Load and haul 12 cubic yards of construction debris to the dump, provide roll-off service, and handle site cleanup and disposal tickets.',
+  Logistics: 'e.g. Rework freight pallets, stage shipments for cross-docking, coordinate last-mile delivery logistics, and manage accessorial handling.',
+};
+
+function updateJobDescriptionPlaceholder(tradeName) {
+  const example = TRADE_DESC_EXAMPLES[tradeName] || TRADE_DESC_EXAMPLES.Plumbing;
+  document.getElementById('jobDesc').placeholder = example;
+}
+
 let selectedTrade = '🔧 Plumbing';
-let pricingMode = 'hourly';      // 'hourly' | 'flat' | 'trucking'
+let pricingMode = 'hourly';      // 'hourly' | 'flat' | 'trucking' | 'logistics'
 let taxMode = 'none';            // 'none' | 'custom'
 let timeline = 'Standard';
 let quoteUsed = parseInt(localStorage.getItem('quoteUsed') || '0', 10);
@@ -1190,6 +1274,7 @@ function init() {
   bindTimelinePills();
   bindTaxToggle();
   bindTruckingInputs();
+  bindLogisticsInputs();
   bindApiKey();
   updateUsageDisplay();
 }
@@ -1205,15 +1290,19 @@ function renderTrades() {
       document.querySelectorAll('.trade-chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       selectedTrade = `${t.emoji} ${t.name}`;
+      updateJobDescriptionPlaceholder(t.name);
       // Auto-switch to trucking mode if trucking trade selected
       if (t.name === 'Hauling & Trucking') {
         setPricingMode('trucking');
-      } else if (pricingMode === 'trucking') {
+      } else if (t.name === 'Logistics') {
+        setPricingMode('logistics');
+      } else if (pricingMode === 'trucking' || pricingMode === 'logistics') {
         setPricingMode('hourly');
       }
     };
     grid.appendChild(chip);
   });
+  updateJobDescriptionPlaceholder('Plumbing');
 }
 
 function bindPricingToggle() {
@@ -1224,9 +1313,9 @@ function bindPricingToggle() {
 
 function setPricingMode(mode) {
   pricingMode = mode;
-  // hide toggle when trucking
+  // hide toggle when trucking or logistics
   const toggle = document.getElementById('pricingToggle');
-  toggle.style.display = (mode === 'trucking') ? 'none' : 'inline-flex';
+  toggle.style.display = (mode === 'trucking' || mode === 'logistics') ? 'none' : 'inline-flex';
 
   document.querySelectorAll('#pricingToggle button').forEach(b =>
     b.classList.toggle('active', b.dataset.mode === mode)
@@ -1235,6 +1324,7 @@ function setPricingMode(mode) {
   document.getElementById('hourlyPanel').classList.toggle('hidden', mode !== 'hourly');
   document.getElementById('flatPanel').classList.toggle('hidden', mode !== 'flat');
   document.getElementById('truckingPanel').classList.toggle('hidden', mode !== 'trucking');
+  document.getElementById('logisticsPanel').classList.toggle('hidden', mode !== 'logistics');
 }
 
 function bindTimelinePills() {
@@ -1243,6 +1333,15 @@ function bindTimelinePills() {
       document.querySelectorAll('#timelinePills button').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       timeline = btn.dataset.tl;
+      const surchargeField = document.getElementById('timelineSurchargeField');
+      const surchargeLabel = document.getElementById('timelineSurchargeLabel');
+      if (timeline === 'Priority' || timeline === 'Emergency') {
+        surchargeLabel.textContent = `${timeline} surcharge ($)`;
+        surchargeField.classList.remove('hidden');
+        showToast(`${timeline} selected — a surcharge will be added for rush service.`);
+      } else {
+        surchargeField.classList.add('hidden');
+      }
     };
   });
 }
@@ -1263,6 +1362,37 @@ function bindTruckingInputs() {
   updateTruckSubtotal();
 }
 
+function bindLogisticsInputs() {
+  ['logisticsRate','logisticsQty','logisticsDays','accessorialFees'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateLogisticsSubtotal);
+  });
+  document.getElementById('logisticsBillingMethod').addEventListener('change', () => {
+    const method = document.getElementById('logisticsBillingMethod').value;
+    const daysField = document.getElementById('logisticsDaysField');
+    const qtyLabel = document.getElementById('logisticsQtyLabel');
+    if (method === 'palletDay') {
+      daysField.classList.remove('hidden');
+    } else {
+      daysField.classList.add('hidden');
+    }
+    // Update qty label based on method
+    const labels = {
+      pallet: '# of pallets',
+      palletDay: '# of pallets',
+      pound: 'Pounds',
+      cwt: 'Hundredweight (CWT)',
+      cubicFoot: 'Cubic feet',
+      piece: '# of pieces / units',
+      hour: 'Hours',
+      mile: 'Miles',
+      flat: 'Quantity'
+    };
+    qtyLabel.textContent = labels[method] || '# of pallets';
+    updateLogisticsSubtotal();
+  });
+  updateLogisticsSubtotal();
+}
+
 function updateTruckSubtotal() {
   const count = parseFloat(document.getElementById('truckCount').value) || 0;
   const rate = parseFloat(document.getElementById('truckRate').value) || 0;
@@ -1270,6 +1400,19 @@ function updateTruckSubtotal() {
   const fee = parseFloat(document.getElementById('disposalFee').value) || 0;
   const sub = (count * rate * qty) + fee;
   document.getElementById('truckSubtotal').textContent = fmt(sub);
+}
+
+function updateLogisticsSubtotal() {
+  const rate = parseFloat(document.getElementById('logisticsRate').value) || 0;
+  const qty = parseFloat(document.getElementById('logisticsQty').value) || 0;
+  const days = parseFloat(document.getElementById('logisticsDays').value) || 1;
+  const accessorials = parseFloat(document.getElementById('accessorialFees').value) || 0;
+  const billingMethod = document.getElementById('logisticsBillingMethod').value;
+  let sub = rate * qty + accessorials;
+  if (billingMethod === 'palletDay') {
+    sub = rate * qty * days + accessorials;
+  }
+  document.getElementById('logisticsSubtotal').textContent = fmt(sub);
 }
 
 function bindApiKey() {
@@ -1383,16 +1526,18 @@ async function generateQuote() {
 }
 
 function buildPricingContext() {
+  const surcharge = parseFloat(document.getElementById('rushSurcharge').value) || 0;
   if (pricingMode === 'hourly') {
     const h = parseFloat(document.getElementById('hours').value) || 0;
     const r = parseFloat(document.getElementById('rate').value) || 0;
     const m = parseFloat(document.getElementById('materials').value) || 0;
     return {
       mode: 'hourly',
-      summary: `Estimated ${h} hours at $${r}/hr (= $${h*r}). Materials estimated at $${m}.`,
+      summary: `Estimated ${h} hours at $${r}/hr (= $${h*r}). Materials estimated at $${m}. ${surcharge ? `Rush surcharge: $${surcharge}.` : ''}`,
       labor: h * r,
       materials: m,
-      total: h * r + m,
+      surcharge,
+      total: h * r + m + surcharge,
     };
   }
   if (pricingMode === 'flat') {
@@ -1400,45 +1545,94 @@ function buildPricingContext() {
     const inc = document.getElementById('flatIncludes').value || 'Labor and materials';
     return {
       mode: 'flat',
-      summary: `Flat all-in price: $${p}. Includes: ${inc}.`,
-      total: p,
+      summary: `Flat all-in price: $${p}. Includes: ${inc}. ${surcharge ? `Rush surcharge: $${surcharge}.` : ''}`,
+      total: p + surcharge,
       includes: inc,
+      surcharge,
     };
   }
-  // trucking
-  const tt = document.getElementById('truckType').value;
-  const tc = parseFloat(document.getElementById('truckCount').value) || 1;
-  const bm = document.getElementById('billingMethod').value;
-  const tr = parseFloat(document.getElementById('truckRate').value) || 0;
-  const tq = parseFloat(document.getElementById('truckQty').value) || 0;
-  const fee = parseFloat(document.getElementById('disposalFee').value) || 0;
-  const mat = document.getElementById('materialHauled').value || '';
-  const sub = (tc * tr * tq) + fee;
-  return {
-    mode: 'trucking',
-    summary: `${tc}x ${tt}, billed per ${bm} at $${tr} × ${tq} = $${tc*tr*tq}. Disposal/dump fees: $${fee}. ${mat ? 'Material hauled: ' + mat + '.' : ''} Total: $${sub}.`,
-    truckType: tt,
-    truckCount: tc,
-    billingMethod: bm,
-    rate: tr,
-    qty: tq,
-    fee, mat,
-    total: sub,
-  };
+  if (pricingMode === 'trucking') {
+    const tt = document.getElementById('truckType').value;
+    const tc = parseFloat(document.getElementById('truckCount').value) || 1;
+    const bm = document.getElementById('billingMethod').value;
+    const tr = parseFloat(document.getElementById('truckRate').value) || 0;
+    const tq = parseFloat(document.getElementById('truckQty').value) || 0;
+    const fee = parseFloat(document.getElementById('disposalFee').value) || 0;
+    const mat = document.getElementById('materialHauled').value || '';
+    const sub = (tc * tr * tq) + fee + surcharge;
+    return {
+      mode: 'trucking',
+      summary: `${tc}x ${tt}, billed per ${bm} at $${tr} × ${tq} = $${tc*tr*tq}. Disposal/dump fees: $${fee}. ${mat ? 'Material hauled: ' + mat + '.' : ''} ${surcharge ? `Rush surcharge: $${surcharge}.` : ''} Total: $${sub}.`,
+      truckType: tt,
+      truckCount: tc,
+      billingMethod: bm,
+      rate: tr,
+      qty: tq,
+      fee,
+      mat,
+      surcharge,
+      total: sub,
+    };
+  }
+  if (pricingMode === 'logistics') {
+    const st = document.getElementById('serviceType').value;
+    const lbm = document.getElementById('logisticsBillingMethod').value;
+    const lr = parseFloat(document.getElementById('logisticsRate').value) || 0;
+    const lq = parseFloat(document.getElementById('logisticsQty').value) || 0;
+    const ld = parseFloat(document.getElementById('logisticsDays').value) || 1;
+    const acc = parseFloat(document.getElementById('accessorialFees').value) || 0;
+    const sh = document.getElementById('specialHandling').value || '';
+    let lsub = lr * lq + acc;
+    if (lbm === 'palletDay') {
+      lsub = lr * lq * ld + acc;
+    }
+    const logisticsTotal = lsub + surcharge;
+    return {
+      mode: 'logistics',
+      summary: `${st} service, billed ${lbm.replace(/([A-Z])/g, ' $1').toLowerCase()} at $${lr}${lbm === 'palletDay' ? ` × ${lq} pallets × ${ld} days` : ` × ${lq}`}. Accessorial fees: $${acc}. ${sh ? 'Special handling: ' + sh + '.' : ''} ${surcharge ? `Rush surcharge: $${surcharge}.` : ''} Total: $${logisticsTotal}.`,
+      serviceType: st,
+      billingMethod: lbm,
+      rate: lr,
+      qty: lq,
+      days: ld,
+      accessorials: acc,
+      specialHandling: sh,
+      surcharge,
+      total: logisticsTotal,
+    };
+  }
+  return { mode: pricingMode, summary: '', total: 0 };
 }
 
+const TRADE_GUIDANCE = {
+  Plumbing: 'Plumbing quote conventions: Include a separate trip/service charge if appropriate (typical $75-150). Mark up parts at retail (industry standard 100-200% over wholesale) but do not itemize markup separately. Use plumbing terminology: rough-in, fixtures, shut-off valves, wax rings, supply lines, drain lines, pressure testing, pulling permits if applicable. Typical payment: 50% deposit on jobs over $500, balance on completion. Typical warranty: 1 year on labor, manufacturer warranty on parts. Mention after-hours/emergency rates if relevant. Common line items: Labor, Parts, Permits (if needed), Trip/diagnostic charge.',
+  Electrical: 'Electrical quote conventions: Use electrical terminology: circuit, panel, amperage, GFCI/AFCI, breakers, code compliance, inspection. Always note permit and inspection responsibility (whose burden — typically the contractor pulls and includes). Materials should reflect realistic costs (wire, devices, breakers, fixtures). Typical payment: deposit common on panel upgrades or larger jobs (30-50%), NET 15-30 on service work. Typical warranty: 1-year labor, manufacturer warranty on devices. Common line items: Labor, Materials (wire/devices/fixtures), Permits & inspection, Trip charge if applicable.',
+  HVAC: 'HVAC quote conventions: Distinguish between service work and equipment installation in the language used. Use HVAC terminology: tonnage, SEER rating, refrigerant, ductwork, load calculation, condenser, evaporator coil, thermostat. For installations, separate equipment cost, installation labor, refrigerant, disposal of old unit, and startup/commissioning. Typical payment: 50% deposit on system installs, NET 30 on service. Typical warranty: 10-year manufacturer (parts), 1-year labor. For service work, mention diagnostic fee. Suggest a maintenance contract in notes when appropriate.',
+  Roofing: 'Roofing quote conventions: Bid in squares (1 square = 100 sq ft) when possible. Use roofing terminology: tear-off, decking, underlayment, ice & water shield, drip edge, ridge vent, flashing, valleys, step flashing. Always include disposal/dump fees as a separate line. Typical payment structure: 1/3 deposit, 1/3 on material delivery, 1/3 on completion. Typical warranty: manufacturer warranty on materials (20-50 years on shingles), 5-10 year labor warranty. Mention weather contingency in scope.',
+  General: 'General contracting conventions: Scope tends to span multiple trades and may include subcontractors. Use construction terminology: scope, change orders, subcontractors, permits, project management/supervision. Mention how change orders are handled in payment terms. For larger jobs, structure payments as progress milestones (e.g., 25% deposit, 25% at rough-in, 25% at substantial completion, 25% retainage on final). Typical warranty: 1 year on workmanship, longer on structural elements. Common line items vary widely by job — break out by major scope area.',
+  Painting: 'Painting quote conventions: Distinguish between surface prep (often the bulk of labor), primer, paint coats, and detail/trim work. Use painting terminology: cut-in, rolling, spray vs brush, coats, prep work (sanding/scraping/patching), caulking, masking. Specify number of coats and paint quality/brand if relevant. Typical payment: 50% deposit on residential, NET on commercial. Typical warranty: 1-2 years on workmanship, manufacturer warranty on paint. Common line items: Surface preparation, Primer, Paint and supplies, Labor, Trim and detail work.',
+  Flooring: 'Flooring quote conventions: Use flooring terminology: subfloor, underlayment, acclimation (hardwood), transitions/T-molding, baseboards, waste factor. Always include a waste factor (typically 10% for most materials, 15% for diagonal patterns). Distinguish material cost from installation labor. Mention tear-out and disposal of existing flooring as a separate line. Typical payment: 50% on materials, balance on completion. Typical warranty: manufacturer warranty on materials, 1-year labor. Common line items: Tear-out and disposal, Subfloor prep, Materials (with waste factor), Installation labor, Transitions and finish work.',
+  Landscaping: 'Landscaping quote conventions: Use landscaping terminology: hardscape, softscape, irrigation runs, drainage, grading, specimen plants, mulch, soil amendments, edging. Distinguish between hardscape (pavers, walls, patios) and softscape (plants, sod, mulch). Mention plant warranty (typically 1 year / one growing season — must be cared for per instructions). Typical payment: 50% deposit on installs, NET 30 on maintenance. Typical warranty: 1 year on plants, longer on hardscape. Common line items: Site prep and grading, Materials (plants/hardscape/mulch), Installation labor, Cleanup and haul-off.',
+};
+
 function buildPrompt({ trade, desc, pricingDetails, timeline, taxRate, taxLabel, clientName, clientAddr }) {
+  const rawTrade = trade.replace(/^[^A-Za-z0-9]+/, '').trim();
+  const tradeGuidance = TRADE_GUIDANCE[rawTrade] || '';
+  const guidanceSection = tradeGuidance ? `\nTRADE-SPECIFIC GUIDANCE:\n${tradeGuidance}\n` : '';
   const truckingNote = pricingDetails.mode === 'trucking'
     ? `\nThis is a HAULING/TRUCKING job. Use trucking-specific language. Line items should reflect truck operation (e.g. "Equipment & operator", "Fuel & travel", "Disposal fees", "Site cleanup"). Mention applicable certifications, weight tickets, dump site coordination, etc. in scope/terms where relevant.`
+    : '';
+  const logisticsNote = pricingDetails.mode === 'logistics'
+    ? `\nThis is a LOGISTICS job. Use logistics industry terminology naturally (BOL, pallet positions, accessorials, dock-to-dock, dimensional weight, freight class where appropriate). Generate 4 line items reflecting how logistics jobs actually break down. Examples by service type: Freight reworking: Labor (palletizing/sorting), Materials (pallets, shrink wrap, labels), Equipment usage, Disposal of waste materials. Storage: Pallet positions × duration, Inbound receiving fee, Inventory management, Outbound staging. Delivery: Linehaul, Fuel surcharge, Accessorials (lift gate, residential, etc.), Driver labor. Pick & Pack: Pick fee per piece, Packing materials, Order processing, Outbound shipping prep. For accessorials, list them as their own line item if any are present (do not bury them in linehaul or labor). In scope and payment terms, mention BOL/proof of delivery, claims process, and standard logistics terms (NET 30 is common in this industry, vs. deposit + balance for other trades). Warranty for logistics typically focuses on cargo claims, damage limits, and carrier liability — phrase appropriately.`
     : '';
 
   return `You are drafting a professional contractor quote for a tradesperson. Be clear, confident, specific.
 
 TRADE: ${trade}
-JOB DESCRIPTION: ${desc}
+JOB DESCRIPTION: ${desc}${guidanceSection}
 CLIENT: ${clientName}${clientAddr ? ' at ' + clientAddr : ''}
 TIMELINE: ${timeline}
-PRICING: ${pricingDetails.summary}${truckingNote}
+PRICING: ${pricingDetails.summary}${truckingNote}${logisticsNote}
 
 Return your output as STRICT JSON with this exact structure (no preamble, no code fences, just the JSON):
 
