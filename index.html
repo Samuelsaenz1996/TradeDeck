@@ -2604,6 +2604,24 @@ function t(key, vars) {
   return v;
 }
 
+// pickLang: returns the right-language string from a bilingual {en, es} field.
+// Defensive: if the field is a plain string (legacy AI output, old cached quotes,
+// or a fallback), return it as-is. Falls back to whichever language exists.
+function pickLang(field, fallback) {
+  if (field == null) return fallback || '';
+  if (typeof field === 'string') return field;
+  if (typeof field === 'object') {
+    return field[tdLang] || field.en || field.es || fallback || '';
+  }
+  return String(field);
+}
+
+// Bilingual quote/followup state. Held so the user can flip languages on a
+// generated quote and see both versions. Each blur on an editable field writes
+// back only to the currently-displayed language slot.
+let currentQuote = null;
+let currentFollowup = null;
+
 function applyLanguage() {
   document.documentElement.setAttribute('lang', tdLang);
   // Static HTML: text-only swaps
@@ -2654,6 +2672,9 @@ function applyLanguage() {
   if (typeof refreshQuoteMetaLine === 'function') refreshQuoteMetaLine();
   // Followup meta line
   if (typeof refreshFollowupMetaLine === 'function') refreshFollowupMetaLine();
+  // Bilingual AI content: re-render in the new language if a quote/followup is on screen
+  if (typeof rerenderQuoteForLanguage === 'function') rerenderQuoteForLanguage();
+  if (typeof rerenderFollowupForLanguage === 'function') rerenderFollowupForLanguage();
 }
 
 function setLanguage(lang) {
@@ -2888,6 +2909,7 @@ function init() {
   renderPaymentsView();
   bindApiKey();
   updateUsageDisplay();
+  bindBilingualEditableSync();
   // Upgrade button (was inline onclick previously — moved out so we can localize the alert)
   const upgradeBtn = document.getElementById('upgradeBtn');
   if (upgradeBtn) upgradeBtn.onclick = () => alert(t('sidebar.upgradeAlert'));
@@ -3336,7 +3358,7 @@ async function generateFollowup() {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 800,
+        max_tokens: 1500,
         messages: [{ role: 'user', content: prompt }],
       }),
     });
@@ -3373,6 +3395,72 @@ function regenerateFollowup() {
   generateFollowup();
 }
 
+// Per-language blur capture for the AI-generated editable fields. Edits in EN
+// update currentQuote.<field>.en; edits in ES update currentQuote.<field>.es.
+// Bound once during init — these elements live in the static HTML.
+function bindBilingualEditableSync() {
+  const quoteFields = [
+    ['quoteScope',    'scope'],
+    ['quoteTerms',    'paymentTerms'],
+    ['quoteWarranty', 'warranty'],
+  ];
+  quoteFields.forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('blur', () => {
+      if (!currentQuote) return;
+      if (typeof currentQuote[key] !== 'object' || currentQuote[key] === null) {
+        currentQuote[key] = { en: '', es: '' };
+      }
+      currentQuote[key][tdLang] = el.textContent;
+    });
+  });
+  const followupFields = [
+    ['followupSubject', 'subject'],
+    ['followupBody',    'body'],
+  ];
+  followupFields.forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('blur', () => {
+      if (!currentFollowup) return;
+      if (typeof currentFollowup[key] !== 'object' || currentFollowup[key] === null) {
+        currentFollowup[key] = { en: '', es: '' };
+      }
+      currentFollowup[key][tdLang] = el.textContent;
+    });
+  });
+}
+
+// Re-render AI-generated quote content in the current language, preserving any
+// user-added rows and any edits the user made in the other language.
+function rerenderQuoteForLanguage() {
+  const wrap = document.getElementById('quoteWrap');
+  if (!currentQuote || !wrap || !wrap.classList.contains('visible')) return;
+  document.getElementById('quoteScope').textContent = pickLang(currentQuote.scope);
+  document.getElementById('quoteTerms').textContent = pickLang(currentQuote.paymentTerms);
+  document.getElementById('quoteWarranty').textContent = pickLang(currentQuote.warranty);
+  const tbody = document.getElementById('lineBody');
+  Array.from(tbody.querySelectorAll('tr[data-line-index]')).forEach(row => {
+    const i = parseInt(row.dataset.lineIndex, 10);
+    const li = currentQuote.lineItems && currentQuote.lineItems[i];
+    if (!li) return;
+    const nameEl = row.querySelector('.line-name');
+    const descEl = row.querySelector('.line-desc');
+    if (nameEl) nameEl.textContent = pickLang(li.name) || t('quote.lineNew');
+    if (descEl) descEl.textContent = pickLang(li.desc) || t('quote.lineDescDefault');
+  });
+}
+
+function rerenderFollowupForLanguage() {
+  const wrap = document.getElementById('followupWrap');
+  if (!currentFollowup || !wrap || !wrap.classList.contains('visible')) return;
+  if (followupChannel !== 'Text') {
+    document.getElementById('followupSubject').textContent = pickLang(currentFollowup.subject).trim();
+  }
+  document.getElementById('followupBody').textContent = pickLang(currentFollowup.body).trim();
+}
+
 function followupChannelLabel(ch) {
   return ch === 'Text' ? t('followup.channels.text') : t('followup.channels.email');
 }
@@ -3385,9 +3473,10 @@ function refreshFollowupMetaLine() {
 }
 
 function renderFollowupMessage(data) {
+  currentFollowup = data;
   document.getElementById('followupSubjectSection').classList.toggle('hidden', followupChannel === 'Text');
-  document.getElementById('followupSubject').textContent = followupChannel === 'Text' ? '' : (data.subject || '').trim();
-  document.getElementById('followupBody').textContent = (data.body || '').trim();
+  document.getElementById('followupSubject').textContent = followupChannel === 'Text' ? '' : pickLang(data.subject).trim();
+  document.getElementById('followupBody').textContent = pickLang(data.body).trim();
   refreshFollowupMetaLine();
   updateTextCharCount();
 }
@@ -3430,8 +3519,7 @@ function buildFollowupPrompt({ trade, customerName, jobDesc, quoteAmount, scenar
   const signatureInstruction = signatureParts.length
     ? `If possible, close the message with the saved signature: ${signatureParts.join(', ')}.`
     : 'If no signature is provided, close with a simple professional sign-off.';
-
-  return `You are drafting a contractor follow-up message for a customer. Use first-person voice (I, not we). Never use corporate filler like "circle back," "just touching base," or "hope this finds you well."\n\nTRADE: ${trade}\nCUSTOMER: ${customerName}\nORIGINAL JOB REFERENCE: ${jobDesc}\nQUOTE AMOUNT: ${amountText}\nQUOTE AGE: ${quoteAge}\nTONE: ${tone}\nCHANNEL: ${channel}${guidanceSection}\n${scenarioInstructions}\n${toneInstruction}\n${channelInstruction}\n${signatureInstruction}\n\nReturn strict JSON only with this exact shape (no preamble, no code fences):\n{\n  "subject": "...",\n  "body": "..."\n}`;
+  return `You are drafting a contractor follow-up message for a customer. Use first-person voice (I, not we). Never use corporate filler like "circle back," "just touching base," or "hope this finds you well."\n\nTRADE: ${trade}\nCUSTOMER: ${customerName}\nORIGINAL JOB REFERENCE: ${jobDesc}\nQUOTE AMOUNT: ${amountText}\nQUOTE AGE: ${quoteAge}\nTONE: ${tone}\nCHANNEL: ${channel}${guidanceSection}\n${scenarioInstructions}\n${toneInstruction}\n${channelInstruction}\n${signatureInstruction}\n\nBILINGUAL OUTPUT: Return both an English ("en") and a natural construction-trade Spanish ("es") version of the subject and body. The Spanish must use real US/Mexican contractor vocabulary (anticipo, mano de obra, etc.), not formal Castilian. Both versions carry the same message; JSON keys stay in English.\n\nReturn strict JSON only with this exact shape (no preamble, no code fences):\n{\n  "subject": { "en": "...", "es": "..." },\n  "body":    { "en": "...", "es": "..." }\n}`;
 }
 
 function updateTextCharCount() {
@@ -3596,7 +3684,7 @@ async function generateQuote() {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 1500,
+        max_tokens: 2800,
         messages: [{ role: 'user', content: prompt }],
       }),
     });
@@ -3817,18 +3905,20 @@ CLIENT: ${clientName}${clientAddr ? ' at ' + clientAddr : ''}
 TIMELINE: ${timeline}
 PRICING: ${pricingDetails.summary}${truckingNote}${logisticsNote}${paintingNote}${flooringNote}${roofingNote}
 
+BILINGUAL OUTPUT: Every text field must be returned in BOTH English ("en") AND natural construction-trade Spanish as used by US/Mexican contractors ("es"). The Spanish must be real working-trade vocabulary (e.g. tablaroca, anticipo, mano de obra, garantía, tarima, cuadros de teja, escombro), NOT formal Castilian Spanish. Both versions describe the same work and amounts — this is a true translation, not different content. Currency stays as $ amounts. JSON keys remain in English exactly as shown.
+
 Return your output as STRICT JSON with this exact structure (no preamble, no code fences, just the JSON):
 
 {
-  "scope": "2–4 sentence professional scope of work, written in third person, mentioning specific actions, materials/methods, and what's included.",
+  "scope": { "en": "2–4 sentence professional scope of work, written in third person, mentioning specific actions, materials/methods, and what's included.", "es": "Same scope, written in natural trade Spanish." },
   "lineItems": [
-    {"name": "...", "desc": "...", "amount": 0},
-    {"name": "...", "desc": "...", "amount": 0},
-    {"name": "...", "desc": "...", "amount": 0},
-    {"name": "...", "desc": "...", "amount": 0}
+    { "name": { "en": "...", "es": "..." }, "desc": { "en": "...", "es": "..." }, "amount": 0 },
+    { "name": { "en": "...", "es": "..." }, "desc": { "en": "...", "es": "..." }, "amount": 0 },
+    { "name": { "en": "...", "es": "..." }, "desc": { "en": "...", "es": "..." }, "amount": 0 },
+    { "name": { "en": "...", "es": "..." }, "desc": { "en": "...", "es": "..." }, "amount": 0 }
   ],
-  "paymentTerms": "1–2 sentence payment terms (deposit %, milestones if any, accepted methods).",
-  "warranty": "1–2 sentence warranty statement appropriate for this trade and job."
+  "paymentTerms": { "en": "1–2 sentence payment terms (deposit %, milestones if any, accepted methods).", "es": "Same terms in trade Spanish." },
+  "warranty":     { "en": "1–2 sentence warranty statement appropriate for this trade and job.",            "es": "Same warranty in trade Spanish." }
 }
 
 CRITICAL: lineItems amounts must sum to approximately ${Math.round(pricingDetails.total)}. Use 4 line items that break the work down meaningfully (e.g. labor, materials, equipment, cleanup — varies by trade). Make line items specific to THIS job, not generic.${taxRate > 0 ? ` Note: ${taxLabel} of ${taxRate}% will be added separately, do NOT include in line items.` : ''}`;
@@ -3882,6 +3972,10 @@ function localeForDate() {
 }
 
 function renderQuote(data) {
+  // Hold onto the bilingual payload so language toggles can re-render in place
+  // and so per-language edits (blur handlers below) have somewhere to write back.
+  currentQuote = data;
+
   const clientName = document.getElementById('clientName').value || t('quote.clientPlaceholder');
   const clientAddr = document.getElementById('clientAddr').value || t('quote.addressPlaceholder');
 
@@ -3899,31 +3993,34 @@ function renderQuote(data) {
   clientNameEl.textContent = clientName;
   clientAddrEl.textContent = clientAddr;
   document.getElementById('quoteTradeMeta').innerHTML = `<strong>${selectedTradeDisplay()}</strong><br/>${timelineLabel(timeline)}`;
-  document.getElementById('quoteScope').textContent = data.scope || '';
-  document.getElementById('quoteTerms').textContent = data.paymentTerms || '';
-  document.getElementById('quoteWarranty').textContent = data.warranty || '';
+  document.getElementById('quoteScope').textContent = pickLang(data.scope);
+  document.getElementById('quoteTerms').textContent = pickLang(data.paymentTerms);
+  document.getElementById('quoteWarranty').textContent = pickLang(data.warranty);
   document.getElementById('quoteMetaLine').textContent = `${selectedTradeDisplay()} · ${timelineLabel(timeline)} · ${clientName}`;
 
-  // line items
+  // line items — pass index so the row knows which currentQuote.lineItems entry it mirrors
   const tbody = document.getElementById('lineBody');
   tbody.innerHTML = '';
-  (data.lineItems || []).forEach(item => {
-    addLineItemRow(item);
+  (data.lineItems || []).forEach((item, i) => {
+    addLineItemRow(item, i);
   });
 
   recalcTotals();
 }
 
-function addLineItemRow(item) {
+function addLineItemRow(item, index) {
   const tbody = document.getElementById('lineBody');
   const tr = document.createElement('tr');
+  if (typeof index === 'number') tr.dataset.lineIndex = String(index);
   const safe = (s) => (s == null ? '' : String(s));
+  const nameText = item ? pickLang(item.name) : '';
+  const descText = item ? pickLang(item.desc) : '';
   const amt = item && typeof item.amount === 'number' ? item.amount : 0;
 
   tr.innerHTML = `
     <td>
-      <div class="line-name editable" contenteditable="true">${safe(item?.name) || t('quote.lineNew')}</div>
-      <div class="line-desc editable" contenteditable="true">${safe(item?.desc) || t('quote.lineDescDefault')}</div>
+      <div class="line-name editable" contenteditable="true">${safe(nameText) || t('quote.lineNew')}</div>
+      <div class="line-desc editable" contenteditable="true">${safe(descText) || t('quote.lineDescDefault')}</div>
     </td>
     <td class="amt-col">
       <span class="amt-cell editable" contenteditable="true">${fmt(amt)}</span>
@@ -3932,10 +4029,42 @@ function addLineItemRow(item) {
       <button class="delete-btn" title="Remove">×</button>
     </td>
   `;
-  // bind events
-  tr.querySelector('.delete-btn').onclick = () => { tr.remove(); recalcTotals(); };
+  const nameEl = tr.querySelector('.line-name');
+  const descEl = tr.querySelector('.line-desc');
+  const amtEl  = tr.querySelector('.amt-cell');
+
+  // Sync edits back to currentQuote so a language flip doesn't lose them.
+  // Only AI-generated rows (those with a stored index) participate; user-added
+  // rows ("+ Add line item") have no index, so they just retain whatever the
+  // user typed regardless of language.
+  function syncBack() {
+    if (!currentQuote || tr.dataset.lineIndex === undefined) return;
+    const i = parseInt(tr.dataset.lineIndex, 10);
+    const li = currentQuote.lineItems && currentQuote.lineItems[i];
+    if (!li) return;
+    if (typeof li.name !== 'object' || li.name === null) li.name = { en: '', es: '' };
+    if (typeof li.desc !== 'object' || li.desc === null) li.desc = { en: '', es: '' };
+    li.name[tdLang] = nameEl.textContent;
+    li.desc[tdLang] = descEl.textContent;
+    li.amount = parseAmount(amtEl.textContent);
+  }
+
+  tr.querySelector('.delete-btn').onclick = () => {
+    const wasIndexed = tr.dataset.lineIndex !== undefined;
+    const removedAt = wasIndexed ? parseInt(tr.dataset.lineIndex, 10) : -1;
+    tr.remove();
+    if (wasIndexed && currentQuote && currentQuote.lineItems) {
+      // Drop the stored line item too so a later language flip doesn't recreate it,
+      // then renumber the remaining AI-indexed rows to match the new array order.
+      currentQuote.lineItems.splice(removedAt, 1);
+      Array.from(tbody.querySelectorAll('tr[data-line-index]')).forEach((row, newIdx) => {
+        row.dataset.lineIndex = String(newIdx);
+      });
+    }
+    recalcTotals();
+  };
   tr.querySelectorAll('.editable').forEach(el => {
-    el.addEventListener('blur', recalcTotals);
+    el.addEventListener('blur', () => { syncBack(); recalcTotals(); });
     el.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); el.blur(); }
     });
@@ -4136,6 +4265,9 @@ function clearForm() {
   updateRoofingSubtotal();
 
   document.getElementById('quoteWrap').classList.remove('visible');
+  // Drop the bilingual snapshot so a future language toggle won't try to
+  // restore the cleared quote
+  currentQuote = null;
   showToast(t('toast.cleared'));
 }
 
