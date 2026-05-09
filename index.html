@@ -345,6 +345,15 @@
   }
   .topbar h1 em { font-style: italic; color: var(--accent); }
   .topbar-meta { font-size: 13px; color: var(--ink-3); }
+  .topbar-right { display: flex; align-items: center; gap: 14px; }
+  .lang-toggle { padding: 2px; }
+  .lang-toggle button {
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    min-width: 32px;
+  }
 
   .container { padding: 28px 32px 60px; width: 100%; max-width: none; }
 
@@ -1025,10 +1034,10 @@
 
 <!-- API Key Banner -->
 <div class="api-banner" id="apiBanner">
-  <span class="api-banner-label">Anthropic API Key</span>
-  <input type="password" class="api-banner-input" id="apiKeyInput" placeholder="sk-ant-api03-..." autocomplete="off" />
-  <button class="api-banner-btn" id="saveKeyBtn">Save</button>
-  <span class="api-banner-status" id="apiStatus">Required to generate quotes</span>
+  <span class="api-banner-label" data-i18n="api.label">Anthropic API Key</span>
+  <input type="password" class="api-banner-input" id="apiKeyInput" data-i18n-placeholder="api.placeholder" placeholder="sk-ant-api03-..." autocomplete="off" />
+  <button class="api-banner-btn" id="saveKeyBtn" data-i18n="api.save">Save</button>
+  <span class="api-banner-status" id="apiStatus" data-i18n="api.required">Required to generate quotes</span>
 </div>
 
 <div class="app">
@@ -1037,57 +1046,57 @@
   <div class="drawer-backdrop" id="drawerBackdrop"></div>
 
   <!-- Sidebar (also serves as the mobile drawer) -->
-  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
-    <button class="drawer-close" id="drawerClose" aria-label="Close navigation" type="button">&times;</button>
+  <aside class="sidebar" id="sidebar" role="navigation" data-i18n-aria="aria.mainNav" aria-label="Main navigation">
+    <button class="drawer-close" id="drawerClose" data-i18n-aria="aria.closeMenu" aria-label="Close navigation" type="button">&times;</button>
     <div class="brand">
       <div class="brand-mark">T</div>
       <div class="brand-name">Trade<em>Deck</em></div>
     </div>
 
-    <div class="nav-section">Workspace</div>
+    <div class="nav-section" data-i18n="nav.workspace">Workspace</div>
     <div id="navQuotes" class="nav-item active">
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 13h6M9 17h6"/></svg>
-      Quotes
+      <span data-i18n="nav.quotes">Quotes</span>
     </div>
     <div id="navFollowups" class="nav-item">
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      Follow-ups
+      <span data-i18n="nav.followups">Follow-ups</span>
     </div>
     <div id="navClients" class="nav-item">
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"/></svg>
-      Clients
-      <span class="nav-preview-badge">Preview</span>
+      <span data-i18n="nav.clients">Clients</span>
+      <span class="nav-preview-badge" data-i18n="nav.preview">Preview</span>
     </div>
     <div id="navJobs" class="nav-item">
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>
-      Jobs
-      <span class="nav-preview-badge">Preview</span>
+      <span data-i18n="nav.jobs">Jobs</span>
+      <span class="nav-preview-badge" data-i18n="nav.preview">Preview</span>
     </div>
     <div id="navPayments" class="nav-item">
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-      Payments
-      <span class="nav-preview-badge">Preview</span>
+      <span data-i18n="nav.payments">Payments</span>
+      <span class="nav-preview-badge" data-i18n="nav.preview">Preview</span>
     </div>
 
-    <div class="nav-section">Account</div>
+    <div class="nav-section" data-i18n="nav.account">Account</div>
     <div class="nav-item">
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      Profile
+      <span data-i18n="nav.profile">Profile</span>
     </div>
     <div class="nav-item">
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      Settings
+      <span data-i18n="nav.settings">Settings</span>
     </div>
 
     <div class="sidebar-bottom">
       <div class="usage-card">
-        <div class="usage-label">Free Plan</div>
-        <div class="usage-count"><span id="quoteUsed">0</span><span> / 5 quotes</span></div>
+        <div class="usage-label" data-i18n="sidebar.freePlan">Free Plan</div>
+        <div class="usage-count"><span id="quoteUsed">0</span><span data-i18n="sidebar.quotesSuffix"> / 5 quotes</span></div>
         <div class="usage-bar"><div class="usage-bar-fill" id="usageBar" style="width: 0%"></div></div>
       </div>
-      <button class="upgrade-btn" onclick="alert('Stripe checkout coming soon. For now, this is a placeholder.')">
-        Upgrade to Pro
-        <small>$49/month · unlimited</small>
+      <button class="upgrade-btn" id="upgradeBtn">
+        <span data-i18n="sidebar.upgrade">Upgrade to Pro</span>
+        <small data-i18n="sidebar.upgradeSub">$49/month · unlimited</small>
       </button>
     </div>
   </aside>
@@ -1096,12 +1105,18 @@
   <main class="main">
     <div class="topbar">
       <div class="topbar-left">
-        <button class="menu-toggle" id="menuToggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sidebar" type="button">
+        <button class="menu-toggle" id="menuToggle" data-i18n-aria="aria.openMenu" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sidebar" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
         </button>
-        <h1 id="topbarTitle">New <em>quote</em></h1>
+        <h1 id="topbarTitle" data-i18n-html="topbar.newQuoteHtml">New <em>quote</em></h1>
       </div>
-      <div class="topbar-meta" id="topbarMeta">Draft</div>
+      <div class="topbar-right">
+        <div class="pricing-toggle lang-toggle" id="langToggle" role="group" aria-label="Language">
+          <button data-lang="en" type="button" class="active">EN</button>
+          <button data-lang="es" type="button">ES</button>
+        </div>
+        <div class="topbar-meta" id="topbarMeta" data-i18n="topbar.draft">Draft</div>
+      </div>
     </div>
 
     <div class="container">
@@ -1111,40 +1126,40 @@
       <div class="card" id="formCard">
         <div class="card-title">
           <span class="card-title-num">1</span>
-          What's the job?
+          <span data-i18n="form.whatsTheJob">What's the job?</span>
         </div>
-        <div class="card-sub">Pick a trade, describe the work, and we'll draft a professional quote.</div>
+        <div class="card-sub" data-i18n="form.whatsSub">Pick a trade, describe the work, and we'll draft a professional quote.</div>
 
         <div class="field">
-          <label class="label">Trade</label>
+          <label class="label" data-i18n="form.trade">Trade</label>
           <div class="trades-grid" id="tradesGrid"></div>
         </div>
 
         <div class="field">
-          <label class="label">Job description</label>
+          <label class="label" data-i18n="form.jobDesc">Job description</label>
           <textarea class="textarea" id="jobDesc" placeholder="e.g. Replace 50ft of cast iron drain line under the kitchen, install new cleanouts, repair drywall after."></textarea>
         </div>
 
         <div class="field">
-          <label class="label">Pricing approach</label>
+          <label class="label" data-i18n="form.pricingApproach">Pricing approach</label>
           <div class="pricing-toggle" id="pricingToggle">
-            <button data-mode="hourly" class="active">⏱ Hourly</button>
-            <button data-mode="flat">📋 Flat rate</button>
+            <button data-mode="hourly" class="active" data-i18n="form.hourly">⏱ Hourly</button>
+            <button data-mode="flat" data-i18n="form.flat">📋 Flat rate</button>
           </div>
 
           <!-- Hourly Panel -->
           <div id="hourlyPanel">
             <div class="field-row cols-3">
               <div>
-                <label class="label">Estimated hours</label>
+                <label class="label" data-i18n="hourly.estHours">Estimated hours</label>
                 <input type="number" class="input" id="hours" value="8" min="0" step="0.5" />
               </div>
               <div>
-                <label class="label">Hourly rate ($)</label>
+                <label class="label" data-i18n="hourly.rate">Hourly rate ($)</label>
                 <input type="number" class="input" id="rate" value="125" min="0" />
               </div>
               <div>
-                <label class="label">Materials estimate ($)</label>
+                <label class="label" data-i18n="hourly.materials">Materials estimate ($)</label>
                 <input type="number" class="input" id="materials" value="450" min="0" />
               </div>
             </div>
@@ -1154,12 +1169,12 @@
           <div id="flatPanel" class="hidden">
             <div class="field-row cols-2">
               <div>
-                <label class="label">All-in price ($)</label>
+                <label class="label" data-i18n="flat.price">All-in price ($)</label>
                 <input type="number" class="input" id="flatPrice" value="2400" min="0" />
               </div>
               <div>
-                <label class="label">Includes (optional)</label>
-                <input type="text" class="input" id="flatIncludes" placeholder="Labor + materials + cleanup" />
+                <label class="label" data-i18n="flat.includes">Includes (optional)</label>
+                <input type="text" class="input" id="flatIncludes" data-i18n-placeholder="flat.includesPlaceholder" placeholder="Labor + materials + cleanup" />
               </div>
             </div>
           </div>
@@ -1168,53 +1183,53 @@
           <div id="truckingPanel" class="trucking-panel hidden">
             <div class="field-row cols-2">
               <div>
-                <label class="label">Truck type</label>
+                <label class="label" data-i18n="trucking.type">Truck type</label>
                 <select class="select" id="truckType">
-                  <option>Dump truck</option>
-                  <option>Flatbed</option>
-                  <option>Pickup w/ trailer</option>
-                  <option>Box truck</option>
-                  <option>Tractor-trailer</option>
-                  <option>Roll-off</option>
+                  <option value="Dump truck" data-i18n="trucking.types.dump">Dump truck</option>
+                  <option value="Flatbed" data-i18n="trucking.types.flatbed">Flatbed</option>
+                  <option value="Pickup w/ trailer" data-i18n="trucking.types.pickup">Pickup w/ trailer</option>
+                  <option value="Box truck" data-i18n="trucking.types.box">Box truck</option>
+                  <option value="Tractor-trailer" data-i18n="trucking.types.tractor">Tractor-trailer</option>
+                  <option value="Roll-off" data-i18n="trucking.types.rolloff">Roll-off</option>
                 </select>
               </div>
               <div>
-                <label class="label"># of trucks</label>
+                <label class="label" data-i18n="trucking.count"># of trucks</label>
                 <input type="number" class="input" id="truckCount" value="1" min="1" />
               </div>
             </div>
             <div class="field-row cols-3">
               <div>
-                <label class="label">Billing method</label>
+                <label class="label" data-i18n="trucking.billing">Billing method</label>
                 <select class="select" id="billingMethod">
-                  <option value="load">Per load</option>
-                  <option value="hour">Per hour</option>
-                  <option value="yard">Per cubic yard</option>
-                  <option value="ton">Per ton</option>
-                  <option value="mile">Per mile</option>
+                  <option value="load" data-i18n="trucking.billing.load">Per load</option>
+                  <option value="hour" data-i18n="trucking.billing.hour">Per hour</option>
+                  <option value="yard" data-i18n="trucking.billing.yard">Per cubic yard</option>
+                  <option value="ton" data-i18n="trucking.billing.ton">Per ton</option>
+                  <option value="mile" data-i18n="trucking.billing.mile">Per mile</option>
                 </select>
               </div>
               <div>
-                <label class="label">Rate ($)</label>
+                <label class="label" data-i18n="trucking.rate">Rate ($)</label>
                 <input type="number" class="input" id="truckRate" value="180" min="0" />
               </div>
               <div>
-                <label class="label">Quantity</label>
+                <label class="label" data-i18n="trucking.qty">Quantity</label>
                 <input type="number" class="input" id="truckQty" value="6" min="0" step="0.5" />
               </div>
             </div>
             <div class="field-row cols-2">
               <div>
-                <label class="label">Disposal / dump fees ($)</label>
+                <label class="label" data-i18n="trucking.disposal">Disposal / dump fees ($)</label>
                 <input type="number" class="input" id="disposalFee" value="120" min="0" />
               </div>
               <div>
-                <label class="label">Materials hauled (optional)</label>
-                <input type="text" class="input" id="materialHauled" placeholder="Concrete debris, gravel, etc." />
+                <label class="label" data-i18n="trucking.materialHauled">Materials hauled (optional)</label>
+                <input type="text" class="input" id="materialHauled" data-i18n-placeholder="trucking.materialHauledPlaceholder" placeholder="Concrete debris, gravel, etc." />
               </div>
             </div>
             <div class="trucking-subtotal">
-              <span class="trucking-subtotal-label">Live subtotal</span>
+              <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
               <span class="trucking-subtotal-amt" id="truckSubtotal">$1,200.00</span>
             </div>
           </div>
@@ -1222,60 +1237,60 @@
           <div id="logisticsPanel" class="trucking-panel hidden">
             <div class="field-row cols-2">
               <div>
-                <label class="label">Service type</label>
+                <label class="label" data-i18n="logistics.service">Service type</label>
                 <select class="select" id="serviceType">
-                  <option>Freight reworking</option>
-                  <option>Storage / Warehousing</option>
-                  <option>Last-mile delivery</option>
-                  <option>Loading / Unloading</option>
-                  <option>Cross-docking</option>
-                  <option>Pick & Pack</option>
-                  <option>Returns processing</option>
-                  <option>Other</option>
+                  <option value="Freight reworking" data-i18n="logistics.services.freight">Freight reworking</option>
+                  <option value="Storage / Warehousing" data-i18n="logistics.services.storage">Storage / Warehousing</option>
+                  <option value="Last-mile delivery" data-i18n="logistics.services.lastMile">Last-mile delivery</option>
+                  <option value="Loading / Unloading" data-i18n="logistics.services.loading">Loading / Unloading</option>
+                  <option value="Cross-docking" data-i18n="logistics.services.crossDock">Cross-docking</option>
+                  <option value="Pick & Pack" data-i18n="logistics.services.pickPack">Pick & Pack</option>
+                  <option value="Returns processing" data-i18n="logistics.services.returns">Returns processing</option>
+                  <option value="Other" data-i18n="logistics.services.other">Other</option>
                 </select>
               </div>
               <div>
-                <label class="label">Billing method</label>
+                <label class="label" data-i18n="logistics.billing">Billing method</label>
                 <select class="select" id="logisticsBillingMethod">
-                  <option value="pallet">Per pallet</option>
-                  <option value="palletDay">Per pallet per day</option>
-                  <option value="pound">Per pound</option>
-                  <option value="cwt">Per hundredweight (CWT)</option>
-                  <option value="cubicFoot">Per cubic foot</option>
-                  <option value="piece">Per piece / unit</option>
-                  <option value="hour">Per hour</option>
-                  <option value="mile">Per mile</option>
-                  <option value="flat">Flat rate</option>
+                  <option value="pallet" data-i18n="logistics.billing.pallet">Per pallet</option>
+                  <option value="palletDay" data-i18n="logistics.billing.palletDay">Per pallet per day</option>
+                  <option value="pound" data-i18n="logistics.billing.pound">Per pound</option>
+                  <option value="cwt" data-i18n="logistics.billing.cwt">Per hundredweight (CWT)</option>
+                  <option value="cubicFoot" data-i18n="logistics.billing.cubicFoot">Per cubic foot</option>
+                  <option value="piece" data-i18n="logistics.billing.piece">Per piece / unit</option>
+                  <option value="hour" data-i18n="logistics.billing.hour">Per hour</option>
+                  <option value="mile" data-i18n="logistics.billing.mile">Per mile</option>
+                  <option value="flat" data-i18n="logistics.billing.flat">Flat rate</option>
                 </select>
               </div>
             </div>
             <div class="field-row cols-3">
               <div>
-                <label class="label">Rate ($)</label>
+                <label class="label" data-i18n="logistics.rate">Rate ($)</label>
                 <input type="number" class="input" id="logisticsRate" value="50" min="0" step="0.01" />
               </div>
               <div>
-                <label class="label" id="logisticsQtyLabel"># of pallets</label>
+                <label class="label" id="logisticsQtyLabel" data-i18n="logistics.qty.pallet"># of pallets</label>
                 <input type="number" class="input" id="logisticsQty" value="10" min="0" step="0.1" />
               </div>
               <div id="logisticsDaysField" class="hidden">
-                <label class="label">Days</label>
+                <label class="label" data-i18n="logistics.days">Days</label>
                 <input type="number" class="input" id="logisticsDays" value="7" min="1" />
               </div>
             </div>
             <div class="field-row cols-2">
               <div>
-                <label class="label">Accessorial fees ($)</label>
+                <label class="label" data-i18n="logistics.accessorial">Accessorial fees ($)</label>
                 <input type="number" class="input" id="accessorialFees" value="0" min="0" step="0.01" />
-                <small style="color: var(--ink-3); font-size: 11px;">Lift gate, waiting time, residential delivery, hazmat handling, etc.</small>
+                <small style="color: var(--ink-3); font-size: 11px;" data-i18n="logistics.accessorialHelp">Lift gate, waiting time, residential delivery, hazmat handling, etc.</small>
               </div>
               <div>
-                <label class="label">Special handling (optional)</label>
-                <input type="text" class="input" id="specialHandling" placeholder="Climate controlled, white glove, hazmat..." />
+                <label class="label" data-i18n="logistics.handling">Special handling (optional)</label>
+                <input type="text" class="input" id="specialHandling" data-i18n-placeholder="logistics.handlingPlaceholder" placeholder="Climate controlled, white glove, hazmat..." />
               </div>
             </div>
             <div class="trucking-subtotal">
-              <span class="trucking-subtotal-label">Live subtotal</span>
+              <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
               <span class="trucking-subtotal-amt" id="logisticsSubtotal">$500.00</span>
             </div>
           </div>
@@ -1283,11 +1298,11 @@
           <div id="paintingPanel" class="trucking-panel hidden">
             <div class="field-row cols-2">
               <div>
-                <label class="label">Wall area (sq ft)</label>
+                <label class="label" data-i18n="painting.area">Wall area (sq ft)</label>
                 <input type="number" class="input" id="paintArea" value="800" min="0" />
               </div>
               <div>
-                <label class="label">Number of coats</label>
+                <label class="label" data-i18n="painting.coats">Number of coats</label>
                 <select class="select" id="paintCoats">
                   <option value="1">1</option>
                   <option value="2" selected>2</option>
@@ -1297,28 +1312,28 @@
             </div>
             <div class="field-row cols-3">
               <div>
-                <label class="label">Rate per sq ft per coat ($)</label>
+                <label class="label" data-i18n="painting.rate">Rate per sq ft per coat ($)</label>
                 <input type="number" class="input" id="paintRate" value="1.50" min="0" step="0.01" />
               </div>
               <div>
-                <label class="label">Paint cost ($)</label>
+                <label class="label" data-i18n="painting.cost">Paint cost ($)</label>
                 <input type="number" class="input" id="paintCost" value="200" min="0" step="0.01" />
-                <small style="color: var(--ink-3); font-size: 11px;">Total paint and supplies</small>
+                <small style="color: var(--ink-3); font-size: 11px;" data-i18n="painting.costHelp">Total paint and supplies</small>
               </div>
               <div>
-                <label class="label">Surface prep ($)</label>
+                <label class="label" data-i18n="painting.prep">Surface prep ($)</label>
                 <input type="number" class="input" id="paintPrep" value="0" min="0" step="0.01" />
-                <small style="color: var(--ink-3); font-size: 11px;">Sanding, patching, caulking, masking</small>
+                <small style="color: var(--ink-3); font-size: 11px;" data-i18n="painting.prepHelp">Sanding, patching, caulking, masking</small>
               </div>
             </div>
             <div class="field-row cols-2">
               <div>
-                <label class="label">Trim and detail work ($)</label>
+                <label class="label" data-i18n="painting.trim">Trim and detail work ($)</label>
                 <input type="number" class="input" id="paintTrim" value="0" min="0" step="0.01" />
               </div>
             </div>
             <div class="trucking-subtotal">
-              <span class="trucking-subtotal-label">Live subtotal</span>
+              <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
               <span class="trucking-subtotal-amt" id="paintingSubtotal">$0.00</span>
             </div>
           </div>
@@ -1326,55 +1341,55 @@
           <div id="flooringPanel" class="trucking-panel hidden">
             <div class="field-row cols-2">
               <div>
-                <label class="label">Floor area (sq ft)</label>
+                <label class="label" data-i18n="flooring.area">Floor area (sq ft)</label>
                 <input type="number" class="input" id="floorArea" value="400" min="0" step="0.1" />
               </div>
               <div>
-                <label class="label">Material type</label>
+                <label class="label" data-i18n="flooring.material">Material type</label>
                 <select class="select" id="floorMaterialType">
-                  <option>Laminate</option>
-                  <option>Vinyl/LVP</option>
-                  <option>Hardwood</option>
-                  <option>Engineered</option>
-                  <option>Tile</option>
-                  <option>Carpet</option>
-                  <option>Other</option>
+                  <option value="Laminate" data-i18n="flooring.materials.laminate">Laminate</option>
+                  <option value="Vinyl/LVP" data-i18n="flooring.materials.vinyl">Vinyl/LVP</option>
+                  <option value="Hardwood" data-i18n="flooring.materials.hardwood">Hardwood</option>
+                  <option value="Engineered" data-i18n="flooring.materials.engineered">Engineered</option>
+                  <option value="Tile" data-i18n="flooring.materials.tile">Tile</option>
+                  <option value="Carpet" data-i18n="flooring.materials.carpet">Carpet</option>
+                  <option value="Other" data-i18n="flooring.materials.other">Other</option>
                 </select>
               </div>
             </div>
             <div class="field-row cols-3">
               <div>
-                <label class="label">Material cost per sq ft ($)</label>
+                <label class="label" data-i18n="flooring.materialRate">Material cost per sq ft ($)</label>
                 <input type="number" class="input" id="floorMaterialRate" value="4.00" min="0" step="0.01" />
               </div>
               <div>
-                <label class="label">Installation rate per sq ft ($)</label>
+                <label class="label" data-i18n="flooring.installRate">Installation rate per sq ft ($)</label>
                 <input type="number" class="input" id="floorInstallRate" value="3.50" min="0" step="0.01" />
               </div>
               <div>
-                <label class="label">Waste factor (%)</label>
+                <label class="label" data-i18n="flooring.waste">Waste factor (%)</label>
                 <input type="number" class="input" id="floorWasteFactor" value="10" min="0" step="0.1" />
-                <small style="color: var(--ink-3); font-size: 11px;">Typically 10% (standard) or 15% (diagonal patterns)</small>
+                <small style="color: var(--ink-3); font-size: 11px;" data-i18n="flooring.wasteHelp">Typically 10% (standard) or 15% (diagonal patterns)</small>
               </div>
             </div>
             <div class="field-row cols-2">
               <div>
-                <label class="label">Tear-out and disposal ($)</label>
+                <label class="label" data-i18n="flooring.tearOut">Tear-out and disposal ($)</label>
                 <input type="number" class="input" id="floorTearOut" value="0" min="0" step="0.01" />
               </div>
               <div>
-                <label class="label">Subfloor prep ($)</label>
+                <label class="label" data-i18n="flooring.subfloor">Subfloor prep ($)</label>
                 <input type="number" class="input" id="floorSubfloorPrep" value="0" min="0" step="0.01" />
               </div>
             </div>
             <div class="field-row cols-2">
               <div>
-                <label class="label">Transitions and finish work ($)</label>
+                <label class="label" data-i18n="flooring.transitions">Transitions and finish work ($)</label>
                 <input type="number" class="input" id="floorTransitions" value="0" min="0" step="0.01" />
               </div>
             </div>
             <div class="trucking-subtotal">
-              <span class="trucking-subtotal-label">Live subtotal</span>
+              <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
               <span class="trucking-subtotal-amt" id="flooringSubtotal">$0.00</span>
             </div>
           </div>
@@ -1382,49 +1397,49 @@
           <div id="roofingPanel" class="trucking-panel hidden">
             <div class="field-row cols-2">
               <div>
-                <label class="label">Roof area (squares)</label>
+                <label class="label" data-i18n="roofing.area">Roof area (squares)</label>
                 <input type="number" class="input" id="roofSquares" value="25" min="0" step="0.1" />
-                <small style="color: var(--ink-3); font-size: 11px;">1 square = 100 sq ft</small>
+                <small style="color: var(--ink-3); font-size: 11px;" data-i18n="roofing.areaHelp">1 square = 100 sq ft</small>
               </div>
               <div>
-                <label class="label">Roofing material</label>
+                <label class="label" data-i18n="roofing.material">Roofing material</label>
                 <select class="select" id="roofMaterialType">
-                  <option>Asphalt shingles</option>
-                  <option>Metal</option>
-                  <option>Tile</option>
-                  <option>Flat/Membrane</option>
-                  <option>Wood shake</option>
-                  <option>Other</option>
+                  <option value="Asphalt shingles" data-i18n="roofing.materials.shingles">Asphalt shingles</option>
+                  <option value="Metal" data-i18n="roofing.materials.metal">Metal</option>
+                  <option value="Tile" data-i18n="roofing.materials.tile">Tile</option>
+                  <option value="Flat/Membrane" data-i18n="roofing.materials.flat">Flat/Membrane</option>
+                  <option value="Wood shake" data-i18n="roofing.materials.shake">Wood shake</option>
+                  <option value="Other" data-i18n="roofing.materials.other">Other</option>
                 </select>
               </div>
             </div>
             <div class="field-row cols-3">
               <div>
-                <label class="label">Material cost per square ($)</label>
+                <label class="label" data-i18n="roofing.materialRate">Material cost per square ($)</label>
                 <input type="number" class="input" id="roofMaterialRate" value="250" min="0" step="0.01" />
               </div>
               <div>
-                <label class="label">Labor per square ($)</label>
+                <label class="label" data-i18n="roofing.laborRate">Labor per square ($)</label>
                 <input type="number" class="input" id="roofLaborRate" value="200" min="0" step="0.01" />
               </div>
               <div>
-                <label class="label">Tear-off per square ($)</label>
+                <label class="label" data-i18n="roofing.tearOff">Tear-off per square ($)</label>
                 <input type="number" class="input" id="roofTearOffRate" value="75" min="0" step="0.01" />
               </div>
             </div>
             <div class="field-row cols-2">
               <div>
-                <label class="label">Disposal / dump fees ($)</label>
+                <label class="label" data-i18n="roofing.disposal">Disposal / dump fees ($)</label>
                 <input type="number" class="input" id="roofDisposal" value="350" min="0" step="0.01" />
               </div>
               <div>
-                <label class="label">Underlayment, flashing, accessories ($)</label>
+                <label class="label" data-i18n="roofing.accessories">Underlayment, flashing, accessories ($)</label>
                 <input type="number" class="input" id="roofAccessories" value="400" min="0" step="0.01" />
-                <small style="color: var(--ink-3); font-size: 11px;">Ice & water shield, drip edge, ridge vent, flashing</small>
+                <small style="color: var(--ink-3); font-size: 11px;" data-i18n="roofing.accessoriesHelp">Ice & water shield, drip edge, ridge vent, flashing</small>
               </div>
             </div>
             <div class="trucking-subtotal">
-              <span class="trucking-subtotal-label">Live subtotal</span>
+              <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
               <span class="trucking-subtotal-amt" id="roofingSubtotal">$0.00</span>
             </div>
           </div>
@@ -1435,47 +1450,47 @@
       <div class="card">
         <div class="card-title">
           <span class="card-title-num">2</span>
-          Who & when
+          <span data-i18n="who.title">Who & when</span>
         </div>
-        <div class="card-sub">Client details, urgency, and tax setup.</div>
+        <div class="card-sub" data-i18n="who.sub">Client details, urgency, and tax setup.</div>
 
         <div class="field-row cols-2">
           <div>
-            <label class="label">Client name</label>
-            <input type="text" class="input" id="clientName" placeholder="Sarah Chen" />
+            <label class="label" data-i18n="who.clientName">Client name</label>
+            <input type="text" class="input" id="clientName" data-i18n-placeholder="who.clientNamePlaceholder" placeholder="Sarah Chen" />
           </div>
           <div>
-            <label class="label">Job address</label>
-            <input type="text" class="input" id="clientAddr" placeholder="412 Maple St, Austin TX 78704" />
+            <label class="label" data-i18n="who.address">Job address</label>
+            <input type="text" class="input" id="clientAddr" data-i18n-placeholder="who.addressPlaceholder" placeholder="412 Maple St, Austin TX 78704" />
           </div>
         </div>
 
         <div class="field">
-          <label class="label">Timeline</label>
+          <label class="label" data-i18n="timeline.label">Timeline</label>
           <div class="timeline-pills" id="timelinePills">
-            <button data-tl="Standard" class="active">Standard</button>
-            <button data-tl="Priority">Priority</button>
-            <button data-tl="Emergency">Emergency</button>
+            <button data-tl="Standard" class="active" data-i18n="timeline.standard">Standard</button>
+            <button data-tl="Priority" data-i18n="timeline.priority">Priority</button>
+            <button data-tl="Emergency" data-i18n="timeline.emergency">Emergency</button>
           </div>
         </div>
         <div id="timelineSurchargeField" class="field hidden">
-          <label class="label" id="timelineSurchargeLabel">Rush surcharge ($)</label>
+          <label class="label" id="timelineSurchargeLabel" data-i18n="timeline.surcharge">Rush surcharge ($)</label>
           <input type="number" class="input" id="rushSurcharge" value="0" min="0" step="0.01" />
         </div>
 
         <div class="field">
-          <label class="label">Tax</label>
+          <label class="label" data-i18n="tax.label">Tax</label>
           <div class="tax-toggle">
-            <label><input type="radio" name="taxMode" value="none" checked /> No tax</label>
-            <label><input type="radio" name="taxMode" value="custom" /> Custom tax</label>
+            <label><input type="radio" name="taxMode" value="none" checked /> <span data-i18n="tax.none">No tax</span></label>
+            <label><input type="radio" name="taxMode" value="custom" /> <span data-i18n="tax.custom">Custom tax</span></label>
           </div>
           <div id="taxCustomFields" class="field-row cols-2 hidden">
             <div>
-              <label class="label">Tax rate (%)</label>
+              <label class="label" data-i18n="tax.rate">Tax rate (%)</label>
               <input type="number" class="input" id="taxRate" value="8.25" min="0" step="0.01" />
             </div>
             <div>
-              <label class="label">Tax label</label>
+              <label class="label" data-i18n="tax.label2">Tax label</label>
               <input type="text" class="input" id="taxLabel" value="Sales Tax" />
             </div>
           </div>
@@ -1483,9 +1498,9 @@
 
         <div class="actions-row">
           <button class="btn-primary" id="generateBtn" onclick="generateQuote()">
-            <span id="genBtnText">✦ Generate quote</span>
+            <span id="genBtnText" data-i18n="actions.generate">✦ Generate quote</span>
           </button>
-          <button class="btn-secondary" onclick="clearForm()">Clear form</button>
+          <button class="btn-secondary" onclick="clearForm()" data-i18n="actions.clear">Clear form</button>
         </div>
       </div>
 
@@ -1493,13 +1508,13 @@
       <div class="quote-wrap" id="quoteWrap">
         <div class="quote-actions-bar">
           <div class="left">
-            <div class="status-chip">Draft</div>
+            <div class="status-chip" data-i18n="quote.draftChip">Draft</div>
             <span class="topbar-meta" id="quoteMetaLine"></span>
           </div>
           <div class="right">
-            <button class="action-btn" onclick="copyQuote()">📋 Copy quote</button>
-            <button class="action-btn" onclick="downloadPdf()">⬇ Download PDF</button>
-            <button class="action-btn primary" onclick="convertToInvoice()">→ Convert to invoice</button>
+            <button class="action-btn" onclick="copyQuote()" data-i18n="quote.copy">📋 Copy quote</button>
+            <button class="action-btn" onclick="downloadPdf()" data-i18n="quote.downloadPdf">⬇ Download PDF</button>
+            <button class="action-btn primary" onclick="convertToInvoice()" data-i18n="quote.convertInvoice">→ Convert to invoice</button>
           </div>
         </div>
 
@@ -1510,57 +1525,57 @@
               <div class="quote-company-tag editable" contenteditable="true">Licensed · Insured · Family-owned since 2009</div>
             </div>
             <div class="quote-meta">
-              <div class="quote-meta-label">Quote</div>
+              <div class="quote-meta-label" data-i18n="quote.label">Quote</div>
               <div class="quote-id" id="quoteId">#Q-0001</div>
-              <div class="quote-meta-label">Valid until</div>
+              <div class="quote-meta-label" data-i18n="quote.validUntil">Valid until</div>
               <div class="quote-date editable" contenteditable="true" id="validUntil">—</div>
             </div>
           </div>
 
           <div class="quote-grid">
             <div>
-              <div class="quote-block-label">Prepared for</div>
+              <div class="quote-block-label" data-i18n="quote.preparedFor">Prepared for</div>
               <div class="quote-block-value">
-                <strong class="editable" contenteditable="true" id="quoteClientName">Client Name</strong><br />
-                <span class="editable" contenteditable="true" id="quoteClientAddr">Job Address</span>
+                <strong class="editable" contenteditable="true" id="quoteClientName" data-i18n="quote.clientPlaceholder">Client Name</strong><br />
+                <span class="editable" contenteditable="true" id="quoteClientAddr" data-i18n="quote.addressPlaceholder">Job Address</span>
               </div>
             </div>
             <div>
-              <div class="quote-block-label">Trade · Timeline</div>
+              <div class="quote-block-label" data-i18n="quote.tradeTimeline">Trade · Timeline</div>
               <div class="quote-block-value" id="quoteTradeMeta">—</div>
             </div>
           </div>
 
           <div class="quote-section">
-            <div class="quote-section-title">Scope of work</div>
+            <div class="quote-section-title" data-i18n="quote.scope">Scope of work</div>
             <div class="quote-scope editable" contenteditable="true" id="quoteScope">—</div>
           </div>
 
           <div class="quote-section">
-            <div class="quote-section-title">Line items</div>
+            <div class="quote-section-title" data-i18n="quote.lineItems">Line items</div>
             <table class="line-table" id="lineTable">
               <thead>
                 <tr>
-                  <th style="width: 70%">Description</th>
-                  <th class="amt-col">Amount</th>
+                  <th style="width: 70%" data-i18n="quote.colDescription">Description</th>
+                  <th class="amt-col" data-i18n="quote.colAmount">Amount</th>
                   <th style="width: 30px"></th>
                 </tr>
               </thead>
               <tbody id="lineBody"></tbody>
             </table>
-            <button class="add-line-btn" onclick="addLineItemRow()">＋ Add line item</button>
+            <button class="add-line-btn" onclick="addLineItemRow()" data-i18n="quote.addLine">＋ Add line item</button>
 
             <div class="totals-block">
               <div class="totals-row">
-                <span class="lbl">Subtotal</span>
+                <span class="lbl" data-i18n="quote.subtotal">Subtotal</span>
                 <span class="val" id="subtotalDisp">$0.00</span>
               </div>
               <div class="totals-row" id="taxRow">
-                <span class="lbl" id="taxRowLbl">Tax</span>
+                <span class="lbl" id="taxRowLbl" data-i18n="quote.tax">Tax</span>
                 <span class="val" id="taxDisp">$0.00</span>
               </div>
               <div class="totals-row grand">
-                <span class="lbl">Total</span>
+                <span class="lbl" data-i18n="quote.total">Total</span>
                 <span class="val" id="totalDisp">$0.00</span>
               </div>
             </div>
@@ -1568,18 +1583,18 @@
 
           <div class="quote-footer-grid">
             <div>
-              <div class="quote-section-title">Payment terms</div>
+              <div class="quote-section-title" data-i18n="quote.terms">Payment terms</div>
               <div class="quote-footer-text editable" contenteditable="true" id="quoteTerms">—</div>
             </div>
             <div>
-              <div class="quote-section-title">Warranty</div>
+              <div class="quote-section-title" data-i18n="quote.warranty">Warranty</div>
               <div class="quote-footer-text editable" contenteditable="true" id="quoteWarranty">—</div>
             </div>
           </div>
 
           <div class="quote-notes">
-            <div class="quote-notes-label">Notes</div>
-            <div class="quote-notes-text editable" contenteditable="true" id="quoteNotes">Click to add any notes for the client...</div>
+            <div class="quote-notes-label" data-i18n="quote.notes">Notes</div>
+            <div class="quote-notes-text editable" contenteditable="true" id="quoteNotes" data-i18n="quote.notesPlaceholder">Click to add any notes for the client...</div>
           </div>
         </div>
       </div>
@@ -1590,103 +1605,103 @@
         <div class="card">
           <div class="card-title">
             <span class="card-title-num">1</span>
-            Follow-up details
+            <span data-i18n="followup.title">Follow-up details</span>
           </div>
-          <div class="card-sub">Draft a customer follow-up message based on the quote status and communication channel.</div>
+          <div class="card-sub" data-i18n="followup.sub">Draft a customer follow-up message based on the quote status and communication channel.</div>
 
           <div class="field">
-            <label class="label">Trade</label>
+            <label class="label" data-i18n="form.trade">Trade</label>
             <div class="trades-grid" id="followupTradesGrid"></div>
           </div>
 
           <div class="field-row cols-2">
             <div>
-              <label class="label">Customer name</label>
-              <input type="text" class="input" id="followupCustomerName" placeholder="Sarah Chen" />
+              <label class="label" data-i18n="followup.customer">Customer name</label>
+              <input type="text" class="input" id="followupCustomerName" data-i18n-placeholder="who.clientNamePlaceholder" placeholder="Sarah Chen" />
             </div>
             <div>
-              <label class="label">Quote amount ($)</label>
+              <label class="label" data-i18n="followup.amount">Quote amount ($)</label>
               <input type="number" class="input" id="followupQuoteAmount" value="2400" min="0" step="0.01" />
             </div>
           </div>
 
           <div class="field">
-            <label class="label">Original job reference</label>
-            <input type="text" class="input" id="followupJobDesc" placeholder="Kitchen sink replacement + drywall repair" maxlength="80" />
+            <label class="label" data-i18n="followup.originalJob">Original job reference</label>
+            <input type="text" class="input" id="followupJobDesc" data-i18n-placeholder="followup.originalJobPlaceholder" placeholder="Kitchen sink replacement + drywall repair" maxlength="80" />
           </div>
 
           <div class="field">
-            <label class="label">Your details</label>
+            <label class="label" data-i18n="followup.yourDetails">Your details</label>
             <div class="signature-panel">
               <div class="signature-summary" id="followupSignatureSummary">
                 <div class="signature-summary-text" id="followupSigPreview">No signature saved yet</div>
-                <button class="action-btn small" id="followupSigEditBtn">Edit</button>
+                <button class="action-btn small" id="followupSigEditBtn" data-i18n="followup.edit">Edit</button>
               </div>
               <div class="field-row cols-3 hidden" id="followupSignatureFields">
                 <div>
-                  <label class="label">Name</label>
-                  <input type="text" class="input" id="followupSigName" placeholder="Jordan Lee" />
+                  <label class="label" data-i18n="followup.name">Name</label>
+                  <input type="text" class="input" id="followupSigName" data-i18n-placeholder="followup.namePlaceholder" placeholder="Jordan Lee" />
                 </div>
                 <div>
-                  <label class="label">Business</label>
-                  <input type="text" class="input" id="followupSigBusiness" placeholder="TradeDeck Services" />
+                  <label class="label" data-i18n="followup.business">Business</label>
+                  <input type="text" class="input" id="followupSigBusiness" data-i18n-placeholder="followup.businessPlaceholder" placeholder="TradeDeck Services" />
                 </div>
                 <div>
-                  <label class="label">Contact</label>
-                  <input type="text" class="input" id="followupSigContact" placeholder="(555) 123-4567" />
+                  <label class="label" data-i18n="followup.contact">Contact</label>
+                  <input type="text" class="input" id="followupSigContact" data-i18n-placeholder="followup.contactPlaceholder" placeholder="(555) 123-4567" />
                 </div>
               </div>
               <div class="actions-row hidden" id="followupSignatureActions">
-                <button class="btn-secondary" id="followupSigSaveBtn">Save</button>
-                <button class="btn-secondary" id="followupSigCancelBtn">Cancel</button>
+                <button class="btn-secondary" id="followupSigSaveBtn" data-i18n="followup.save">Save</button>
+                <button class="btn-secondary" id="followupSigCancelBtn" data-i18n="followup.cancel">Cancel</button>
               </div>
             </div>
           </div>
 
           <div class="field">
-            <label class="label">Scenario</label>
+            <label class="label" data-i18n="followup.scenario">Scenario</label>
             <div class="timeline-pills" id="followupScenarioPills">
-              <button data-scenario="No reply yet" class="active">No reply yet</button>
-              <button data-scenario="Still thinking it over">Still thinking it over</button>
-              <button data-scenario="Said yes, no deposit yet">Said yes, no deposit yet</button>
-              <button data-scenario="Declined the quote">Declined the quote</button>
-              <button data-scenario="Job complete, asking for review">Job complete, asking for review</button>
-              <button data-scenario="Past customer check-in">Past customer check-in</button>
+              <button data-scenario="No reply yet" class="active" data-i18n="followup.scenarios.noReply">No reply yet</button>
+              <button data-scenario="Still thinking it over" data-i18n="followup.scenarios.thinking">Still thinking it over</button>
+              <button data-scenario="Said yes, no deposit yet" data-i18n="followup.scenarios.yes">Said yes, no deposit yet</button>
+              <button data-scenario="Declined the quote" data-i18n="followup.scenarios.declined">Declined the quote</button>
+              <button data-scenario="Job complete, asking for review" data-i18n="followup.scenarios.review">Job complete, asking for review</button>
+              <button data-scenario="Past customer check-in" data-i18n="followup.scenarios.checkIn">Past customer check-in</button>
             </div>
           </div>
 
           <div class="field-row cols-3">
             <div>
-              <label class="label">Quote age</label>
+              <label class="label" data-i18n="followup.age">Quote age</label>
               <div class="timeline-pills" id="followupDaysAgoPills">
-                <button data-days="1" data-label="1 day ago">1 day</button>
-                <button data-days="3" data-label="3 days ago" class="active">3 days</button>
-                <button data-days="5" data-label="5 days ago">5 days</button>
-                <button data-days="7" data-label="about a week ago">1 week</button>
+                <button data-days="1" data-label="1 day ago" data-i18n="followup.age.1">1 day</button>
+                <button data-days="3" data-label="3 days ago" class="active" data-i18n="followup.age.3">3 days</button>
+                <button data-days="5" data-label="5 days ago" data-i18n="followup.age.5">5 days</button>
+                <button data-days="7" data-label="about a week ago" data-i18n="followup.age.7">1 week</button>
               </div>
             </div>
             <div>
-              <label class="label">Tone</label>
+              <label class="label" data-i18n="followup.tone">Tone</label>
               <div class="timeline-pills" id="followupTonePills">
-                <button data-tone="Friendly" class="active">Friendly</button>
-                <button data-tone="Professional">Professional</button>
-                <button data-tone="Direct">Direct</button>
+                <button data-tone="Friendly" class="active" data-i18n="followup.tones.friendly">Friendly</button>
+                <button data-tone="Professional" data-i18n="followup.tones.professional">Professional</button>
+                <button data-tone="Direct" data-i18n="followup.tones.direct">Direct</button>
               </div>
             </div>
             <div>
-              <label class="label">Channel</label>
+              <label class="label" data-i18n="followup.channel">Channel</label>
               <div class="timeline-pills" id="followupChannelPills">
-                <button data-channel="Email" class="active">Email</button>
-                <button data-channel="Text">Text</button>
+                <button data-channel="Email" class="active" data-i18n="followup.channels.email">Email</button>
+                <button data-channel="Text" data-i18n="followup.channels.text">Text</button>
               </div>
             </div>
           </div>
 
           <div class="actions-row">
             <button class="btn-primary" id="generateFollowupBtn" onclick="generateFollowup()">
-              <span id="followupGenBtnText">✦ Generate message</span>
+              <span id="followupGenBtnText" data-i18n="actions.generateMessage">✦ Generate message</span>
             </button>
-            <button class="btn-secondary" id="regenerateFollowupBtn" onclick="regenerateFollowup()" disabled>
+            <button class="btn-secondary" id="regenerateFollowupBtn" onclick="regenerateFollowup()" disabled data-i18n="actions.regenerate">
               Regenerate
             </button>
           </div>
@@ -1695,23 +1710,23 @@
         <div class="quote-wrap" id="followupWrap">
           <div class="quote-actions-bar">
             <div class="left">
-              <div class="status-chip">Draft</div>
-              <span class="topbar-meta" id="followupMetaLine">Follow-up message</span>
+              <div class="status-chip" data-i18n="quote.draftChip">Draft</div>
+              <span class="topbar-meta" id="followupMetaLine" data-i18n="followup.metaLine">Follow-up message</span>
             </div>
             <div class="right">
-              <button class="action-btn" onclick="copyFollowupMessage()">📋 Copy message</button>
-              <button class="action-btn primary" onclick="regenerateFollowup()">♻ Regenerate</button>
+              <button class="action-btn" onclick="copyFollowupMessage()" data-i18n="followup.copyMessage">📋 Copy message</button>
+              <button class="action-btn primary" onclick="regenerateFollowup()" data-i18n="followup.regenerate">♻ Regenerate</button>
             </div>
           </div>
 
           <div class="quote" id="followupDoc">
             <div class="quote-section" id="followupSubjectSection">
-              <div class="quote-section-title">Subject</div>
+              <div class="quote-section-title" data-i18n="followup.subject">Subject</div>
               <div class="quote-scope editable" contenteditable="true" id="followupSubject">—</div>
             </div>
 
             <div class="quote-section">
-              <div class="quote-section-title">Message</div>
+              <div class="quote-section-title" data-i18n="followup.message">Message</div>
               <div class="quote-scope editable" contenteditable="true" id="followupBody">—</div>
               <div class="topbar-meta" id="textCharCount" style="margin-top: 10px; display: none;">0 / 160 chars</div>
             </div>
@@ -1721,32 +1736,32 @@
 
       <div id="clientsView" class="hidden">
         <div class="info-banner" id="clientsPreviewBanner">
-          <span>👀 Preview — this section is a mockup with sample data. Fully working version coming soon.</span>
+          <span data-i18n="preview.banner">👀 Preview — this section is a mockup with sample data. Fully working version coming soon.</span>
           <button onclick="this.closest('.info-banner').style.display='none'">×</button>
         </div>
         <div class="card">
           <div class="field-row cols-3">
             <div>
-              <div class="card-title">Clients</div>
+              <div class="card-title" data-i18n="clients.title">Clients</div>
             </div>
             <div>
-              <input class="input" placeholder="Search clients..." disabled />
+              <input class="input" data-i18n-placeholder="clients.search" placeholder="Search clients..." disabled />
             </div>
             <div style="display:flex; justify-content:flex-end; align-items:flex-end;">
-              <button class="btn-primary" disabled>+ Add client</button>
+              <button class="btn-primary" disabled data-i18n="clients.add">+ Add client</button>
             </div>
           </div>
           <div class="field-row cols-3">
             <div class="stat-card">
-              <div class="stat-card-title">Total clients</div>
+              <div class="stat-card-title" data-i18n="clients.totalClients">Total clients</div>
               <div class="stat-card-value">24</div>
             </div>
             <div class="stat-card">
-              <div class="stat-card-title">Active this month</div>
+              <div class="stat-card-title" data-i18n="clients.activeMonth">Active this month</div>
               <div class="stat-card-value">8</div>
             </div>
             <div class="stat-card">
-              <div class="stat-card-title">Repeat customers</div>
+              <div class="stat-card-title" data-i18n="clients.repeatCustomers">Repeat customers</div>
               <div class="stat-card-value">11</div>
             </div>
           </div>
@@ -1755,12 +1770,12 @@
           <table class="line-table">
             <thead>
               <tr>
-                <th>Client</th>
-                <th>Contact</th>
-                <th>Jobs</th>
-                <th>Total revenue</th>
-                <th>Last contact</th>
-                <th>Status</th>
+                <th data-i18n="clients.col.client">Client</th>
+                <th data-i18n="clients.col.contact">Contact</th>
+                <th data-i18n="clients.col.jobs">Jobs</th>
+                <th data-i18n="clients.col.revenue">Total revenue</th>
+                <th data-i18n="clients.col.lastContact">Last contact</th>
+                <th data-i18n="clients.col.status">Status</th>
                 <th></th>
               </tr>
             </thead>
@@ -1771,46 +1786,46 @@
 
       <div id="jobsView" class="hidden">
         <div class="info-banner" id="jobsPreviewBanner">
-          <span>👀 Preview — this section is a mockup with sample data. Fully working version coming soon.</span>
+          <span data-i18n="preview.banner">👀 Preview — this section is a mockup with sample data. Fully working version coming soon.</span>
           <button onclick="this.closest('.info-banner').style.display='none'">×</button>
         </div>
         <div class="card">
           <div class="field-row cols-2">
             <div>
-              <div class="card-title">Jobs</div>
+              <div class="card-title" data-i18n="jobs.title">Jobs</div>
             </div>
             <div style="display:flex; justify-content:flex-end; align-items:flex-end;">
-              <button class="btn-primary" disabled>+ New job</button>
+              <button class="btn-primary" disabled data-i18n="jobs.add">+ New job</button>
             </div>
           </div>
           <div class="field">
             <div class="timeline-pills" id="jobFilterPills">
-              <button class="active" disabled>All</button>
-              <button disabled>Quoted</button>
-              <button disabled>In Progress</button>
-              <button disabled>Complete</button>
-              <button disabled>Paid</button>
+              <button class="active" disabled data-i18n="jobs.filter.all">All</button>
+              <button disabled data-i18n="jobs.filter.quoted">Quoted</button>
+              <button disabled data-i18n="jobs.filter.inProgress">In Progress</button>
+              <button disabled data-i18n="jobs.filter.complete">Complete</button>
+              <button disabled data-i18n="jobs.filter.paid">Paid</button>
             </div>
           </div>
         </div>
         <div class="field-row cols-4">
           <div class="stat-card">
-            <div class="stat-card-title">Open quotes</div>
+            <div class="stat-card-title" data-i18n="jobs.openQuotes">Open quotes</div>
             <div class="stat-card-value">6</div>
             <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$14,200</div>
           </div>
           <div class="stat-card">
-            <div class="stat-card-title">In progress</div>
+            <div class="stat-card-title" data-i18n="jobs.inProgress">In progress</div>
             <div class="stat-card-value">4</div>
             <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$28,500</div>
           </div>
           <div class="stat-card">
-            <div class="stat-card-title">Awaiting payment</div>
+            <div class="stat-card-title" data-i18n="jobs.awaiting">Awaiting payment</div>
             <div class="stat-card-value">3</div>
             <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$9,800</div>
           </div>
           <div class="stat-card">
-            <div class="stat-card-title">Completed this month</div>
+            <div class="stat-card-title" data-i18n="jobs.completed">Completed this month</div>
             <div class="stat-card-value">11</div>
             <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$42,300</div>
           </div>
@@ -1819,12 +1834,12 @@
           <table class="line-table">
             <thead>
               <tr>
-                <th>Job</th>
-                <th>Client</th>
-                <th>Trade</th>
-                <th>Quote</th>
-                <th>Status</th>
-                <th>Date</th>
+                <th data-i18n="jobs.col.job">Job</th>
+                <th data-i18n="jobs.col.client">Client</th>
+                <th data-i18n="jobs.col.trade">Trade</th>
+                <th data-i18n="jobs.col.quote">Quote</th>
+                <th data-i18n="jobs.col.status">Status</th>
+                <th data-i18n="jobs.col.date">Date</th>
               </tr>
             </thead>
             <tbody id="jobsTableBody"></tbody>
@@ -1834,51 +1849,51 @@
 
       <div id="paymentsView" class="hidden">
         <div class="info-banner" id="paymentsPreviewBanner">
-          <span>👀 Preview — this section is a mockup with sample data. Fully working version coming soon.</span>
+          <span data-i18n="preview.banner">👀 Preview — this section is a mockup with sample data. Fully working version coming soon.</span>
           <button onclick="this.closest('.info-banner').style.display='none'">×</button>
         </div>
         <div class="card">
           <div class="field-row cols-2">
             <div>
-              <div class="card-title">Payments</div>
+              <div class="card-title" data-i18n="payments.title">Payments</div>
             </div>
             <div style="display:flex; justify-content:flex-end; align-items:flex-end;">
-              <div class="timeline-pills" style="width:auto;"><button class="active" disabled>Last 30 days ▼</button></div>
+              <div class="timeline-pills" style="width:auto;"><button class="active" disabled data-i18n="payments.range">Last 30 days ▼</button></div>
             </div>
           </div>
         </div>
         <div class="field-row cols-4">
           <div class="stat-card">
-            <div class="stat-card-title">Total invoiced</div>
+            <div class="stat-card-title" data-i18n="payments.totalInvoiced">Total invoiced</div>
             <div class="stat-card-value">$42,300</div>
           </div>
           <div class="stat-card">
-            <div class="stat-card-title">Total received</div>
+            <div class="stat-card-title" data-i18n="payments.totalReceived">Total received</div>
             <div class="stat-card-value">$32,500</div>
           </div>
           <div class="stat-card">
-            <div class="stat-card-title">Outstanding</div>
+            <div class="stat-card-title" data-i18n="payments.outstanding">Outstanding</div>
             <div class="stat-card-value">$9,800</div>
           </div>
           <div class="stat-card">
-            <div class="stat-card-title">Avg days to pay</div>
+            <div class="stat-card-title" data-i18n="payments.avgDays">Avg days to pay</div>
             <div class="stat-card-value">18</div>
           </div>
         </div>
         <div class="card">
-          <div class="stat-card-title" style="margin-bottom: 14px;">Cash received</div>
+          <div class="stat-card-title" style="margin-bottom: 14px;" data-i18n="payments.cashReceived">Cash received</div>
           <svg class="payment-chart" viewBox="0 0 560 210" preserveAspectRatio="none" id="paymentChartSvg"></svg>
         </div>
         <div class="card">
           <table class="line-table">
             <thead>
               <tr>
-                <th>Invoice #</th>
-                <th>Client</th>
-                <th>Job</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Date</th>
+                <th data-i18n="payments.col.invoice">Invoice #</th>
+                <th data-i18n="payments.col.client">Client</th>
+                <th data-i18n="payments.col.job">Job</th>
+                <th data-i18n="payments.col.amount">Amount</th>
+                <th data-i18n="payments.col.status">Status</th>
+                <th data-i18n="payments.col.date">Date</th>
               </tr>
             </thead>
             <tbody id="paymentsTableBody"></tbody>
@@ -1893,6 +1908,766 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// ============================================================================
+// i18n
+// ============================================================================
+let tdLang = (localStorage.getItem('tdLang') === 'es') ? 'es' : 'en';
+
+const I18N = {
+  en: {
+    // API banner
+    'api.label': 'Anthropic API Key',
+    'api.placeholder': 'sk-ant-api03-...',
+    'api.save': 'Save',
+    'api.required': 'Required to generate quotes',
+    'api.savedReady': '✓ API key saved (locally) — ready to generate',
+    // Sidebar
+    'nav.workspace': 'Workspace',
+    'nav.quotes': 'Quotes',
+    'nav.followups': 'Follow-ups',
+    'nav.clients': 'Clients',
+    'nav.jobs': 'Jobs',
+    'nav.payments': 'Payments',
+    'nav.preview': 'Preview',
+    'nav.account': 'Account',
+    'nav.profile': 'Profile',
+    'nav.settings': 'Settings',
+    'sidebar.freePlan': 'Free Plan',
+    'sidebar.quotesSuffix': ' / 5 quotes',
+    'sidebar.upgrade': 'Upgrade to Pro',
+    'sidebar.upgradeSub': '$49/month · unlimited',
+    'sidebar.upgradeAlert': 'Stripe checkout coming soon. For now, this is a placeholder.',
+    // Topbar
+    'topbar.newQuoteHtml': 'New <em>quote</em>',
+    'topbar.newFollowupHtml': 'New <em>follow-up</em>',
+    'topbar.clients': 'Clients',
+    'topbar.jobs': 'Jobs',
+    'topbar.payments': 'Payments',
+    'topbar.draft': 'Draft',
+    'topbar.draftFollowup': 'Draft follow-up',
+    'topbar.previewOnly': 'Preview only',
+    // Form card 1
+    'form.whatsTheJob': "What's the job?",
+    'form.whatsSub': "Pick a trade, describe the work, and we'll draft a professional quote.",
+    'form.trade': 'Trade',
+    'form.jobDesc': 'Job description',
+    'form.pricingApproach': 'Pricing approach',
+    'form.hourly': '⏱ Hourly',
+    'form.flat': '📋 Flat rate',
+    // Hourly
+    'hourly.estHours': 'Estimated hours',
+    'hourly.rate': 'Hourly rate ($)',
+    'hourly.materials': 'Materials estimate ($)',
+    // Flat
+    'flat.price': 'All-in price ($)',
+    'flat.includes': 'Includes (optional)',
+    'flat.includesPlaceholder': 'Labor + materials + cleanup',
+    // Trucking
+    'trucking.type': 'Truck type',
+    'trucking.types.dump': 'Dump truck',
+    'trucking.types.flatbed': 'Flatbed',
+    'trucking.types.pickup': 'Pickup w/ trailer',
+    'trucking.types.box': 'Box truck',
+    'trucking.types.tractor': 'Tractor-trailer',
+    'trucking.types.rolloff': 'Roll-off',
+    'trucking.count': '# of trucks',
+    'trucking.billing': 'Billing method',
+    'trucking.billing.load': 'Per load',
+    'trucking.billing.hour': 'Per hour',
+    'trucking.billing.yard': 'Per cubic yard',
+    'trucking.billing.ton': 'Per ton',
+    'trucking.billing.mile': 'Per mile',
+    'trucking.rate': 'Rate ($)',
+    'trucking.qty': 'Quantity',
+    'trucking.disposal': 'Disposal / dump fees ($)',
+    'trucking.materialHauled': 'Materials hauled (optional)',
+    'trucking.materialHauledPlaceholder': 'Concrete debris, gravel, etc.',
+    'liveSubtotal': 'Live subtotal',
+    // Logistics
+    'logistics.service': 'Service type',
+    'logistics.services.freight': 'Freight reworking',
+    'logistics.services.storage': 'Storage / Warehousing',
+    'logistics.services.lastMile': 'Last-mile delivery',
+    'logistics.services.loading': 'Loading / Unloading',
+    'logistics.services.crossDock': 'Cross-docking',
+    'logistics.services.pickPack': 'Pick & Pack',
+    'logistics.services.returns': 'Returns processing',
+    'logistics.services.other': 'Other',
+    'logistics.billing': 'Billing method',
+    'logistics.billing.pallet': 'Per pallet',
+    'logistics.billing.palletDay': 'Per pallet per day',
+    'logistics.billing.pound': 'Per pound',
+    'logistics.billing.cwt': 'Per hundredweight (CWT)',
+    'logistics.billing.cubicFoot': 'Per cubic foot',
+    'logistics.billing.piece': 'Per piece / unit',
+    'logistics.billing.hour': 'Per hour',
+    'logistics.billing.mile': 'Per mile',
+    'logistics.billing.flat': 'Flat rate',
+    'logistics.rate': 'Rate ($)',
+    'logistics.qty.pallet': '# of pallets',
+    'logistics.qty.pound': 'Pounds',
+    'logistics.qty.cwt': 'Hundredweight (CWT)',
+    'logistics.qty.cubicFoot': 'Cubic feet',
+    'logistics.qty.piece': '# of pieces / units',
+    'logistics.qty.hour': 'Hours',
+    'logistics.qty.mile': 'Miles',
+    'logistics.qty.flat': 'Quantity',
+    'logistics.days': 'Days',
+    'logistics.accessorial': 'Accessorial fees ($)',
+    'logistics.accessorialHelp': 'Lift gate, waiting time, residential delivery, hazmat handling, etc.',
+    'logistics.handling': 'Special handling (optional)',
+    'logistics.handlingPlaceholder': 'Climate controlled, white glove, hazmat...',
+    // Painting
+    'painting.area': 'Wall area (sq ft)',
+    'painting.coats': 'Number of coats',
+    'painting.rate': 'Rate per sq ft per coat ($)',
+    'painting.cost': 'Paint cost ($)',
+    'painting.costHelp': 'Total paint and supplies',
+    'painting.prep': 'Surface prep ($)',
+    'painting.prepHelp': 'Sanding, patching, caulking, masking',
+    'painting.trim': 'Trim and detail work ($)',
+    // Flooring
+    'flooring.area': 'Floor area (sq ft)',
+    'flooring.material': 'Material type',
+    'flooring.materials.laminate': 'Laminate',
+    'flooring.materials.vinyl': 'Vinyl/LVP',
+    'flooring.materials.hardwood': 'Hardwood',
+    'flooring.materials.engineered': 'Engineered',
+    'flooring.materials.tile': 'Tile',
+    'flooring.materials.carpet': 'Carpet',
+    'flooring.materials.other': 'Other',
+    'flooring.materialRate': 'Material cost per sq ft ($)',
+    'flooring.installRate': 'Installation rate per sq ft ($)',
+    'flooring.waste': 'Waste factor (%)',
+    'flooring.wasteHelp': 'Typically 10% (standard) or 15% (diagonal patterns)',
+    'flooring.tearOut': 'Tear-out and disposal ($)',
+    'flooring.subfloor': 'Subfloor prep ($)',
+    'flooring.transitions': 'Transitions and finish work ($)',
+    // Roofing
+    'roofing.area': 'Roof area (squares)',
+    'roofing.areaHelp': '1 square = 100 sq ft',
+    'roofing.material': 'Roofing material',
+    'roofing.materials.shingles': 'Asphalt shingles',
+    'roofing.materials.metal': 'Metal',
+    'roofing.materials.tile': 'Tile',
+    'roofing.materials.flat': 'Flat/Membrane',
+    'roofing.materials.shake': 'Wood shake',
+    'roofing.materials.other': 'Other',
+    'roofing.materialRate': 'Material cost per square ($)',
+    'roofing.laborRate': 'Labor per square ($)',
+    'roofing.tearOff': 'Tear-off per square ($)',
+    'roofing.disposal': 'Disposal / dump fees ($)',
+    'roofing.accessories': 'Underlayment, flashing, accessories ($)',
+    'roofing.accessoriesHelp': 'Ice & water shield, drip edge, ridge vent, flashing',
+    // Form Card 2
+    'who.title': 'Who & when',
+    'who.sub': 'Client details, urgency, and tax setup.',
+    'who.clientName': 'Client name',
+    'who.clientNamePlaceholder': 'Sarah Chen',
+    'who.address': 'Job address',
+    'who.addressPlaceholder': '412 Maple St, Austin TX 78704',
+    'timeline.label': 'Timeline',
+    'timeline.standard': 'Standard',
+    'timeline.priority': 'Priority',
+    'timeline.emergency': 'Emergency',
+    'timeline.surcharge': 'Rush surcharge ($)',
+    'timeline.surchargeWith': '{x} surcharge ($)',
+    'timeline.surchargeToast': '{x} selected — a surcharge will be added for rush service.',
+    'tax.label': 'Tax',
+    'tax.none': 'No tax',
+    'tax.custom': 'Custom tax',
+    'tax.rate': 'Tax rate (%)',
+    'tax.label2': 'Tax label',
+    // Actions
+    'actions.generate': '✦ Generate quote',
+    'actions.clear': 'Clear form',
+    'actions.generateMessage': '✦ Generate message',
+    'actions.regenerate': 'Regenerate',
+    'actions.drafting': '<span class="spinner"></span> Drafting…',
+    // Quote actions bar / doc
+    'quote.draftChip': 'Draft',
+    'quote.copy': '📋 Copy quote',
+    'quote.downloadPdf': '⬇ Download PDF',
+    'quote.convertInvoice': '→ Convert to invoice',
+    'quote.companyName': 'Your Company Name',
+    'quote.companyTag': 'Licensed · Insured · Family-owned since 2009',
+    'quote.label': 'Quote',
+    'quote.validUntil': 'Valid until',
+    'quote.preparedFor': 'Prepared for',
+    'quote.tradeTimeline': 'Trade · Timeline',
+    'quote.scope': 'Scope of work',
+    'quote.lineItems': 'Line items',
+    'quote.colDescription': 'Description',
+    'quote.colAmount': 'Amount',
+    'quote.addLine': '＋ Add line item',
+    'quote.subtotal': 'Subtotal',
+    'quote.tax': 'Tax',
+    'quote.total': 'Total',
+    'quote.terms': 'Payment terms',
+    'quote.warranty': 'Warranty',
+    'quote.notes': 'Notes',
+    'quote.notesPlaceholder': 'Click to add any notes for the client...',
+    'quote.lineNew': 'New item',
+    'quote.lineDescDefault': 'Description',
+    'quote.clientPlaceholder': 'Client Name',
+    'quote.addressPlaceholder': 'Job Address',
+    // Followups
+    'followup.title': 'Follow-up details',
+    'followup.sub': 'Draft a customer follow-up message based on the quote status and communication channel.',
+    'followup.customer': 'Customer name',
+    'followup.amount': 'Quote amount ($)',
+    'followup.originalJob': 'Original job reference',
+    'followup.originalJobPlaceholder': 'Kitchen sink replacement + drywall repair',
+    'followup.yourDetails': 'Your details',
+    'followup.noSignature': 'No signature saved yet',
+    'followup.edit': 'Edit',
+    'followup.name': 'Name',
+    'followup.namePlaceholder': 'Jordan Lee',
+    'followup.business': 'Business',
+    'followup.businessPlaceholder': 'TradeDeck Services',
+    'followup.contact': 'Contact',
+    'followup.contactPlaceholder': '(555) 123-4567',
+    'followup.save': 'Save',
+    'followup.cancel': 'Cancel',
+    'followup.scenario': 'Scenario',
+    'followup.scenarios.noReply': 'No reply yet',
+    'followup.scenarios.thinking': 'Still thinking it over',
+    'followup.scenarios.yes': 'Said yes, no deposit yet',
+    'followup.scenarios.declined': 'Declined the quote',
+    'followup.scenarios.review': 'Job complete, asking for review',
+    'followup.scenarios.checkIn': 'Past customer check-in',
+    'followup.age': 'Quote age',
+    'followup.age.1': '1 day',
+    'followup.age.3': '3 days',
+    'followup.age.5': '5 days',
+    'followup.age.7': '1 week',
+    'followup.tone': 'Tone',
+    'followup.tones.friendly': 'Friendly',
+    'followup.tones.professional': 'Professional',
+    'followup.tones.direct': 'Direct',
+    'followup.channel': 'Channel',
+    'followup.channels.email': 'Email',
+    'followup.channels.text': 'Text',
+    'followup.metaLine': 'Follow-up message',
+    'followup.copyMessage': '📋 Copy message',
+    'followup.regenerate': '♻ Regenerate',
+    'followup.subject': 'Subject',
+    'followup.message': 'Message',
+    'followup.charCount': '{n} / 160 chars',
+    'followup.charCountSplit': '{n} / 160 chars — may split into multiple texts',
+    'followup.metaPrefix': 'Follow-up · {channel}',
+    // Preview banner shared
+    'preview.banner': '👀 Preview — this section is a mockup with sample data. Fully working version coming soon.',
+    // Clients
+    'clients.title': 'Clients',
+    'clients.search': 'Search clients...',
+    'clients.add': '+ Add client',
+    'clients.totalClients': 'Total clients',
+    'clients.activeMonth': 'Active this month',
+    'clients.repeatCustomers': 'Repeat customers',
+    'clients.col.client': 'Client',
+    'clients.col.contact': 'Contact',
+    'clients.col.jobs': 'Jobs',
+    'clients.col.revenue': 'Total revenue',
+    'clients.col.lastContact': 'Last contact',
+    'clients.col.status': 'Status',
+    'clients.jobsUnit': 'jobs',
+    // Jobs
+    'jobs.title': 'Jobs',
+    'jobs.add': '+ New job',
+    'jobs.filter.all': 'All',
+    'jobs.filter.quoted': 'Quoted',
+    'jobs.filter.inProgress': 'In Progress',
+    'jobs.filter.complete': 'Complete',
+    'jobs.filter.paid': 'Paid',
+    'jobs.openQuotes': 'Open quotes',
+    'jobs.inProgress': 'In progress',
+    'jobs.awaiting': 'Awaiting payment',
+    'jobs.completed': 'Completed this month',
+    'jobs.col.job': 'Job',
+    'jobs.col.client': 'Client',
+    'jobs.col.trade': 'Trade',
+    'jobs.col.quote': 'Quote',
+    'jobs.col.status': 'Status',
+    'jobs.col.date': 'Date',
+    // Payments
+    'payments.title': 'Payments',
+    'payments.range': 'Last 30 days ▼',
+    'payments.totalInvoiced': 'Total invoiced',
+    'payments.totalReceived': 'Total received',
+    'payments.outstanding': 'Outstanding',
+    'payments.avgDays': 'Avg days to pay',
+    'payments.cashReceived': 'Cash received',
+    'payments.weekShort': 'Wk',
+    'payments.col.invoice': 'Invoice #',
+    'payments.col.client': 'Client',
+    'payments.col.job': 'Job',
+    'payments.col.amount': 'Amount',
+    'payments.col.status': 'Status',
+    'payments.col.date': 'Date',
+    // Status pills
+    'status.Active': 'Active',
+    'status.Past': 'Past',
+    'status.Lead': 'Lead',
+    'status.Quoted': 'Quoted',
+    'status.In Progress': 'In Progress',
+    'status.Complete': 'Complete',
+    'status.Paid': 'Paid',
+    'status.Pending': 'Pending',
+    'status.Overdue': 'Overdue',
+    // Toasts / messages
+    'toast.saveApiFirst': 'Save your API key first',
+    'toast.freeLimit': 'Free plan limit reached. Upgrade to Pro.',
+    'toast.addCustomerFirst': 'Add a customer name first',
+    'toast.addJobRefFirst': 'Add the original job description first',
+    'toast.addJobDescFirst': 'Add a job description first',
+    'toast.quoteDrafted': 'Quote drafted ✓',
+    'toast.followupDrafted': 'Follow-up drafted ✓',
+    'toast.genFailed': 'Generation failed',
+    'toast.signatureSaved': 'Signature saved',
+    'toast.messageCopied': 'Message copied to clipboard ✓',
+    'toast.quoteCopied': 'Quote copied to clipboard ✓',
+    'toast.copyFailed': 'Copy failed',
+    'toast.pdfPlaceholder': 'PDF export coming soon — for now, use Copy or print to PDF',
+    'toast.invoicePlaceholder': 'Invoice converter coming next — placeholder for now',
+    'toast.pasteApiFirst': 'Paste your API key first',
+    'toast.notAnthropicKey': "That doesn't look like an Anthropic key",
+    'toast.apiKeySaved': 'API key saved',
+    'toast.cleared': 'Cleared',
+    'confirm.clearForm': 'Clear the form and quote?',
+    // Aria labels
+    'aria.openMenu': 'Open navigation menu',
+    'aria.closeMenu': 'Close navigation',
+    'aria.mainNav': 'Main navigation',
+  },
+  es: {
+    // API banner
+    'api.label': 'Clave API de Anthropic',
+    'api.placeholder': 'sk-ant-api03-...',
+    'api.save': 'Guardar',
+    'api.required': 'Requerida para generar cotizaciones',
+    'api.savedReady': '✓ Clave guardada (localmente) — listo para generar',
+    // Sidebar
+    'nav.workspace': 'Espacio de trabajo',
+    'nav.quotes': 'Cotizaciones',
+    'nav.followups': 'Seguimientos',
+    'nav.clients': 'Clientes',
+    'nav.jobs': 'Trabajos',
+    'nav.payments': 'Pagos',
+    'nav.preview': 'Vista previa',
+    'nav.account': 'Cuenta',
+    'nav.profile': 'Perfil',
+    'nav.settings': 'Configuración',
+    'sidebar.freePlan': 'Plan Gratis',
+    'sidebar.quotesSuffix': ' / 5 cotizaciones',
+    'sidebar.upgrade': 'Mejorar a Pro',
+    'sidebar.upgradeSub': '$49/mes · ilimitado',
+    'sidebar.upgradeAlert': 'Próximamente checkout con Stripe. Por ahora es un marcador.',
+    // Topbar
+    'topbar.newQuoteHtml': 'Nueva <em>cotización</em>',
+    'topbar.newFollowupHtml': 'Nuevo <em>seguimiento</em>',
+    'topbar.clients': 'Clientes',
+    'topbar.jobs': 'Trabajos',
+    'topbar.payments': 'Pagos',
+    'topbar.draft': 'Borrador',
+    'topbar.draftFollowup': 'Borrador de seguimiento',
+    'topbar.previewOnly': 'Solo vista previa',
+    // Form card 1
+    'form.whatsTheJob': '¿Cuál es el trabajo?',
+    'form.whatsSub': 'Elige un oficio, describe el trabajo y prepararemos una cotización profesional.',
+    'form.trade': 'Oficio',
+    'form.jobDesc': 'Descripción del trabajo',
+    'form.pricingApproach': 'Forma de cobro',
+    'form.hourly': '⏱ Por hora',
+    'form.flat': '📋 Precio fijo',
+    // Hourly
+    'hourly.estHours': 'Horas estimadas',
+    'hourly.rate': 'Tarifa por hora ($)',
+    'hourly.materials': 'Estimado de materiales ($)',
+    // Flat
+    'flat.price': 'Precio todo incluido ($)',
+    'flat.includes': 'Incluye (opcional)',
+    'flat.includesPlaceholder': 'Mano de obra + materiales + limpieza',
+    // Trucking
+    'trucking.type': 'Tipo de camión',
+    'trucking.types.dump': 'Camión de volteo',
+    'trucking.types.flatbed': 'Plataforma',
+    'trucking.types.pickup': 'Pickup con remolque',
+    'trucking.types.box': 'Camión caja',
+    'trucking.types.tractor': 'Tractocamión',
+    'trucking.types.rolloff': 'Roll-off',
+    'trucking.count': '# de camiones',
+    'trucking.billing': 'Forma de cobro',
+    'trucking.billing.load': 'Por carga',
+    'trucking.billing.hour': 'Por hora',
+    'trucking.billing.yard': 'Por yarda cúbica',
+    'trucking.billing.ton': 'Por tonelada',
+    'trucking.billing.mile': 'Por milla',
+    'trucking.rate': 'Tarifa ($)',
+    'trucking.qty': 'Cantidad',
+    'trucking.disposal': 'Costos de descarga / vertedero ($)',
+    'trucking.materialHauled': 'Material transportado (opcional)',
+    'trucking.materialHauledPlaceholder': 'Escombro de concreto, grava, etc.',
+    'liveSubtotal': 'Subtotal en vivo',
+    // Logistics
+    'logistics.service': 'Tipo de servicio',
+    'logistics.services.freight': 'Reacondicionamiento de carga',
+    'logistics.services.storage': 'Almacenaje',
+    'logistics.services.lastMile': 'Entrega de última milla',
+    'logistics.services.loading': 'Carga / Descarga',
+    'logistics.services.crossDock': 'Cross-docking',
+    'logistics.services.pickPack': 'Pick & Pack',
+    'logistics.services.returns': 'Procesamiento de devoluciones',
+    'logistics.services.other': 'Otro',
+    'logistics.billing': 'Forma de cobro',
+    'logistics.billing.pallet': 'Por tarima',
+    'logistics.billing.palletDay': 'Por tarima por día',
+    'logistics.billing.pound': 'Por libra',
+    'logistics.billing.cwt': 'Por quintal (CWT)',
+    'logistics.billing.cubicFoot': 'Por pie cúbico',
+    'logistics.billing.piece': 'Por pieza / unidad',
+    'logistics.billing.hour': 'Por hora',
+    'logistics.billing.mile': 'Por milla',
+    'logistics.billing.flat': 'Precio fijo',
+    'logistics.rate': 'Tarifa ($)',
+    'logistics.qty.pallet': '# de tarimas',
+    'logistics.qty.pound': 'Libras',
+    'logistics.qty.cwt': 'Quintal (CWT)',
+    'logistics.qty.cubicFoot': 'Pies cúbicos',
+    'logistics.qty.piece': '# de piezas / unidades',
+    'logistics.qty.hour': 'Horas',
+    'logistics.qty.mile': 'Millas',
+    'logistics.qty.flat': 'Cantidad',
+    'logistics.days': 'Días',
+    'logistics.accessorial': 'Cargos accesoriales ($)',
+    'logistics.accessorialHelp': 'Plataforma, tiempo de espera, entrega residencial, manejo de hazmat, etc.',
+    'logistics.handling': 'Manejo especial (opcional)',
+    'logistics.handlingPlaceholder': 'Clima controlado, guante blanco, hazmat...',
+    // Painting
+    'painting.area': 'Área de pared (pies²)',
+    'painting.coats': 'Número de manos',
+    'painting.rate': 'Tarifa por pie² por mano ($)',
+    'painting.cost': 'Costo de pintura ($)',
+    'painting.costHelp': 'Pintura y suministros totales',
+    'painting.prep': 'Preparación de superficie ($)',
+    'painting.prepHelp': 'Lijado, resanado, sellado, enmascarado',
+    'painting.trim': 'Acabados y detalles ($)',
+    // Flooring
+    'flooring.area': 'Área de piso (pies²)',
+    'flooring.material': 'Tipo de material',
+    'flooring.materials.laminate': 'Laminado',
+    'flooring.materials.vinyl': 'Vinílico/LVP',
+    'flooring.materials.hardwood': 'Madera maciza',
+    'flooring.materials.engineered': 'Ingenierizado',
+    'flooring.materials.tile': 'Loseta',
+    'flooring.materials.carpet': 'Alfombra',
+    'flooring.materials.other': 'Otro',
+    'flooring.materialRate': 'Costo de material por pie² ($)',
+    'flooring.installRate': 'Tarifa de instalación por pie² ($)',
+    'flooring.waste': 'Factor de desperdicio (%)',
+    'flooring.wasteHelp': 'Generalmente 10% (estándar) o 15% (patrones diagonales)',
+    'flooring.tearOut': 'Demolición y desecho ($)',
+    'flooring.subfloor': 'Preparación de contrapiso ($)',
+    'flooring.transitions': 'Transiciones y acabados ($)',
+    // Roofing
+    'roofing.area': 'Área de techo (cuadros)',
+    'roofing.areaHelp': '1 cuadro = 100 pies²',
+    'roofing.material': 'Material del techo',
+    'roofing.materials.shingles': 'Tejas asfálticas',
+    'roofing.materials.metal': 'Metálico',
+    'roofing.materials.tile': 'Teja',
+    'roofing.materials.flat': 'Plano/Membrana',
+    'roofing.materials.shake': 'Tablilla de madera',
+    'roofing.materials.other': 'Otro',
+    'roofing.materialRate': 'Costo de material por cuadro ($)',
+    'roofing.laborRate': 'Mano de obra por cuadro ($)',
+    'roofing.tearOff': 'Remoción por cuadro ($)',
+    'roofing.disposal': 'Costos de desecho / vertedero ($)',
+    'roofing.accessories': 'Bajoteja, flashings y accesorios ($)',
+    'roofing.accessoriesHelp': 'Capa contra hielo y agua, goterón, ventilación de cumbrera, flashing',
+    // Form Card 2
+    'who.title': 'Quién y cuándo',
+    'who.sub': 'Datos del cliente, urgencia y configuración de impuestos.',
+    'who.clientName': 'Nombre del cliente',
+    'who.clientNamePlaceholder': 'Sara Chen',
+    'who.address': 'Dirección del trabajo',
+    'who.addressPlaceholder': 'Calle Maple 412, Austin TX 78704',
+    'timeline.label': 'Tiempos',
+    'timeline.standard': 'Estándar',
+    'timeline.priority': 'Prioridad',
+    'timeline.emergency': 'Emergencia',
+    'timeline.surcharge': 'Recargo por urgencia ($)',
+    'timeline.surchargeWith': 'Recargo de {x} ($)',
+    'timeline.surchargeToast': '{x} seleccionado — se añadirá un recargo por servicio urgente.',
+    'tax.label': 'Impuesto',
+    'tax.none': 'Sin impuesto',
+    'tax.custom': 'Impuesto personalizado',
+    'tax.rate': 'Tasa de impuesto (%)',
+    'tax.label2': 'Etiqueta del impuesto',
+    // Actions
+    'actions.generate': '✦ Generar cotización',
+    'actions.clear': 'Limpiar formulario',
+    'actions.generateMessage': '✦ Generar mensaje',
+    'actions.regenerate': 'Volver a generar',
+    'actions.drafting': '<span class="spinner"></span> Redactando…',
+    // Quote actions bar / doc
+    'quote.draftChip': 'Borrador',
+    'quote.copy': '📋 Copiar cotización',
+    'quote.downloadPdf': '⬇ Descargar PDF',
+    'quote.convertInvoice': '→ Convertir a factura',
+    'quote.companyName': 'Nombre de tu empresa',
+    'quote.companyTag': 'Con licencia · Asegurado · Empresa familiar desde 2009',
+    'quote.label': 'Cotización',
+    'quote.validUntil': 'Válido hasta',
+    'quote.preparedFor': 'Preparado para',
+    'quote.tradeTimeline': 'Oficio · Tiempos',
+    'quote.scope': 'Alcance del trabajo',
+    'quote.lineItems': 'Conceptos',
+    'quote.colDescription': 'Descripción',
+    'quote.colAmount': 'Monto',
+    'quote.addLine': '＋ Agregar concepto',
+    'quote.subtotal': 'Subtotal',
+    'quote.tax': 'Impuesto',
+    'quote.total': 'Total',
+    'quote.terms': 'Condiciones de pago',
+    'quote.warranty': 'Garantía',
+    'quote.notes': 'Notas',
+    'quote.notesPlaceholder': 'Haz clic para agregar notas para el cliente...',
+    'quote.lineNew': 'Nuevo concepto',
+    'quote.lineDescDefault': 'Descripción',
+    'quote.clientPlaceholder': 'Nombre del cliente',
+    'quote.addressPlaceholder': 'Dirección del trabajo',
+    // Followups
+    'followup.title': 'Detalles del seguimiento',
+    'followup.sub': 'Redacta un mensaje de seguimiento al cliente según el estado de la cotización y el canal de comunicación.',
+    'followup.customer': 'Nombre del cliente',
+    'followup.amount': 'Monto de la cotización ($)',
+    'followup.originalJob': 'Referencia del trabajo original',
+    'followup.originalJobPlaceholder': 'Cambio de tarja + reparación de tablaroca',
+    'followup.yourDetails': 'Tus datos',
+    'followup.noSignature': 'Aún no hay firma guardada',
+    'followup.edit': 'Editar',
+    'followup.name': 'Nombre',
+    'followup.namePlaceholder': 'Jordan Lee',
+    'followup.business': 'Negocio',
+    'followup.businessPlaceholder': 'TradeDeck Services',
+    'followup.contact': 'Contacto',
+    'followup.contactPlaceholder': '(555) 123-4567',
+    'followup.save': 'Guardar',
+    'followup.cancel': 'Cancelar',
+    'followup.scenario': 'Escenario',
+    'followup.scenarios.noReply': 'Sin respuesta aún',
+    'followup.scenarios.thinking': 'Aún lo está pensando',
+    'followup.scenarios.yes': 'Dijo que sí, sin anticipo todavía',
+    'followup.scenarios.declined': 'Rechazó la cotización',
+    'followup.scenarios.review': 'Trabajo terminado, pidiendo reseña',
+    'followup.scenarios.checkIn': 'Saludo a cliente anterior',
+    'followup.age': 'Antigüedad de la cotización',
+    'followup.age.1': '1 día',
+    'followup.age.3': '3 días',
+    'followup.age.5': '5 días',
+    'followup.age.7': '1 semana',
+    'followup.tone': 'Tono',
+    'followup.tones.friendly': 'Amigable',
+    'followup.tones.professional': 'Profesional',
+    'followup.tones.direct': 'Directo',
+    'followup.channel': 'Canal',
+    'followup.channels.email': 'Correo',
+    'followup.channels.text': 'SMS',
+    'followup.metaLine': 'Mensaje de seguimiento',
+    'followup.copyMessage': '📋 Copiar mensaje',
+    'followup.regenerate': '♻ Volver a generar',
+    'followup.subject': 'Asunto',
+    'followup.message': 'Mensaje',
+    'followup.charCount': '{n} / 160 caracteres',
+    'followup.charCountSplit': '{n} / 160 caracteres — puede dividirse en varios mensajes',
+    'followup.metaPrefix': 'Seguimiento · {channel}',
+    // Preview banner shared
+    'preview.banner': '👀 Vista previa — esta sección es una maqueta con datos de ejemplo. Próximamente versión completa.',
+    // Clients
+    'clients.title': 'Clientes',
+    'clients.search': 'Buscar clientes...',
+    'clients.add': '+ Agregar cliente',
+    'clients.totalClients': 'Total de clientes',
+    'clients.activeMonth': 'Activos este mes',
+    'clients.repeatCustomers': 'Clientes recurrentes',
+    'clients.col.client': 'Cliente',
+    'clients.col.contact': 'Contacto',
+    'clients.col.jobs': 'Trabajos',
+    'clients.col.revenue': 'Ingresos totales',
+    'clients.col.lastContact': 'Último contacto',
+    'clients.col.status': 'Estado',
+    'clients.jobsUnit': 'trabajos',
+    // Jobs
+    'jobs.title': 'Trabajos',
+    'jobs.add': '+ Nuevo trabajo',
+    'jobs.filter.all': 'Todos',
+    'jobs.filter.quoted': 'Cotizado',
+    'jobs.filter.inProgress': 'En proceso',
+    'jobs.filter.complete': 'Completado',
+    'jobs.filter.paid': 'Pagado',
+    'jobs.openQuotes': 'Cotizaciones abiertas',
+    'jobs.inProgress': 'En proceso',
+    'jobs.awaiting': 'Esperando pago',
+    'jobs.completed': 'Completados este mes',
+    'jobs.col.job': 'Trabajo',
+    'jobs.col.client': 'Cliente',
+    'jobs.col.trade': 'Oficio',
+    'jobs.col.quote': 'Cotización',
+    'jobs.col.status': 'Estado',
+    'jobs.col.date': 'Fecha',
+    // Payments
+    'payments.title': 'Pagos',
+    'payments.range': 'Últimos 30 días ▼',
+    'payments.totalInvoiced': 'Total facturado',
+    'payments.totalReceived': 'Total recibido',
+    'payments.outstanding': 'Pendiente',
+    'payments.avgDays': 'Días promedio para cobrar',
+    'payments.cashReceived': 'Efectivo recibido',
+    'payments.weekShort': 'Sem',
+    'payments.col.invoice': 'Factura #',
+    'payments.col.client': 'Cliente',
+    'payments.col.job': 'Trabajo',
+    'payments.col.amount': 'Monto',
+    'payments.col.status': 'Estado',
+    'payments.col.date': 'Fecha',
+    // Status pills
+    'status.Active': 'Activo',
+    'status.Past': 'Anterior',
+    'status.Lead': 'Prospecto',
+    'status.Quoted': 'Cotizado',
+    'status.In Progress': 'En proceso',
+    'status.Complete': 'Completado',
+    'status.Paid': 'Pagado',
+    'status.Pending': 'Pendiente',
+    'status.Overdue': 'Vencido',
+    // Toasts / messages
+    'toast.saveApiFirst': 'Guarda tu clave API primero',
+    'toast.freeLimit': 'Límite del plan gratis alcanzado. Mejora a Pro.',
+    'toast.addCustomerFirst': 'Agrega el nombre del cliente primero',
+    'toast.addJobRefFirst': 'Agrega la descripción original del trabajo primero',
+    'toast.addJobDescFirst': 'Agrega una descripción del trabajo primero',
+    'toast.quoteDrafted': 'Cotización lista ✓',
+    'toast.followupDrafted': 'Seguimiento listo ✓',
+    'toast.genFailed': 'Falló la generación',
+    'toast.signatureSaved': 'Firma guardada',
+    'toast.messageCopied': 'Mensaje copiado al portapapeles ✓',
+    'toast.quoteCopied': 'Cotización copiada al portapapeles ✓',
+    'toast.copyFailed': 'Falló al copiar',
+    'toast.pdfPlaceholder': 'Exportar PDF próximamente — por ahora usa Copiar o imprime a PDF',
+    'toast.invoicePlaceholder': 'Conversor de facturas próximamente — por ahora es un marcador',
+    'toast.pasteApiFirst': 'Pega tu clave API primero',
+    'toast.notAnthropicKey': 'Eso no parece una clave de Anthropic',
+    'toast.apiKeySaved': 'Clave API guardada',
+    'toast.cleared': 'Limpiado',
+    'confirm.clearForm': '¿Limpiar el formulario y la cotización?',
+    // Aria labels
+    'aria.openMenu': 'Abrir menú de navegación',
+    'aria.closeMenu': 'Cerrar navegación',
+    'aria.mainNav': 'Navegación principal',
+  },
+};
+
+const TRADE_LABELS_ES = {
+  Plumbing: 'Plomería',
+  Electrical: 'Electricidad',
+  HVAC: 'HVAC',
+  Roofing: 'Techos',
+  General: 'General',
+  Painting: 'Pintura',
+  Flooring: 'Pisos',
+  Landscaping: 'Jardinería',
+  'Hauling & Trucking': 'Acarreo y transporte',
+  Logistics: 'Logística',
+};
+
+const TRADE_DESC_EXAMPLES_ES = {
+  Plumbing: 'Ej. Cambiar 50 pies de drenaje de hierro fundido bajo la cocina, instalar registros de limpieza nuevos y reparar la tablaroca después.',
+  Electrical: 'Ej. Cambiar un subalimentador defectuoso del panel, instalar contactos GFCI nuevos en la cocina y actualizar la iluminación a luminarias LED.',
+  HVAC: 'Ej. Diagnosticar el apagado intermitente del A/C, recargar refrigerante, cambiar el motor del ventilador del condensador y verificar el flujo de aire.',
+  Roofing: 'Ej. Cambiar 18 cuadros de teja asfáltica desgastada, instalar bajoteja y capa contra hielo y agua, y reemplazar flashings en chimeneas y ventilas.',
+  General: 'Ej. Demoler el baño viejo, instalar tina y enchape nuevos, actualizar muebles de plomería, pintar paredes e instalar molduras y puertas.',
+  Painting: 'Ej. Preparar y pintar la sala y el pasillo, resanar tablaroca, sellar áreas desnudas y aplicar dos manos de pintura interior premium.',
+  Flooring: 'Ej. Quitar la alfombra existente, preparar el contrapiso, instalar madera ingenierizada con bajopiso y rematar con transiciones y cuarto de redondo.',
+  Landscaping: 'Ej. Instalar elevadores de riego nuevos, agregar camas de mantillo, plantar arbustos y perennes, instalar bordillo de piedra y nivelar para drenaje.',
+  'Hauling & Trucking': 'Ej. Cargar y transportar 12 yardas cúbicas de escombro de obra al vertedero, dar servicio de roll-off y manejar limpieza del sitio y boletos de descarga.',
+  Logistics: 'Ej. Reacondicionar tarimas, preparar embarques para cross-docking, coordinar logística de última milla y administrar manejo accesorial.',
+};
+
+function t(key, vars) {
+  let v = (I18N[tdLang] && I18N[tdLang][key]) || (I18N.en && I18N.en[key]) || key;
+  if (vars) {
+    Object.keys(vars).forEach(k => {
+      v = v.replace(new RegExp('\\{' + k + '\\}', 'g'), vars[k]);
+    });
+  }
+  return v;
+}
+
+function applyLanguage() {
+  document.documentElement.setAttribute('lang', tdLang);
+  // Static HTML: text-only swaps
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  // innerHTML swaps (for strings containing markup like <em>)
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    el.innerHTML = t(el.getAttribute('data-i18n-html'));
+  });
+  // Placeholders
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder')));
+  });
+  // Aria labels
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+    el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
+  });
+  // Title attributes
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    el.setAttribute('title', t(el.getAttribute('data-i18n-title')));
+  });
+  // Update lang-toggle active state
+  document.querySelectorAll('#langToggle button').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === tdLang);
+  });
+  // Re-render dynamic surfaces
+  if (typeof renderTrades === 'function') renderTrades();
+  if (typeof renderFollowupTrades === 'function') renderFollowupTrades();
+  if (typeof renderClientsView === 'function') renderClientsView();
+  if (typeof renderJobsView === 'function') renderJobsView();
+  if (typeof renderPaymentsView === 'function') renderPaymentsView();
+  // Update topbar to current view
+  if (typeof refreshTopbarForCurrentView === 'function') refreshTopbarForCurrentView();
+  // API status text (only data-i18n'd when not in 'ok' state)
+  if (typeof refreshApiStatus === 'function') refreshApiStatus();
+  // Logistics qty label: re-trigger labelling logic since current map keys use t()
+  if (typeof refreshLogisticsQtyLabel === 'function') refreshLogisticsQtyLabel();
+  // Surcharge label (only relevant when Priority/Emergency selected)
+  if (typeof refreshSurchargeLabel === 'function') refreshSurchargeLabel();
+  // Char counter for SMS
+  if (typeof updateTextCharCount === 'function') updateTextCharCount();
+  // Tax row label inside the quote totals block
+  if (typeof recalcTotals === 'function') recalcTotals();
+  // Followup signature summary preview text
+  if (typeof updateFollowupSignatureSummary === 'function') updateFollowupSignatureSummary();
+  // Quote meta line (uses translated timeline)
+  if (typeof refreshQuoteMetaLine === 'function') refreshQuoteMetaLine();
+  // Followup meta line
+  if (typeof refreshFollowupMetaLine === 'function') refreshFollowupMetaLine();
+}
+
+function setLanguage(lang) {
+  tdLang = (lang === 'es') ? 'es' : 'en';
+  localStorage.setItem('tdLang', tdLang);
+  applyLanguage();
+}
+
+function bindLangToggle() {
+  document.querySelectorAll('#langToggle button').forEach(btn => {
+    btn.onclick = () => setLanguage(btn.dataset.lang);
+  });
+}
+
 // ============================================================================
 // State
 // ============================================================================
@@ -1989,6 +2764,14 @@ function getTradeEmoji(trade) {
   return (TRADES.find(t => t.name === trade) || {}).emoji || '';
 }
 
+function tradeDisplay(name) {
+  return tdLang === 'es' ? (TRADE_LABELS_ES[name] || name) : name;
+}
+
+function statusDisplay(s) {
+  return t('status.' + s);
+}
+
 function renderClientsView() {
   const body = document.getElementById('clientsTableBody');
   body.innerHTML = MOCK_CLIENTS.map(client => `
@@ -2002,10 +2785,10 @@ function renderClientsView() {
         </div>
       </td>
       <td>${client.contact}</td>
-      <td>${client.jobs} jobs</td>
+      <td>${client.jobs} ${t('clients.jobsUnit')}</td>
       <td>${fmt(client.revenue)}</td>
       <td>${client.lastContact}</td>
-      <td><span class="status-pill status-${client.status.toLowerCase()}">${client.status}</span></td>
+      <td><span class="status-pill status-${client.status.toLowerCase()}">${statusDisplay(client.status)}</span></td>
       <td style="text-align:right; color: var(--ink-3);">⋯</td>
     </tr>
   `).join('');
@@ -2017,9 +2800,9 @@ function renderJobsView() {
     <tr class="job-table-row">
       <td>${job.description}</td>
       <td>${job.clientName}</td>
-      <td>${getTradeEmoji(job.trade)} ${job.trade}</td>
+      <td>${getTradeEmoji(job.trade)} ${tradeDisplay(job.trade)}</td>
       <td>${fmt(job.amount)}</td>
-      <td><span class="status-pill status-${job.status.toLowerCase().replace(/ /g, '-')}">${job.status}</span></td>
+      <td><span class="status-pill status-${job.status.toLowerCase().replace(/ /g, '-')}">${statusDisplay(job.status)}</span></td>
       <td>${job.date}</td>
     </tr>
   `).join('');
@@ -2033,7 +2816,7 @@ function renderPaymentsView() {
       <td>${payment.clientName}</td>
       <td>${payment.job.length > 40 ? payment.job.slice(0, 37) + '...' : payment.job}</td>
       <td>${fmt(payment.amount)}</td>
-      <td><span class="status-pill status-${payment.status.toLowerCase()}">${payment.status}</span></td>
+      <td><span class="status-pill status-${payment.status.toLowerCase()}">${statusDisplay(payment.status)}</span></td>
       <td>${payment.date}</td>
     </tr>
   `).join('');
@@ -2056,15 +2839,11 @@ function renderPaymentChart() {
     const barHeight = ((week.amount / max) * (height - padding * 2));
     const x = padding + index * stepX;
     const y = height - padding - barHeight;
+    const label = `${t('payments.weekShort')} ${index + 1}`;
     content += `<rect x="${x - 16}" y="${y}" width="32" height="${barHeight}" class="chart-bar" rx="8" />`;
-    content += `<text x="${x}" y="${height - 12}" fill="${'var(--ink-2)'}" font-size="10" text-anchor="middle">${week.label}</text>`;
+    content += `<text x="${x}" y="${height - 12}" fill="${'var(--ink-2)'}" font-size="10" text-anchor="middle">${label}</text>`;
   });
   svg.innerHTML = content;
-}
-
-function updateJobDescriptionPlaceholder(tradeName) {
-  const example = TRADE_DESC_EXAMPLES[tradeName] || TRADE_DESC_EXAMPLES.Plumbing;
-  document.getElementById('jobDesc').placeholder = example;
 }
 
 let selectedTrade = '🔧 Plumbing';
@@ -2086,6 +2865,7 @@ let apiKey = localStorage.getItem('anthropicKey') || '';
 // Init
 // ============================================================================
 function init() {
+  bindLangToggle();
   renderTrades();
   bindPricingToggle();
   bindTimelinePills();
@@ -2108,30 +2888,38 @@ function init() {
   renderPaymentsView();
   bindApiKey();
   updateUsageDisplay();
+  // Upgrade button (was inline onclick previously — moved out so we can localize the alert)
+  const upgradeBtn = document.getElementById('upgradeBtn');
+  if (upgradeBtn) upgradeBtn.onclick = () => alert(t('sidebar.upgradeAlert'));
+  // Apply persisted language preference. Runs after all dynamic surfaces have rendered
+  // once in their default English form, then swaps everything in one pass.
+  applyLanguage();
 }
 
 function renderTrades() {
   const grid = document.getElementById('tradesGrid');
   grid.innerHTML = '';
-  TRADES.forEach((t, i) => {
+  // Determine the currently-selected trade name (from selectedTrade like "🔧 Plumbing")
+  const activeName = (selectedTrade || '').replace(/^[^A-Za-z0-9]+/, '').trim();
+  TRADES.forEach((trade) => {
     const chip = document.createElement('button');
-    chip.className = 'trade-chip' + (t.name === 'Plumbing' ? ' active' : '');
-    chip.innerHTML = `<span class="trade-emoji">${t.emoji}</span>${t.name}`;
+    chip.className = 'trade-chip' + (trade.name === activeName ? ' active' : '');
+    chip.innerHTML = `<span class="trade-emoji">${trade.emoji}</span>${tradeDisplay(trade.name)}`;
     chip.onclick = () => {
       grid.querySelectorAll('.trade-chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
-      selectedTrade = `${t.emoji} ${t.name}`;
-      updateJobDescriptionPlaceholder(t.name);
+      selectedTrade = `${trade.emoji} ${trade.name}`;
+      updateJobDescriptionPlaceholder(trade.name);
       // Auto-switch to the correct custom pricing mode if selected
-      if (t.name === 'Hauling & Trucking') {
+      if (trade.name === 'Hauling & Trucking') {
         setPricingMode('trucking');
-      } else if (t.name === 'Logistics') {
+      } else if (trade.name === 'Logistics') {
         setPricingMode('logistics');
-      } else if (t.name === 'Painting') {
+      } else if (trade.name === 'Painting') {
         setPricingMode('painting');
-      } else if (t.name === 'Flooring') {
+      } else if (trade.name === 'Flooring') {
         setPricingMode('flooring');
-      } else if (t.name === 'Roofing') {
+      } else if (trade.name === 'Roofing') {
         setPricingMode('roofing');
       } else if (['trucking','logistics','painting','flooring','roofing'].includes(pricingMode)) {
         setPricingMode('hourly');
@@ -2139,7 +2927,7 @@ function renderTrades() {
     };
     grid.appendChild(chip);
   });
-  updateJobDescriptionPlaceholder('Plumbing');
+  updateJobDescriptionPlaceholder(activeName || 'Plumbing');
 }
 
 function bindPricingToggle() {
@@ -2167,6 +2955,27 @@ function setPricingMode(mode) {
   document.getElementById('roofingPanel').classList.toggle('hidden', mode !== 'roofing');
 }
 
+function timelineLabel(tl) {
+  if (tl === 'Standard') return t('timeline.standard');
+  if (tl === 'Priority') return t('timeline.priority');
+  if (tl === 'Emergency') return t('timeline.emergency');
+  return tl;
+}
+
+function refreshSurchargeLabel() {
+  const surchargeField = document.getElementById('timelineSurchargeField');
+  const surchargeLabel = document.getElementById('timelineSurchargeLabel');
+  if (!surchargeField || !surchargeLabel) return;
+  if (timeline === 'Priority' || timeline === 'Emergency') {
+    // Remove the data-i18n attr so applyLanguage doesn't overwrite our interpolated label
+    surchargeLabel.removeAttribute('data-i18n');
+    surchargeLabel.textContent = t('timeline.surchargeWith', { x: timelineLabel(timeline) });
+  } else {
+    surchargeLabel.setAttribute('data-i18n', 'timeline.surcharge');
+    surchargeLabel.textContent = t('timeline.surcharge');
+  }
+}
+
 function bindTimelinePills() {
   document.querySelectorAll('#timelinePills button').forEach(btn => {
     btn.onclick = () => {
@@ -2174,14 +2983,15 @@ function bindTimelinePills() {
       btn.classList.add('active');
       timeline = btn.dataset.tl;
       const surchargeField = document.getElementById('timelineSurchargeField');
-      const surchargeLabel = document.getElementById('timelineSurchargeLabel');
       if (timeline === 'Priority' || timeline === 'Emergency') {
-        surchargeLabel.textContent = `${timeline} surcharge ($)`;
         surchargeField.classList.remove('hidden');
-        showToast(`${timeline} selected — a surcharge will be added for rush service.`);
+        refreshSurchargeLabel();
+        showToast(t('timeline.surchargeToast', { x: timelineLabel(timeline) }));
       } else {
         surchargeField.classList.add('hidden');
+        refreshSurchargeLabel();
       }
+      refreshQuoteMetaLine();
     };
   });
 }
@@ -2202,6 +3012,27 @@ function bindTruckingInputs() {
   updateTruckSubtotal();
 }
 
+function refreshLogisticsQtyLabel() {
+  const sel = document.getElementById('logisticsBillingMethod');
+  const qtyLabel = document.getElementById('logisticsQtyLabel');
+  if (!sel || !qtyLabel) return;
+  const method = sel.value;
+  const keyByMethod = {
+    pallet: 'logistics.qty.pallet',
+    palletDay: 'logistics.qty.pallet',
+    pound: 'logistics.qty.pound',
+    cwt: 'logistics.qty.cwt',
+    cubicFoot: 'logistics.qty.cubicFoot',
+    piece: 'logistics.qty.piece',
+    hour: 'logistics.qty.hour',
+    mile: 'logistics.qty.mile',
+    flat: 'logistics.qty.flat',
+  };
+  const key = keyByMethod[method] || 'logistics.qty.pallet';
+  qtyLabel.setAttribute('data-i18n', key);
+  qtyLabel.textContent = t(key);
+}
+
 function bindLogisticsInputs() {
   ['logisticsRate','logisticsQty','logisticsDays','accessorialFees'].forEach(id => {
     document.getElementById(id).addEventListener('input', updateLogisticsSubtotal);
@@ -2209,27 +3040,11 @@ function bindLogisticsInputs() {
   document.getElementById('logisticsBillingMethod').addEventListener('change', () => {
     const method = document.getElementById('logisticsBillingMethod').value;
     const daysField = document.getElementById('logisticsDaysField');
-    const qtyLabel = document.getElementById('logisticsQtyLabel');
-    if (method === 'palletDay') {
-      daysField.classList.remove('hidden');
-    } else {
-      daysField.classList.add('hidden');
-    }
-    // Update qty label based on method
-    const labels = {
-      pallet: '# of pallets',
-      palletDay: '# of pallets',
-      pound: 'Pounds',
-      cwt: 'Hundredweight (CWT)',
-      cubicFoot: 'Cubic feet',
-      piece: '# of pieces / units',
-      hour: 'Hours',
-      mile: 'Miles',
-      flat: 'Quantity'
-    };
-    qtyLabel.textContent = labels[method] || '# of pallets';
+    daysField.classList.toggle('hidden', method !== 'palletDay');
+    refreshLogisticsQtyLabel();
     updateLogisticsSubtotal();
   });
+  refreshLogisticsQtyLabel();
   updateLogisticsSubtotal();
 }
 
@@ -2297,7 +3112,30 @@ function bindDrawer() {
   });
 }
 
+let currentView = 'quotes';
+
+const VIEW_TOPBAR = {
+  quotes:    { titleHtml: 'topbar.newQuoteHtml',    meta: 'topbar.draft' },
+  followups: { titleHtml: 'topbar.newFollowupHtml', meta: 'topbar.draftFollowup' },
+  clients:   { titleHtml: 'topbar.clients',         meta: 'topbar.previewOnly' },
+  jobs:      { titleHtml: 'topbar.jobs',            meta: 'topbar.previewOnly' },
+  payments:  { titleHtml: 'topbar.payments',        meta: 'topbar.previewOnly' },
+};
+
+function refreshTopbarForCurrentView() {
+  const cfg = VIEW_TOPBAR[currentView] || VIEW_TOPBAR.quotes;
+  const title = document.getElementById('topbarTitle');
+  const meta = document.getElementById('topbarMeta');
+  title.setAttribute('data-i18n-html', cfg.titleHtml);
+  title.removeAttribute('data-i18n');
+  title.innerHTML = t(cfg.titleHtml);
+  meta.setAttribute('data-i18n', cfg.meta);
+  meta.removeAttribute('data-i18n-html');
+  meta.textContent = t(cfg.meta);
+}
+
 function switchView(view) {
+  currentView = view;
   document.getElementById('quotesView').classList.toggle('hidden', view !== 'quotes');
   document.getElementById('followupView').classList.toggle('hidden', view !== 'followups');
   document.getElementById('clientsView').classList.toggle('hidden', view !== 'clients');
@@ -2308,47 +3146,39 @@ function switchView(view) {
     document.getElementById(id).classList.toggle('active', id === `nav${view.charAt(0).toUpperCase()}${view.slice(1)}`);
   });
 
-  const title = document.getElementById('topbarTitle');
-  const meta = document.getElementById('topbarMeta');
-  if (view === 'quotes') {
-    title.innerHTML = 'New <em>quote</em>';
-    meta.textContent = 'Draft';
-  } else if (view === 'followups') {
-    title.innerHTML = 'New <em>follow-up</em>';
-    meta.textContent = 'Draft follow-up';
-  } else if (view === 'clients') {
-    title.innerHTML = 'Clients';
-    meta.textContent = 'Preview only';
-  } else if (view === 'jobs') {
-    title.innerHTML = 'Jobs';
-    meta.textContent = 'Preview only';
-  } else if (view === 'payments') {
-    title.innerHTML = 'Payments';
-    meta.textContent = 'Preview only';
-  }
+  refreshTopbarForCurrentView();
 }
 
 function renderFollowupTrades() {
   const grid = document.getElementById('followupTradesGrid');
   grid.innerHTML = '';
-  TRADES.forEach((t) => {
+  const activeName = (selectedFollowupTrade || '').replace(/^[^A-Za-z0-9]+/, '').trim();
+  TRADES.forEach((trade) => {
     const chip = document.createElement('button');
-    chip.className = 'trade-chip' + (t.name === 'Plumbing' ? ' active' : '');
-    chip.innerHTML = `<span class="trade-emoji">${t.emoji}</span>${t.name}`;
+    chip.className = 'trade-chip' + (trade.name === activeName ? ' active' : '');
+    chip.innerHTML = `<span class="trade-emoji">${trade.emoji}</span>${tradeDisplay(trade.name)}`;
     chip.onclick = () => {
       grid.querySelectorAll('.trade-chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
-      selectedFollowupTrade = `${t.emoji} ${t.name}`;
-      updateFollowupJobDescriptionPlaceholder(t.name);
+      selectedFollowupTrade = `${trade.emoji} ${trade.name}`;
+      updateFollowupJobDescriptionPlaceholder(trade.name);
     };
     grid.appendChild(chip);
   });
-  updateFollowupJobDescriptionPlaceholder('Plumbing');
+  updateFollowupJobDescriptionPlaceholder(activeName || 'Plumbing');
+}
+
+function tradeExample(tradeName) {
+  const dict = tdLang === 'es' ? TRADE_DESC_EXAMPLES_ES : TRADE_DESC_EXAMPLES;
+  return dict[tradeName] || dict.Plumbing;
+}
+
+function updateJobDescriptionPlaceholder(tradeName) {
+  document.getElementById('jobDesc').placeholder = tradeExample(tradeName);
 }
 
 function updateFollowupJobDescriptionPlaceholder(tradeName) {
-  const example = TRADE_DESC_EXAMPLES[tradeName] || TRADE_DESC_EXAMPLES.Plumbing;
-  document.getElementById('followupJobDesc').placeholder = example.replace(/^(e\.g\.\s*)?/i, '');
+  document.getElementById('followupJobDesc').placeholder = tradeExample(tradeName).replace(/^(e\.g\.\s*|ej\.\s*)?/i, '');
 }
 
 function bindFollowupScenarioPills() {
@@ -2423,7 +3253,7 @@ function saveFollowupSignature() {
   updateFollowupSignatureSummary();
   document.getElementById('followupSignatureFields').classList.add('hidden');
   document.getElementById('followupSignatureActions').classList.add('hidden');
-  showToast('Signature saved');
+  showToast(t('toast.signatureSaved'));
 }
 
 function cancelFollowupSignatureEdit() {
@@ -2436,7 +3266,7 @@ function cancelFollowupSignatureEdit() {
 
 function updateFollowupSignatureSummary() {
   const summary = [followupSigName, followupSigBusiness, followupSigContact].filter(Boolean).join(' · ');
-  document.getElementById('followupSigPreview').textContent = summary || 'No signature saved yet';
+  document.getElementById('followupSigPreview').textContent = summary || t('followup.noSignature');
 }
 
 function bindFollowupInputs() {
@@ -2447,12 +3277,12 @@ function bindFollowupInputs() {
 
 async function generateFollowup() {
   if (!apiKey) {
-    showToast('Save your API key first', true);
+    showToast(t('toast.saveApiFirst'), true);
     document.getElementById('apiKeyInput').focus();
     return;
   }
   if (quoteUsed >= 5) {
-    showToast('Free plan limit reached. Upgrade to Pro.', true);
+    showToast(t('toast.freeLimit'), true);
     return;
   }
 
@@ -2460,12 +3290,12 @@ async function generateFollowup() {
   const jobDesc = document.getElementById('followupJobDesc').value.trim();
   const quoteAmount = parseFloat(document.getElementById('followupQuoteAmount').value) || 0;
   if (!customerName) {
-    showToast('Add a customer name first', true);
+    showToast(t('toast.addCustomerFirst'), true);
     document.getElementById('followupCustomerName').focus();
     return;
   }
   if (!jobDesc) {
-    showToast('Add the original job description first', true);
+    showToast(t('toast.addJobRefFirst'), true);
     document.getElementById('followupJobDesc').focus();
     return;
   }
@@ -2474,7 +3304,8 @@ async function generateFollowup() {
   const txt = document.getElementById('followupGenBtnText');
   btn.disabled = true;
   document.getElementById('regenerateFollowupBtn').disabled = true;
-  txt.innerHTML = '<span class="spinner"></span> Drafting…';
+  txt.removeAttribute('data-i18n');
+  txt.innerHTML = t('actions.drafting');
 
   try {
     const signature = {
@@ -2526,14 +3357,15 @@ async function generateFollowup() {
 
     document.getElementById('followupWrap').classList.add('visible');
     document.getElementById('followupWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    showToast('Follow-up drafted ✓');
+    showToast(t('toast.followupDrafted'));
   } catch (e) {
     console.error(e);
-    showToast(e.message || 'Generation failed', true);
+    showToast(e.message || t('toast.genFailed'), true);
   } finally {
     btn.disabled = false;
     document.getElementById('regenerateFollowupBtn').disabled = false;
-    txt.innerHTML = '✦ Generate message';
+    txt.setAttribute('data-i18n', 'actions.generateMessage');
+    txt.textContent = t('actions.generateMessage');
   }
 }
 
@@ -2541,24 +3373,36 @@ function regenerateFollowup() {
   generateFollowup();
 }
 
+function followupChannelLabel(ch) {
+  return ch === 'Text' ? t('followup.channels.text') : t('followup.channels.email');
+}
+
+function refreshFollowupMetaLine() {
+  const el = document.getElementById('followupMetaLine');
+  if (!el) return;
+  el.removeAttribute('data-i18n');
+  el.textContent = t('followup.metaPrefix', { channel: followupChannelLabel(followupChannel) });
+}
+
 function renderFollowupMessage(data) {
   document.getElementById('followupSubjectSection').classList.toggle('hidden', followupChannel === 'Text');
   document.getElementById('followupSubject').textContent = followupChannel === 'Text' ? '' : (data.subject || '').trim();
   document.getElementById('followupBody').textContent = (data.body || '').trim();
-  document.getElementById('followupMetaLine').textContent = `Follow-up · ${followupChannel}`;
+  refreshFollowupMetaLine();
   updateTextCharCount();
 }
 
 function copyFollowupMessage() {
   const subject = document.getElementById('followupSubject').textContent.trim();
   const body = document.getElementById('followupBody').textContent.trim();
+  const subjectLabel = t('followup.subject');
   const text = followupChannel === 'Email'
-    ? `Subject: ${subject}\n\n${body}`
+    ? `${subjectLabel}: ${subject}\n\n${body}`
     : body;
   navigator.clipboard.writeText(text).then(() => {
-    showToast('Message copied to clipboard ✓');
+    showToast(t('toast.messageCopied'));
   }).catch(() => {
-    showToast('Copy failed', true);
+    showToast(t('toast.copyFailed'), true);
   });
 }
 
@@ -2596,7 +3440,9 @@ function updateTextCharCount() {
   const count = body.length;
   if (followupChannel === 'Text') {
     counter.style.display = 'block';
-    counter.textContent = `${count} / 160 chars` + (count > 160 ? ' — may split into multiple texts' : '');
+    counter.textContent = count > 160
+      ? t('followup.charCountSplit', { n: count })
+      : t('followup.charCount', { n: count });
   } else {
     counter.style.display = 'none';
   }
@@ -2659,25 +3505,36 @@ function updateRoofingSubtotal() {
   document.getElementById('roofingSubtotal').textContent = fmt(sub);
 }
 
+function refreshApiStatus() {
+  const banner = document.getElementById('apiBanner');
+  const status = document.getElementById('apiStatus');
+  if (banner.classList.contains('ok')) {
+    status.removeAttribute('data-i18n');
+    status.textContent = t('api.savedReady');
+  } else {
+    status.setAttribute('data-i18n', 'api.required');
+    status.textContent = t('api.required');
+  }
+}
+
 function bindApiKey() {
   const banner = document.getElementById('apiBanner');
   const input = document.getElementById('apiKeyInput');
-  const status = document.getElementById('apiStatus');
 
   if (apiKey) {
     banner.classList.add('ok');
-    status.textContent = '✓ API key saved (locally) — ready to generate';
   }
+  refreshApiStatus();
 
   document.getElementById('saveKeyBtn').onclick = () => {
     const v = input.value.trim();
-    if (!v) { showToast('Paste your API key first', true); return; }
-    if (!v.startsWith('sk-ant-')) { showToast('That doesn\'t look like an Anthropic key', true); return; }
+    if (!v) { showToast(t('toast.pasteApiFirst'), true); return; }
+    if (!v.startsWith('sk-ant-')) { showToast(t('toast.notAnthropicKey'), true); return; }
     apiKey = v;
     localStorage.setItem('anthropicKey', v);
     banner.classList.add('ok');
-    status.textContent = '✓ API key saved (locally) — ready to generate';
-    showToast('API key saved');
+    refreshApiStatus();
+    showToast(t('toast.apiKeySaved'));
   };
 
   input.addEventListener('keydown', (e) => {
@@ -2696,17 +3553,17 @@ function updateUsageDisplay() {
 // ============================================================================
 async function generateQuote() {
   if (!apiKey) {
-    showToast('Save your API key first', true);
+    showToast(t('toast.saveApiFirst'), true);
     document.getElementById('apiKeyInput').focus();
     return;
   }
   if (quoteUsed >= 5) {
-    showToast('Free plan limit reached. Upgrade to Pro.', true);
+    showToast(t('toast.freeLimit'), true);
     return;
   }
   const desc = document.getElementById('jobDesc').value.trim();
   if (!desc) {
-    showToast('Add a job description first', true);
+    showToast(t('toast.addJobDescFirst'), true);
     document.getElementById('jobDesc').focus();
     return;
   }
@@ -2714,7 +3571,8 @@ async function generateQuote() {
   const btn = document.getElementById('generateBtn');
   const txt = document.getElementById('genBtnText');
   btn.disabled = true;
-  txt.innerHTML = '<span class="spinner"></span> Drafting…';
+  txt.removeAttribute('data-i18n');
+  txt.innerHTML = t('actions.drafting');
 
   try {
     const pricingDetails = buildPricingContext();
@@ -2759,13 +3617,14 @@ async function generateQuote() {
 
     document.getElementById('quoteWrap').classList.add('visible');
     document.getElementById('quoteWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    showToast('Quote drafted ✓');
+    showToast(t('toast.quoteDrafted'));
   } catch (e) {
     console.error(e);
-    showToast(e.message || 'Generation failed', true);
+    showToast(e.message || t('toast.genFailed'), true);
   } finally {
     btn.disabled = false;
-    txt.innerHTML = '✦ Generate quote';
+    txt.setAttribute('data-i18n', 'actions.generate');
+    txt.textContent = t('actions.generate');
   }
 }
 
@@ -3001,22 +3860,49 @@ function parseModelOutput(text) {
 // ============================================================================
 // Render Quote
 // ============================================================================
+function selectedTradeDisplay() {
+  // selectedTrade looks like "🔧 Plumbing" — split emoji and the canonical English name
+  const m = selectedTrade.match(/^([^A-Za-z0-9]+)\s*(.+)$/);
+  if (!m) return selectedTrade;
+  return `${m[1]} ${tradeDisplay(m[2].trim())}`;
+}
+
+function refreshQuoteMetaLine() {
+  const wrap = document.getElementById('quoteWrap');
+  if (!wrap || !wrap.classList.contains('visible')) return;
+  const clientNameEl = document.getElementById('quoteClientName');
+  const tradeMetaEl = document.getElementById('quoteTradeMeta');
+  const metaLineEl = document.getElementById('quoteMetaLine');
+  if (tradeMetaEl) tradeMetaEl.innerHTML = `<strong>${selectedTradeDisplay()}</strong><br/>${timelineLabel(timeline)}`;
+  if (metaLineEl) metaLineEl.textContent = `${selectedTradeDisplay()} · ${timelineLabel(timeline)} · ${clientNameEl ? clientNameEl.textContent : ''}`;
+}
+
+function localeForDate() {
+  return tdLang === 'es' ? 'es-MX' : 'en-US';
+}
+
 function renderQuote(data) {
-  const clientName = document.getElementById('clientName').value || 'Client Name';
-  const clientAddr = document.getElementById('clientAddr').value || 'Job Address';
+  const clientName = document.getElementById('clientName').value || t('quote.clientPlaceholder');
+  const clientAddr = document.getElementById('clientAddr').value || t('quote.addressPlaceholder');
 
   // header
   const today = new Date();
   const validUntil = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
-  document.getElementById('validUntil').textContent = validUntil.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  document.getElementById('validUntil').textContent = validUntil.toLocaleDateString(localeForDate(), { year: 'numeric', month: 'short', day: 'numeric' });
   document.getElementById('quoteId').textContent = '#Q-' + String(1000 + quoteUsed + 1);
-  document.getElementById('quoteClientName').textContent = clientName;
-  document.getElementById('quoteClientAddr').textContent = clientAddr;
-  document.getElementById('quoteTradeMeta').innerHTML = `<strong>${selectedTrade}</strong><br/>${timeline}`;
+  const clientNameEl = document.getElementById('quoteClientName');
+  const clientAddrEl = document.getElementById('quoteClientAddr');
+  // Once real content is written, drop the placeholder i18n binding so a later
+  // language switch doesn't overwrite the user's data with the localized placeholder.
+  clientNameEl.removeAttribute('data-i18n');
+  clientAddrEl.removeAttribute('data-i18n');
+  clientNameEl.textContent = clientName;
+  clientAddrEl.textContent = clientAddr;
+  document.getElementById('quoteTradeMeta').innerHTML = `<strong>${selectedTradeDisplay()}</strong><br/>${timelineLabel(timeline)}`;
   document.getElementById('quoteScope').textContent = data.scope || '';
   document.getElementById('quoteTerms').textContent = data.paymentTerms || '';
   document.getElementById('quoteWarranty').textContent = data.warranty || '';
-  document.getElementById('quoteMetaLine').textContent = `${selectedTrade} · ${timeline} · ${clientName}`;
+  document.getElementById('quoteMetaLine').textContent = `${selectedTradeDisplay()} · ${timelineLabel(timeline)} · ${clientName}`;
 
   // line items
   const tbody = document.getElementById('lineBody');
@@ -3036,8 +3922,8 @@ function addLineItemRow(item) {
 
   tr.innerHTML = `
     <td>
-      <div class="line-name editable" contenteditable="true">${safe(item?.name) || 'New item'}</div>
-      <div class="line-desc editable" contenteditable="true">${safe(item?.desc) || 'Description'}</div>
+      <div class="line-name editable" contenteditable="true">${safe(item?.name) || t('quote.lineNew')}</div>
+      <div class="line-desc editable" contenteditable="true">${safe(item?.desc) || t('quote.lineDescDefault')}</div>
     </td>
     <td class="amt-col">
       <span class="amt-cell editable" contenteditable="true">${fmt(amt)}</span>
@@ -3072,11 +3958,14 @@ function recalcTotals() {
   const taxLabelEl = document.getElementById('taxRowLbl');
   if (taxMode === 'custom') {
     const rate = parseFloat(document.getElementById('taxRate').value) || 0;
-    const lbl = document.getElementById('taxLabel').value || 'Tax';
+    const lbl = document.getElementById('taxLabel').value || t('quote.tax');
     taxAmount = subtotal * (rate / 100);
+    taxLabelEl.removeAttribute('data-i18n');
     taxLabelEl.textContent = `${lbl} (${rate}%)`;
     taxRow.style.display = 'flex';
   } else {
+    taxLabelEl.setAttribute('data-i18n', 'quote.tax');
+    taxLabelEl.textContent = t('quote.tax');
     taxRow.style.display = 'none';
   }
 
@@ -3118,47 +4007,47 @@ function copyQuote() {
   const text = `${company}
 ${tag}
 
-QUOTE ${id}
-Valid until: ${validUntil}
+${t('quote.label').toUpperCase()} ${id}
+${t('quote.validUntil')}: ${validUntil}
 
-PREPARED FOR
+${t('quote.preparedFor').toUpperCase()}
 ${clientName}
 ${clientAddr}
 
 ${trade}
 
-SCOPE OF WORK
+${t('quote.scope').toUpperCase()}
 ${scope}
 
-LINE ITEMS
+${t('quote.lineItems').toUpperCase()}
 ${lineLines.join('\n')}
 
-Subtotal: ${sub}${showTax ? `\n${taxLbl}: ${tax}` : ''}
-TOTAL: ${total}
+${t('quote.subtotal')}: ${sub}${showTax ? `\n${taxLbl}: ${tax}` : ''}
+${t('quote.total').toUpperCase()}: ${total}
 
-PAYMENT TERMS
+${t('quote.terms').toUpperCase()}
 ${terms}
 
-WARRANTY
+${t('quote.warranty').toUpperCase()}
 ${warranty}
 
-NOTES
+${t('quote.notes').toUpperCase()}
 ${notes}
 `;
   navigator.clipboard.writeText(text).then(() => {
-    showToast('Quote copied to clipboard ✓');
+    showToast(t('toast.quoteCopied'));
   }).catch(() => {
-    showToast('Copy failed', true);
+    showToast(t('toast.copyFailed'), true);
   });
 }
 
 function downloadPdf() {
-  showToast('PDF export coming soon — for now, use Copy or print to PDF');
+  showToast(t('toast.pdfPlaceholder'));
   setTimeout(() => window.print(), 600);
 }
 
 function convertToInvoice() {
-  showToast('Invoice converter coming next — placeholder for now');
+  showToast(t('toast.invoicePlaceholder'));
 }
 
 // ============================================================================
@@ -3183,7 +4072,7 @@ function showToast(msg, isError = false) {
 }
 
 function clearForm() {
-  if (!confirm('Clear the form and quote?')) return;
+  if (!confirm(t('confirm.clearForm'))) return;
 
   const FIELD_DEFAULTS = [
     // Common
@@ -3247,7 +4136,7 @@ function clearForm() {
   updateRoofingSubtotal();
 
   document.getElementById('quoteWrap').classList.remove('visible');
-  showToast('Cleared');
+  showToast(t('toast.cleared'));
 }
 
 // recalc when tax inputs change
