@@ -2728,11 +2728,73 @@ function pickLang(field, fallback) {
   return String(field);
 }
 
+function quoteContentLang() {
+  if (!currentQuote || !currentQuote.scope || typeof currentQuote.scope !== 'object') return tdLang;
+  const hasEn = (currentQuote.scope.en || '').trim().length > 0;
+  const hasEs = (currentQuote.scope.es || '').trim().length > 0;
+  if (hasEn && hasEs) return tdLang;  // bilingual quote — follow UI
+  if (hasEn) return 'en';
+  if (hasEs) return 'es';
+  return tdLang;
+}
+
 // Bilingual quote/followup state. Held so the user can flip languages on a
 // generated quote and see both versions. Each blur on an editable field writes
 // back only to the currently-displayed language slot.
 let currentQuote = null;
 let currentFollowup = null;
+
+function applyQuoteContentLang() {
+  const wrap = document.getElementById('quoteWrap');
+  if (!wrap || !wrap.classList.contains('visible') || !currentQuote) return;
+  const lang = quoteContentLang();
+  const lookup = (key) => (I18N[lang] && I18N[lang][key]) || (I18N.en && I18N.en[key]) || key;
+
+  // Static data-i18n labels inside the quote document
+  document.querySelectorAll('#quoteDoc [data-i18n]').forEach(el => {
+    el.textContent = lookup(el.getAttribute('data-i18n'));
+  });
+
+  // Dynamically generated "+ Add line item" buttons
+  document.querySelectorAll('#lineBody .add-line-btn').forEach(el => {
+    el.textContent = lookup('quote.addLine');
+  });
+
+  // Trade subheader rows: emoji + Spanish or English trade name
+  document.querySelectorAll('.line-trade-header[data-trade-header]').forEach(row => {
+    const tname = row.dataset.tradeHeader;
+    const emoji = (TRADES.find(td => td.name === tname) || {}).emoji || '';
+    const displayName = lang === 'es' ? (TRADE_LABELS_ES[tname] || tname) : tname;
+    const firstCell = row.querySelector('td');
+    if (firstCell) firstCell.textContent = `${emoji} ${displayName}`;
+  });
+
+  // Trade · Timeline meta inside the quote (uses trade names + timeline label)
+  const tradeMetaEl = document.getElementById('quoteTradeMeta');
+  if (tradeMetaEl && selectedTrades.length) {
+    const tradesStr = selectedTrades.map(emojiTrade => {
+      const m = emojiTrade.match(/^([^A-Za-z0-9]+)\s*(.+)$/);
+      if (!m) return emojiTrade;
+      const name = m[2].trim();
+      const display = lang === 'es' ? (TRADE_LABELS_ES[name] || name) : name;
+      return `${m[1]} ${display}`;
+    }).join(' + ');
+    const tlKey = 'timeline.' + timeline.toLowerCase();
+    tradeMetaEl.innerHTML = `<strong>${tradesStr}</strong><br/>${lookup(tlKey)}`;
+  }
+
+  // Tax row label — restore correct language version
+  const taxLabelEl = document.getElementById('taxRowLbl');
+  if (taxLabelEl) {
+    if (taxMode === 'custom') {
+      const rate = parseFloat(document.getElementById('taxRate').value) || 0;
+      const customLbl = (document.getElementById('taxLabel').value || '').trim() || lookup('quote.tax');
+      taxLabelEl.textContent = `${customLbl} (${rate}%)`;
+    } else {
+      taxLabelEl.textContent = lookup('quote.tax');
+    }
+  }
+}
 
 function applyLanguage() {
   document.documentElement.setAttribute('lang', tdLang);
@@ -2786,6 +2848,9 @@ function applyLanguage() {
   // Bilingual AI content: re-render in the new language if a quote/followup is on screen
   if (typeof rerenderQuoteForLanguage === 'function') rerenderQuoteForLanguage();
   if (typeof rerenderFollowupForLanguage === 'function') rerenderFollowupForLanguage();
+  // Pin quote-internal labels to the quote's content language (must run last
+  // so it can override anything the refresh helpers above wrote)
+  applyQuoteContentLang();
 }
 
 function setLanguage(lang) {
