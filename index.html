@@ -1065,6 +1065,7 @@
   }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -1994,6 +1995,10 @@
 <div class="toast" id="toast"></div>
 
 <script>
+const SUPABASE_URL = "https://cqmctdhxticryelvhhze.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_YOWddbCqAPdFrg-9otLSzw_akBdoAPh";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
 // ============================================================================
 // i18n
 // ============================================================================
