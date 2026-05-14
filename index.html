@@ -811,6 +811,30 @@
   }
   .line-name { font-weight: 600; margin-bottom: 3px; }
   .line-desc { font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+  .line-trade-header td {
+    background: var(--surface-2);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-2);
+    font-weight: 700;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+    border-top: 1px solid var(--line);
+  }
+  .line-trade-header td.amt-col {
+    font-family: var(--mono);
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .line-trade-header:hover { background: transparent; }
+  .line-trade-header:hover td { background: var(--surface-2); }
+  .line-add-row td {
+    padding: 8px 12px 16px;
+    border-bottom: none;
+  }
+  .line-add-row:hover { background: transparent; }
+  .line-add-row:hover td { background: transparent; }
   .amt-cell {
     font-family: var(--mono);
     font-size: 14px;
@@ -1622,7 +1646,6 @@
               </thead>
               <tbody id="lineBody"></tbody>
             </table>
-            <button class="add-line-btn" onclick="addLineItemRow()" data-i18n="quote.addLine">＋ Add line item</button>
 
             <div class="totals-block">
               <div class="totals-row">
@@ -2152,7 +2175,6 @@ const I18N = {
     'quoteLang.label': 'Generate in',
     'form.tradePricing': 'Pricing for trade',
     'aria.tradeTabs': 'Trade pricing tabs',
-    'toast.multiTradeWarning': 'Multi-trade quotes — using active tab only for now. Full multi-trade generation coming next.',
     'aria.quoteLanguage': 'Quote output language',
     'quote.englishOnlyNotice': 'This quote was generated in English only.',
     'quote.spanishOnlyNotice': 'This quote was generated in Spanish only.',
@@ -2296,6 +2318,7 @@ const I18N = {
     'toast.addJobRefFirst': 'Add the original job description first',
     'toast.addJobDescFirst': 'Add a job description first',
     'toast.selectTradeFirst': 'Pick a trade first',
+    'toast.addDescForTrade': 'Add a description for {trade} first',
     'toast.quoteDrafted': 'Quote drafted ✓',
     'toast.followupDrafted': 'Follow-up drafted ✓',
     'toast.genFailed': 'Generation failed',
@@ -2494,7 +2517,6 @@ const I18N = {
     'quoteLang.label': 'Generar en',
     'form.tradePricing': 'Precio por oficio',
     'aria.tradeTabs': 'Pestañas de precios por oficio',
-    'toast.multiTradeWarning': 'Cotizaciones multi-oficio — por ahora solo se usa la pestaña activa. La generación completa multi-oficio viene pronto.',
     'aria.quoteLanguage': 'Idioma de salida de la cotización',
     'quote.englishOnlyNotice': 'Esta cotización se generó solo en inglés.',
     'quote.spanishOnlyNotice': 'Esta cotización se generó solo en español.',
@@ -2638,6 +2660,7 @@ const I18N = {
     'toast.addJobRefFirst': 'Agrega la descripción original del trabajo primero',
     'toast.addJobDescFirst': 'Agrega una descripción del trabajo primero',
     'toast.selectTradeFirst': 'Elige un oficio primero',
+    'toast.addDescForTrade': 'Agrega una descripción para {trade} primero',
     'toast.quoteDrafted': 'Cotización lista ✓',
     'toast.followupDrafted': 'Seguimiento listo ✓',
     'toast.genFailed': 'Falló la generación',
@@ -3783,16 +3806,8 @@ function rerenderQuoteForLanguage() {
   // Payment terms are re-rendered from the template, not picked directly.
   renderPaymentTerms();
   document.getElementById('quoteWarranty').textContent = pickLang(currentQuote.warranty);
-  const tbody = document.getElementById('lineBody');
-  Array.from(tbody.querySelectorAll('tr[data-line-index]')).forEach(row => {
-    const i = parseInt(row.dataset.lineIndex, 10);
-    const li = currentQuote.lineItems && currentQuote.lineItems[i];
-    if (!li) return;
-    const nameEl = row.querySelector('.line-name');
-    const descEl = row.querySelector('.line-desc');
-    if (nameEl) nameEl.textContent = pickLang(li.name) || t('quote.lineNew');
-    if (descEl) descEl.textContent = pickLang(li.desc) || t('quote.lineDescDefault');
-  });
+  // Full re-render also refreshes sub-header trade names in the new language
+  renderLineItemsTable();
   recalcTotals();
   refreshQuoteLangNotice();
 }
@@ -3998,18 +4013,21 @@ async function generateQuote() {
     showToast(t('toast.selectTradeFirst'), true);
     return;
   }
-  const desc = document.getElementById('jobDesc').value.trim();
-  if (!desc) {
-    showToast(t('toast.addJobDescFirst'), true);
-    document.getElementById('jobDesc').focus();
-    return;
-  }
-
-  if (selectedTrades.length > 1) {
-    showToast(t('toast.multiTradeWarning'));
-  }
-
+  // Save current tab state first so the desc validation below sees fresh data
   saveActiveTradeState();
+
+  // Validate every selected trade has a job description
+  for (let i = 0; i < selectedTrades.length; i++) {
+    const name = tradeNameOf(selectedTrades[i]);
+    const state = tradePricingState[name];
+    const jobDesc = ((state && state.jobDesc) || '').trim();
+    if (!jobDesc) {
+      setActiveTrade(i);
+      document.getElementById('jobDesc').focus();
+      showToast(t('toast.addDescForTrade', { trade: tradeDisplay(name) }), true);
+      return;
+    }
+  }
 
   const btn = document.getElementById('generateBtn');
   const txt = document.getElementById('genBtnText');
@@ -4018,15 +4036,14 @@ async function generateQuote() {
   txt.innerHTML = t('actions.drafting');
 
   try {
-    const pricingDetails = buildPricingContext();
+    const pricingContext = buildPricingContext();
     const taxRate = taxMode === 'custom' ? parseFloat(document.getElementById('taxRate').value) || 0 : 0;
     const taxLabel = taxMode === 'custom' ? document.getElementById('taxLabel').value || 'Tax' : '';
     const clientName = document.getElementById('clientName').value || 'Client';
     const clientAddr = document.getElementById('clientAddr').value || '';
 
     const prompt = buildPrompt({
-      trade: selectedTrades[activeTradeIndex],
-      desc, pricingDetails, timeline, taxRate, taxLabel, clientName, clientAddr,
+      pricingContext, timeline, taxRate, taxLabel, clientName, clientAddr,
       quoteLanguages,
     });
 
@@ -4040,7 +4057,7 @@ async function generateQuote() {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 2800,
+        max_tokens: 2800 + Math.max(0, selectedTrades.length - 1) * 1500,
         messages: [{ role: 'user', content: prompt }],
       }),
     });
@@ -4072,153 +4089,137 @@ async function generateQuote() {
   }
 }
 
-function buildPricingContext() {
-  const surcharge = parseFloat(document.getElementById('rushSurcharge').value) || 0;
-  if (pricingMode === 'hourly') {
-    const h = parseFloat(document.getElementById('hours').value) || 0;
-    const r = parseFloat(document.getElementById('rate').value) || 0;
-    const m = parseFloat(document.getElementById('materials').value) || 0;
+// Reads pricing data from a single trade's saved state object and
+// returns a pricing context for that trade (no DOM access).
+function buildContextForTradeState(tradeName, state) {
+  state = state || { mode: defaultModeForTrade(tradeName) };
+  const defaults = PRICING_DEFAULTS[state.mode] || {};
+  const get = (id) => (state[id] !== undefined ? state[id] : defaults[id]) || 0;
+  const getStr = (id) => (state[id] !== undefined ? state[id] : (defaults[id] || ''));
+  const mode = state.mode;
+
+  if (mode === 'hourly') {
+    const h = parseFloat(get('hours')) || 0;
+    const r = parseFloat(get('rate')) || 0;
+    const m = parseFloat(get('materials')) || 0;
     return {
-      mode: 'hourly',
-      summary: `Estimated ${h} hours at $${r}/hr (= $${h*r}). Materials estimated at $${m}. ${surcharge ? `Rush surcharge: $${surcharge}.` : ''}`,
-      labor: h * r,
-      materials: m,
-      surcharge,
-      total: h * r + m + surcharge,
+      mode,
+      summary: `Estimated ${h} hours at $${r}/hr (= $${h*r}). Materials estimated at $${m}.`,
+      total: h * r + m,
     };
   }
-  if (pricingMode === 'flat') {
-    const p = parseFloat(document.getElementById('flatPrice').value) || 0;
-    const inc = document.getElementById('flatIncludes').value || 'Labor and materials';
+  if (mode === 'flat') {
+    const p = parseFloat(get('flatPrice')) || 0;
+    const inc = getStr('flatIncludes') || 'Labor and materials';
     return {
-      mode: 'flat',
-      summary: `Flat all-in price: $${p}. Includes: ${inc}. ${surcharge ? `Rush surcharge: $${surcharge}.` : ''}`,
-      total: p + surcharge,
+      mode,
+      summary: `Flat all-in price: $${p}. Includes: ${inc}.`,
+      total: p,
       includes: inc,
-      surcharge,
     };
   }
-  if (pricingMode === 'trucking') {
-    const tt = document.getElementById('truckType').value;
-    const tc = parseFloat(document.getElementById('truckCount').value) || 1;
-    const bm = document.getElementById('billingMethod').value;
-    const tr = parseFloat(document.getElementById('truckRate').value) || 0;
-    const tq = parseFloat(document.getElementById('truckQty').value) || 0;
-    const fee = parseFloat(document.getElementById('disposalFee').value) || 0;
-    const mat = document.getElementById('materialHauled').value || '';
-    const sub = (tc * tr * tq) + fee + surcharge;
+  if (mode === 'trucking') {
+    const tt = getStr('truckType');
+    const tc = parseFloat(get('truckCount')) || 1;
+    const bm = getStr('billingMethod');
+    const tr = parseFloat(get('truckRate')) || 0;
+    const tq = parseFloat(get('truckQty')) || 0;
+    const fee = parseFloat(get('disposalFee')) || 0;
+    const mat = getStr('materialHauled') || '';
+    const sub = (tc * tr * tq) + fee;
     return {
-      mode: 'trucking',
-      summary: `${tc}x ${tt}, billed per ${bm} at $${tr} × ${tq} = $${tc*tr*tq}. Disposal/dump fees: $${fee}. ${mat ? 'Material hauled: ' + mat + '.' : ''} ${surcharge ? `Rush surcharge: $${surcharge}.` : ''} Total: $${sub}.`,
-      truckType: tt,
-      truckCount: tc,
-      billingMethod: bm,
-      rate: tr,
-      qty: tq,
-      fee,
-      mat,
-      surcharge,
+      mode,
+      summary: `${tc}x ${tt}, billed per ${bm} at $${tr} × ${tq} = $${tc*tr*tq}. Disposal/dump fees: $${fee}. ${mat ? 'Material hauled: ' + mat + '.' : ''} Total: $${sub}.`,
       total: sub,
     };
   }
-  if (pricingMode === 'logistics') {
-    const st = document.getElementById('serviceType').value;
-    const lbm = document.getElementById('logisticsBillingMethod').value;
-    const lr = parseFloat(document.getElementById('logisticsRate').value) || 0;
-    const lq = parseFloat(document.getElementById('logisticsQty').value) || 0;
-    const ld = parseFloat(document.getElementById('logisticsDays').value) || 1;
-    const acc = parseFloat(document.getElementById('accessorialFees').value) || 0;
-    const sh = document.getElementById('specialHandling').value || '';
+  if (mode === 'logistics') {
+    const st = getStr('serviceType');
+    const lbm = getStr('logisticsBillingMethod');
+    const lr = parseFloat(get('logisticsRate')) || 0;
+    const lq = parseFloat(get('logisticsQty')) || 0;
+    const ld = parseFloat(get('logisticsDays')) || 1;
+    const acc = parseFloat(get('accessorialFees')) || 0;
+    const sh = getStr('specialHandling') || '';
     let lsub = lr * lq + acc;
-    if (lbm === 'palletDay') {
-      lsub = lr * lq * ld + acc;
-    }
-    const logisticsTotal = lsub + surcharge;
+    if (lbm === 'palletDay') lsub = lr * lq * ld + acc;
     return {
-      mode: 'logistics',
-      summary: `${st} service, billed ${lbm.replace(/([A-Z])/g, ' $1').toLowerCase()} at $${lr}${lbm === 'palletDay' ? ` × ${lq} pallets × ${ld} days` : ` × ${lq}`}. Accessorial fees: $${acc}. ${sh ? 'Special handling: ' + sh + '.' : ''} ${surcharge ? `Rush surcharge: $${surcharge}.` : ''} Total: $${logisticsTotal}.`,
-      serviceType: st,
-      billingMethod: lbm,
-      rate: lr,
-      qty: lq,
-      days: ld,
-      accessorials: acc,
-      specialHandling: sh,
-      surcharge,
-      total: logisticsTotal,
+      mode,
+      summary: `${st} service, billed ${lbm.replace(/([A-Z])/g, ' $1').toLowerCase()} at $${lr}${lbm === 'palletDay' ? ` × ${lq} pallets × ${ld} days` : ` × ${lq}`}. Accessorial fees: $${acc}. ${sh ? 'Special handling: ' + sh + '.' : ''} Total: $${lsub}.`,
+      total: lsub,
     };
   }
-  if (pricingMode === 'painting') {
-    const area = parseFloat(document.getElementById('paintArea').value) || 0;
-    const coats = parseFloat(document.getElementById('paintCoats').value) || 1;
-    const rate = parseFloat(document.getElementById('paintRate').value) || 0;
-    const paintCost = parseFloat(document.getElementById('paintCost').value) || 0;
-    const prep = parseFloat(document.getElementById('paintPrep').value) || 0;
-    const trim = parseFloat(document.getElementById('paintTrim').value) || 0;
+  if (mode === 'painting') {
+    const area = parseFloat(get('paintArea')) || 0;
+    const coats = parseFloat(get('paintCoats')) || 1;
+    const rate = parseFloat(get('paintRate')) || 0;
+    const paintCost = parseFloat(get('paintCost')) || 0;
+    const prep = parseFloat(get('paintPrep')) || 0;
+    const trim = parseFloat(get('paintTrim')) || 0;
     const labor = area * coats * rate;
-    const total = labor + paintCost + prep + trim + surcharge;
+    const total = labor + paintCost + prep + trim;
     return {
-      mode: 'painting',
-      summary: `${area} sq ft of painting at ${coats} coat(s) and $${rate}/sq ft/coat = $${labor.toFixed(2)}. Paint and supplies: $${paintCost}. Surface prep: $${prep}. Trim/detail work: $${trim}. ${surcharge ? `Rush surcharge: $${surcharge}.` : ''} Total: $${total.toFixed(2)}.`,
-      area,
-      coats,
-      rate,
-      paintCost,
-      prep,
-      trim,
-      surcharge,
+      mode,
+      summary: `${area} sq ft of painting at ${coats} coat(s) and $${rate}/sq ft/coat = $${labor.toFixed(2)}. Paint and supplies: $${paintCost}. Surface prep: $${prep}. Trim/detail work: $${trim}. Total: $${total.toFixed(2)}.`,
       total,
     };
   }
-  if (pricingMode === 'flooring') {
-    const area = parseFloat(document.getElementById('floorArea').value) || 0;
-    const materialRate = parseFloat(document.getElementById('floorMaterialRate').value) || 0;
-    const installRate = parseFloat(document.getElementById('floorInstallRate').value) || 0;
-    const waste = parseFloat(document.getElementById('floorWasteFactor').value) || 0;
-    const tearOut = parseFloat(document.getElementById('floorTearOut').value) || 0;
-    const subfloor = parseFloat(document.getElementById('floorSubfloorPrep').value) || 0;
-    const transitions = parseFloat(document.getElementById('floorTransitions').value) || 0;
+  if (mode === 'flooring') {
+    const area = parseFloat(get('floorArea')) || 0;
+    const materialRate = parseFloat(get('floorMaterialRate')) || 0;
+    const installRate = parseFloat(get('floorInstallRate')) || 0;
+    const waste = parseFloat(get('floorWasteFactor')) || 0;
+    const tearOut = parseFloat(get('floorTearOut')) || 0;
+    const subfloor = parseFloat(get('floorSubfloorPrep')) || 0;
+    const transitions = parseFloat(get('floorTransitions')) || 0;
     const base = area * (materialRate + installRate);
     const wasteCost = base * (waste / 100);
-    const subtotal = base + wasteCost + tearOut + subfloor + transitions;
-    const total = subtotal + surcharge;
+    const total = base + wasteCost + tearOut + subfloor + transitions;
     return {
-      mode: 'flooring',
-      summary: `${area} sq ft flooring with ${waste}% waste factor. Materials: $${materialRate}/sq ft, installation: $${installRate}/sq ft. Base cost $${base.toFixed(2)}, waste $${wasteCost.toFixed(2)}. Tear-out: $${tearOut}, subfloor prep: $${subfloor}, transitions/finish: $${transitions}. ${surcharge ? `Rush surcharge: $${surcharge}.` : ''} Total: $${total.toFixed(2)}.`,
-      area,
-      materialRate,
-      installRate,
-      waste,
-      tearOut,
-      subfloor,
-      transitions,
-      surcharge,
+      mode,
+      summary: `${area} sq ft flooring with ${waste}% waste factor. Materials: $${materialRate}/sq ft, installation: $${installRate}/sq ft. Base cost $${base.toFixed(2)}, waste $${wasteCost.toFixed(2)}. Tear-out: $${tearOut}, subfloor prep: $${subfloor}, transitions/finish: $${transitions}. Total: $${total.toFixed(2)}.`,
       total,
     };
   }
-  if (pricingMode === 'roofing') {
-    const squares = parseFloat(document.getElementById('roofSquares').value) || 0;
-    const materialRate = parseFloat(document.getElementById('roofMaterialRate').value) || 0;
-    const laborRate = parseFloat(document.getElementById('roofLaborRate').value) || 0;
-    const tearOffRate = parseFloat(document.getElementById('roofTearOffRate').value) || 0;
-    const disposal = parseFloat(document.getElementById('roofDisposal').value) || 0;
-    const accessories = parseFloat(document.getElementById('roofAccessories').value) || 0;
+  if (mode === 'roofing') {
+    const squares = parseFloat(get('roofSquares')) || 0;
+    const materialRate = parseFloat(get('roofMaterialRate')) || 0;
+    const laborRate = parseFloat(get('roofLaborRate')) || 0;
+    const tearOffRate = parseFloat(get('roofTearOffRate')) || 0;
+    const disposal = parseFloat(get('roofDisposal')) || 0;
+    const accessories = parseFloat(get('roofAccessories')) || 0;
     const materialTotal = squares * (materialRate + laborRate + tearOffRate);
-    const total = materialTotal + disposal + accessories + surcharge;
+    const total = materialTotal + disposal + accessories;
     return {
-      mode: 'roofing',
-      summary: `${squares} squares at $${materialRate} material, $${laborRate} labor, and $${tearOffRate} tear-off per square = $${materialTotal.toFixed(2)}. Disposal: $${disposal}, accessories: $${accessories}. ${surcharge ? `Rush surcharge: $${surcharge}.` : ''} Total: $${total.toFixed(2)}.`,
-      squares,
-      materialRate,
-      laborRate,
-      tearOffRate,
-      disposal,
-      accessories,
-      surcharge,
+      mode,
+      summary: `${squares} squares at $${materialRate} material, $${laborRate} labor, and $${tearOffRate} tear-off per square = $${materialTotal.toFixed(2)}. Disposal: $${disposal}, accessories: $${accessories}. Total: $${total.toFixed(2)}.`,
       total,
     };
   }
-  return { mode: pricingMode, summary: '', total: 0 };
+  return { mode, summary: '', total: 0 };
+}
+
+// Returns the full multi-trade pricing context: an array of per-trade
+// contexts plus the global surcharge and combined total.
+function buildPricingContext() {
+  const surcharge = parseFloat(document.getElementById('rushSurcharge').value) || 0;
+  const trades = selectedTrades.map(emojiTrade => {
+    const name = tradeNameOf(emojiTrade);
+    const state = tradePricingState[name] || { mode: defaultModeForTrade(name) };
+    const ctx = buildContextForTradeState(name, state);
+    return {
+      emojiTrade,
+      name,
+      jobDesc: state.jobDesc || '',
+      ...ctx,
+    };
+  });
+  const tradesTotal = trades.reduce((sum, t) => sum + (t.total || 0), 0);
+  return {
+    trades,
+    surcharge,
+    combinedTotal: tradesTotal + surcharge,
+  };
 }
 
 const TRADE_GUIDANCE = {
@@ -4233,68 +4234,82 @@ const TRADE_GUIDANCE = {
   Landscaping: 'Landscaping quote conventions: Use landscaping terminology: hardscape, softscape, irrigation runs, drainage, grading, specimen plants, mulch, soil amendments, edging. Distinguish between hardscape (pavers, walls, patios) and softscape (plants, sod, mulch). Mention plant warranty (typically 1 year / one growing season — must be cared for per instructions). Typical payment: 50% deposit on installs, NET 30 on maintenance. Typical warranty: 1 year on plants, longer on hardscape. Common line items: Site prep and grading, Materials (plants/hardscape/mulch), Installation labor, Cleanup and haul-off.',
 };
 
-function buildPrompt({ trade, desc, pricingDetails, timeline, taxRate, taxLabel, clientName, clientAddr, quoteLanguages }) {
-  const rawTrade = trade.replace(/^[^A-Za-z0-9]+/, '').trim();
-  const tradeGuidance = TRADE_GUIDANCE[rawTrade] || '';
-  const guidanceSection = tradeGuidance ? `\nTRADE-SPECIFIC GUIDANCE:\n${tradeGuidance}\n` : '';
-  const truckingNote = pricingDetails.mode === 'trucking'
-    ? `\nThis is a HAULING/TRUCKING job. Use trucking-specific language. Line items should reflect truck operation (e.g. "Equipment & operator", "Fuel & travel", "Disposal fees", "Site cleanup"). Mention applicable certifications, weight tickets, dump site coordination, etc. in scope/terms where relevant.`
-    : '';
-  const logisticsNote = pricingDetails.mode === 'logistics'
-    ? `\nThis is a LOGISTICS job. Use logistics industry terminology naturally (BOL, pallet positions, accessorials, dock-to-dock, dimensional weight, freight class where appropriate). Generate 4 line items reflecting how logistics jobs actually break down. Examples by service type: Freight reworking: Labor (palletizing/sorting), Materials (pallets, shrink wrap, labels), Equipment usage, Disposal of waste materials. Storage: Pallet positions × duration, Inbound receiving fee, Inventory management, Outbound staging. Delivery: Linehaul, Fuel surcharge, Accessorials (lift gate, residential, etc.), Driver labor. Pick & Pack: Pick fee per piece, Packing materials, Order processing, Outbound shipping prep. For accessorials, list them as their own line item if any are present (do not bury them in linehaul or labor). In scope and payment terms, mention BOL/proof of delivery, claims process, and standard logistics terms (NET 30 is common in this industry, vs. deposit + balance for other trades). Warranty for logistics typically focuses on cargo claims, damage limits, and carrier liability — phrase appropriately.`
-    : '';
-  const paintingNote = pricingDetails.mode === 'painting'
-    ? `\nThis is a PAINTING job. Use painting terminology like surface prep, cut-in, rolling, primer, coats, masking, and trim/detail work. Highlight prep and the number of coats, and break line items into paint/supplies, prep, labor, and trim/detail work.`
-    : '';
-  const flooringNote = pricingDetails.mode === 'flooring'
-    ? `\nThis is a FLOORING job. Use flooring terminology like subfloor prep, waste factor, transitions, tear-out, underlayment, and finish work. Break line items into material, installation, tear-out/disposal, and transitions/finish.`
-    : '';
-  const roofingNote = pricingDetails.mode === 'roofing'
-    ? `\nThis is a ROOFING job. Use roofing terminology like squares, tear-off, underlayment, flashing, disposal fees, and accessories. Break line items into material, labor, tear-off/disposal, and accessories/cleanup. Mention weather contingency and warranty expectations.`
-    : '';
+function buildPrompt({ pricingContext, timeline, taxRate, taxLabel, clientName, clientAddr, quoteLanguages }) {
+  const { trades, surcharge, combinedTotal } = pricingContext;
+  const isMulti = trades.length > 1;
+
+  const tradeBlocks = trades.map((t, i) => {
+    const guidance = TRADE_GUIDANCE[t.name] || '';
+    const modeNote = (function() {
+      if (t.mode === 'trucking') return 'This is a HAULING/TRUCKING segment. Use trucking-specific terminology (equipment & operator, fuel & travel, disposal, site cleanup, dump tickets).';
+      if (t.mode === 'logistics') return 'This is a LOGISTICS segment. Use logistics terminology naturally (BOL, pallet positions, accessorials, dock-to-dock, freight class).';
+      if (t.mode === 'painting') return 'This is a PAINTING segment. Use painting terminology (surface prep, cut-in, rolling, primer, coats, trim/detail).';
+      if (t.mode === 'flooring') return 'This is a FLOORING segment. Use flooring terminology (subfloor prep, waste factor, transitions, tear-out, underlayment, finish).';
+      if (t.mode === 'roofing') return 'This is a ROOFING segment. Use roofing terminology (squares, tear-off, underlayment, flashing, disposal, accessories). Mention weather contingency.';
+      return '';
+    })();
+    return `TRADE ${i + 1}: ${t.emojiTrade}
+  Job description: ${t.jobDesc}
+  Pricing: ${t.summary}
+  Subtotal for this trade: $${Math.round(t.total)}
+  Trade-specific guidance: ${guidance}${modeNote ? '\n  Mode note: ' + modeNote : ''}`;
+  }).join('\n\n');
 
   let langInstruction;
   if (quoteLanguages === 'en') {
-    langInstruction = `LANGUAGE: Generate ALL text fields in English ONLY. For every {"en": "...", "es": "..."} pair in the schema below, fill in "en" with quality English content and set "es" to an empty string "". Do not translate or fill in Spanish.`;
+    langInstruction = `LANGUAGE: Generate ALL text fields in English ONLY. For every {"en": "...", "es": "..."} pair in the schema below, fill in "en" with quality English content and set "es" to "". Do not translate or fill in Spanish.`;
   } else if (quoteLanguages === 'es') {
-    langInstruction = `LANGUAGE: Generate ALL text fields in natural construction-trade Spanish ONLY, as used by US/Mexican contractors (tablaroca, anticipo, mano de obra, garantía, tarima, cuadros de teja, escombro — NOT formal Castilian). For every {"en": "...", "es": "..."} pair in the schema below, fill in "es" with quality trade Spanish and set "en" to an empty string "". Do not translate or fill in English.`;
+    langInstruction = `LANGUAGE: Generate ALL text fields in natural construction-trade Spanish ONLY (tablaroca, anticipo, mano de obra, garantía, tarima, cuadros de teja, escombro — NOT formal Castilian). For every {"en": "...", "es": "..."} pair, fill in "es" and set "en" to "". Do not translate or fill in English.`;
   } else {
-    langInstruction = `BILINGUAL OUTPUT: Every text field must be returned in BOTH English ("en") AND natural construction-trade Spanish as used by US/Mexican contractors ("es"). The Spanish must be real working-trade vocabulary (e.g. tablaroca, anticipo, mano de obra, garantía, tarima, cuadros de teja, escombro), NOT formal Castilian Spanish. Both versions describe the same work and amounts — this is a true translation, not different content. Currency stays as $ amounts. JSON keys remain in English exactly as shown.`;
+    langInstruction = `BILINGUAL OUTPUT: Every text field must be returned in BOTH English ("en") AND natural construction-trade Spanish as used by US/Mexican contractors ("es"). The Spanish must be real working-trade vocabulary, NOT formal Castilian. Currency stays as $ amounts. JSON keys remain in English exactly as shown.`;
   }
+
+  const multiTradeRules = isMulti ? `
+
+MULTI-TRADE QUOTE RULES:
+- This quote covers ${trades.length} distinct trades. Treat them as separate scopes of work in one document.
+- SCOPE: Write ${trades.length} short paragraphs, one per trade, in the order listed above. Start each paragraph with the trade name (e.g. "Roofing: ..."). Separate paragraphs with a blank line. The whole thing goes inside the single "scope.en" and "scope.es" strings — DO NOT use markdown headings, just plain text with blank-line separators.
+- LINE ITEMS: Generate 4 line items PER TRADE (so ${trades.length * 4} total). Every line item MUST include a "trade" field matching one of these trade names EXACTLY: ${trades.map(t => '"' + t.name + '"').join(', ')}. The amounts for each trade's line items must sum to approximately that trade's subtotal listed above.
+- WARRANTY: Write ${trades.length} short warranty paragraphs, one per trade, addressing the relevant warranty conventions for each. Same blank-line-separated format as scope. Start each with the trade name.
+- PAYMENT TERMS: Write ONE set of payment terms covering the combined total. Single deposit, single balance.
+` : `
+
+SINGLE-TRADE QUOTE:
+- Every line item MUST include a "trade" field with the value "${trades[0].name}".
+- SCOPE: 2–4 sentence professional scope of work.
+- WARRANTY: 1–2 sentence warranty appropriate for this trade.
+`;
 
   return `You are drafting a professional contractor quote for a tradesperson. Be clear, confident, specific.
 
-TRADE: ${trade}
-JOB DESCRIPTION: ${desc}${guidanceSection}
+${tradeBlocks}
+
 CLIENT: ${clientName}${clientAddr ? ' at ' + clientAddr : ''}
 TIMELINE: ${timeline}
-DEPOSIT PERCENTAGE (user-specified): ${depositPercent}%
-PRICING: ${pricingDetails.summary}${truckingNote}${logisticsNote}${paintingNote}${flooringNote}${roofingNote}
+DEPOSIT PERCENTAGE (user-specified): ${depositPercent}%${surcharge ? '\nRUSH SURCHARGE (applies to combined total): $' + surcharge : ''}
+COMBINED PRICING TOTAL: $${Math.round(combinedTotal)}
 
 ${langInstruction}
-
+${multiTradeRules}
 Return your output as STRICT JSON with this exact structure (no preamble, no code fences, just the JSON):
 
 {
-  "scope": { "en": "2–4 sentence professional scope of work, written in third person, mentioning specific actions, materials/methods, and what's included.", "es": "Same scope, written in natural trade Spanish." },
+  "scope": { "en": "...", "es": "..." },
   "lineItems": [
-    { "name": { "en": "...", "es": "..." }, "desc": { "en": "...", "es": "..." }, "amount": 0 },
-    { "name": { "en": "...", "es": "..." }, "desc": { "en": "...", "es": "..." }, "amount": 0 },
-    { "name": { "en": "...", "es": "..." }, "desc": { "en": "...", "es": "..." }, "amount": 0 },
-    { "name": { "en": "...", "es": "..." }, "desc": { "en": "...", "es": "..." }, "amount": 0 }
+    { "name": { "en": "...", "es": "..." }, "desc": { "en": "...", "es": "..." }, "amount": 0, "trade": "TradeNameHere" }
   ],
   "paymentTerms": {
     "template": {
-      "en": "1–2 sentence payment terms. Use the placeholders {{depositPct}}, {{depositAmt}}, and {{balanceAmt}} wherever those values would appear. {{depositPct}} renders without a % sign — the % must be hardcoded in your sentence (e.g. '{{depositPct}}% deposit'). {{depositAmt}} and {{balanceAmt}} render as dollar amounts with $ already included. Mention accepted payment methods (check, ACH, card) where appropriate.",
-      "es": "Same payment terms in trade Spanish. Same placeholders: {{depositPct}}, {{depositAmt}}, {{balanceAmt}}."
+      "en": "1–2 sentence payment terms using placeholders {{depositPct}}, {{depositAmt}}, and {{balanceAmt}}. The % must be hardcoded (e.g. '{{depositPct}}% deposit'). {{depositAmt}} and {{balanceAmt}} render as dollar amounts with $ already included. Mention accepted payment methods.",
+      "es": "Same payment terms in trade Spanish using the same placeholders."
     }
   },
-  "warranty":     { "en": "1–2 sentence warranty statement appropriate for this trade and job.",            "es": "Same warranty in trade Spanish." }
+  "warranty": { "en": "...", "es": "..." }
 }
 
-IMPORTANT FOR paymentTerms: The user has chosen a ${depositPercent}% deposit. Write payment terms that honor this percentage as a single upfront deposit, regardless of trade conventions about milestones. Do NOT write out the dollar amounts as literals — instead use the placeholders {{depositPct}}, {{depositAmt}}, and {{balanceAmt}} so the app can substitute the live values. Example: "{{depositPct}}% deposit ({{depositAmt}}) required upon acceptance, balance ({{balanceAmt}}) due upon completion. Accepted: check, ACH, or major credit cards."
+IMPORTANT FOR paymentTerms: The user has chosen a ${depositPercent}% deposit on the combined total. Use the placeholders — do NOT write dollar amounts as literals. Example: "{{depositPct}}% deposit ({{depositAmt}}) required upon acceptance, balance ({{balanceAmt}}) due upon completion. Accepted: check, ACH, or major credit cards."
 
-CRITICAL: lineItems amounts must sum to approximately ${Math.round(pricingDetails.total)}. Use 4 line items that break the work down meaningfully (e.g. labor, materials, equipment, cleanup — varies by trade). Make line items specific to THIS job, not generic.${taxRate > 0 ? ` Note: ${taxLabel} of ${taxRate}% will be added separately, do NOT include in line items.` : ''}`;
+CRITICAL: lineItems amounts must sum to approximately $${Math.round(combinedTotal - surcharge)} (the combined total before rush surcharge). Each line item's "trade" field MUST exactly match one of the trade names listed in the TRADE blocks above.${taxRate > 0 ? ` Note: ${taxLabel} of ${taxRate}% will be added separately, do NOT include in line items.` : ''}`;
 }
 
 function parseModelOutput(text) {
@@ -4311,16 +4326,17 @@ function parseModelOutput(text) {
     return JSON.parse(jsonStr);
   } catch (e) {
     console.warn('JSON parse failed, falling back', e);
+    const fallbackTrade = tradeNameOf(selectedTrades[0] || '') || 'General';
     return {
-      scope: text,
-      lineItems: [{ name: 'Services', desc: '', amount: 0 }],
+      scope: { en: text, es: '' },
+      lineItems: [{ name: { en: 'Services', es: '' }, desc: { en: '', es: '' }, amount: 0, trade: fallbackTrade }],
       paymentTerms: {
         template: {
           en: "{{depositPct}}% deposit ({{depositAmt}}) required upon acceptance, balance ({{balanceAmt}}) due upon completion.",
           es: "Anticipo del {{depositPct}}% ({{depositAmt}}) al aceptar, saldo ({{balanceAmt}}) a la entrega."
         }
       },
-      warranty: '1-year workmanship warranty.',
+      warranty: { en: '1-year workmanship warranty.', es: '' },
     };
   }
 }
@@ -4329,11 +4345,14 @@ function parseModelOutput(text) {
 // Render Quote
 // ============================================================================
 function selectedTradeDisplay() {
-  // Active trade's display string. Multi-trade list formatting comes next.
-  const activeTrade = selectedTrades[activeTradeIndex] || selectedTrades[0] || '';
-  const m = activeTrade.match(/^([^A-Za-z0-9]+)\s*(.+)$/);
-  if (!m) return activeTrade;
-  return `${m[1]} ${tradeDisplay(m[2].trim())}`;
+  // Returns a joined display string for ALL selected trades.
+  // e.g. "🔧 Plumbing + 🏠 Roofing"
+  if (!selectedTrades.length) return '';
+  return selectedTrades.map(emojiTrade => {
+    const m = emojiTrade.match(/^([^A-Za-z0-9]+)\s*(.+)$/);
+    if (!m) return emojiTrade;
+    return `${m[1]} ${tradeDisplay(m[2].trim())}`;
+  }).join(' + ');
 }
 
 function refreshQuoteMetaLine() {
@@ -4391,19 +4410,15 @@ function renderQuote(data) {
   document.getElementById('quoteWarranty').textContent = pickLang(data.warranty);
   document.getElementById('quoteMetaLine').textContent = `${selectedTradeDisplay()} · ${timelineLabel(timeline)} · ${clientName}`;
 
-  // line items — pass index so the row knows which currentQuote.lineItems entry it mirrors
-  const tbody = document.getElementById('lineBody');
-  tbody.innerHTML = '';
-  (data.lineItems || []).forEach((item, i) => {
-    addLineItemRow(item, i);
-  });
+  // line items — render the whole table including per-trade sub-headers
+  renderLineItemsTable();
 
   recalcTotals();
   refreshQuoteLangNotice();
 }
 
-function addLineItemRow(item, index) {
-  const tbody = document.getElementById('lineBody');
+// Pure factory: creates a <tr> for a single line item. Does NOT append.
+function createLineItemRow(item, index) {
   const tr = document.createElement('tr');
   if (typeof index === 'number') tr.dataset.lineIndex = String(index);
   const safe = (s) => (s == null ? '' : String(s));
@@ -4427,10 +4442,6 @@ function addLineItemRow(item, index) {
   const descEl = tr.querySelector('.line-desc');
   const amtEl  = tr.querySelector('.amt-cell');
 
-  // Sync edits back to currentQuote so a language flip doesn't lose them.
-  // Only AI-generated rows (those with a stored index) participate; user-added
-  // rows ("+ Add line item") have no index, so they just retain whatever the
-  // user typed regardless of language.
   function syncBack() {
     if (!currentQuote || tr.dataset.lineIndex === undefined) return;
     const i = parseInt(tr.dataset.lineIndex, 10);
@@ -4446,25 +4457,108 @@ function addLineItemRow(item, index) {
   tr.querySelector('.delete-btn').onclick = () => {
     const wasIndexed = tr.dataset.lineIndex !== undefined;
     const removedAt = wasIndexed ? parseInt(tr.dataset.lineIndex, 10) : -1;
-    tr.remove();
     if (wasIndexed && currentQuote && currentQuote.lineItems) {
-      // Drop the stored line item too so a later language flip doesn't recreate it,
-      // then renumber the remaining AI-indexed rows to match the new array order.
       currentQuote.lineItems.splice(removedAt, 1);
-      Array.from(tbody.querySelectorAll('tr[data-line-index]')).forEach((row, newIdx) => {
-        row.dataset.lineIndex = String(newIdx);
-      });
     }
+    renderLineItemsTable();
     recalcTotals();
   };
+
   tr.querySelectorAll('.editable').forEach(el => {
     el.addEventListener('blur', () => { syncBack(); recalcTotals(); });
     el.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); el.blur(); }
     });
   });
-  tbody.appendChild(tr);
+
+  return tr;
+}
+
+// Pushes a new line item tagged with a specific trade, then re-renders.
+// Called from the per-group +Add buttons in renderLineItemsTable.
+function addLineItemForTrade(tradeName) {
+  if (!currentQuote) currentQuote = { lineItems: [] };
+  if (!Array.isArray(currentQuote.lineItems)) currentQuote.lineItems = [];
+
+  const slot = { en: '', es: '' };
+  slot[tdLang] = t('quote.lineNew');
+  const descSlot = { en: '', es: '' };
+  descSlot[tdLang] = t('quote.lineDescDefault');
+
+  currentQuote.lineItems.push({
+    name: slot,
+    desc: descSlot,
+    amount: 0,
+    trade: tradeName,
+  });
+
+  renderLineItemsTable();
   recalcTotals();
+}
+
+// Renders the entire line items table from currentQuote.lineItems,
+// grouped by trade with sub-header rows showing per-trade subtotals.
+function renderLineItemsTable() {
+  const tbody = document.getElementById('lineBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  if (!currentQuote || !Array.isArray(currentQuote.lineItems)) return;
+
+  // Backfill missing trade fields against malformed AI output / legacy data
+  const defaultTrade = tradeNameOf(selectedTrades[0] || '') || '';
+  currentQuote.lineItems.forEach(li => {
+    if (!li.trade) li.trade = defaultTrade;
+  });
+
+  const tradeOrder = selectedTrades.map(tradeNameOf);
+
+  // Group items by trade, preserving original index for syncBack
+  const groups = {};
+  currentQuote.lineItems.forEach((li, i) => {
+    const tname = li.trade || defaultTrade;
+    if (!groups[tname]) groups[tname] = [];
+    groups[tname].push({ item: li, originalIndex: i });
+  });
+
+  tradeOrder.forEach(tname => {
+    const groupItems = groups[tname];
+    if (!groupItems || !groupItems.length) return;
+
+    const tradeSubtotal = groupItems.reduce((sum, g) => sum + (parseFloat(g.item.amount) || 0), 0);
+
+    const tradeEntry = TRADES.find(td => td.name === tname);
+    const emoji = tradeEntry ? tradeEntry.emoji : '';
+    const displayName = tradeDisplay(tname);
+
+    const headerTr = document.createElement('tr');
+    headerTr.className = 'line-trade-header';
+    headerTr.dataset.tradeHeader = tname;
+    headerTr.innerHTML = `
+      <td colspan="2">${emoji} ${displayName}</td>
+      <td class="amt-col" data-trade-subtotal="${tname}">${fmt(tradeSubtotal)}</td>
+    `;
+    tbody.appendChild(headerTr);
+
+    groupItems.forEach(g => {
+      const tr = createLineItemRow(g.item, g.originalIndex);
+      tbody.appendChild(tr);
+    });
+
+    // Per-group "+ Add line item" button row
+    const addRow = document.createElement('tr');
+    addRow.className = 'line-add-row';
+    const addCell = document.createElement('td');
+    addCell.colSpan = 3;
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'add-line-btn';
+    addBtn.setAttribute('data-i18n', 'quote.addLine');
+    addBtn.textContent = t('quote.addLine');
+    addBtn.onclick = () => addLineItemForTrade(tname);
+    addCell.appendChild(addBtn);
+    addRow.appendChild(addCell);
+    tbody.appendChild(addRow);
+  });
 }
 
 function renderPaymentTerms() {
@@ -4503,11 +4597,25 @@ function renderPaymentTerms() {
 
 function recalcTotals() {
   let subtotal = 0;
-  document.querySelectorAll('#lineBody .amt-cell').forEach(c => {
+  // Sum item rows only (not sub-headers, which have their own data attr)
+  document.querySelectorAll('#lineBody tr[data-line-index] .amt-cell').forEach(c => {
     const v = parseAmount(c.textContent);
     subtotal += v;
-    // re-format on blur
     if (document.activeElement !== c) c.textContent = fmt(v);
+  });
+
+  // Refresh per-trade subtotal displays in sub-header rows
+  document.querySelectorAll('[data-trade-subtotal]').forEach(cell => {
+    const tname = cell.getAttribute('data-trade-subtotal');
+    let tsub = 0;
+    document.querySelectorAll('#lineBody tr[data-line-index]').forEach(row => {
+      const i = parseInt(row.dataset.lineIndex, 10);
+      const li = currentQuote && currentQuote.lineItems && currentQuote.lineItems[i];
+      if (li && li.trade === tname) {
+        tsub += parseFloat(li.amount) || 0;
+      }
+    });
+    cell.textContent = fmt(tsub);
   });
 
   let taxAmount = 0;
@@ -4551,10 +4659,17 @@ function copyQuote() {
 
   let lineLines = [];
   document.querySelectorAll('#lineBody tr').forEach(tr => {
-    const name = tr.querySelector('.line-name').textContent.trim();
-    const desc = tr.querySelector('.line-desc').textContent.trim();
-    const amt = tr.querySelector('.amt-cell').textContent.trim();
-    lineLines.push(`  • ${name} — ${amt}\n    ${desc}`);
+    if (tr.classList.contains('line-trade-header')) {
+      const label = tr.querySelector('td').textContent.trim();
+      const amt = tr.querySelector('.amt-col').textContent.trim();
+      lineLines.push(`\n--- ${label.toUpperCase()} (${amt}) ---`);
+    } else {
+      const nameEl = tr.querySelector('.line-name');
+      const descEl = tr.querySelector('.line-desc');
+      const amtEl = tr.querySelector('.amt-cell');
+      if (!nameEl || !descEl || !amtEl) return;
+      lineLines.push(`  • ${nameEl.textContent.trim()} — ${amtEl.textContent.trim()}\n    ${descEl.textContent.trim()}`);
+    }
   });
 
   const sub = document.getElementById('subtotalDisp').textContent;
