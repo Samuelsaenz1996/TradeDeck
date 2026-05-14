@@ -982,7 +982,6 @@
   /* PDF generation: prevent specific blocks from splitting across pages.
      page-break-inside has no effect on screen display, only on paginated
      output, so these are safe to apply unconditionally. */
-  .quote-section,
   .totals-block,
   .quote-footer-grid,
   .quote-notes,
@@ -4781,6 +4780,9 @@ async function generateQuotePdfBlob() {
   const savedScroll = window.scrollY;
   window.scrollTo(0, 0);
 
+  const addRows = quoteEl.querySelectorAll('.line-add-row');
+  addRows.forEach(row => { row.style.display = 'none'; });
+
   const opts = {
     margin: 0.5,
     image: { type: 'jpeg', quality: 0.98 },
@@ -4800,6 +4802,7 @@ async function generateQuotePdfBlob() {
     console.error('PDF generation failed:', e);
     return null;
   } finally {
+    addRows.forEach(row => { row.style.removeProperty('display'); });
     window.scrollTo(0, savedScroll);
   }
 }
