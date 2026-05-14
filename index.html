@@ -627,6 +627,24 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  .gen-progress {
+    margin: 0 0 20px;
+    padding: 12px 0 0;
+  }
+  .progress-track {
+    height: 4px;
+    background: var(--line);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--gold) 100%);
+    border-radius: 99px;
+    transition: width 0.25s ease-out;
+  }
+
   /* === Quote Preview === */
   .quote-wrap { display: none; }
   .quote-wrap.visible { display: block; animation: fadeIn 0.4s ease-out; }
@@ -701,6 +719,11 @@
     right: 0;
     height: 6px;
     background: linear-gradient(90deg, var(--accent) 0%, var(--gold) 100%);
+  }
+  .quote.pdf-export {
+    padding: 28px 32px;
+    box-shadow: none;
+    border: none;
   }
   .quote-header {
     display: flex;
@@ -956,6 +979,22 @@
     font-style: italic;
   }
 
+  /* PDF generation: prevent specific blocks from splitting across pages.
+     page-break-inside has no effect on screen display, only on paginated
+     output, so these are safe to apply unconditionally. */
+  .quote-section,
+  .totals-block,
+  .quote-footer-grid,
+  .quote-notes,
+  .line-trade-header {
+    page-break-inside: avoid;
+  }
+
+  /* Allow the line items table to break between rows naturally */
+  .line-table tr {
+    page-break-inside: avoid;
+  }
+
   /* === Toast === */
   .toast {
     position: fixed;
@@ -1062,6 +1101,7 @@
     .field-row.cols-2, .field-row.cols-3, .field-row.cols-4 { grid-template-columns: 1fr; }
   }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
@@ -1576,6 +1616,10 @@
         </div>
       </div>
 
+      <div class="gen-progress hidden" id="generateProgress">
+        <div class="progress-track"><div class="progress-fill"></div></div>
+      </div>
+
       <!-- Quote Preview -->
       <div class="quote-wrap" id="quoteWrap">
         <div class="quote-actions-bar">
@@ -1584,8 +1628,9 @@
             <span class="topbar-meta" id="quoteMetaLine"></span>
           </div>
           <div class="right">
-            <button class="action-btn" onclick="copyQuote()" data-i18n="quote.copy">📋 Copy quote</button>
             <button class="action-btn" onclick="downloadPdf()" data-i18n="quote.downloadPdf">⬇ Download PDF</button>
+            <button class="action-btn" onclick="sendQuoteEmail()" data-i18n="quote.email">✉ Email</button>
+            <button class="action-btn" onclick="sendQuoteText()" data-i18n="quote.text">💬 Text</button>
             <button class="action-btn primary" onclick="convertToInvoice()" data-i18n="quote.convertInvoice">→ Convert to invoice</button>
           </div>
         </div>
@@ -1787,6 +1832,10 @@
               Regenerate
             </button>
           </div>
+        </div>
+
+        <div class="gen-progress hidden" id="followupProgress">
+          <div class="progress-track"><div class="progress-fill"></div></div>
         </div>
 
         <div class="quote-wrap" id="followupWrap">
@@ -2183,6 +2232,8 @@ const I18N = {
     // Quote actions bar / doc
     'quote.draftChip': 'Draft',
     'quote.copy': '📋 Copy quote',
+    'quote.email': '✉ Email',
+    'quote.text': '💬 Text',
     'quote.downloadPdf': '⬇ Download PDF',
     'quote.convertInvoice': '→ Convert to invoice',
     'quote.companyName': 'Your Company Name',
@@ -2326,7 +2377,12 @@ const I18N = {
     'toast.messageCopied': 'Message copied to clipboard ✓',
     'toast.quoteCopied': 'Quote copied to clipboard ✓',
     'toast.copyFailed': 'Copy failed',
-    'toast.pdfPlaceholder': 'PDF export coming soon — for now, use Copy or print to PDF',
+    'toast.pdfGenerating': 'Generating PDF…',
+    'toast.pdfReady': 'PDF ready ✓',
+    'toast.pdfFailed': 'PDF generation failed',
+    'toast.pdfLibraryMissing': 'PDF library not loaded',
+    'toast.pdfDownloadedAttach': 'PDF downloaded — attach it to the email that just opened',
+    'toast.pdfDownloadedShare': 'PDF downloaded — share it however you prefer',
     'toast.invoicePlaceholder': 'Invoice converter coming next — placeholder for now',
     'toast.pasteApiFirst': 'Paste your API key first',
     'toast.notAnthropicKey': "That doesn't look like an Anthropic key",
@@ -2525,6 +2581,8 @@ const I18N = {
     // Quote actions bar / doc
     'quote.draftChip': 'Borrador',
     'quote.copy': '📋 Copiar cotización',
+    'quote.email': '✉ Correo',
+    'quote.text': '💬 SMS',
     'quote.downloadPdf': '⬇ Descargar PDF',
     'quote.convertInvoice': '→ Convertir a factura',
     'quote.companyName': 'Nombre de tu empresa',
@@ -2668,7 +2726,12 @@ const I18N = {
     'toast.messageCopied': 'Mensaje copiado al portapapeles ✓',
     'toast.quoteCopied': 'Cotización copiada al portapapeles ✓',
     'toast.copyFailed': 'Falló al copiar',
-    'toast.pdfPlaceholder': 'Exportar PDF próximamente — por ahora usa Copiar o imprime a PDF',
+    'toast.pdfGenerating': 'Generando PDF…',
+    'toast.pdfReady': 'PDF listo ✓',
+    'toast.pdfFailed': 'Falló al generar el PDF',
+    'toast.pdfLibraryMissing': 'Librería PDF no cargada',
+    'toast.pdfDownloadedAttach': 'PDF descargado — adjúntalo al correo que se acaba de abrir',
+    'toast.pdfDownloadedShare': 'PDF descargado — compártelo como prefieras',
     'toast.invoicePlaceholder': 'Conversor de facturas próximamente — por ahora es un marcador',
     'toast.pasteApiFirst': 'Pega tu clave API primero',
     'toast.notAnthropicKey': 'Eso no parece una clave de Anthropic',
@@ -3681,28 +3744,17 @@ async function generateFollowup() {
       signature,
     });
 
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1500,
-        messages: [{ role: 'user', content: prompt }],
-      }),
+    const estimatedChars = 1500 * 2.5;
+    showProgress('followupProgress');
+
+    const text = await streamCompletion({
+      apiKey,
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1500,
+      prompt,
+      onProgress: (accumulated) => updateProgress('followupProgress', accumulated.length, estimatedChars),
     });
 
-    if (!resp.ok) {
-      const err = await resp.text();
-      throw new Error(`API error ${resp.status}: ${err.slice(0, 200)}`);
-    }
-
-    const data = await resp.json();
-    const text = data.content?.[0]?.text || '';
     const parsed = parseModelOutput(text);
     renderFollowupMessage(parsed);
 
@@ -3713,9 +3765,12 @@ async function generateFollowup() {
     document.getElementById('followupWrap').classList.add('visible');
     document.getElementById('followupWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
     showToast(t('toast.followupDrafted'));
+    completeProgress('followupProgress');
+    setTimeout(() => hideProgress('followupProgress'), 600);
   } catch (e) {
     console.error(e);
     showToast(e.message || t('toast.genFailed'), true);
+    hideProgress('followupProgress');
   } finally {
     btn.disabled = false;
     document.getElementById('regenerateFollowupBtn').disabled = false;
@@ -4047,27 +4102,17 @@ async function generateQuote() {
       quoteLanguages,
     });
 
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 2800 + Math.max(0, selectedTrades.length - 1) * 1500,
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    });
+    const maxTokens = 2800 + Math.max(0, selectedTrades.length - 1) * 1500;
+    const estimatedChars = maxTokens * 2.5;
+    showProgress('generateProgress');
 
-    if (!resp.ok) {
-      const err = await resp.text();
-      throw new Error(`API error ${resp.status}: ${err.slice(0, 200)}`);
-    }
-    const data = await resp.json();
-    const text = data.content?.[0]?.text || '';
+    const text = await streamCompletion({
+      apiKey,
+      model: 'claude-sonnet-4-6',
+      max_tokens: maxTokens,
+      prompt,
+      onProgress: (accumulated) => updateProgress('generateProgress', accumulated.length, estimatedChars),
+    });
 
     const parsed = parseModelOutput(text);
     renderQuote(parsed);
@@ -4079,9 +4124,12 @@ async function generateQuote() {
     document.getElementById('quoteWrap').classList.add('visible');
     document.getElementById('quoteWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
     showToast(t('toast.quoteDrafted'));
+    completeProgress('generateProgress');
+    setTimeout(() => hideProgress('generateProgress'), 600);
   } catch (e) {
     console.error(e);
     showToast(e.message || t('toast.genFailed'), true);
+    hideProgress('generateProgress');
   } finally {
     btn.disabled = false;
     txt.setAttribute('data-i18n', 'actions.generate');
@@ -4715,9 +4763,165 @@ ${notes}
   });
 }
 
-function downloadPdf() {
-  showToast(t('toast.pdfPlaceholder'));
-  setTimeout(() => window.print(), 600);
+async function generateQuotePdfBlob() {
+  const quoteEl = document.getElementById('quoteDoc');
+  if (!quoteEl) return null;
+
+  if (typeof html2pdf === 'undefined') {
+    showToast(t('toast.pdfLibraryMissing'), true);
+    return null;
+  }
+
+  if (document.activeElement && document.activeElement.blur) {
+    document.activeElement.blur();
+  }
+
+  try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch (e) {}
+
+  const savedScroll = window.scrollY;
+  window.scrollTo(0, 0);
+
+  const opts = {
+    margin: 0.5,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      backgroundColor: '#FFFFFF',
+    },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+    pagebreak: { mode: ['css', 'legacy'] },
+  };
+
+  try {
+    return await html2pdf().set(opts).from(quoteEl).output('blob');
+  } catch (e) {
+    console.error('PDF generation failed:', e);
+    return null;
+  } finally {
+    window.scrollTo(0, savedScroll);
+  }
+}
+
+function buildQuotePdfFilename() {
+  const rawId = document.getElementById('quoteId').textContent.trim();
+  const safeId = rawId.replace(/[^A-Za-z0-9-]/g, '') || 'Quote';
+  const rawClient = document.getElementById('quoteClientName').textContent.trim();
+  const safeClient = rawClient.replace(/[^A-Za-z0-9]+/g, '_') || 'Client';
+  return `${safeId}-${safeClient}.pdf`;
+}
+
+function triggerBlobDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function downloadPdf() {
+  showToast(t('toast.pdfGenerating'));
+  const blob = await generateQuotePdfBlob();
+  if (!blob) {
+    showToast(t('toast.pdfFailed'), true);
+    return;
+  }
+  triggerBlobDownload(blob, buildQuotePdfFilename());
+  showToast(t('toast.pdfReady'));
+}
+
+async function sendQuoteEmail() {
+  showToast(t('toast.pdfGenerating'));
+  const blob = await generateQuotePdfBlob();
+  if (!blob) {
+    showToast(t('toast.pdfFailed'), true);
+    return;
+  }
+  const filename = buildQuotePdfFilename();
+
+  const id = document.getElementById('quoteId').textContent.trim();
+  const company = document.querySelector('.quote-company-name').textContent.trim();
+
+  const subject = tdLang === 'es'
+    ? `Cotización ${id} de ${company}`
+    : `Quote ${id} from ${company}`;
+  const message = tdLang === 'es'
+    ? `Hola, te adjunto la cotización ${id}. Cualquier pregunta, avísame.`
+    : `Hi, please find your quote ${id} attached. Let me know if you have any questions.`;
+
+  const file = new File([blob], filename, { type: 'application/pdf' });
+
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: subject,
+        text: message,
+      });
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+      console.warn('Web Share failed, falling back:', e);
+    }
+  }
+
+  triggerBlobDownload(blob, filename);
+  showToast(t('toast.pdfDownloadedAttach'));
+
+  const fallbackBody = tdLang === 'es'
+    ? `${message}\n\n[Adjunta el PDF descargado a este correo antes de enviarlo.]`
+    : `${message}\n\n[Attach the downloaded PDF to this email before sending.]`;
+
+  setTimeout(() => {
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(fallbackBody)}`;
+  }, 800);
+}
+
+async function sendQuoteText() {
+  showToast(t('toast.pdfGenerating'));
+  const blob = await generateQuotePdfBlob();
+  if (!blob) {
+    showToast(t('toast.pdfFailed'), true);
+    return;
+  }
+  const filename = buildQuotePdfFilename();
+
+  const id = document.getElementById('quoteId').textContent.trim();
+  const total = document.getElementById('totalDisp').textContent.trim();
+  const clientName = document.getElementById('quoteClientName').textContent.trim();
+  const company = document.querySelector('.quote-company-name').textContent.trim();
+  const firstName = (clientName.split(/\s+/)[0] || '').trim();
+
+  const shortMsg = tdLang === 'es'
+    ? `Hola ${firstName}, soy de ${company}. Te adjunto tu cotización ${id} (${total}).`
+    : `Hi ${firstName}, this is ${company}. Your quote ${id} is attached (${total}).`;
+
+  const file = new File([blob], filename, { type: 'application/pdf' });
+
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: `Quote ${id}`,
+        text: shortMsg,
+      });
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+      console.warn('Web Share failed, falling back:', e);
+    }
+  }
+
+  triggerBlobDownload(blob, filename);
+  showToast(t('toast.pdfDownloadedShare'));
+
+  setTimeout(() => {
+    window.location.href = `sms:?body=${encodeURIComponent(shortMsg)}`;
+  }, 800);
 }
 
 function convertToInvoice() {
@@ -4743,6 +4947,94 @@ function showToast(msg, isError = false) {
   t.classList.add('show');
   clearTimeout(showToast._timer);
   showToast._timer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+function showProgress(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('hidden');
+  const fill = el.querySelector('.progress-fill');
+  if (fill) fill.style.width = '0%';
+}
+
+function updateProgress(id, currentChars, estimatedChars) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const fill = el.querySelector('.progress-fill');
+  if (!fill) return;
+  const pct = Math.min((currentChars / Math.max(estimatedChars, 1)) * 100, 90);
+  fill.style.width = pct + '%';
+}
+
+function completeProgress(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const fill = el.querySelector('.progress-fill');
+  if (fill) fill.style.width = '100%';
+}
+
+function hideProgress(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add('hidden');
+}
+
+async function streamCompletion({ apiKey, model, max_tokens, prompt, onProgress }) {
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens,
+      messages: [{ role: 'user', content: prompt }],
+      stream: true,
+    }),
+  });
+
+  if (!resp.ok) {
+    const err = await resp.text();
+    throw new Error(`API error ${resp.status}: ${err.slice(0, 200)}`);
+  }
+
+  if (!resp.body) {
+    throw new Error('Streaming not supported in this browser');
+  }
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let accumulated = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const data = line.slice(6).trim();
+      if (!data) continue;
+      try {
+        const event = JSON.parse(data);
+        if (event.type === 'content_block_delta' && event.delta && event.delta.type === 'text_delta') {
+          accumulated += event.delta.text;
+          if (onProgress) onProgress(accumulated);
+        }
+      } catch (e) {
+        // Malformed SSE line — skip silently
+      }
+    }
+  }
+
+  return accumulated;
 }
 
 function clearForm() {
