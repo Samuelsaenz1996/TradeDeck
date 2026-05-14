@@ -977,6 +977,84 @@
   /* === Hidden state === */
   .hidden { display: none !important; }
 
+  /* === Auth screen === */
+  .auth-screen {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: var(--bg);
+  }
+  .auth-screen.hidden { display: none !important; }
+  .auth-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: var(--shadow-lg);
+  }
+  .auth-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .auth-title {
+    font-family: var(--display);
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .auth-sub {
+    color: var(--ink-3);
+    font-size: 14px;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  .auth-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    font-size: 16px;
+    outline: none;
+    margin-bottom: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.12s, box-shadow 0.12s;
+  }
+  .auth-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(196, 90, 26, 0.12);
+  }
+  .auth-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .auth-btn:hover:not(:disabled) { background: var(--accent); }
+  .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .auth-status {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    background: var(--surface-2);
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+  .auth-status.error { background: rgba(179, 58, 42, 0.08); color: var(--bad); }
+
   /* === Mobile nav (hamburger + drawer + backdrop) === */
   .topbar-left {
     display: flex;
@@ -1069,6 +1147,21 @@
 </head>
 <body>
 
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="brand-mark">T</div>
+      <div class="brand-name">Trade<em>Deck</em></div>
+    </div>
+    <h1 class="auth-title" data-i18n="auth.title">Sign in to TradeDeck</h1>
+    <p class="auth-sub" data-i18n="auth.sub">Enter your email and we'll send you a magic link.</p>
+    <input type="email" class="auth-input" id="authEmail" placeholder="you@yourbusiness.com" autocomplete="email" />
+    <button class="auth-btn" id="authSendBtn" data-i18n="auth.sendBtn">Send magic link</button>
+    <div class="auth-status hidden" id="authStatus"></div>
+  </div>
+</div>
+
+<div id="appContainer" class="hidden">
 <div class="app">
 
   <!-- Mobile drawer backdrop -->
@@ -1991,6 +2084,7 @@
     </div>
   </main>
 </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -2339,6 +2433,15 @@ const I18N = {
     'toast.invoicePlaceholder': 'Invoice converter coming next — placeholder for now',
     'toast.cleared': 'Cleared',
     'confirm.clearForm': 'Clear the form and quote?',
+    // Auth
+    'auth.title': 'Sign in to TradeDeck',
+    'auth.sub': "Enter your email and we'll send you a magic link.",
+    'auth.sendBtn': 'Send magic link',
+    'auth.sending': 'Sending…',
+    'auth.sent': '✓ Check your email — click the link to sign in.',
+    'auth.emailRequired': 'Enter your email first',
+    'auth.signInFailed': 'Could not send link: ',
+    'nav.signOut': 'Sign out',
     // Aria labels
     'aria.openMenu': 'Open navigation menu',
     'aria.closeMenu': 'Close navigation',
@@ -2678,6 +2781,15 @@ const I18N = {
     'toast.invoicePlaceholder': 'Conversor de facturas próximamente — por ahora es un marcador',
     'toast.cleared': 'Limpiado',
     'confirm.clearForm': '¿Limpiar el formulario y la cotización?',
+    // Auth
+    'auth.title': 'Inicia sesión en TradeDeck',
+    'auth.sub': 'Escribe tu correo y te enviamos un enlace mágico.',
+    'auth.sendBtn': 'Enviar enlace',
+    'auth.sending': 'Enviando…',
+    'auth.sent': '✓ Revisa tu correo — haz clic en el enlace para entrar.',
+    'auth.emailRequired': 'Escribe tu correo primero',
+    'auth.signInFailed': 'No se pudo enviar el enlace: ',
+    'nav.signOut': 'Cerrar sesión',
     // Aria labels
     'aria.openMenu': 'Abrir menú de navegación',
     'aria.closeMenu': 'Cerrar navegación',
