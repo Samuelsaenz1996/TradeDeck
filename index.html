@@ -1098,6 +1098,8 @@
     .topbar { padding: 14px 16px; }
     .container { padding: 20px 16px 40px; }
     .quote { padding: 24px; }
+    /* Prevent iOS Safari from auto-zooming into focused inputs (requires >=16px) */
+    .input, .select, .textarea, .api-banner-input { font-size: 16px; }
     .quote-header, .quote-grid, .quote-footer-grid { grid-template-columns: 1fr; }
     .quote-header { flex-direction: column; gap: 16px; }
     .quote-meta { text-align: left; }
