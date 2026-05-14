@@ -1221,7 +1221,7 @@
                style="flex-wrap: wrap;"></div>
         </div>
 
-        <div class="field">
+        <div class="field hidden" id="jobDescField">
           <label class="label" data-i18n="form.jobDesc">Job description</label>
           <textarea class="textarea" id="jobDesc" placeholder="e.g. Replace 50ft of cast iron drain line under the kitchen, install new cleanouts, repair drywall after."></textarea>
         </div>
@@ -3323,9 +3323,11 @@ function hideAllPricingPanels() {
 }
 
 function updateActionsRowVisibility() {
+  const noTrades = selectedTrades.length === 0;
   const row = document.getElementById('actionsRow');
-  if (!row) return;
-  row.classList.toggle('hidden', selectedTrades.length === 0);
+  if (row) row.classList.toggle('hidden', noTrades);
+  const jobDescField = document.getElementById('jobDescField');
+  if (jobDescField) jobDescField.classList.toggle('hidden', noTrades);
 }
 
 function setPricingMode(mode) {
