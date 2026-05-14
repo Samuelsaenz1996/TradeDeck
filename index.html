@@ -1527,7 +1527,7 @@
           </small>
         </div>
 
-        <div class="actions-row">
+        <div class="actions-row hidden" id="actionsRow">
           <button class="btn-primary" id="generateBtn" onclick="generateQuote()">
             <span id="genBtnText" data-i18n="actions.generate">✦ Generate quote</span>
           </button>
@@ -3187,6 +3187,7 @@ function renderTrades() {
   });
   const firstActiveName = tradeNameOf(selectedTrades[activeTradeIndex] || selectedTrades[0] || '');
   updateJobDescriptionPlaceholder(firstActiveName || null);
+  updateActionsRowVisibility();
 }
 
 function renderTradeTabs() {
@@ -3227,6 +3228,12 @@ function hideAllPricingPanels() {
   });
   const empty = document.getElementById('pricingEmptyState');
   if (empty) empty.classList.remove('hidden');
+}
+
+function updateActionsRowVisibility() {
+  const row = document.getElementById('actionsRow');
+  if (!row) return;
+  row.classList.toggle('hidden', selectedTrades.length === 0);
 }
 
 function setPricingMode(mode) {
