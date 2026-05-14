@@ -1,6 +1,6 @@
 # TradeDeck — Project Status
 
-Last updated: May 14, 2026
+Last updated: May 14, 2026 (post Sprint 1B)
 
 Save this. Paste into any future Claude conversation to continue.
 
@@ -12,22 +12,32 @@ TradeDeck is an AI-powered admin tool for contractors and tradespeople. Drafts p
 
 - **Pricing plan:** Free (5 quotes/month) · Pro $49/month · Team $99/month
 - **Target:** $2,000–$5,000/month from a small base of paying contractors
-- **Stage:** Live MVP with active testers; both testers said "would pay" (intent confirmation pending)
+- **Stage:** Live MVP behind auth; 1 confirmed paying tester ($49/mo), backend migration in progress
 - **Goal type:** Side project that generates income, not full-time business
+- **Long-term:** Wrap in Capacitor for App Store + Google Play distribution
 
 ## Tech Stack (Current)
 
 - **Frontend:** Single `index.html` file — vanilla JS, no framework, no build step
-- **AI:** Anthropic API, model `claude-sonnet-4-6`, called direct from browser using `anthropic-dangerous-direct-browser-access: true` header, with SSE streaming enabled
+- **AI:** Anthropic API via server-side Edge function proxy at `/api/generate.js`. Model `claude-sonnet-4-6`. SSE streaming preserved through the proxy.
+- **API key:** `ANTHROPIC_API_KEY` env var in Vercel (Production + Preview + Development) — no longer in the browser
+- **Auth:** Supabase magic-link email auth; session persisted in localStorage by the Supabase client
+- **Supabase project:** `https://cqmctdhxticryelvhhze.supabase.co`
+- **Publishable key:** `sb_publishable_YOWddbCqAPdFrg-9otLSzw_akBdoAPh` (safe in browser — RLS gates actual data)
 - **PDF generation:** html2pdf.js (loaded from cdnjs)
-- **API key:** Read from localStorage (`anthropicKey`), entered via banner at top
 - **Hosting:** Vercel (auto-deploys from GitHub `main` branch)
-- **Live URL:** [paste trade-deck-ten.vercel.app or your custom URL]
+- **Live URL:** https://trade-deck-ten.vercel.app
 - **Repo:** [paste github.com/yourusername/tradedeck URL]
 - **Editor:** VS Code with Claude Code for inline edits, Git via GitHub Desktop
 - **API safety:** $20/month spending cap set in Anthropic Console
 
 ## What's Built (Functional)
+
+### Backend foundation ✨ (Sprint 1A + 1B)
+- **Server-side Anthropic proxy** (`api/generate.js`): Vercel Edge function. POST `{model, max_tokens, prompt}`, attaches server-side `ANTHROPIC_API_KEY`, forwards to anthropic.com with `stream: true`, pipes the SSE response straight back to the browser. POST-only (405 otherwise), 500 if env var missing, 400 on bad JSON, upstream errors surfaced as JSON.
+- **Supabase auth gate**: App wrapped in `<div id="appContainer" class="hidden">`, revealed only after a valid session. Login screen at `<div class="auth-screen">` collects email and calls `sb.auth.signInWithOtp` with `emailRedirectTo: window.location.origin`. `sb.auth.onAuthStateChange` listener toggles UI on session changes. Session persists across refreshes.
+- **Sign out** nav item in sidebar Account section calls `sb.auth.signOut()`.
+- **Quote content-language fix**: `quoteContentLang()` returns the language the quote was generated in (locked for monolingual quotes; follows `tdLang` for bilingual quotes). `applyQuoteContentLang()` runs as the final step of `applyLanguage()` and overrides every `[data-i18n]` inside `#quoteDoc`, the dynamic "+ Add line item" buttons, trade subheader rows, in-doc trade-meta, and tax row label. An English-only quote now stays fully English internally even when UI flips to Spanish.
 
 ### Quote generator
 - 10 trades with emojis: 🔧 Plumbing, ⚡ Electrical, ❄️ HVAC, 🏠 Roofing, 🔨 General, 🖌️ Painting, 🪵 Flooring, 🌿 Landscaping, 🚛 Hauling & Trucking, 📦 Logistics
@@ -52,6 +62,7 @@ TradeDeck is an AI-powered admin tool for contractors and tradespeople. Drafts p
 - AI generates bilingual content into `{en, es}` slot pairs (`scope`, `lineItems[].name`, `lineItems[].desc`, `paymentTerms.template`, `warranty`); `pickLang()` picks the right language at render time
 - Edits in EN write back to `currentQuote.<field>.en`; edits in ES write to `.es` (per-language blur capture so neither language overwrites the other)
 - Language can be switched after generation — re-renders the existing quote in the other language without losing user edits in either
+- **Quote document labels lock to the quote's content language** — switching UI lang doesn't partially-translate a monolingual quote (see `quoteContentLang` / `applyQuoteContentLang` above)
 - Banner appears when the current UI language doesn't have content (e.g. viewing in ES but the quote was generated EN-only) prompting regeneration
 - Spanish vocab tuned for US/Mexican contractor usage (anticipo, mano de obra, tablaroca, cuadros de teja, etc.) — not formal Castilian
 - Status pills, dates (`localeForDate`), and trade names all localized
@@ -73,15 +84,12 @@ TradeDeck is an AI-powered admin tool for contractors and tradespeople. Drafts p
 ### PDF export (working)
 - "Download PDF" generates a real letter-size PDF via html2pdf.js
 - Pipeline: blur active input → `await document.fonts.ready` → save scroll, scroll to top → hide UI chrome (per-group +Add buttons, empty Notes block) → render with html2canvas (scale 2, white background, no `windowWidth` / `x` / `y` / `scrollX` / `scrollY` overrides) → wrap in jsPDF letter portrait → restore everything in a `finally` block
-- `generateQuotePdfBlob()` is the single source — reused by:
-  - `downloadPdf()` — direct file download
-  - `sendQuoteEmail()` — attaches the PDF via Web Share API when supported; otherwise downloads the file and opens a pre-filled mailto:
-  - `sendQuoteText()` — same pattern with sms:
-- CSS uses `page-break-inside: avoid` on key blocks (totals, footer grid, notes, table rows, trade sub-headers) to control pagination
+- `generateQuotePdfBlob()` is the single source — reused by `downloadPdf()`, `sendQuoteEmail()` (Web Share API → mailto fallback), `sendQuoteText()` (sms fallback)
+- CSS uses `page-break-inside: avoid` on key blocks
 - Filename built from quote ID + client name (sanitized)
 
 ### Streaming responses
-- Both quote and follow-up generation use SSE streaming (`stream: true` on the API call)
+- Both quote and follow-up generation use SSE streaming via the `/api/generate` proxy
 - `streamCompletion()` parses `content_block_delta` events and accumulates text incrementally
 - Progress bar fills as tokens stream, capped at 90% until completion; flushes to 100% on done
 
@@ -96,16 +104,16 @@ TradeDeck is an AI-powered admin tool for contractors and tradespeople. Drafts p
 ### CRM mockups (visual only, fake data)
 - **Clients:** 12 fake clients in `MOCK_CLIENTS`, table with avatar/contact/jobs/revenue/last-contact/status
 - **Jobs:** 15 fake jobs in `MOCK_JOBS`, status pills, with stat cards
-- **Payments:** 12 fake invoices in `MOCK_PAYMENTS` + 8 weeks of fake cash receipts in `MOCK_PAYMENT_WEEKS`, simple inline SVG bar chart, status pills with overdue row highlight
+- **Payments:** 12 fake invoices in `MOCK_PAYMENTS` + 8 weeks of fake cash receipts in `MOCK_PAYMENT_WEEKS`, simple inline SVG bar chart
 - Each mockup screen has a dismissible "Preview — sample data" banner
 - "Preview" badges on Clients/Jobs/Payments nav items
 
 ### UI / UX
-- Sidebar nav grouped into Workspace (Quotes, Follow-ups, Clients, Jobs, Payments) and Account (Profile, Settings)
-- Free plan usage indicator (`quoteUsed` localStorage counter, max 5)
+- Sidebar nav grouped into Workspace (Quotes, Follow-ups, Clients, Jobs, Payments) and Account (Profile, Settings, Sign out)
+- Free plan usage indicator (`quoteUsed` localStorage counter, max 5) — moving to server-side in Sprint 1C
 - Upgrade to Pro button (placeholder, no Stripe yet)
 - Sticky topbar with view-aware title and meta line
-- API key banner at top, key saved to localStorage
+- Login screen at app boot (replaces the old API-key banner that was removed)
 - Toast notifications for actions and errors
 - Custom design system: Fraunces (display) + IBM Plex Sans (body) + JetBrains Mono (code), warm neutrals with amber accent
 
@@ -113,64 +121,71 @@ TradeDeck is an AI-powered admin tool for contractors and tradespeople. Drafts p
 
 | Feature | Priority | Notes |
 |---|---|---|
-| Backend (Next.js + Vercel API route) | High | Required to charge customers; move API call server-side |
-| Auth (Supabase) | High | Required for real metering and payments |
-| Stripe billing | High | $49/mo Pro plan, $99/mo Team |
-| Real CRM (replacing mockups) | Medium | After backend + auth land, swap fake data for real DB-backed views |
-| Persistence of past quotes/follow-ups | Medium | No backend yet; quotes vanish on refresh |
+| Server-side `quoteUsed` enforcement | High | Sprint 1C — move from localStorage to `profiles` table column |
+| Persisted quotes (database) | High | Sprint 2 — `quotes` table with RLS, real "My quotes" history |
+| Real CRM (replacing mockups) | High | Sprint 2 — `clients`, `jobs` tables, swap mockups for real queries |
+| Stripe billing | High | Sprint 3 — Stripe Checkout hosted page + `/api/stripe-webhook` to update plan column |
+| Capacitor wrap (iOS + Android) | Medium | Sprint 4+ — reader-app pattern (signup on web, app authenticates) |
+| Custom SMTP via Resend | Medium | Supabase default email is 2/hr — blocks onboarding more testers; needs verified domain |
 | Convert-to-invoice | Medium | Currently a placeholder button |
-| PWA setup (manifest, service worker, icons) | Medium | "Add to home screen" support |
 | Switch to Haiku option | Low | Faster/cheaper alternative for users who don't need Sonnet quality |
 | Deduplicate `TRADE_GUIDANCE` keys | Low | Some redundancy across trade-specific instructions |
 
 ## Key Decisions Made
 
-- Mobile-first PWA approach over native — faster to ship
+- **Stack: vanilla HTML + Supabase + Vercel Edge + Stripe Checkout + Capacitor** — explicitly NOT Next.js. Vanilla SPAs wrap cleanly in Capacitor for the App Store; Next.js does not.
+- **Reader-app pattern for IAP avoidance** — signup and payment on the web; mobile apps just authenticate existing accounts. Standard B2B SaaS pattern (Notion, Slack, Linear).
+- **Supabase over alternatives** — auth and Postgres in one SDK, generous free tier, RLS does security so the publishable key is safe to expose in the browser
+- **Magic link over password** — friendlier for contractors who won't remember passwords; trades one email round-trip for one less thing to forget
+- Mobile-first PWA approach over native rewrite — Capacitor wraps the existing HTML
 - Single HTML file for MVP — no build step, easy to iterate with Claude
-- Browser-direct API calls for now — knowingly insecure for paying users, fine for trusted testers
 - $20/month spending cap on Anthropic Console — protects against worst case
-- Each tester pastes their own / shared key in browser — no auth yet
 - Trucking, Logistics, Painting, Flooring, Roofing get their own pricing panels (different billing models)
 - Plumbing, Electrical, HVAC, General, Landscaping all use generic hourly/flat — got "smarter" via `TRADE_GUIDANCE` AI prompts, not new UI
-- **Multi-trade in one quote** instead of one-trade-per-quote — single source of truth for combined jobs, per-trade subtotals visible inline, AI is forced to tag each line item with its trade so totals stay coherent
-- **Bilingual EN/ES baked in from the start** — target market includes a meaningful share of Spanish-speaking contractors and homeowners; cheaper to build it now than retrofit later
+- **Multi-trade in one quote** instead of one-trade-per-quote — single source of truth for combined jobs
+- **Bilingual EN/ES baked in from the start** — target market includes a meaningful share of Spanish-speaking contractors and homeowners
 - **Three quote output languages** (EN / ES / both) — "both" keeps a single PDF the contractor can hand to either party
-- **PDF via html2pdf.js direct from the live DOM** — no separate template, no clone, lets the user's inline edits land in the PDF as-is. html2canvas opts kept deliberately minimal — adding `windowWidth` or position overrides caused reflow/clipping in earlier attempts.
+- **Quote document labels lock to content language** — switching UI lang doesn't partial-translate a monolingual quote
+- **PDF via html2pdf.js direct from the live DOM** — no separate template, no clone. html2canvas opts kept deliberately minimal — adding `windowWidth` or position overrides caused reflow/clipping in earlier attempts.
 - Side project goal, not full-time — strategy weighted toward sustainability over scale
 - CRM section currently a mockup to test concept before backend investment
 
 ## Active Testers
 
-- [Tester 1 name] — [their trade, e.g. "logistics company owner"]
-- [Tester 2 name] — [their trade]
-- Status: Both said "this is awesome, would pay" — pending firmer commitment via direct $49 question
-- Next step: Confirm payment intent, then start backend migration
+- [Tester 1 name] — confirmed $49/month commitment ✓
+- [Tester 2 name] — pending firmer commitment
+- Status: 1 confirmed paying, backend migration in progress to enable real billing
 
 ## Open Issues / Known Quirks
 
-- Quote generation takes ~30–60s on Sonnet 4.6 — streaming progress bar improves perceived speed; full Haiku swap still on table
-- 5-quote free limit lives in localStorage, easily bypassed (acceptable for trusted testers, will be enforced server-side later)
-- API key visible in browser devtools (acceptable for trusted testers only)
-- No persistence of past quotes or follow-ups (no backend yet)
+- **Supabase default email: 2/hr on free tier** — blocks onboarding more than 2 testers per hour. Fix is custom SMTP via Resend with a verified domain (deferred).
+- Quote generation takes ~30–60s on Sonnet 4.6 — streaming progress bar improves perceived speed
+- `quoteUsed` 5-quote free limit still lives in localStorage, easily bypassed (Sprint 1C fixes this)
+- No persistence of past quotes or follow-ups yet (Sprint 2)
 - Convert-to-invoice button is still a placeholder
 
 ## Architectural Path Forward
 
-When ready to charge customers (gated on confirmed "yes I'll pay $49" from at least one tester):
-
-1. **Weekend 1:** Convert single `index.html` → Next.js project. Move Anthropic API call to server route (`/api/generate-quote`, `/api/generate-followup`). API key as env var on Vercel. Deploy to same domain.
-2. **Weekend 2:** Add Supabase auth + database. Track `quotes_used_this_month` per user. Enforce 5-quote free limit on server.
-3. **Weekend 3:** Stripe Checkout + webhook. Free → Pro upgrade flow. First paying customer.
-4. **Post-Stripe:** Replace CRM mockups with DB-backed real data (clients, jobs, payments). Build invoice converter.
+- ✅ **Sprint 1A** (DONE): Server-side Anthropic proxy. API key moved out of browser. SSE streaming preserved.
+- ✅ **Quote language fix** (DONE): Quote document labels lock to content language.
+- ✅ **Sprint 1B** (DONE): Supabase magic-link auth gate. App hidden behind login.
+- ⏳ **Sprint 1C** (NEXT): Move `quoteUsed` from localStorage to a Supabase `profiles` table column. Server-side enforcement of the 5-quote free limit.
+- ⏳ **Sprint 2**: Schema for `quotes`, `clients`, `jobs` tables with RLS. Persist generated quotes. Real "My quotes" history. Swap CRM mockups for real queries.
+- ⏳ **Sprint 3**: Stripe Checkout via `/api/create-checkout`. Webhook at `/api/stripe-webhook` updates `users.plan`. Plan gating (free=5/mo, pro=unlimited).
+- ⏳ **Sprint 4+**: Capacitor wrap for App Store + Google Play. Reader-app pattern (signup on web, app authenticates).
 
 ## Code Conventions / Notes
 
 - Model name: `claude-sonnet-4-6` (used in both `generateQuote` and `generateFollowup`)
-- API call uses `anthropic-dangerous-direct-browser-access: true` header and `stream: true`
+- API call goes to `/api/generate` (no more `api.anthropic.com` direct, no Anthropic headers in browser, no `apiKey` param to `streamCompletion`)
+- `sb` global = `window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)` at top of inline script
+- Auth functions: `initAuth()` / `updateAuthUI(session)` / `handleSignIn()` / `handleSignOut()`; called from bottom of script as `init(); initAuth();`
 - `pricingMode` global: `'hourly'` | `'flat'` | `'trucking'` | `'logistics'` | `'painting'` | `'flooring'` | `'roofing'`
 - `taxMode` global: `'none'` | `'custom'`
 - `tdLang` global: `'en'` | `'es'` — current UI language
 - `quoteLanguages` global: `'en'` | `'es'` | `'both'` — AI output language for next generation
+- `quoteContentLang()` — returns the locked language for monolingual quotes, `tdLang` for bilingual
+- `applyQuoteContentLang()` — overrides quote-internal labels using `quoteContentLang()`; called at end of `applyLanguage()`
 - `selectedTrades` array (multi-trade): emoji + name strings (e.g. `["🔧 Plumbing", "🏠 Roofing"]`)
 - `activeTradeIndex` — which trade tab is currently being edited
 - `tradePricingState` object — keyed by trade name, holds `{ mode, jobDesc, ...pricingInputs }` per trade so switching tabs preserves inputs
@@ -182,19 +197,31 @@ When ready to charge customers (gated on confirmed "yes I'll pay $49" from at le
 - `TRADE_LABELS_ES` — Spanish display names for trades
 - `TRADE_GUIDANCE` — trade-specific AI prompt context (embedded in prompt, English only)
 - `TRADE_DESC_EXAMPLES` / `TRADE_DESC_EXAMPLES_ES` — trade-specific placeholder text for job description
-- `I18N` — full UI dictionary, en/es. `t(key, vars)` is the lookup helper.
+- `I18N` — full UI dictionary, en/es. `t(key, vars)` is the lookup helper. New `auth.*` keys and `nav.signOut` added in Sprint 1B.
 - `MOCK_CLIENTS`, `MOCK_JOBS`, `MOCK_PAYMENTS`, `MOCK_PAYMENT_WEEKS` — top-level constants for easy DB swap later
 - `PRICING_INPUTS_BY_MODE` + `PRICING_DEFAULTS` — drive the snapshot/restore for per-trade pricing input state
-- localStorage keys: `anthropicKey`, `quoteUsed`, `tdSigName`, `tdSigBusiness`, `tdSigContact`, `tdLang`, `tdDepositPercent`, `tdQuoteLanguages`
+- localStorage keys: `quoteUsed`, `tdSigName`, `tdSigBusiness`, `tdSigContact`, `tdLang`, `tdDepositPercent`, `tdQuoteLanguages` (NOTE: `anthropicKey` is GONE since the API call moved server-side)
+- Supabase auth session is automatically persisted to localStorage by the Supabase client (key starts with `sb-cqmctdhxticryelvhhze-`)
 - Payment terms template uses `{{depositPct}}`, `{{depositAmt}}`, `{{balanceAmt}}` placeholders interpolated client-side by `renderPaymentTerms()`. Once the user edits the rendered text, the template is locked off (`userEdited: true`) and literal text is stored per-language.
 - CSS uses custom properties (`--ink`, `--accent`, `--line`, `--surface`, `--surface-2`, etc.) — reuse, don't redefine
+- New CSS classes from Sprint 1B: `.auth-screen`, `.auth-card`, `.auth-brand`, `.auth-title`, `.auth-sub`, `.auth-input`, `.auth-btn`, `.auth-status`
 - Display font: Fraunces. Body font: IBM Plex Sans. Mono: JetBrains Mono.
 - Mobile breakpoint: 900px (sidebar becomes drawer below this)
-- **PDF pipeline gotcha:** `generateQuotePdfBlob()` is the single source; `downloadPdf`, `sendQuoteEmail`, `sendQuoteText` all call it. html2canvas opts deliberately minimal (`scale: 2, useCORS: true, logging: false, backgroundColor: '#FFFFFF'`). Do **not** add `windowWidth`, `x`, `y`, `scrollX`, or `scrollY` — earlier attempts to "improve" them caused content clipping (windowWidth reflows the layout; x/y/scrollX/Y shifts the capture rectangle off-element). Let html2canvas use the element's natural bounds.
+- Removed in Sprint 1A: API key banner HTML + `.api-banner*` CSS, `bindApiKey` / `refreshApiStatus` functions, `apiKey` global, 9 obsolete `api.*` / `toast.api*` i18n keys; sticky offsets adjusted (banner was 44px tall — sidebar/topbar now stick to top: 0)
+- **PDF pipeline gotcha:** `generateQuotePdfBlob()` is the single source. html2canvas opts deliberately minimal (`scale: 2, useCORS: true, logging: false, backgroundColor: '#FFFFFF'`). Do **not** add `windowWidth`, `x`, `y`, `scrollX`, or `scrollY` — earlier attempts to "improve" them caused content clipping.
+- **Tooling note:** Claude Code on this Windows host has `awk` (via Git Bash) but no `node` binary — JS syntax checks fall back to careful manual review
+
+## Workflow Preferences
+
+- **Small incremental steps** over big-bang changes
+- **Prompts wrapped in fenced code blocks** for one-click copy into Claude Code in VS Code
+- **4-section prompt format**: Manual setup → The changes → Self-tests (Claude Code runs against its own diff) → Test plan for the user
+- **Self-tests baked in**: Claude Code reports "X/X passed" before the user proceeds to deployment
+- **Explicit negative constraints** when prior attempts failed ("do NOT do X")
 
 ## Open Questions for Next Session
 
-- Did testers confirm $49/month commitment when asked directly?
-- Any bilingual edge cases the testers have hit in the wild (e.g. Spanish-speaking contractor sending an EN+ES quote to an English-only homeowner)?
-- Backend migration: start Weekend 1 immediately, or wait for more tester usage data?
-- Worth adding a "duplicate this quote" / "save as template" feature before backend, or only after persistence is real?
+- Sprint 1C: should `quoteUsed` reset by calendar month (1st of month) or rolling 30 days?
+- Sprint 3 Stripe: confirm hosted Stripe Checkout over custom-built (faster, simpler, less PCI surface)
+- Custom domain for TradeDeck (needed for Resend SMTP + less amateur look) — when to buy?
+- Capacitor timing — wait until Sprint 3 is done, or start in parallel?
