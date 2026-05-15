@@ -5217,6 +5217,23 @@ document.addEventListener('input', (e) => {
 });
 
 // ===== Auth =====
+async function refreshQuoteUsedFromServer() {
+  try {
+    const { data, error } = await sb.rpc('get_quote_status');
+    if (error) {
+      console.warn('get_quote_status failed:', error);
+      return;
+    }
+    if (!data || data.reason === 'not_authenticated') return;
+    if (typeof data.quotes_used === 'number') {
+      quoteUsed = data.quotes_used;
+      updateUsageDisplay();
+    }
+  } catch (e) {
+    console.warn('get_quote_status threw:', e);
+  }
+}
+
 async function initAuth() {
   const { data: { session } } = await sb.auth.getSession();
   updateAuthUI(session);
@@ -5238,6 +5255,8 @@ function updateAuthUI(session) {
   if (session) {
     authScreen.classList.add('hidden');
     appContainer.classList.remove('hidden');
+    // Real Supabase session has an access_token; dev bypass is just { bypass: true }.
+    if (session.access_token) refreshQuoteUsedFromServer();
   } else {
     authScreen.classList.remove('hidden');
     appContainer.classList.add('hidden');
