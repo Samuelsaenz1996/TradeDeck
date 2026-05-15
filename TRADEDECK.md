@@ -225,3 +225,4 @@ TradeDeck is an AI-powered admin tool for contractors and tradespeople. Drafts p
 - Sprint 3 Stripe: confirm hosted Stripe Checkout over custom-built (faster, simpler, less PCI surface)
 - Custom domain for TradeDeck (needed for Resend SMTP + less amateur look) — when to buy?
 - Capacitor timing — wait until Sprint 3 is done, or start in parallel?
+- rememember to remove dev bypass on login

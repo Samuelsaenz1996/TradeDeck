@@ -1044,6 +1044,19 @@
   }
   .auth-btn:hover:not(:disabled) { background: var(--accent); }
   .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .auth-btn-dev {
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px;
+    background: transparent;
+    color: var(--ink-3);
+    border: 1px dashed var(--line);
+    border-radius: var(--radius);
+    font-size: 13px;
+    cursor: pointer;
+    transition: color 0.12s, border-color 0.12s;
+  }
+  .auth-btn-dev:hover { color: var(--ink-2); border-color: var(--ink-3); }
   .auth-status {
     margin-top: 16px;
     padding: 12px 14px;
@@ -1158,6 +1171,7 @@
     <input type="email" class="auth-input" id="authEmail" placeholder="you@yourbusiness.com" autocomplete="email" />
     <button class="auth-btn" id="authSendBtn" data-i18n="auth.sendBtn">Send magic link</button>
     <div class="auth-status hidden" id="authStatus"></div>
+    <button class="auth-btn-dev" id="authBypassBtn" data-i18n="auth.bypassBtn">Skip auth (dev only)</button>
   </div>
 </div>
 
@@ -2445,6 +2459,7 @@ const I18N = {
     'auth.sent': '✓ Check your email — click the link to sign in.',
     'auth.emailRequired': 'Enter your email first',
     'auth.signInFailed': 'Could not send link: ',
+    'auth.bypassBtn': 'Skip auth (dev only)',
     'nav.signOut': 'Sign out',
     // Aria labels
     'aria.openMenu': 'Open navigation menu',
@@ -2793,6 +2808,7 @@ const I18N = {
     'auth.sent': '✓ Revisa tu correo — haz clic en el enlace para entrar.',
     'auth.emailRequired': 'Escribe tu correo primero',
     'auth.signInFailed': 'No se pudo enviar el enlace: ',
+    'auth.bypassBtn': 'Saltar inicio (solo dev)',
     'nav.signOut': 'Cerrar sesión',
     // Aria labels
     'aria.openMenu': 'Abrir menú de navegación',
@@ -5212,6 +5228,8 @@ async function initAuth() {
     if (e.key === 'Enter') handleSignIn();
   });
   document.getElementById('navSignOut').onclick = handleSignOut;
+  // DEV ONLY — bypass auth for local testing. Remove before production.
+  document.getElementById('authBypassBtn').onclick = () => updateAuthUI({ bypass: true });
 }
 
 function updateAuthUI(session) {
