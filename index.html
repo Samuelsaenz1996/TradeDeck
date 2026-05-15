@@ -5283,7 +5283,14 @@ async function initAuth() {
   });
   document.getElementById('navSignOut').onclick = handleSignOut;
   // DEV ONLY — bypass auth for local testing. Remove before production.
-  document.getElementById('authBypassBtn').onclick = () => updateAuthUI({ bypass: true });
+  // Resets the localStorage counter on each bypass click so testers always
+  // start a clean 5/5 session without DevTools surgery.
+  document.getElementById('authBypassBtn').onclick = () => {
+    quoteUsed = 0;
+    localStorage.setItem('quoteUsed', '0');
+    updateUsageDisplay();
+    updateAuthUI({ bypass: true });
+  };
 }
 
 function updateAuthUI(session) {
