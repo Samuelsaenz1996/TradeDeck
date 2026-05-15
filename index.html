@@ -3829,11 +3829,6 @@ function bindFollowupInputs() {
 }
 
 async function generateFollowup() {
-  if (quoteUsed >= 5) {
-    showToast(t('toast.freeLimit'), true);
-    return;
-  }
-
   const customerName = document.getElementById('followupCustomerName').value.trim();
   const jobDesc = document.getElementById('followupJobDesc').value.trim();
   const quoteAmount = parseFloat(document.getElementById('followupQuoteAmount').value) || 0;
@@ -3847,6 +3842,9 @@ async function generateFollowup() {
     document.getElementById('followupJobDesc').focus();
     return;
   }
+
+  // Consume a credit. Real users → server-enforced RPC. Bypass → localStorage.
+  if (!(await consumeQuotaOrShowError())) return;
 
   const btn = document.getElementById('generateFollowupBtn');
   const txt = document.getElementById('followupGenBtnText');
@@ -3886,10 +3884,6 @@ async function generateFollowup() {
 
     const parsed = parseModelOutput(text);
     renderFollowupMessage(parsed);
-
-    quoteUsed += 1;
-    localStorage.setItem('quoteUsed', String(quoteUsed));
-    updateUsageDisplay();
 
     document.getElementById('followupWrap').classList.add('visible');
     document.getElementById('followupWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -4147,10 +4141,6 @@ function updateUsageDisplay() {
 // Generate Quote (Anthropic API call)
 // ============================================================================
 async function generateQuote() {
-  if (quoteUsed >= 5) {
-    showToast(t('toast.freeLimit'), true);
-    return;
-  }
   if (selectedTrades.length === 0) {
     showToast(t('toast.selectTradeFirst'), true);
     return;
@@ -4170,6 +4160,9 @@ async function generateQuote() {
       return;
     }
   }
+
+  // Consume a credit. Real users → server-enforced RPC. Bypass → localStorage.
+  if (!(await consumeQuotaOrShowError())) return;
 
   const btn = document.getElementById('generateBtn');
   const txt = document.getElementById('genBtnText');
@@ -4202,10 +4195,6 @@ async function generateQuote() {
 
     const parsed = parseModelOutput(text);
     renderQuote(parsed);
-
-    quoteUsed += 1;
-    localStorage.setItem('quoteUsed', String(quoteUsed));
-    updateUsageDisplay();
 
     document.getElementById('quoteWrap').classList.add('visible');
     document.getElementById('quoteWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -5217,6 +5206,54 @@ document.addEventListener('input', (e) => {
 });
 
 // ===== Auth =====
+// Consumes one quote credit before a generation runs.
+// Real users (Supabase session): atomic server-enforced consumption via the
+//   consume_quote_credit RPC. Returns false if quota exceeded, true on success.
+// Bypass users (no session): falls back to the localStorage counter, same
+//   5/quote cap as before, but unauthenticated and unenforceable.
+// On success, updates `quoteUsed` and the sidebar display. On failure,
+// shows the appropriate toast and returns false (caller MUST abort).
+async function consumeQuotaOrShowError() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session && session.access_token) {
+    // Real user: server enforces atomically
+    try {
+      const { data, error } = await sb.rpc('consume_quote_credit');
+      if (error) {
+        console.warn('consume_quote_credit failed:', error);
+        showToast(t('toast.genFailed'), true);
+        return false;
+      }
+      if (!data || !data.allowed) {
+        if (data && data.reason === 'quota_exceeded') {
+          showToast(t('toast.freeLimit'), true);
+        } else {
+          showToast(t('toast.genFailed'), true);
+        }
+        return false;
+      }
+      if (typeof data.quotes_used === 'number') {
+        quoteUsed = data.quotes_used;
+        updateUsageDisplay();
+      }
+      return true;
+    } catch (e) {
+      console.warn('consume_quote_credit threw:', e);
+      showToast(t('toast.genFailed'), true);
+      return false;
+    }
+  }
+  // Bypass user: localStorage enforces (legacy path, preserved on purpose)
+  if (quoteUsed >= 5) {
+    showToast(t('toast.freeLimit'), true);
+    return false;
+  }
+  quoteUsed += 1;
+  localStorage.setItem('quoteUsed', String(quoteUsed));
+  updateUsageDisplay();
+  return true;
+}
+
 async function refreshQuoteUsedFromServer() {
   try {
     const { data, error } = await sb.rpc('get_quote_status');
