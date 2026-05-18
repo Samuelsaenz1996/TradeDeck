@@ -427,6 +427,27 @@
     box-shadow: var(--shadow-sm);
     font-weight: 600;
   }
+  .pricing-substruct-toggle {
+    display: inline-flex;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 3px;
+    margin-bottom: 14px;
+  }
+  .pricing-substruct-toggle button {
+    padding: 6px 14px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-2);
+    transition: all 0.12s;
+  }
+  .pricing-substruct-toggle button.active {
+    background: var(--ink);
+    color: var(--bg);
+    font-weight: 600;
+  }
   .quote-lang-toggle button {
     padding: 9px 14px;
     font-size: 13px;
@@ -1332,266 +1353,499 @@
 
           <!-- Trucking Panel -->
           <div id="truckingPanel" class="trucking-panel hidden">
-            <div class="field-row cols-2">
-              <div>
-                <label class="label" data-i18n="trucking.type">Truck type</label>
-                <select class="select" id="truckType">
-                  <option value="Dump truck" data-i18n="trucking.types.dump">Dump truck</option>
-                  <option value="Flatbed" data-i18n="trucking.types.flatbed">Flatbed</option>
-                  <option value="Pickup w/ trailer" data-i18n="trucking.types.pickup">Pickup w/ trailer</option>
-                  <option value="Box truck" data-i18n="trucking.types.box">Box truck</option>
-                  <option value="Tractor-trailer" data-i18n="trucking.types.tractor">Tractor-trailer</option>
-                  <option value="Roll-off" data-i18n="trucking.types.rolloff">Roll-off</option>
-                </select>
+            <div class="pricing-substruct-toggle" id="truckingSubstructToggle"
+                 role="group" aria-label="Pricing structure">
+              <button data-substruct="per-unit" class="active" type="button"
+                      data-i18n="substruct.perUnit">Per-unit</button>
+              <button data-substruct="flat-rate" type="button"
+                      data-i18n="substruct.flat">Flat rate</button>
+            </div>
+            <div class="per-unit-fields" id="truckingPerUnitFields">
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="trucking.type">Truck type</label>
+                  <select class="select" id="truckType">
+                    <option value="Dump truck" data-i18n="trucking.types.dump">Dump truck</option>
+                    <option value="Flatbed" data-i18n="trucking.types.flatbed">Flatbed</option>
+                    <option value="Pickup w/ trailer" data-i18n="trucking.types.pickup">Pickup w/ trailer</option>
+                    <option value="Box truck" data-i18n="trucking.types.box">Box truck</option>
+                    <option value="Tractor-trailer" data-i18n="trucking.types.tractor">Tractor-trailer</option>
+                    <option value="Roll-off" data-i18n="trucking.types.rolloff">Roll-off</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="label" data-i18n="trucking.count"># of trucks</label>
+                  <input type="number" class="input" id="truckCount" value="0" min="0" />
+                </div>
               </div>
-              <div>
-                <label class="label" data-i18n="trucking.count"># of trucks</label>
-                <input type="number" class="input" id="truckCount" value="0" min="0" />
+              <div class="field-row cols-3">
+                <div>
+                  <label class="label" data-i18n="trucking.billing">Billing method</label>
+                  <select class="select" id="billingMethod">
+                    <option value="load" data-i18n="trucking.billing.load">Per load</option>
+                    <option value="hour" data-i18n="trucking.billing.hour">Per hour</option>
+                    <option value="yard" data-i18n="trucking.billing.yard">Per cubic yard</option>
+                    <option value="ton" data-i18n="trucking.billing.ton">Per ton</option>
+                    <option value="mile" data-i18n="trucking.billing.mile">Per mile</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="label" data-i18n="trucking.rate">Rate ($)</label>
+                  <input type="number" class="input" id="truckRate" value="0" min="0" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="trucking.qty">Quantity</label>
+                  <input type="number" class="input" id="truckQty" value="0" min="0" step="0.5" />
+                </div>
+              </div>
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="trucking.disposal">Disposal / dump fees ($)</label>
+                  <input type="number" class="input" id="disposalFee" value="0" min="0" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="trucking.materialHauled">Materials hauled (optional)</label>
+                  <input type="text" class="input" id="materialHauled" data-i18n-placeholder="trucking.materialHauledPlaceholder" placeholder="Concrete debris, gravel, etc." />
+                </div>
+              </div>
+              <div class="trucking-subtotal">
+                <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
+                <span class="trucking-subtotal-amt" id="truckSubtotal">$1,200.00</span>
               </div>
             </div>
-            <div class="field-row cols-3">
-              <div>
-                <label class="label" data-i18n="trucking.billing">Billing method</label>
-                <select class="select" id="billingMethod">
-                  <option value="load" data-i18n="trucking.billing.load">Per load</option>
-                  <option value="hour" data-i18n="trucking.billing.hour">Per hour</option>
-                  <option value="yard" data-i18n="trucking.billing.yard">Per cubic yard</option>
-                  <option value="ton" data-i18n="trucking.billing.ton">Per ton</option>
-                  <option value="mile" data-i18n="trucking.billing.mile">Per mile</option>
-                </select>
+            <div class="flat-rate-fields hidden" id="truckingFlatRateFields">
+              <div class="field-row cols-3">
+                <div>
+                  <label class="label" data-i18n="flat.quantity">Quantity</label>
+                  <input type="number" class="input" id="truckingFlatQty" value="0" min="0" step="0.1" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.unit">Unit</label>
+                  <select class="select" id="truckingFlatUnit">
+                    <option value="trips">Trips</option>
+                    <option value="cubicYards">Cubic yards</option>
+                    <option value="tons">Tons</option>
+                    <option value="loads">Loads</option>
+                    <option value="hours">Hours</option>
+                    <option value="custom">Custom...</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.customUnit" id="truckingFlatCustomUnitLabel">Custom unit</label>
+                  <input type="text" class="input hidden" id="truckingFlatCustomUnit"
+                         data-i18n-placeholder="flat.customUnitPlaceholder"
+                         placeholder="e.g. buckets, runs, pieces" />
+                </div>
               </div>
-              <div>
-                <label class="label" data-i18n="trucking.rate">Rate ($)</label>
-                <input type="number" class="input" id="truckRate" value="0" min="0" />
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
+                  <input type="number" class="input" id="truckingFlatMaterial" value="0" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
+                  <input type="number" class="input" id="truckingFlatRate" value="0" min="0" step="0.01" />
+                </div>
               </div>
-              <div>
-                <label class="label" data-i18n="trucking.qty">Quantity</label>
-                <input type="number" class="input" id="truckQty" value="0" min="0" step="0.5" />
+              <div class="trucking-subtotal">
+                <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
+                <span class="trucking-subtotal-amt" id="truckingFlatSubtotal">$0.00</span>
               </div>
-            </div>
-            <div class="field-row cols-2">
-              <div>
-                <label class="label" data-i18n="trucking.disposal">Disposal / dump fees ($)</label>
-                <input type="number" class="input" id="disposalFee" value="0" min="0" />
-              </div>
-              <div>
-                <label class="label" data-i18n="trucking.materialHauled">Materials hauled (optional)</label>
-                <input type="text" class="input" id="materialHauled" data-i18n-placeholder="trucking.materialHauledPlaceholder" placeholder="Concrete debris, gravel, etc." />
-              </div>
-            </div>
-            <div class="trucking-subtotal">
-              <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
-              <span class="trucking-subtotal-amt" id="truckSubtotal">$1,200.00</span>
             </div>
           </div>
 
           <div id="logisticsPanel" class="trucking-panel hidden">
-            <div class="field-row cols-2">
-              <div>
-                <label class="label" data-i18n="logistics.service">Service type</label>
-                <select class="select" id="serviceType">
-                  <option value="Freight reworking" data-i18n="logistics.services.freight">Freight reworking</option>
-                  <option value="Storage / Warehousing" data-i18n="logistics.services.storage">Storage / Warehousing</option>
-                  <option value="Last-mile delivery" data-i18n="logistics.services.lastMile">Last-mile delivery</option>
-                  <option value="Loading / Unloading" data-i18n="logistics.services.loading">Loading / Unloading</option>
-                  <option value="Cross-docking" data-i18n="logistics.services.crossDock">Cross-docking</option>
-                  <option value="Pick & Pack" data-i18n="logistics.services.pickPack">Pick & Pack</option>
-                  <option value="Returns processing" data-i18n="logistics.services.returns">Returns processing</option>
-                  <option value="Other" data-i18n="logistics.services.other">Other</option>
-                </select>
+            <div class="pricing-substruct-toggle" id="logisticsSubstructToggle"
+                 role="group" aria-label="Pricing structure">
+              <button data-substruct="per-unit" class="active" type="button"
+                      data-i18n="substruct.perUnit">Per-unit</button>
+              <button data-substruct="flat-rate" type="button"
+                      data-i18n="substruct.flat">Flat rate</button>
+            </div>
+            <div class="per-unit-fields" id="logisticsPerUnitFields">
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="logistics.service">Service type</label>
+                  <select class="select" id="serviceType">
+                    <option value="Freight reworking" data-i18n="logistics.services.freight">Freight reworking</option>
+                    <option value="Storage / Warehousing" data-i18n="logistics.services.storage">Storage / Warehousing</option>
+                    <option value="Last-mile delivery" data-i18n="logistics.services.lastMile">Last-mile delivery</option>
+                    <option value="Loading / Unloading" data-i18n="logistics.services.loading">Loading / Unloading</option>
+                    <option value="Cross-docking" data-i18n="logistics.services.crossDock">Cross-docking</option>
+                    <option value="Pick & Pack" data-i18n="logistics.services.pickPack">Pick & Pack</option>
+                    <option value="Returns processing" data-i18n="logistics.services.returns">Returns processing</option>
+                    <option value="Other" data-i18n="logistics.services.other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="label" data-i18n="logistics.billing">Billing method</label>
+                  <select class="select" id="logisticsBillingMethod">
+                    <option value="pallet" data-i18n="logistics.billing.pallet">Per pallet</option>
+                    <option value="palletDay" data-i18n="logistics.billing.palletDay">Per pallet per day</option>
+                    <option value="pound" data-i18n="logistics.billing.pound">Per pound</option>
+                    <option value="cwt" data-i18n="logistics.billing.cwt">Per hundredweight (CWT)</option>
+                    <option value="cubicFoot" data-i18n="logistics.billing.cubicFoot">Per cubic foot</option>
+                    <option value="piece" data-i18n="logistics.billing.piece">Per piece / unit</option>
+                    <option value="hour" data-i18n="logistics.billing.hour">Per hour</option>
+                    <option value="mile" data-i18n="logistics.billing.mile">Per mile</option>
+                    <option value="flat" data-i18n="logistics.billing.flat">Flat rate</option>
+                  </select>
+                </div>
               </div>
-              <div>
-                <label class="label" data-i18n="logistics.billing">Billing method</label>
-                <select class="select" id="logisticsBillingMethod">
-                  <option value="pallet" data-i18n="logistics.billing.pallet">Per pallet</option>
-                  <option value="palletDay" data-i18n="logistics.billing.palletDay">Per pallet per day</option>
-                  <option value="pound" data-i18n="logistics.billing.pound">Per pound</option>
-                  <option value="cwt" data-i18n="logistics.billing.cwt">Per hundredweight (CWT)</option>
-                  <option value="cubicFoot" data-i18n="logistics.billing.cubicFoot">Per cubic foot</option>
-                  <option value="piece" data-i18n="logistics.billing.piece">Per piece / unit</option>
-                  <option value="hour" data-i18n="logistics.billing.hour">Per hour</option>
-                  <option value="mile" data-i18n="logistics.billing.mile">Per mile</option>
-                  <option value="flat" data-i18n="logistics.billing.flat">Flat rate</option>
-                </select>
+              <div class="field-row cols-3">
+                <div>
+                  <label class="label" data-i18n="logistics.rate">Rate ($)</label>
+                  <input type="number" class="input" id="logisticsRate" value="0" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" id="logisticsQtyLabel" data-i18n="logistics.qty.pallet"># of pallets</label>
+                  <input type="number" class="input" id="logisticsQty" value="0" min="0" step="0.1" />
+                </div>
+                <div id="logisticsDaysField" class="hidden">
+                  <label class="label" data-i18n="logistics.days">Days</label>
+                  <input type="number" class="input" id="logisticsDays" value="0" min="0" />
+                </div>
+              </div>
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="logistics.accessorial">Accessorial fees ($)</label>
+                  <input type="number" class="input" id="accessorialFees" value="0" min="0" step="0.01" />
+                  <small style="color: var(--ink-3); font-size: 11px;" data-i18n="logistics.accessorialHelp">Lift gate, waiting time, residential delivery, hazmat handling, etc.</small>
+                </div>
+                <div>
+                  <label class="label" data-i18n="logistics.handling">Special handling (optional)</label>
+                  <input type="text" class="input" id="specialHandling" data-i18n-placeholder="logistics.handlingPlaceholder" placeholder="Climate controlled, white glove, hazmat..." />
+                </div>
+              </div>
+              <div class="trucking-subtotal">
+                <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
+                <span class="trucking-subtotal-amt" id="logisticsSubtotal">$500.00</span>
               </div>
             </div>
-            <div class="field-row cols-3">
-              <div>
-                <label class="label" data-i18n="logistics.rate">Rate ($)</label>
-                <input type="number" class="input" id="logisticsRate" value="0" min="0" step="0.01" />
+            <div class="flat-rate-fields hidden" id="logisticsFlatRateFields">
+              <div class="field-row cols-3">
+                <div>
+                  <label class="label" data-i18n="flat.quantity">Quantity</label>
+                  <input type="number" class="input" id="logisticsFlatQty" value="0" min="0" step="0.1" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.unit">Unit</label>
+                  <select class="select" id="logisticsFlatUnit">
+                    <option value="pallets">Pallets</option>
+                    <option value="containers">Containers</option>
+                    <option value="pieces">Pieces</option>
+                    <option value="stops">Stops</option>
+                    <option value="miles">Miles</option>
+                    <option value="custom">Custom...</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.customUnit" id="logisticsFlatCustomUnitLabel">Custom unit</label>
+                  <input type="text" class="input hidden" id="logisticsFlatCustomUnit"
+                         data-i18n-placeholder="flat.customUnitPlaceholder"
+                         placeholder="e.g. buckets, runs, pieces" />
+                </div>
               </div>
-              <div>
-                <label class="label" id="logisticsQtyLabel" data-i18n="logistics.qty.pallet"># of pallets</label>
-                <input type="number" class="input" id="logisticsQty" value="0" min="0" step="0.1" />
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
+                  <input type="number" class="input" id="logisticsFlatMaterial" value="0" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
+                  <input type="number" class="input" id="logisticsFlatRate" value="0" min="0" step="0.01" />
+                </div>
               </div>
-              <div id="logisticsDaysField" class="hidden">
-                <label class="label" data-i18n="logistics.days">Days</label>
-                <input type="number" class="input" id="logisticsDays" value="0" min="0" />
+              <div class="trucking-subtotal">
+                <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
+                <span class="trucking-subtotal-amt" id="logisticsFlatSubtotal">$0.00</span>
               </div>
-            </div>
-            <div class="field-row cols-2">
-              <div>
-                <label class="label" data-i18n="logistics.accessorial">Accessorial fees ($)</label>
-                <input type="number" class="input" id="accessorialFees" value="0" min="0" step="0.01" />
-                <small style="color: var(--ink-3); font-size: 11px;" data-i18n="logistics.accessorialHelp">Lift gate, waiting time, residential delivery, hazmat handling, etc.</small>
-              </div>
-              <div>
-                <label class="label" data-i18n="logistics.handling">Special handling (optional)</label>
-                <input type="text" class="input" id="specialHandling" data-i18n-placeholder="logistics.handlingPlaceholder" placeholder="Climate controlled, white glove, hazmat..." />
-              </div>
-            </div>
-            <div class="trucking-subtotal">
-              <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
-              <span class="trucking-subtotal-amt" id="logisticsSubtotal">$500.00</span>
             </div>
           </div>
 
           <div id="paintingPanel" class="trucking-panel hidden">
-            <div class="field-row cols-2">
-              <div>
-                <label class="label" data-i18n="painting.area">Wall area (sq ft)</label>
-                <input type="number" class="input" id="paintArea" value="0" min="0" />
+            <div class="pricing-substruct-toggle" id="paintingSubstructToggle"
+                 role="group" aria-label="Pricing structure">
+              <button data-substruct="per-unit" class="active" type="button"
+                      data-i18n="substruct.perUnit">Per-unit</button>
+              <button data-substruct="flat-rate" type="button"
+                      data-i18n="substruct.flat">Flat rate</button>
+            </div>
+            <div class="per-unit-fields" id="paintingPerUnitFields">
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="painting.area">Wall area (sq ft)</label>
+                  <input type="number" class="input" id="paintArea" value="0" min="0" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="painting.coats">Number of coats</label>
+                  <select class="select" id="paintCoats">
+                    <option value="1">1</option>
+                    <option value="2" selected>2</option>
+                    <option value="3">3</option>
+                  </select>
+                </div>
               </div>
-              <div>
-                <label class="label" data-i18n="painting.coats">Number of coats</label>
-                <select class="select" id="paintCoats">
-                  <option value="1">1</option>
-                  <option value="2" selected>2</option>
-                  <option value="3">3</option>
-                </select>
+              <div class="field-row cols-3">
+                <div>
+                  <label class="label" data-i18n="painting.rate">Rate per sq ft per coat ($)</label>
+                  <input type="number" class="input" id="paintRate" value="0" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="painting.cost">Paint cost ($)</label>
+                  <input type="number" class="input" id="paintCost" value="0" min="0" step="0.01" />
+                  <small style="color: var(--ink-3); font-size: 11px;" data-i18n="painting.costHelp">Total paint and supplies</small>
+                </div>
+                <div>
+                  <label class="label" data-i18n="painting.prep">Surface prep ($)</label>
+                  <input type="number" class="input" id="paintPrep" value="0" min="0" step="0.01" />
+                  <small style="color: var(--ink-3); font-size: 11px;" data-i18n="painting.prepHelp">Sanding, patching, caulking, masking</small>
+                </div>
+              </div>
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="painting.trim">Trim and detail work ($)</label>
+                  <input type="number" class="input" id="paintTrim" value="0" min="0" step="0.01" />
+                </div>
+              </div>
+              <div class="trucking-subtotal">
+                <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
+                <span class="trucking-subtotal-amt" id="paintingSubtotal">$0.00</span>
               </div>
             </div>
-            <div class="field-row cols-3">
-              <div>
-                <label class="label" data-i18n="painting.rate">Rate per sq ft per coat ($)</label>
-                <input type="number" class="input" id="paintRate" value="0" min="0" step="0.01" />
+            <div class="flat-rate-fields hidden" id="paintingFlatRateFields">
+              <div class="field-row cols-3">
+                <div>
+                  <label class="label" data-i18n="flat.quantity">Quantity</label>
+                  <input type="number" class="input" id="paintingFlatQty" value="0" min="0" step="0.1" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.unit">Unit</label>
+                  <select class="select" id="paintingFlatUnit">
+                    <option value="sqft">Sq ft</option>
+                    <option value="rooms">Rooms</option>
+                    <option value="linft">Linear ft (trim)</option>
+                    <option value="custom">Custom...</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.customUnit" id="paintingFlatCustomUnitLabel">Custom unit</label>
+                  <input type="text" class="input hidden" id="paintingFlatCustomUnit"
+                         data-i18n-placeholder="flat.customUnitPlaceholder"
+                         placeholder="e.g. buckets, runs, pieces" />
+                </div>
               </div>
-              <div>
-                <label class="label" data-i18n="painting.cost">Paint cost ($)</label>
-                <input type="number" class="input" id="paintCost" value="0" min="0" step="0.01" />
-                <small style="color: var(--ink-3); font-size: 11px;" data-i18n="painting.costHelp">Total paint and supplies</small>
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
+                  <input type="number" class="input" id="paintingFlatMaterial" value="0" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
+                  <input type="number" class="input" id="paintingFlatRate" value="0" min="0" step="0.01" />
+                </div>
               </div>
-              <div>
-                <label class="label" data-i18n="painting.prep">Surface prep ($)</label>
-                <input type="number" class="input" id="paintPrep" value="0" min="0" step="0.01" />
-                <small style="color: var(--ink-3); font-size: 11px;" data-i18n="painting.prepHelp">Sanding, patching, caulking, masking</small>
+              <div class="trucking-subtotal">
+                <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
+                <span class="trucking-subtotal-amt" id="paintingFlatSubtotal">$0.00</span>
               </div>
-            </div>
-            <div class="field-row cols-2">
-              <div>
-                <label class="label" data-i18n="painting.trim">Trim and detail work ($)</label>
-                <input type="number" class="input" id="paintTrim" value="0" min="0" step="0.01" />
-              </div>
-            </div>
-            <div class="trucking-subtotal">
-              <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
-              <span class="trucking-subtotal-amt" id="paintingSubtotal">$0.00</span>
             </div>
           </div>
 
           <div id="flooringPanel" class="trucking-panel hidden">
-            <div class="field-row cols-2">
-              <div>
-                <label class="label" data-i18n="flooring.area">Floor area (sq ft)</label>
-                <input type="number" class="input" id="floorArea" value="0" min="0" step="0.1" />
+            <div class="pricing-substruct-toggle" id="flooringSubstructToggle"
+                 role="group" aria-label="Pricing structure">
+              <button data-substruct="per-unit" class="active" type="button"
+                      data-i18n="substruct.perUnit">Per-unit</button>
+              <button data-substruct="flat-rate" type="button"
+                      data-i18n="substruct.flat">Flat rate</button>
+            </div>
+            <div class="per-unit-fields" id="flooringPerUnitFields">
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="flooring.area">Floor area (sq ft)</label>
+                  <input type="number" class="input" id="floorArea" value="0" min="0" step="0.1" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="flooring.material">Material type</label>
+                  <select class="select" id="floorMaterialType">
+                    <option value="Laminate" data-i18n="flooring.materials.laminate">Laminate</option>
+                    <option value="Vinyl/LVP" data-i18n="flooring.materials.vinyl">Vinyl/LVP</option>
+                    <option value="Hardwood" data-i18n="flooring.materials.hardwood">Hardwood</option>
+                    <option value="Engineered" data-i18n="flooring.materials.engineered">Engineered</option>
+                    <option value="Tile" data-i18n="flooring.materials.tile">Tile</option>
+                    <option value="Carpet" data-i18n="flooring.materials.carpet">Carpet</option>
+                    <option value="Other" data-i18n="flooring.materials.other">Other</option>
+                  </select>
+                </div>
               </div>
-              <div>
-                <label class="label" data-i18n="flooring.material">Material type</label>
-                <select class="select" id="floorMaterialType">
-                  <option value="Laminate" data-i18n="flooring.materials.laminate">Laminate</option>
-                  <option value="Vinyl/LVP" data-i18n="flooring.materials.vinyl">Vinyl/LVP</option>
-                  <option value="Hardwood" data-i18n="flooring.materials.hardwood">Hardwood</option>
-                  <option value="Engineered" data-i18n="flooring.materials.engineered">Engineered</option>
-                  <option value="Tile" data-i18n="flooring.materials.tile">Tile</option>
-                  <option value="Carpet" data-i18n="flooring.materials.carpet">Carpet</option>
-                  <option value="Other" data-i18n="flooring.materials.other">Other</option>
-                </select>
+              <div class="field-row cols-3">
+                <div>
+                  <label class="label" data-i18n="flooring.materialRate">Material cost per sq ft ($)</label>
+                  <input type="number" class="input" id="floorMaterialRate" value="0" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="flooring.installRate">Installation rate per sq ft ($)</label>
+                  <input type="number" class="input" id="floorInstallRate" value="0" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="flooring.waste">Waste factor (%)</label>
+                  <input type="number" class="input" id="floorWasteFactor" value="0" min="0" step="0.1" />
+                  <small style="color: var(--ink-3); font-size: 11px;" data-i18n="flooring.wasteHelp">Typically 10% (standard) or 15% (diagonal patterns)</small>
+                </div>
+              </div>
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="flooring.tearOut">Tear-out and disposal ($)</label>
+                  <input type="number" class="input" id="floorTearOut" value="0" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="flooring.subfloor">Subfloor prep ($)</label>
+                  <input type="number" class="input" id="floorSubfloorPrep" value="0" min="0" step="0.01" />
+                </div>
+              </div>
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="flooring.transitions">Transitions and finish work ($)</label>
+                  <input type="number" class="input" id="floorTransitions" value="0" min="0" step="0.01" />
+                </div>
+              </div>
+              <div class="trucking-subtotal">
+                <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
+                <span class="trucking-subtotal-amt" id="flooringSubtotal">$0.00</span>
               </div>
             </div>
-            <div class="field-row cols-3">
-              <div>
-                <label class="label" data-i18n="flooring.materialRate">Material cost per sq ft ($)</label>
-                <input type="number" class="input" id="floorMaterialRate" value="0" min="0" step="0.01" />
+            <div class="flat-rate-fields hidden" id="flooringFlatRateFields">
+              <div class="field-row cols-3">
+                <div>
+                  <label class="label" data-i18n="flat.quantity">Quantity</label>
+                  <input type="number" class="input" id="flooringFlatQty" value="0" min="0" step="0.1" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.unit">Unit</label>
+                  <select class="select" id="flooringFlatUnit">
+                    <option value="sqft">Sq ft</option>
+                    <option value="linft">Linear ft</option>
+                    <option value="rooms">Rooms</option>
+                    <option value="custom">Custom...</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.customUnit" id="flooringFlatCustomUnitLabel">Custom unit</label>
+                  <input type="text" class="input hidden" id="flooringFlatCustomUnit"
+                         data-i18n-placeholder="flat.customUnitPlaceholder"
+                         placeholder="e.g. buckets, runs, pieces" />
+                </div>
               </div>
-              <div>
-                <label class="label" data-i18n="flooring.installRate">Installation rate per sq ft ($)</label>
-                <input type="number" class="input" id="floorInstallRate" value="0" min="0" step="0.01" />
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
+                  <input type="number" class="input" id="flooringFlatMaterial" value="0" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
+                  <input type="number" class="input" id="flooringFlatRate" value="0" min="0" step="0.01" />
+                </div>
               </div>
-              <div>
-                <label class="label" data-i18n="flooring.waste">Waste factor (%)</label>
-                <input type="number" class="input" id="floorWasteFactor" value="0" min="0" step="0.1" />
-                <small style="color: var(--ink-3); font-size: 11px;" data-i18n="flooring.wasteHelp">Typically 10% (standard) or 15% (diagonal patterns)</small>
+              <div class="trucking-subtotal">
+                <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
+                <span class="trucking-subtotal-amt" id="flooringFlatSubtotal">$0.00</span>
               </div>
-            </div>
-            <div class="field-row cols-2">
-              <div>
-                <label class="label" data-i18n="flooring.tearOut">Tear-out and disposal ($)</label>
-                <input type="number" class="input" id="floorTearOut" value="0" min="0" step="0.01" />
-              </div>
-              <div>
-                <label class="label" data-i18n="flooring.subfloor">Subfloor prep ($)</label>
-                <input type="number" class="input" id="floorSubfloorPrep" value="0" min="0" step="0.01" />
-              </div>
-            </div>
-            <div class="field-row cols-2">
-              <div>
-                <label class="label" data-i18n="flooring.transitions">Transitions and finish work ($)</label>
-                <input type="number" class="input" id="floorTransitions" value="0" min="0" step="0.01" />
-              </div>
-            </div>
-            <div class="trucking-subtotal">
-              <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
-              <span class="trucking-subtotal-amt" id="flooringSubtotal">$0.00</span>
             </div>
           </div>
 
           <div id="roofingPanel" class="trucking-panel hidden">
-            <div class="field-row cols-2">
-              <div>
-                <label class="label" data-i18n="roofing.area">Roof area (squares)</label>
-                <input type="number" class="input" id="roofSquares" value="0" min="0" step="0.1" />
-                <small style="color: var(--ink-3); font-size: 11px;" data-i18n="roofing.areaHelp">1 square = 100 sq ft</small>
+            <div class="pricing-substruct-toggle" id="roofingSubstructToggle"
+                 role="group" aria-label="Pricing structure">
+              <button data-substruct="per-unit" class="active" type="button"
+                      data-i18n="substruct.perUnit">Per-unit</button>
+              <button data-substruct="flat-rate" type="button"
+                      data-i18n="substruct.flat">Flat rate</button>
+            </div>
+            <div class="per-unit-fields" id="roofingPerUnitFields">
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="roofing.area">Roof area (squares)</label>
+                  <input type="number" class="input" id="roofSquares" value="0" min="0" step="0.1" />
+                  <small style="color: var(--ink-3); font-size: 11px;" data-i18n="roofing.areaHelp">1 square = 100 sq ft</small>
+                </div>
+                <div>
+                  <label class="label" data-i18n="roofing.material">Roofing material</label>
+                  <select class="select" id="roofMaterialType">
+                    <option value="Asphalt shingles" data-i18n="roofing.materials.shingles">Asphalt shingles</option>
+                    <option value="Metal" data-i18n="roofing.materials.metal">Metal</option>
+                    <option value="Tile" data-i18n="roofing.materials.tile">Tile</option>
+                    <option value="Flat/Membrane" data-i18n="roofing.materials.flat">Flat/Membrane</option>
+                    <option value="Wood shake" data-i18n="roofing.materials.shake">Wood shake</option>
+                    <option value="Other" data-i18n="roofing.materials.other">Other</option>
+                  </select>
+                </div>
               </div>
-              <div>
-                <label class="label" data-i18n="roofing.material">Roofing material</label>
-                <select class="select" id="roofMaterialType">
-                  <option value="Asphalt shingles" data-i18n="roofing.materials.shingles">Asphalt shingles</option>
-                  <option value="Metal" data-i18n="roofing.materials.metal">Metal</option>
-                  <option value="Tile" data-i18n="roofing.materials.tile">Tile</option>
-                  <option value="Flat/Membrane" data-i18n="roofing.materials.flat">Flat/Membrane</option>
-                  <option value="Wood shake" data-i18n="roofing.materials.shake">Wood shake</option>
-                  <option value="Other" data-i18n="roofing.materials.other">Other</option>
-                </select>
+              <div class="field-row cols-3">
+                <div>
+                  <label class="label" data-i18n="roofing.materialRate">Material cost per square ($)</label>
+                  <input type="number" class="input" id="roofMaterialRate" value="0" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="roofing.laborRate">Labor per square ($)</label>
+                  <input type="number" class="input" id="roofLaborRate" value="0" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="roofing.tearOff">Tear-off per square ($)</label>
+                  <input type="number" class="input" id="roofTearOffRate" value="0" min="0" step="0.01" />
+                </div>
+              </div>
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="roofing.disposal">Disposal / dump fees ($)</label>
+                  <input type="number" class="input" id="roofDisposal" value="0" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="roofing.accessories">Underlayment, flashing, accessories ($)</label>
+                  <input type="number" class="input" id="roofAccessories" value="0" min="0" step="0.01" />
+                  <small style="color: var(--ink-3); font-size: 11px;" data-i18n="roofing.accessoriesHelp">Ice & water shield, drip edge, ridge vent, flashing</small>
+                </div>
+              </div>
+              <div class="trucking-subtotal">
+                <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
+                <span class="trucking-subtotal-amt" id="roofingSubtotal">$0.00</span>
               </div>
             </div>
-            <div class="field-row cols-3">
-              <div>
-                <label class="label" data-i18n="roofing.materialRate">Material cost per square ($)</label>
-                <input type="number" class="input" id="roofMaterialRate" value="0" min="0" step="0.01" />
+            <div class="flat-rate-fields hidden" id="roofingFlatRateFields">
+              <div class="field-row cols-3">
+                <div>
+                  <label class="label" data-i18n="flat.quantity">Quantity</label>
+                  <input type="number" class="input" id="roofingFlatQty" value="0" min="0" step="0.1" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.unit">Unit</label>
+                  <select class="select" id="roofingFlatUnit">
+                    <option value="squares">Squares</option>
+                    <option value="sqft">Sq ft</option>
+                    <option value="custom">Custom...</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.customUnit" id="roofingFlatCustomUnitLabel">Custom unit</label>
+                  <input type="text" class="input hidden" id="roofingFlatCustomUnit"
+                         data-i18n-placeholder="flat.customUnitPlaceholder"
+                         placeholder="e.g. buckets, runs, pieces" />
+                </div>
               </div>
-              <div>
-                <label class="label" data-i18n="roofing.laborRate">Labor per square ($)</label>
-                <input type="number" class="input" id="roofLaborRate" value="0" min="0" step="0.01" />
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
+                  <input type="number" class="input" id="roofingFlatMaterial" value="0" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
+                  <input type="number" class="input" id="roofingFlatRate" value="0" min="0" step="0.01" />
+                </div>
               </div>
-              <div>
-                <label class="label" data-i18n="roofing.tearOff">Tear-off per square ($)</label>
-                <input type="number" class="input" id="roofTearOffRate" value="0" min="0" step="0.01" />
+              <div class="trucking-subtotal">
+                <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
+                <span class="trucking-subtotal-amt" id="roofingFlatSubtotal">$0.00</span>
               </div>
-            </div>
-            <div class="field-row cols-2">
-              <div>
-                <label class="label" data-i18n="roofing.disposal">Disposal / dump fees ($)</label>
-                <input type="number" class="input" id="roofDisposal" value="0" min="0" step="0.01" />
-              </div>
-              <div>
-                <label class="label" data-i18n="roofing.accessories">Underlayment, flashing, accessories ($)</label>
-                <input type="number" class="input" id="roofAccessories" value="0" min="0" step="0.01" />
-                <small style="color: var(--ink-3); font-size: 11px;" data-i18n="roofing.accessoriesHelp">Ice & water shield, drip edge, ridge vent, flashing</small>
-              </div>
-            </div>
-            <div class="trucking-subtotal">
-              <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
-              <span class="trucking-subtotal-amt" id="roofingSubtotal">$0.00</span>
             </div>
           </div>
         </div>
@@ -2161,6 +2415,29 @@ const I18N = {
     'flat.price': 'All-in price ($)',
     'flat.includes': 'Includes (optional)',
     'flat.includesPlaceholder': 'Labor + materials + cleanup',
+    // Pricing structure sub-toggle (specialty panels)
+    'substruct.perUnit': 'Per-unit',
+    'substruct.flat': 'Flat rate',
+    'flat.quantity': 'Quantity',
+    'flat.unit': 'Unit',
+    'flat.customUnit': 'Custom unit',
+    'flat.customUnitPlaceholder': 'e.g. buckets, runs, pieces',
+    'flat.materialCost': 'Material cost ($)',
+    'flat.flatRate': 'Flat rate ($)',
+    'flat.unitNames.trips': 'trips',
+    'flat.unitNames.cubicYards': 'cubic yards',
+    'flat.unitNames.tons': 'tons',
+    'flat.unitNames.loads': 'loads',
+    'flat.unitNames.hours': 'hours',
+    'flat.unitNames.pallets': 'pallets',
+    'flat.unitNames.containers': 'containers',
+    'flat.unitNames.pieces': 'pieces',
+    'flat.unitNames.stops': 'stops',
+    'flat.unitNames.miles': 'miles',
+    'flat.unitNames.sqft': 'sq ft',
+    'flat.unitNames.rooms': 'rooms',
+    'flat.unitNames.linft': 'linear ft',
+    'flat.unitNames.squares': 'squares',
     // Trucking
     'trucking.type': 'Truck type',
     'trucking.types.dump': 'Dump truck',
@@ -2510,6 +2787,29 @@ const I18N = {
     'flat.price': 'Precio todo incluido ($)',
     'flat.includes': 'Incluye (opcional)',
     'flat.includesPlaceholder': 'Mano de obra + materiales + limpieza',
+    // Pricing structure sub-toggle (specialty panels)
+    'substruct.perUnit': 'Por unidad',
+    'substruct.flat': 'Precio fijo',
+    'flat.quantity': 'Cantidad',
+    'flat.unit': 'Unidad',
+    'flat.customUnit': 'Unidad personalizada',
+    'flat.customUnitPlaceholder': 'p.ej. cubetas, tramos, piezas',
+    'flat.materialCost': 'Costo de material ($)',
+    'flat.flatRate': 'Precio fijo ($)',
+    'flat.unitNames.trips': 'viajes',
+    'flat.unitNames.cubicYards': 'yardas cúbicas',
+    'flat.unitNames.tons': 'toneladas',
+    'flat.unitNames.loads': 'cargas',
+    'flat.unitNames.hours': 'horas',
+    'flat.unitNames.pallets': 'tarimas',
+    'flat.unitNames.containers': 'contenedores',
+    'flat.unitNames.pieces': 'piezas',
+    'flat.unitNames.stops': 'paradas',
+    'flat.unitNames.miles': 'millas',
+    'flat.unitNames.sqft': 'pies²',
+    'flat.unitNames.rooms': 'cuartos',
+    'flat.unitNames.linft': 'pies lineales',
+    'flat.unitNames.squares': 'cuadros',
     // Trucking
     'trucking.type': 'Tipo de camión',
     'trucking.types.dump': 'Camión de volteo',
@@ -3206,11 +3506,11 @@ let quoteUsed = parseInt(localStorage.getItem('quoteUsed') || '0', 10);
 const PRICING_INPUTS_BY_MODE = {
   hourly:    ['hours', 'rate', 'materials'],
   flat:      ['flatPrice', 'flatIncludes'],
-  trucking:  ['truckType','truckCount','billingMethod','truckRate','truckQty','disposalFee','materialHauled'],
-  logistics: ['serviceType','logisticsBillingMethod','logisticsRate','logisticsQty','logisticsDays','accessorialFees','specialHandling'],
-  painting:  ['paintArea','paintCoats','paintRate','paintCost','paintPrep','paintTrim'],
-  flooring:  ['floorArea','floorMaterialType','floorMaterialRate','floorInstallRate','floorWasteFactor','floorTearOut','floorSubfloorPrep','floorTransitions'],
-  roofing:   ['roofSquares','roofMaterialType','roofMaterialRate','roofLaborRate','roofTearOffRate','roofDisposal','roofAccessories'],
+  trucking:  ['truckType','truckCount','billingMethod','truckRate','truckQty','disposalFee','materialHauled','truckingFlatQty','truckingFlatUnit','truckingFlatCustomUnit','truckingFlatMaterial','truckingFlatRate'],
+  logistics: ['serviceType','logisticsBillingMethod','logisticsRate','logisticsQty','logisticsDays','accessorialFees','specialHandling','logisticsFlatQty','logisticsFlatUnit','logisticsFlatCustomUnit','logisticsFlatMaterial','logisticsFlatRate'],
+  painting:  ['paintArea','paintCoats','paintRate','paintCost','paintPrep','paintTrim','paintingFlatQty','paintingFlatUnit','paintingFlatCustomUnit','paintingFlatMaterial','paintingFlatRate'],
+  flooring:  ['floorArea','floorMaterialType','floorMaterialRate','floorInstallRate','floorWasteFactor','floorTearOut','floorSubfloorPrep','floorTransitions','flooringFlatQty','flooringFlatUnit','flooringFlatCustomUnit','flooringFlatMaterial','flooringFlatRate'],
+  roofing:   ['roofSquares','roofMaterialType','roofMaterialRate','roofLaborRate','roofTearOffRate','roofDisposal','roofAccessories','roofingFlatQty','roofingFlatUnit','roofingFlatCustomUnit','roofingFlatMaterial','roofingFlatRate'],
 };
 
 // Defaults per pricing mode. Used as fallback when a trade's saved
@@ -3219,11 +3519,11 @@ const PRICING_INPUTS_BY_MODE = {
 const PRICING_DEFAULTS = {
   hourly:    { hours: '0', rate: '0', materials: '0' },
   flat:      { flatPrice: '0', flatIncludes: '' },
-  trucking:  { truckType: 'Dump truck', truckCount: '0', billingMethod: 'load', truckRate: '0', truckQty: '0', disposalFee: '0', materialHauled: '' },
-  logistics: { serviceType: 'Freight reworking', logisticsBillingMethod: 'pallet', logisticsRate: '0', logisticsQty: '0', logisticsDays: '0', accessorialFees: '0', specialHandling: '' },
-  painting:  { paintArea: '0', paintCoats: '2', paintRate: '0', paintCost: '0', paintPrep: '0', paintTrim: '0' },
-  flooring:  { floorArea: '0', floorMaterialType: 'Laminate', floorMaterialRate: '0', floorInstallRate: '0', floorWasteFactor: '0', floorTearOut: '0', floorSubfloorPrep: '0', floorTransitions: '0' },
-  roofing:   { roofSquares: '0', roofMaterialType: 'Asphalt shingles', roofMaterialRate: '0', roofLaborRate: '0', roofTearOffRate: '0', roofDisposal: '0', roofAccessories: '0' },
+  trucking:  { truckType: 'Dump truck', truckCount: '0', billingMethod: 'load', truckRate: '0', truckQty: '0', disposalFee: '0', materialHauled: '', truckingFlatQty: '0', truckingFlatUnit: 'trips', truckingFlatCustomUnit: '', truckingFlatMaterial: '0', truckingFlatRate: '0' },
+  logistics: { serviceType: 'Freight reworking', logisticsBillingMethod: 'pallet', logisticsRate: '0', logisticsQty: '0', logisticsDays: '0', accessorialFees: '0', specialHandling: '', logisticsFlatQty: '0', logisticsFlatUnit: 'pallets', logisticsFlatCustomUnit: '', logisticsFlatMaterial: '0', logisticsFlatRate: '0' },
+  painting:  { paintArea: '0', paintCoats: '2', paintRate: '0', paintCost: '0', paintPrep: '0', paintTrim: '0', paintingFlatQty: '0', paintingFlatUnit: 'sqft', paintingFlatCustomUnit: '', paintingFlatMaterial: '0', paintingFlatRate: '0' },
+  flooring:  { floorArea: '0', floorMaterialType: 'Laminate', floorMaterialRate: '0', floorInstallRate: '0', floorWasteFactor: '0', floorTearOut: '0', floorSubfloorPrep: '0', floorTransitions: '0', flooringFlatQty: '0', flooringFlatUnit: 'sqft', flooringFlatCustomUnit: '', flooringFlatMaterial: '0', flooringFlatRate: '0' },
+  roofing:   { roofSquares: '0', roofMaterialType: 'Asphalt shingles', roofMaterialRate: '0', roofLaborRate: '0', roofTearOffRate: '0', roofDisposal: '0', roofAccessories: '0', roofingFlatQty: '0', roofingFlatUnit: 'squares', roofingFlatCustomUnit: '', roofingFlatMaterial: '0', roofingFlatRate: '0' },
 };
 
 function tradeNameOf(emojiPlusName) {
@@ -3245,6 +3545,14 @@ function snapshotPricingInputs(mode) {
     const el = document.getElementById(id);
     if (el) out[id] = el.value;
   });
+  if (['trucking','logistics','painting','flooring','roofing'].includes(mode)) {
+    const trade = mode;
+    const toggle = document.getElementById(`${trade}SubstructToggle`);
+    if (toggle) {
+      const activeBtn = toggle.querySelector('button.active');
+      out.pricingStructure = activeBtn ? activeBtn.dataset.substruct : 'per-unit';
+    }
+  }
   return out;
 }
 
@@ -3261,6 +3569,17 @@ function restorePricingInputs(snapshot) {
       el.value = defaults[id];
     }
   });
+  if (['trucking','logistics','painting','flooring','roofing'].includes(mode)) {
+    const structure = snapshot.pricingStructure || 'per-unit';
+    applyPricingStructure(mode, structure);
+    const trade = mode;
+    const unitSel = document.getElementById(`${trade}FlatUnit`);
+    const customInput = document.getElementById(`${trade}FlatCustomUnit`);
+    if (unitSel && customInput) {
+      customInput.classList.toggle('hidden', unitSel.value !== 'custom');
+    }
+    updateFlatSubtotal(trade);
+  }
 }
 
 function restoreJobDescForActiveTrade() {
@@ -3326,6 +3645,11 @@ function init() {
   bindPaintingInputs();
   bindFlooringInputs();
   bindRoofingInputs();
+  ['trucking','logistics','painting','flooring','roofing'].forEach(trade => {
+    bindSubstructToggle(trade);
+    bindFlatRateInputs(trade);
+    updateFlatSubtotal(trade);
+  });
   renderFollowupTrades();
   bindFollowupScenarioPills();
   bindFollowupTonePills();
@@ -3476,6 +3800,54 @@ function setPricingMode(mode) {
   document.getElementById('paintingPanel').classList.toggle('hidden', mode !== 'painting');
   document.getElementById('flooringPanel').classList.toggle('hidden', mode !== 'flooring');
   document.getElementById('roofingPanel').classList.toggle('hidden', mode !== 'roofing');
+}
+
+function applyPricingStructure(trade, structure) {
+  const toggle = document.getElementById(`${trade}SubstructToggle`);
+  if (toggle) {
+    toggle.querySelectorAll('button').forEach(b => {
+      b.classList.toggle('active', b.dataset.substruct === structure);
+    });
+  }
+  const perUnit = document.getElementById(`${trade}PerUnitFields`);
+  const flat = document.getElementById(`${trade}FlatRateFields`);
+  if (perUnit) perUnit.classList.toggle('hidden', structure !== 'per-unit');
+  if (flat) flat.classList.toggle('hidden', structure !== 'flat-rate');
+}
+
+function bindSubstructToggle(trade) {
+  const toggle = document.getElementById(`${trade}SubstructToggle`);
+  if (!toggle) return;
+  toggle.querySelectorAll('button').forEach(btn => {
+    btn.onclick = () => {
+      applyPricingStructure(trade, btn.dataset.substruct);
+      saveActiveTradeState();
+      updateFlatSubtotal(trade);
+    };
+  });
+}
+
+function bindFlatRateInputs(trade) {
+  ['FlatQty','FlatMaterial','FlatRate'].forEach(suffix => {
+    const el = document.getElementById(`${trade}${suffix}`);
+    if (el) el.addEventListener('input', () => updateFlatSubtotal(trade));
+  });
+  const unitSel = document.getElementById(`${trade}FlatUnit`);
+  const customInput = document.getElementById(`${trade}FlatCustomUnit`);
+  if (unitSel && customInput) {
+    unitSel.addEventListener('change', () => {
+      customInput.classList.toggle('hidden', unitSel.value !== 'custom');
+      updateFlatSubtotal(trade);
+    });
+    customInput.addEventListener('input', () => updateFlatSubtotal(trade));
+  }
+}
+
+function updateFlatSubtotal(trade) {
+  const m = parseFloat((document.getElementById(`${trade}FlatMaterial`) || {}).value) || 0;
+  const r = parseFloat((document.getElementById(`${trade}FlatRate`) || {}).value) || 0;
+  const el = document.getElementById(`${trade}FlatSubtotal`);
+  if (el) el.textContent = fmt(m + r);
 }
 
 function timelineLabel(tl) {
@@ -4221,6 +4593,28 @@ function buildContextForTradeState(tradeName, state) {
   const getStr = (id) => (state[id] !== undefined ? state[id] : (defaults[id] || ''));
   const mode = state.mode;
 
+  if (state.pricingStructure === 'flat-rate' &&
+      ['trucking','logistics','painting','flooring','roofing'].includes(state.mode)) {
+    const trade = state.mode;
+    const qty = parseFloat(get(`${trade}FlatQty`)) || 0;
+    const unitKey = getStr(`${trade}FlatUnit`) || '';
+    const customUnit = getStr(`${trade}FlatCustomUnit`) || '';
+    const material = parseFloat(get(`${trade}FlatMaterial`)) || 0;
+    const flatRate = parseFloat(get(`${trade}FlatRate`)) || 0;
+    const unitLabel = unitKey === 'custom'
+      ? (customUnit || 'units')
+      : (I18N.en[`flat.unitNames.${unitKey}`] || unitKey);
+    const total = material + flatRate;
+    const summary = [
+      `FLAT-RATE PRICING (contractor specified a flat rate, not per-unit):`,
+      qty > 0 ? `Quantity: ${qty} ${unitLabel}.` : '',
+      material > 0 ? `Material cost: $${material}.` : '',
+      `Flat labor rate: $${flatRate}.`,
+      `Total: $${total}.`,
+    ].filter(Boolean).join(' ');
+    return { mode: state.mode, summary, total, isFlatRate: true };
+  }
+
   if (mode === 'hourly') {
     const h = parseFloat(get('hours')) || 0;
     const r = parseFloat(get('rate')) || 0;
@@ -4403,11 +4797,14 @@ function buildPrompt({ pricingContext, timeline, taxRate, taxLabel, clientName, 
       if (t.mode === 'roofing') return 'This is a ROOFING segment. Use roofing terminology (squares, tear-off, underlayment, flashing, disposal, accessories). Mention weather contingency.';
       return '';
     })();
+    const flatRateNote = t.isFlatRate
+      ? '\n  FLAT-RATE NOTE: The contractor specified a flat total for this trade, not per-unit pricing. The 3-5 phase-based line items MUST sum to exactly the flat rate total above. The quantity + unit and material cost shown are for context only — do NOT add them as separate dollar amounts beyond the flat rate. Material can become its own line item only if material cost > 0, in which case the labor line items sum to (flat rate) and the material line is separate (= flat rate + material).'
+      : '';
     return `TRADE ${i + 1}: ${t.emojiTrade}
   Job description: ${t.jobDesc}
   Pricing: ${t.summary}
   Subtotal for this trade: $${Math.round(t.total)}
-  Trade-specific guidance: ${guidance}${modeNote ? '\n  Mode note: ' + modeNote : ''}`;
+  Trade-specific guidance: ${guidance}${modeNote ? '\n  Mode note: ' + modeNote : ''}${flatRateNote}`;
   }).join('\n\n');
 
   let langInstruction;
@@ -5193,6 +5590,12 @@ function clearForm() {
     ['roofSquares', '0'], ['roofMaterialType', 'Asphalt shingles'],
     ['roofMaterialRate', '0'], ['roofLaborRate', '0'],
     ['roofTearOffRate', '0'], ['roofDisposal', '0'], ['roofAccessories', '0'],
+    // Flat-rate sub-mode fields
+    ['truckingFlatQty', '0'], ['truckingFlatUnit', 'trips'], ['truckingFlatCustomUnit', ''], ['truckingFlatMaterial', '0'], ['truckingFlatRate', '0'],
+    ['logisticsFlatQty', '0'], ['logisticsFlatUnit', 'pallets'], ['logisticsFlatCustomUnit', ''], ['logisticsFlatMaterial', '0'], ['logisticsFlatRate', '0'],
+    ['paintingFlatQty', '0'], ['paintingFlatUnit', 'sqft'], ['paintingFlatCustomUnit', ''], ['paintingFlatMaterial', '0'], ['paintingFlatRate', '0'],
+    ['flooringFlatQty', '0'], ['flooringFlatUnit', 'sqft'], ['flooringFlatCustomUnit', ''], ['flooringFlatMaterial', '0'], ['flooringFlatRate', '0'],
+    ['roofingFlatQty', '0'], ['roofingFlatUnit', 'squares'], ['roofingFlatCustomUnit', ''], ['roofingFlatMaterial', '0'], ['roofingFlatRate', '0'],
     // Rush surcharge
     ['rushSurcharge', '0'],
     ['depositPercent', '50'],
@@ -5232,6 +5635,14 @@ function clearForm() {
   updatePaintingSubtotal();
   updateFlooringSubtotal();
   updateRoofingSubtotal();
+
+  // Reset all specialty pricing structures back to per-unit
+  ['trucking','logistics','painting','flooring','roofing'].forEach(trade => {
+    applyPricingStructure(trade, 'per-unit');
+    const customInput = document.getElementById(`${trade}FlatCustomUnit`);
+    if (customInput) customInput.classList.add('hidden');
+    updateFlatSubtotal(trade);
+  });
 
   document.getElementById('quoteWrap').classList.remove('visible');
   // Drop the bilingual snapshot so a future language toggle won't try to
