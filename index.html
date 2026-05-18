@@ -461,6 +461,39 @@
     padding: 9px 14px;
     font-size: 13px;
   }
+  .view-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    min-height: 40px;
+  }
+  .view-header-spacer { flex: 1; }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-2);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  .btn-ghost:hover { background: var(--surface-2); }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    transition: filter 0.15s;
+  }
+  .btn-primary:hover { filter: brightness(1.06); }
 
   /* === Trucking panel === */
   .trucking-panel {
@@ -1292,19 +1325,54 @@
     <div class="container">
       <div id="quotesView">
 
-      <!-- Quotes subview toggle: New quote vs My quotes (history) -->
-      <div class="pricing-toggle" id="quotesSubViewToggle"
-           role="group" aria-label="Quotes subview"
-           style="margin-bottom: 20px;">
-        <button data-subview="new" class="active" type="button"
-                data-i18n="quotes.tab.new">+ New quote</button>
-        <button data-subview="history" type="button">
-          <span data-i18n="quotes.tab.history">📋 My quotes</span>
-          <span id="quotesHistoryCount" style="margin-left:6px; opacity:0.6;"></span>
+      <div class="view-header" id="quotesHeader">
+        <button id="quotesBackBtn" type="button" class="btn-ghost hidden"
+                aria-label="Back to my quotes">
+          ← <span data-i18n="quotes.backToList">My quotes</span>
+        </button>
+        <div class="view-header-spacer"></div>
+        <button id="quotesNewBtn" type="button" class="btn-primary">
+          + <span data-i18n="quotes.newButton">New Quote</span>
         </button>
       </div>
 
-      <div id="quotesNewSub">
+      <div id="quotesListSub">
+        <div class="card">
+          <div class="card-title" data-i18n="quotes.history.title">My quotes</div>
+          <div class="card-sub" data-i18n="quotes.history.sub">All your saved quotes. Click any row to open and edit.</div>
+          <input type="search" class="input" id="quotesSearchInput"
+                 data-i18n-placeholder="quotes.history.searchPlaceholder"
+                 placeholder="Search by client name..."
+                 style="max-width: 360px; margin-bottom: 16px;" />
+          <div id="quotesListEmpty" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
+            <div style="font-size: 48px; margin-bottom: 12px;">📋</div>
+            <p style="margin-bottom: 16px;" data-i18n="quotes.history.empty">
+              No quotes yet. Generate one to see it here.
+            </p>
+            <button class="btn-primary" id="quotesEmptyCTA" type="button">
+              + <span data-i18n="quotes.history.emptyCTA">Generate your first quote</span>
+            </button>
+          </div>
+          <div id="quotesListLoading" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
+            <span data-i18n="quotes.history.loading">Loading...</span>
+          </div>
+          <table class="line-table" id="quotesListTable">
+            <thead>
+              <tr>
+                <th data-i18n="quotes.history.col.client">Client</th>
+                <th data-i18n="quotes.history.col.trades">Trades</th>
+                <th class="amt-col" data-i18n="quotes.history.col.total">Total</th>
+                <th data-i18n="quotes.history.col.status">Status</th>
+                <th data-i18n="quotes.history.col.date">Date</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="quotesListBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="quotesFormSub" class="hidden">
 
       <!-- Form Card -->
       <div class="card" id="formCard">
@@ -1964,6 +2032,10 @@
         <div class="progress-track"><div class="progress-fill"></div></div>
       </div>
 
+      </div>
+
+      <div id="quotesDocSub" class="hidden">
+
       <!-- Quote Preview -->
       <div class="quote-wrap" id="quoteWrap">
         <div class="quote-actions-bar">
@@ -2070,36 +2142,6 @@
         </div>
       </div>
 
-      </div>
-
-      <div id="quotesHistorySub" class="hidden">
-        <div class="card">
-          <div class="card-title" data-i18n="quotes.history.title">My quotes</div>
-          <div class="card-sub" data-i18n="quotes.history.sub">All your saved quotes. Click any row to open and edit.</div>
-          <input type="search" class="input" id="quotesSearchInput"
-                 data-i18n-placeholder="quotes.history.searchPlaceholder"
-                 placeholder="Search by client name..."
-                 style="max-width: 360px; margin-bottom: 16px;" />
-          <div id="quotesListEmpty" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
-            <span data-i18n="quotes.history.empty">No quotes yet. Generate one to see it here.</span>
-          </div>
-          <div id="quotesListLoading" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
-            <span data-i18n="quotes.history.loading">Loading...</span>
-          </div>
-          <table class="line-table" id="quotesListTable">
-            <thead>
-              <tr>
-                <th data-i18n="quotes.history.col.client">Client</th>
-                <th data-i18n="quotes.history.col.trades">Trades</th>
-                <th class="amt-col" data-i18n="quotes.history.col.total">Total</th>
-                <th data-i18n="quotes.history.col.status">Status</th>
-                <th data-i18n="quotes.history.col.date">Date</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="quotesListBody"></tbody>
-          </table>
-        </div>
       </div>
 
       </div>
@@ -2790,6 +2832,9 @@ const I18N = {
     'quotes.history.sub': 'All your saved quotes. Click any row to open and edit.',
     'quotes.history.searchPlaceholder': 'Search by client name...',
     'quotes.history.empty': 'No quotes yet. Generate one to see it here.',
+    'quotes.history.emptyCTA': 'Generate your first quote',
+    'quotes.backToList': 'My quotes',
+    'quotes.newButton': 'New Quote',
     'quotes.history.loading': 'Loading...',
     'quotes.history.col.client': 'Client',
     'quotes.history.col.trades': 'Trades',
@@ -3184,6 +3229,9 @@ const I18N = {
     'quotes.history.sub': 'Todas tus cotizaciones guardadas. Haz clic en una fila para abrir y editar.',
     'quotes.history.searchPlaceholder': 'Buscar por nombre del cliente...',
     'quotes.history.empty': 'No hay cotizaciones todavía. Genera una para verla aquí.',
+    'quotes.history.emptyCTA': 'Genera tu primera cotización',
+    'quotes.backToList': 'Mis cotizaciones',
+    'quotes.newButton': 'Nueva cotización',
     'quotes.history.loading': 'Cargando...',
     'quotes.history.col.client': 'Cliente',
     'quotes.history.col.trades': 'Oficios',
@@ -3600,7 +3648,7 @@ let followupSigName = localStorage.getItem('tdSigName') || '';
 let followupSigBusiness = localStorage.getItem('tdSigBusiness') || '';
 let followupSigContact = localStorage.getItem('tdSigContact') || '';
 let quoteUsed = parseInt(localStorage.getItem('quoteUsed') || '0', 10);
-let quotesSubView = 'new';        // 'new' | 'history'
+let quotesSubView = 'list';        // 'list' | 'compose' | 'view'
 let savedQuotesCache = [];        // Most recent fetch from the server
 let quotesSaveTimer = null;       // Debounce timer for inline edits
 
@@ -3768,19 +3816,22 @@ function init() {
   // Upgrade button (was inline onclick previously — moved out so we can localize the alert)
   const upgradeBtn = document.getElementById('upgradeBtn');
   if (upgradeBtn) upgradeBtn.onclick = () => alert(t('sidebar.upgradeAlert'));
-  // Bind the quotes subview toggle
-  document.querySelectorAll('#quotesSubViewToggle button').forEach(btn => {
-    btn.onclick = () => switchQuotesSubView(btn.dataset.subview);
-  });
-  // Bind search input
+  // Bind quotes header buttons
+  const quotesNewBtn = document.getElementById('quotesNewBtn');
+  if (quotesNewBtn) quotesNewBtn.onclick = enterComposeMode;
+  const quotesBackBtn = document.getElementById('quotesBackBtn');
+  if (quotesBackBtn) quotesBackBtn.onclick = () => switchQuotesSubView('list');
+  const quotesEmptyCTA = document.getElementById('quotesEmptyCTA');
+  if (quotesEmptyCTA) quotesEmptyCTA.onclick = enterComposeMode;
+  // Search input (unchanged from 2-C)
   const quotesSearch = document.getElementById('quotesSearchInput');
-  if (quotesSearch) {
-    quotesSearch.addEventListener('input', renderQuotesList);
-  }
+  if (quotesSearch) quotesSearch.addEventListener('input', renderQuotesList);
   // Apply persisted language preference. Runs after all dynamic surfaces have rendered
   // once in their default English form, then swaps everything in one pass.
   applyLanguage();
   if (selectedTrades.length === 0) hideAllPricingPanels();
+  // Default landing state for Quotes view
+  switchQuotesSubView('list');
 }
 
 function renderTrades() {
@@ -6031,18 +6082,39 @@ async function persistGeneratedQuote() {
   }
 }
 
-// Switch between the "new quote" form/quote view and the "my quotes"
-// history list. Refreshes the list whenever we enter history view.
+// Switch among the 3 quote subview modes: list (default landing),
+// compose (generation form), view (read/edit a saved quote document).
 function switchQuotesSubView(view) {
-  quotesSubView = (view === 'history') ? 'history' : 'new';
-  document.getElementById('quotesNewSub').classList.toggle('hidden', quotesSubView !== 'new');
-  document.getElementById('quotesHistorySub').classList.toggle('hidden', quotesSubView !== 'history');
-  document.querySelectorAll('#quotesSubViewToggle button').forEach(b => {
-    b.classList.toggle('active', b.dataset.subview === quotesSubView);
-  });
-  if (quotesSubView === 'history') {
+  const valid = ['list', 'compose', 'view'];
+  quotesSubView = valid.includes(view) ? view : 'list';
+
+  const list = document.getElementById('quotesListSub');
+  const form = document.getElementById('quotesFormSub');
+  const doc  = document.getElementById('quotesDocSub');
+  const backBtn = document.getElementById('quotesBackBtn');
+  const newBtn  = document.getElementById('quotesNewBtn');
+
+  list.classList.toggle('hidden', quotesSubView !== 'list');
+  form.classList.toggle('hidden', quotesSubView !== 'compose');
+  doc.classList.toggle('hidden',  quotesSubView !== 'compose' && quotesSubView !== 'view');
+
+  backBtn.classList.toggle('hidden', quotesSubView === 'list');
+  newBtn.classList.toggle('hidden', quotesSubView !== 'list');
+
+  if (quotesSubView === 'list') {
     loadSavedQuotes();
   }
+}
+
+// "+ New Quote" entry: clean slate, then switch to compose mode.
+function enterComposeMode() {
+  currentQuote = null;
+  const wrap = document.getElementById('quoteWrap');
+  if (wrap) wrap.classList.remove('visible');
+  if (typeof clearForm === 'function') {
+    clearForm();
+  }
+  switchQuotesSubView('compose');
 }
 
 // Fetch the user's saved quotes from Supabase, ordered newest first.
@@ -6062,7 +6134,7 @@ async function loadSavedQuotes() {
     savedQuotesCache = [];
     loading.classList.add('hidden');
     empty.classList.remove('hidden');
-    count.textContent = '';
+    if (count) count.textContent = '';
     return;
   }
 
@@ -6080,7 +6152,7 @@ async function loadSavedQuotes() {
   }
 
   loading.classList.add('hidden');
-  count.textContent = savedQuotesCache.length ? `(${savedQuotesCache.length})` : '';
+  if (count) count.textContent = savedQuotesCache.length ? `(${savedQuotesCache.length})` : '';
   renderQuotesList();
 }
 
@@ -6176,7 +6248,7 @@ async function openSavedQuote(quoteId) {
     renderQuote(currentQuote);
     document.getElementById('quoteWrap').classList.add('visible');
 
-    switchQuotesSubView('new');
+    switchQuotesSubView('view');
 
     document.getElementById('quoteWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (e) {
