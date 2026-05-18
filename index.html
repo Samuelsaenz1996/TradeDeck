@@ -1303,15 +1303,15 @@
             <div class="field-row cols-3">
               <div>
                 <label class="label" data-i18n="hourly.estHours">Estimated hours</label>
-                <input type="number" class="input" id="hours" value="8" min="0" step="0.5" />
+                <input type="number" class="input" id="hours" value="0" min="0" step="0.5" />
               </div>
               <div>
                 <label class="label" data-i18n="hourly.rate">Hourly rate ($)</label>
-                <input type="number" class="input" id="rate" value="125" min="0" />
+                <input type="number" class="input" id="rate" value="0" min="0" />
               </div>
               <div>
                 <label class="label" data-i18n="hourly.materials">Materials estimate ($)</label>
-                <input type="number" class="input" id="materials" value="450" min="0" />
+                <input type="number" class="input" id="materials" value="0" min="0" />
               </div>
             </div>
           </div>
@@ -1321,7 +1321,7 @@
             <div class="field-row cols-2">
               <div>
                 <label class="label" data-i18n="flat.price">All-in price ($)</label>
-                <input type="number" class="input" id="flatPrice" value="2400" min="0" />
+                <input type="number" class="input" id="flatPrice" value="0" min="0" />
               </div>
               <div>
                 <label class="label" data-i18n="flat.includes">Includes (optional)</label>
@@ -1346,7 +1346,7 @@
               </div>
               <div>
                 <label class="label" data-i18n="trucking.count"># of trucks</label>
-                <input type="number" class="input" id="truckCount" value="1" min="1" />
+                <input type="number" class="input" id="truckCount" value="0" min="0" />
               </div>
             </div>
             <div class="field-row cols-3">
@@ -1362,17 +1362,17 @@
               </div>
               <div>
                 <label class="label" data-i18n="trucking.rate">Rate ($)</label>
-                <input type="number" class="input" id="truckRate" value="180" min="0" />
+                <input type="number" class="input" id="truckRate" value="0" min="0" />
               </div>
               <div>
                 <label class="label" data-i18n="trucking.qty">Quantity</label>
-                <input type="number" class="input" id="truckQty" value="6" min="0" step="0.5" />
+                <input type="number" class="input" id="truckQty" value="0" min="0" step="0.5" />
               </div>
             </div>
             <div class="field-row cols-2">
               <div>
                 <label class="label" data-i18n="trucking.disposal">Disposal / dump fees ($)</label>
-                <input type="number" class="input" id="disposalFee" value="120" min="0" />
+                <input type="number" class="input" id="disposalFee" value="0" min="0" />
               </div>
               <div>
                 <label class="label" data-i18n="trucking.materialHauled">Materials hauled (optional)</label>
@@ -1418,15 +1418,15 @@
             <div class="field-row cols-3">
               <div>
                 <label class="label" data-i18n="logistics.rate">Rate ($)</label>
-                <input type="number" class="input" id="logisticsRate" value="50" min="0" step="0.01" />
+                <input type="number" class="input" id="logisticsRate" value="0" min="0" step="0.01" />
               </div>
               <div>
                 <label class="label" id="logisticsQtyLabel" data-i18n="logistics.qty.pallet"># of pallets</label>
-                <input type="number" class="input" id="logisticsQty" value="10" min="0" step="0.1" />
+                <input type="number" class="input" id="logisticsQty" value="0" min="0" step="0.1" />
               </div>
               <div id="logisticsDaysField" class="hidden">
                 <label class="label" data-i18n="logistics.days">Days</label>
-                <input type="number" class="input" id="logisticsDays" value="7" min="1" />
+                <input type="number" class="input" id="logisticsDays" value="0" min="0" />
               </div>
             </div>
             <div class="field-row cols-2">
@@ -1450,7 +1450,7 @@
             <div class="field-row cols-2">
               <div>
                 <label class="label" data-i18n="painting.area">Wall area (sq ft)</label>
-                <input type="number" class="input" id="paintArea" value="800" min="0" />
+                <input type="number" class="input" id="paintArea" value="0" min="0" />
               </div>
               <div>
                 <label class="label" data-i18n="painting.coats">Number of coats</label>
@@ -1464,11 +1464,11 @@
             <div class="field-row cols-3">
               <div>
                 <label class="label" data-i18n="painting.rate">Rate per sq ft per coat ($)</label>
-                <input type="number" class="input" id="paintRate" value="1.50" min="0" step="0.01" />
+                <input type="number" class="input" id="paintRate" value="0" min="0" step="0.01" />
               </div>
               <div>
                 <label class="label" data-i18n="painting.cost">Paint cost ($)</label>
-                <input type="number" class="input" id="paintCost" value="200" min="0" step="0.01" />
+                <input type="number" class="input" id="paintCost" value="0" min="0" step="0.01" />
                 <small style="color: var(--ink-3); font-size: 11px;" data-i18n="painting.costHelp">Total paint and supplies</small>
               </div>
               <div>
@@ -1493,7 +1493,7 @@
             <div class="field-row cols-2">
               <div>
                 <label class="label" data-i18n="flooring.area">Floor area (sq ft)</label>
-                <input type="number" class="input" id="floorArea" value="400" min="0" step="0.1" />
+                <input type="number" class="input" id="floorArea" value="0" min="0" step="0.1" />
               </div>
               <div>
                 <label class="label" data-i18n="flooring.material">Material type</label>
@@ -1511,15 +1511,15 @@
             <div class="field-row cols-3">
               <div>
                 <label class="label" data-i18n="flooring.materialRate">Material cost per sq ft ($)</label>
-                <input type="number" class="input" id="floorMaterialRate" value="4.00" min="0" step="0.01" />
+                <input type="number" class="input" id="floorMaterialRate" value="0" min="0" step="0.01" />
               </div>
               <div>
                 <label class="label" data-i18n="flooring.installRate">Installation rate per sq ft ($)</label>
-                <input type="number" class="input" id="floorInstallRate" value="3.50" min="0" step="0.01" />
+                <input type="number" class="input" id="floorInstallRate" value="0" min="0" step="0.01" />
               </div>
               <div>
                 <label class="label" data-i18n="flooring.waste">Waste factor (%)</label>
-                <input type="number" class="input" id="floorWasteFactor" value="10" min="0" step="0.1" />
+                <input type="number" class="input" id="floorWasteFactor" value="0" min="0" step="0.1" />
                 <small style="color: var(--ink-3); font-size: 11px;" data-i18n="flooring.wasteHelp">Typically 10% (standard) or 15% (diagonal patterns)</small>
               </div>
             </div>
@@ -1549,7 +1549,7 @@
             <div class="field-row cols-2">
               <div>
                 <label class="label" data-i18n="roofing.area">Roof area (squares)</label>
-                <input type="number" class="input" id="roofSquares" value="25" min="0" step="0.1" />
+                <input type="number" class="input" id="roofSquares" value="0" min="0" step="0.1" />
                 <small style="color: var(--ink-3); font-size: 11px;" data-i18n="roofing.areaHelp">1 square = 100 sq ft</small>
               </div>
               <div>
@@ -1567,25 +1567,25 @@
             <div class="field-row cols-3">
               <div>
                 <label class="label" data-i18n="roofing.materialRate">Material cost per square ($)</label>
-                <input type="number" class="input" id="roofMaterialRate" value="250" min="0" step="0.01" />
+                <input type="number" class="input" id="roofMaterialRate" value="0" min="0" step="0.01" />
               </div>
               <div>
                 <label class="label" data-i18n="roofing.laborRate">Labor per square ($)</label>
-                <input type="number" class="input" id="roofLaborRate" value="200" min="0" step="0.01" />
+                <input type="number" class="input" id="roofLaborRate" value="0" min="0" step="0.01" />
               </div>
               <div>
                 <label class="label" data-i18n="roofing.tearOff">Tear-off per square ($)</label>
-                <input type="number" class="input" id="roofTearOffRate" value="75" min="0" step="0.01" />
+                <input type="number" class="input" id="roofTearOffRate" value="0" min="0" step="0.01" />
               </div>
             </div>
             <div class="field-row cols-2">
               <div>
                 <label class="label" data-i18n="roofing.disposal">Disposal / dump fees ($)</label>
-                <input type="number" class="input" id="roofDisposal" value="350" min="0" step="0.01" />
+                <input type="number" class="input" id="roofDisposal" value="0" min="0" step="0.01" />
               </div>
               <div>
                 <label class="label" data-i18n="roofing.accessories">Underlayment, flashing, accessories ($)</label>
-                <input type="number" class="input" id="roofAccessories" value="400" min="0" step="0.01" />
+                <input type="number" class="input" id="roofAccessories" value="0" min="0" step="0.01" />
                 <small style="color: var(--ink-3); font-size: 11px;" data-i18n="roofing.accessoriesHelp">Ice & water shield, drip edge, ridge vent, flashing</small>
               </div>
             </div>
@@ -3217,13 +3217,13 @@ const PRICING_INPUTS_BY_MODE = {
 // snapshot doesn't have a value for an input (e.g. brand-new trade
 // just selected, or a field that didn't exist in an older snapshot).
 const PRICING_DEFAULTS = {
-  hourly:    { hours: '8', rate: '125', materials: '450' },
-  flat:      { flatPrice: '2400', flatIncludes: '' },
-  trucking:  { truckType: 'Dump truck', truckCount: '1', billingMethod: 'load', truckRate: '180', truckQty: '6', disposalFee: '120', materialHauled: '' },
-  logistics: { serviceType: 'Freight reworking', logisticsBillingMethod: 'pallet', logisticsRate: '50', logisticsQty: '10', logisticsDays: '7', accessorialFees: '0', specialHandling: '' },
-  painting:  { paintArea: '800', paintCoats: '2', paintRate: '1.50', paintCost: '200', paintPrep: '0', paintTrim: '0' },
-  flooring:  { floorArea: '400', floorMaterialType: 'Laminate', floorMaterialRate: '4.00', floorInstallRate: '3.50', floorWasteFactor: '10', floorTearOut: '0', floorSubfloorPrep: '0', floorTransitions: '0' },
-  roofing:   { roofSquares: '25', roofMaterialType: 'Asphalt shingles', roofMaterialRate: '250', roofLaborRate: '200', roofTearOffRate: '75', roofDisposal: '350', roofAccessories: '400' },
+  hourly:    { hours: '0', rate: '0', materials: '0' },
+  flat:      { flatPrice: '0', flatIncludes: '' },
+  trucking:  { truckType: 'Dump truck', truckCount: '0', billingMethod: 'load', truckRate: '0', truckQty: '0', disposalFee: '0', materialHauled: '' },
+  logistics: { serviceType: 'Freight reworking', logisticsBillingMethod: 'pallet', logisticsRate: '0', logisticsQty: '0', logisticsDays: '0', accessorialFees: '0', specialHandling: '' },
+  painting:  { paintArea: '0', paintCoats: '2', paintRate: '0', paintCost: '0', paintPrep: '0', paintTrim: '0' },
+  flooring:  { floorArea: '0', floorMaterialType: 'Laminate', floorMaterialRate: '0', floorInstallRate: '0', floorWasteFactor: '0', floorTearOut: '0', floorSubfloorPrep: '0', floorTransitions: '0' },
+  roofing:   { roofSquares: '0', roofMaterialType: 'Asphalt shingles', roofMaterialRate: '0', roofLaborRate: '0', roofTearOffRate: '0', roofDisposal: '0', roofAccessories: '0' },
 };
 
 function tradeNameOf(emojiPlusName) {
@@ -4227,7 +4227,10 @@ function buildContextForTradeState(tradeName, state) {
     const m = parseFloat(get('materials')) || 0;
     return {
       mode,
-      summary: `Estimated ${h} hours at $${r}/hr (= $${h*r}). Materials estimated at $${m}.`,
+      summary: [
+        `Estimated ${h} hours at $${r}/hr (= $${h*r}).`,
+        m > 0 ? `Materials estimated at $${m}.` : '',
+      ].filter(Boolean).join(' '),
       total: h * r + m,
     };
   }
@@ -4252,7 +4255,12 @@ function buildContextForTradeState(tradeName, state) {
     const sub = (tc * tr * tq) + fee;
     return {
       mode,
-      summary: `${tc}x ${tt}, billed per ${bm} at $${tr} × ${tq} = $${tc*tr*tq}. Disposal/dump fees: $${fee}. ${mat ? 'Material hauled: ' + mat + '.' : ''} Total: $${sub}.`,
+      summary: [
+        `${tc}x ${tt}, billed per ${bm} at $${tr} × ${tq} = $${tc*tr*tq}.`,
+        fee > 0 ? `Disposal/dump fees: $${fee}.` : '',
+        mat ? `Material hauled: ${mat}.` : '',
+        `Total: $${sub}.`,
+      ].filter(Boolean).join(' '),
       total: sub,
     };
   }
@@ -4268,7 +4276,12 @@ function buildContextForTradeState(tradeName, state) {
     if (lbm === 'palletDay') lsub = lr * lq * ld + acc;
     return {
       mode,
-      summary: `${st} service, billed ${lbm.replace(/([A-Z])/g, ' $1').toLowerCase()} at $${lr}${lbm === 'palletDay' ? ` × ${lq} pallets × ${ld} days` : ` × ${lq}`}. Accessorial fees: $${acc}. ${sh ? 'Special handling: ' + sh + '.' : ''} Total: $${lsub}.`,
+      summary: [
+        `${st} service, billed ${lbm.replace(/([A-Z])/g, ' $1').toLowerCase()} at $${lr}${lbm === 'palletDay' ? ` × ${lq} pallets × ${ld} days` : ` × ${lq}`}.`,
+        acc > 0 ? `Accessorial fees: $${acc}.` : '',
+        sh ? `Special handling: ${sh}.` : '',
+        `Total: $${lsub}.`,
+      ].filter(Boolean).join(' '),
       total: lsub,
     };
   }
@@ -4283,7 +4296,13 @@ function buildContextForTradeState(tradeName, state) {
     const total = labor + paintCost + prep + trim;
     return {
       mode,
-      summary: `${area} sq ft of painting at ${coats} coat(s) and $${rate}/sq ft/coat = $${labor.toFixed(2)}. Paint and supplies: $${paintCost}. Surface prep: $${prep}. Trim/detail work: $${trim}. Total: $${total.toFixed(2)}.`,
+      summary: [
+        `${area} sq ft of painting at ${coats} coat(s) and $${rate}/sq ft/coat = $${labor.toFixed(2)}.`,
+        `Paint and supplies: $${paintCost}.`,
+        prep > 0 ? `Surface prep: $${prep}.` : '',
+        trim > 0 ? `Trim/detail work: $${trim}.` : '',
+        `Total: $${total.toFixed(2)}.`,
+      ].filter(Boolean).join(' '),
       total,
     };
   }
@@ -4300,7 +4319,15 @@ function buildContextForTradeState(tradeName, state) {
     const total = base + wasteCost + tearOut + subfloor + transitions;
     return {
       mode,
-      summary: `${area} sq ft flooring with ${waste}% waste factor. Materials: $${materialRate}/sq ft, installation: $${installRate}/sq ft. Base cost $${base.toFixed(2)}, waste $${wasteCost.toFixed(2)}. Tear-out: $${tearOut}, subfloor prep: $${subfloor}, transitions/finish: $${transitions}. Total: $${total.toFixed(2)}.`,
+      summary: [
+        `${area} sq ft flooring with ${waste}% waste factor.`,
+        `Materials: $${materialRate}/sq ft, installation: $${installRate}/sq ft.`,
+        `Base cost $${base.toFixed(2)}, waste $${wasteCost.toFixed(2)}.`,
+        tearOut > 0 ? `Tear-out: $${tearOut}.` : '',
+        subfloor > 0 ? `Subfloor prep: $${subfloor}.` : '',
+        transitions > 0 ? `Transitions/finish: $${transitions}.` : '',
+        `Total: $${total.toFixed(2)}.`,
+      ].filter(Boolean).join(' '),
       total,
     };
   }
@@ -4315,7 +4342,12 @@ function buildContextForTradeState(tradeName, state) {
     const total = materialTotal + disposal + accessories;
     return {
       mode,
-      summary: `${squares} squares at $${materialRate} material, $${laborRate} labor, and $${tearOffRate} tear-off per square = $${materialTotal.toFixed(2)}. Disposal: $${disposal}, accessories: $${accessories}. Total: $${total.toFixed(2)}.`,
+      summary: [
+        `${squares} squares at $${materialRate} material, $${laborRate} labor, and $${tearOffRate} tear-off per square = $${materialTotal.toFixed(2)}.`,
+        disposal > 0 ? `Disposal: $${disposal}.` : '',
+        accessories > 0 ? `Accessories: $${accessories}.` : '',
+        `Total: $${total.toFixed(2)}.`,
+      ].filter(Boolean).join(' '),
       total,
     };
   }
@@ -4414,6 +4446,8 @@ COMBINED PRICING TOTAL: $${Math.round(combinedTotal)}
 
 ${langInstruction}
 ${multiTradeRules}
+Do NOT generate a line item for any pricing component left at $0. If an optional pricing component (disposal, prep, tear-out, accessories, etc.) is absent or $0 in the trade summaries above, omit that line item entirely from the output.
+
 Return your output as STRICT JSON with this exact structure (no preamble, no code fences, just the JSON):
 
 {
@@ -4632,6 +4666,11 @@ function renderLineItemsTable() {
   currentQuote.lineItems.forEach(li => {
     if (!li.trade) li.trade = defaultTrade;
   });
+  // Drop zero-amount line items defensively (AI sometimes returns $0 rows
+  // even after the prompt says not to).
+  currentQuote.lineItems = currentQuote.lineItems.filter(li =>
+    (parseFloat(li.amount) || 0) > 0
+  );
 
   const tradeOrder = selectedTrades.map(tradeNameOf);
 
@@ -5131,28 +5170,28 @@ function clearForm() {
   const FIELD_DEFAULTS = [
     // Common
     ['jobDesc', ''], ['clientName', ''], ['clientAddr', ''],
-    ['hours', '8'], ['rate', '125'], ['materials', '450'],
-    ['flatPrice', '2400'], ['flatIncludes', ''],
+    ['hours', '0'], ['rate', '0'], ['materials', '0'],
+    ['flatPrice', '0'], ['flatIncludes', ''],
     // Trucking
-    ['truckType', 'Dump truck'], ['truckCount', '1'],
-    ['billingMethod', 'load'], ['truckRate', '180'], ['truckQty', '6'],
-    ['disposalFee', '120'], ['materialHauled', ''],
+    ['truckType', 'Dump truck'], ['truckCount', '0'],
+    ['billingMethod', 'load'], ['truckRate', '0'], ['truckQty', '0'],
+    ['disposalFee', '0'], ['materialHauled', ''],
     // Logistics
     ['serviceType', 'Freight reworking'], ['logisticsBillingMethod', 'pallet'],
-    ['logisticsRate', '50'], ['logisticsQty', '10'], ['logisticsDays', '7'],
+    ['logisticsRate', '0'], ['logisticsQty', '0'], ['logisticsDays', '0'],
     ['accessorialFees', '0'], ['specialHandling', ''],
     // Painting
-    ['paintArea', '800'], ['paintCoats', '2'], ['paintRate', '1.50'],
-    ['paintCost', '200'], ['paintPrep', '0'], ['paintTrim', '0'],
+    ['paintArea', '0'], ['paintCoats', '2'], ['paintRate', '0'],
+    ['paintCost', '0'], ['paintPrep', '0'], ['paintTrim', '0'],
     // Flooring
-    ['floorArea', '400'], ['floorMaterialType', 'Laminate'],
-    ['floorMaterialRate', '4.00'], ['floorInstallRate', '3.50'],
-    ['floorWasteFactor', '10'], ['floorTearOut', '0'],
+    ['floorArea', '0'], ['floorMaterialType', 'Laminate'],
+    ['floorMaterialRate', '0'], ['floorInstallRate', '0'],
+    ['floorWasteFactor', '0'], ['floorTearOut', '0'],
     ['floorSubfloorPrep', '0'], ['floorTransitions', '0'],
     // Roofing
-    ['roofSquares', '25'], ['roofMaterialType', 'Asphalt shingles'],
-    ['roofMaterialRate', '250'], ['roofLaborRate', '200'],
-    ['roofTearOffRate', '75'], ['roofDisposal', '350'], ['roofAccessories', '400'],
+    ['roofSquares', '0'], ['roofMaterialType', 'Asphalt shingles'],
+    ['roofMaterialRate', '0'], ['roofLaborRate', '0'],
+    ['roofTearOffRate', '0'], ['roofDisposal', '0'], ['roofAccessories', '0'],
     // Rush surcharge
     ['rushSurcharge', '0'],
     ['depositPercent', '50'],
