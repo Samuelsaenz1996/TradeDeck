@@ -2727,6 +2727,7 @@ const I18N = {
     'toast.pdfDownloadedShare': 'PDF downloaded — share it however you prefer',
     'toast.invoicePlaceholder': 'Invoice converter coming next — placeholder for now',
     'toast.cleared': 'Cleared',
+    'toast.flatRateExceeded': 'Flat rate exceeded by {amt}',
     'confirm.clearForm': 'Clear the form and quote?',
     // Auth
     'auth.title': 'Sign in to MyTradeDeck',
@@ -3099,6 +3100,7 @@ const I18N = {
     'toast.pdfDownloadedShare': 'PDF descargado — compártelo como prefieras',
     'toast.invoicePlaceholder': 'Conversor de facturas próximamente — por ahora es un marcador',
     'toast.cleared': 'Limpiado',
+    'toast.flatRateExceeded': 'Precio fijo excedido por {amt}',
     'confirm.clearForm': '¿Limpiar el formulario y la cotización?',
     // Auth
     'auth.title': 'Inicia sesión en MyTradeDeck',
@@ -4566,6 +4568,13 @@ async function generateQuote() {
     });
 
     const parsed = parseModelOutput(text);
+    parsed.tradePricingTargets = {};
+    pricingContext.trades.forEach(td => {
+      parsed.tradePricingTargets[td.name] = {
+        isFlatRate: !!td.isFlatRate,
+        target: td.total || 0,
+      };
+    });
     renderQuote(parsed);
 
     document.getElementById('quoteWrap').classList.add('visible');
@@ -4929,6 +4938,14 @@ function renderQuote(data) {
   // and so per-language edits (blur handlers below) have somewhere to write back.
   currentQuote = data;
 
+  // Drop AI-generated $0 line items once at generation time. User-added $0
+  // lines (from "+ Add line item") are preserved on subsequent re-renders.
+  if (Array.isArray(currentQuote.lineItems)) {
+    currentQuote.lineItems = currentQuote.lineItems.filter(li =>
+      (parseFloat(li.amount) || 0) > 0
+    );
+  }
+
   const clientName = document.getElementById('clientName').value || t('quote.clientPlaceholder');
   const clientAddr = document.getElementById('clientAddr').value || t('quote.addressPlaceholder');
 
@@ -4967,6 +4984,19 @@ function renderQuote(data) {
 
   // line items — render the whole table including per-trade sub-headers
   renderLineItemsTable();
+
+  // Normalize each flat-rate trade so initial line items sum exactly to
+  // the contractor's target (AI output is often slightly off)
+  if (currentQuote.tradePricingTargets) {
+    let didNormalize = false;
+    Object.keys(currentQuote.tradePricingTargets).forEach(tname => {
+      if (currentQuote.tradePricingTargets[tname].isFlatRate) {
+        redistributeFlatRateTrade(tname, -1);
+        didNormalize = true;
+      }
+    });
+    if (didNormalize) renderLineItemsTable();
+  }
 
   recalcTotals();
   refreshQuoteLangNotice();
@@ -5007,13 +5037,23 @@ function createLineItemRow(item, index) {
     li.name[tdLang] = nameEl.textContent;
     li.desc[tdLang] = descEl.textContent;
     li.amount = parseAmount(amtEl.textContent);
+    if (li.trade && getTradeFlatRateTarget(li.trade) !== null) {
+      redistributeFlatRateTrade(li.trade, i);
+      renderLineItemsTable();
+    }
   }
 
   tr.querySelector('.delete-btn').onclick = () => {
     const wasIndexed = tr.dataset.lineIndex !== undefined;
     const removedAt = wasIndexed ? parseInt(tr.dataset.lineIndex, 10) : -1;
+    let removedTrade = null;
     if (wasIndexed && currentQuote && currentQuote.lineItems) {
+      removedTrade = currentQuote.lineItems[removedAt] &&
+                     currentQuote.lineItems[removedAt].trade;
       currentQuote.lineItems.splice(removedAt, 1);
+    }
+    if (removedTrade && getTradeFlatRateTarget(removedTrade) !== null) {
+      redistributeFlatRateTrade(removedTrade, -1);
     }
     renderLineItemsTable();
     recalcTotals();
@@ -5051,6 +5091,76 @@ function addLineItemForTrade(tradeName) {
   recalcTotals();
 }
 
+// Returns the flat-rate target for a trade, or null if the trade is not
+// in flat-rate mode (either per-unit or never captured).
+function getTradeFlatRateTarget(tradeName) {
+  const tgt = currentQuote && currentQuote.tradePricingTargets &&
+              currentQuote.tradePricingTargets[tradeName];
+  return (tgt && tgt.isFlatRate) ? (parseFloat(tgt.target) || 0) : null;
+}
+
+// Redistribute the delta between the trade's current line-item sum and the
+// captured flat-rate target proportionally across the other line items in
+// the same trade. excludeIndex = absolute index in currentQuote.lineItems
+// of the item that was just edited (so it's not re-touched). Pass -1 to
+// redistribute across ALL items (used for delete + initial normalization).
+function redistributeFlatRateTrade(tradeName, excludeIndex) {
+  const target = getTradeFlatRateTarget(tradeName);
+  if (target === null) return;
+  if (!currentQuote || !Array.isArray(currentQuote.lineItems)) return;
+
+  const tradeIndices = [];
+  currentQuote.lineItems.forEach((li, i) => {
+    if (li.trade === tradeName) tradeIndices.push(i);
+  });
+  if (tradeIndices.length === 0) return;
+
+  const currentSum = tradeIndices.reduce(
+    (s, i) => s + (parseFloat(currentQuote.lineItems[i].amount) || 0), 0
+  );
+  const delta = target - currentSum;
+  if (Math.abs(delta) < 0.005) return;
+
+  const otherIndices = tradeIndices.filter(i => i !== excludeIndex);
+
+  if (otherIndices.length === 0) {
+    showToast(t('toast.flatRateExceeded', { amt: fmt(Math.abs(delta)) }), true);
+    return;
+  }
+
+  const othersTotal = otherIndices.reduce(
+    (s, i) => s + (parseFloat(currentQuote.lineItems[i].amount) || 0), 0
+  );
+
+  if (othersTotal === 0) {
+    const share = delta / otherIndices.length;
+    otherIndices.forEach(i => {
+      const curr = parseFloat(currentQuote.lineItems[i].amount) || 0;
+      currentQuote.lineItems[i].amount = Math.max(0, curr + share);
+    });
+  } else {
+    otherIndices.forEach(i => {
+      const li = currentQuote.lineItems[i];
+      const curr = parseFloat(li.amount) || 0;
+      const share = delta * (curr / othersTotal);
+      li.amount = Math.max(0, curr + share);
+    });
+  }
+
+  otherIndices.forEach(i => {
+    currentQuote.lineItems[i].amount =
+      Math.round(currentQuote.lineItems[i].amount * 100) / 100;
+  });
+
+  const newSum = tradeIndices.reduce(
+    (s, i) => s + (parseFloat(currentQuote.lineItems[i].amount) || 0), 0
+  );
+  const overflow = newSum - target;
+  if (Math.abs(overflow) > 0.5) {
+    showToast(t('toast.flatRateExceeded', { amt: fmt(Math.abs(overflow)) }), true);
+  }
+}
+
 // Renders the entire line items table from currentQuote.lineItems,
 // grouped by trade with sub-header rows showing per-trade subtotals.
 function renderLineItemsTable() {
@@ -5064,11 +5174,6 @@ function renderLineItemsTable() {
   currentQuote.lineItems.forEach(li => {
     if (!li.trade) li.trade = defaultTrade;
   });
-  // Drop zero-amount line items defensively (AI sometimes returns $0 rows
-  // even after the prompt says not to).
-  currentQuote.lineItems = currentQuote.lineItems.filter(li =>
-    (parseFloat(li.amount) || 0) > 0
-  );
 
   const tradeOrder = selectedTrades.map(tradeNameOf);
 

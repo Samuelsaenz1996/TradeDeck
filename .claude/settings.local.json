@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "PowerShell($cands = @\\(\"$env:LOCALAPPDATA\\\\Programs\\\\Microsoft VS Code\\\\node.exe\",\"$env:LOCALAPPDATA\\\\Programs\\\\nodejs\\\\node.exe\",\"$env:ProgramFiles\\\\nodejs\\\\node.exe\",\"$env:ProgramFiles\\(x86\\)\\\\nodejs\\\\node.exe\",\"$env:APPDATA\\\\npm\\\\node.exe\"\\); $cands | ForEach-Object { if \\(Test-Path $_\\) { Write-Output \"FOUND $_\" } })",
-      "Bash(awk '/<body>/{f=1} f{print} /<\\\\/body>/{exit}' \"c:/ST/GitHub/TradeDeck/TradeDeck/index.html\")"
+      "Bash(awk '/<body>/{f=1} f{print} /<\\\\/body>/{exit}' \"c:/ST/GitHub/TradeDeck/TradeDeck/index.html\")",
+      "Bash(git -C \"c:\\\\ST\\\\GitHub\\\\TradeDeck\\\\TradeDeck\" diff --stat)"
     ]
   }
 }
