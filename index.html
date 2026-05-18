@@ -4424,13 +4424,14 @@ function buildPrompt({ pricingContext, timeline, taxRate, taxLabel, clientName, 
 MULTI-TRADE QUOTE RULES:
 - This quote covers ${trades.length} distinct trades. Treat them as separate scopes of work in one document.
 - SCOPE: Write ${trades.length} short paragraphs, one per trade, in the order listed above. Start each paragraph with the trade name (e.g. "Roofing: ..."). Separate paragraphs with a blank line. The whole thing goes inside the single "scope.en" and "scope.es" strings — DO NOT use markdown headings, just plain text with blank-line separators.
-- LINE ITEMS: Generate 4 line items PER TRADE (so ${trades.length * 4} total). Every line item MUST include a "trade" field matching one of these trade names EXACTLY: ${trades.map(t => '"' + t.name + '"').join(', ')}. The amounts for each trade's line items must sum to approximately that trade's subtotal listed above.
+- LINE ITEMS: Generate 4 line items PER TRADE (so ${trades.length * 4} total), each reflecting a PHASE of the work in that trade's job description — NOT a 1:1 mapping of pricing components. If a contractor specified only labor for a trade (e.g. "10 hours × $50/hr"), still break that total across 4 descriptive phases (diagnosis, prep, primary work, finishing/testing). Every line item MUST include a "trade" field matching one of these trade names EXACTLY: ${trades.map(t => '"' + t.name + '"').join(', ')}. The amounts for each trade's line items must sum to approximately that trade's subtotal listed above. Do NOT invent new pricing components — only split the existing total into descriptive phases.
 - WARRANTY: Write ${trades.length} short warranty paragraphs, one per trade, addressing the relevant warranty conventions for each. Same blank-line-separated format as scope. Start each with the trade name.
 - PAYMENT TERMS: Write ONE set of payment terms covering the combined total. Single deposit, single balance.
 ` : `
 
 SINGLE-TRADE QUOTE:
 - Every line item MUST include a "trade" field with the value "${trades[0].name}".
+- LINE ITEMS: Generate 3-5 line items reflecting PHASES of the work in the job description — NOT a 1:1 mapping of the pricing components the contractor entered. Example: if the contractor specified only "10 hours × $50/hr = $500 labor" and the description is "diagnose A/C, recharge refrigerant, replace fan motor", do NOT produce one $500 "labor" line. Break the total across descriptive phases like Service call & diagnosis, Refrigerant recharge, Fan motor replacement, System testing. Each phase amount is a sensible portion of the trade's total. Amounts must still sum to the trade's pricing total. Do NOT invent new pricing components — only split the existing total into descriptive phases.
 - SCOPE: 2–4 sentence professional scope of work.
 - WARRANTY: 1–2 sentence warranty appropriate for this trade.
 `;
