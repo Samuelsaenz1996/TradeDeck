@@ -2842,7 +2842,7 @@ const I18N = {
     'quotes.history.col.status': 'Status',
     'quotes.history.col.date': 'Date',
     'quotes.history.noClient': '(no client)',
-    'quotes.history.delete': 'Delete',
+    'quotes.history.delete': 'Delete Quote',
     'quotes.history.confirmDelete': 'Delete this quote? This cannot be undone.',
     'toast.quoteLoadFailed': 'Could not load quote',
     'toast.quoteDeleteFailed': 'Could not delete quote',
@@ -3239,7 +3239,7 @@ const I18N = {
     'quotes.history.col.status': 'Estado',
     'quotes.history.col.date': 'Fecha',
     'quotes.history.noClient': '(sin cliente)',
-    'quotes.history.delete': 'Eliminar',
+    'quotes.history.delete': 'Eliminar cotización',
     'quotes.history.confirmDelete': '¿Eliminar esta cotización? No se puede deshacer.',
     'toast.quoteLoadFailed': 'No se pudo cargar la cotización',
     'toast.quoteDeleteFailed': 'No se pudo eliminar la cotización',
@@ -6200,8 +6200,8 @@ function renderQuotesList() {
         <td><span class="status-pill status-${statusKey}">${statusDisp}</span></td>
         <td>${date}</td>
         <td style="text-align:right;">
-          <button class="delete-btn" data-delete-id="${quote.id}" title="${t('quotes.history.delete')}"
-                  style="opacity:1; position: relative;">×</button>
+          <button class="btn-secondary btn-danger" data-delete-id="${quote.id}"
+                  style="padding: 6px 12px; font-size: 13px;">${t('quotes.history.delete')}</button>
         </td>
       </tr>
     `;
