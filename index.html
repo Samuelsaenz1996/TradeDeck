@@ -2802,6 +2802,11 @@ const I18N = {
     'status.Paid': 'Paid',
     'status.Pending': 'Pending',
     'status.Overdue': 'Overdue',
+    'status.Draft': 'Draft',
+    'status.Sent': 'Sent',
+    'status.Accepted': 'Accepted',
+    'status.Declined': 'Declined',
+    'status.Invoiced': 'Invoiced',
     // Toasts / messages
     'toast.freeLimit': 'Free plan limit reached. Upgrade to Pro.',
     'toast.addCustomerFirst': 'Add a customer name first',
@@ -3199,6 +3204,11 @@ const I18N = {
     'status.Paid': 'Pagado',
     'status.Pending': 'Pendiente',
     'status.Overdue': 'Vencido',
+    'status.Draft': 'Borrador',
+    'status.Sent': 'Enviada',
+    'status.Accepted': 'Aceptada',
+    'status.Declined': 'Rechazada',
+    'status.Invoiced': 'Facturada',
     // Toasts / messages
     'toast.freeLimit': 'Límite del plan gratis alcanzado. Mejora a Pro.',
     'toast.addCustomerFirst': 'Agrega el nombre del cliente primero',
@@ -3432,6 +3442,17 @@ function applyLanguage() {
   // Bilingual AI content: re-render in the new language if a quote/followup is on screen
   if (typeof rerenderQuoteForLanguage === 'function') rerenderQuoteForLanguage();
   if (typeof rerenderFollowupForLanguage === 'function') rerenderFollowupForLanguage();
+  // Re-render dynamic content inside the My Quotes list — the rows
+  // are built with t() at template time and don't pick up data-i18n
+  // attribute sweeps. Only re-render when we're actually showing
+  // the list AND there are cached rows to redraw.
+  if (typeof renderQuotesList === 'function'
+      && typeof quotesSubView !== 'undefined'
+      && quotesSubView === 'list'
+      && Array.isArray(savedQuotesCache)
+      && savedQuotesCache.length > 0) {
+    renderQuotesList();
+  }
   // Pin quote-internal labels to the quote's content language (must run last
   // so it can override anything the refresh helpers above wrote)
   applyQuoteContentLang();
