@@ -2737,6 +2737,7 @@ const I18N = {
     'toast.invoicePlaceholder': 'Invoice converter coming next — placeholder for now',
     'toast.cleared': 'Cleared',
     'toast.flatRateExceeded': 'Flat rate exceeded by {amt}',
+    'toast.quoteSaveFailed': 'Could not save to history',
     'confirm.clearForm': 'Clear the form and quote?',
     // Auth
     'auth.title': 'Sign in to MyTradeDeck',
@@ -3110,6 +3111,7 @@ const I18N = {
     'toast.invoicePlaceholder': 'Conversor de facturas próximamente — por ahora es un marcador',
     'toast.cleared': 'Limpiado',
     'toast.flatRateExceeded': 'Precio fijo excedido por {amt}',
+    'toast.quoteSaveFailed': 'No se pudo guardar al historial',
     'confirm.clearForm': '¿Limpiar el formulario y la cotización?',
     // Auth
     'auth.title': 'Inicia sesión en MyTradeDeck',
@@ -4591,6 +4593,7 @@ async function generateQuote() {
     showToast(t('toast.quoteDrafted'));
     completeProgress('generateProgress');
     setTimeout(() => hideProgress('generateProgress'), 600);
+    persistGeneratedQuote().catch(e => console.warn('persist failed:', e));
   } catch (e) {
     console.error(e);
     showToast(e.message || t('toast.genFailed'), true);
@@ -5817,6 +5820,99 @@ async function consumeQuotaOrShowError() {
   localStorage.setItem('quoteUsed', String(quoteUsed));
   updateUsageDisplay();
   return true;
+}
+
+// Persists the currently-rendered quote to Supabase. Auto-creates a
+// client (looked up by name within the current user's rows) if needed,
+// then auto-creates a job referencing the quote + client. Bypass users
+// (no real session) skip silently. Failures show a toast and log but
+// do not throw.
+async function persistGeneratedQuote() {
+  if (!currentQuote) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.access_token) return;
+
+  try {
+    const userId = session.user.id;
+    const clientName = (document.getElementById('clientName').value || '').trim();
+    const clientAddr = (document.getElementById('clientAddr').value || '').trim();
+    const trades = selectedTrades.map(tradeNameOf);
+    const total = parseAmount(document.getElementById('totalDisp').textContent);
+
+    let clientId = null;
+    if (clientName) {
+      const { data: existing } = await sb
+        .from('clients')
+        .select('id')
+        .eq('name', clientName)
+        .limit(1)
+        .maybeSingle();
+      if (existing && existing.id) {
+        clientId = existing.id;
+      } else {
+        const { data: newClient, error: cErr } = await sb
+          .from('clients')
+          .insert({
+            user_id: userId,
+            name: clientName,
+            addr: clientAddr || null,
+            status: 'lead',
+          })
+          .select('id')
+          .single();
+        if (cErr) {
+          console.warn('client insert failed:', cErr);
+        } else if (newClient) {
+          clientId = newClient.id;
+        }
+      }
+    }
+
+    const { data: newQuote, error: qErr } = await sb
+      .from('quotes')
+      .insert({
+        user_id: userId,
+        client_id: clientId,
+        client_name: clientName || null,
+        client_addr: clientAddr || null,
+        total: isFinite(total) ? total : 0,
+        trades: trades,
+        status: 'draft',
+        payload: currentQuote,
+      })
+      .select('id')
+      .single();
+    if (qErr) {
+      console.warn('quote insert failed:', qErr);
+      showToast(t('toast.quoteSaveFailed'), true);
+      return;
+    }
+    if (!newQuote || !newQuote.id) return;
+
+    currentQuote.id = newQuote.id;
+
+    if (clientId && trades.length > 0) {
+      const desc = trades.map(name => {
+        const state = tradePricingState[name];
+        return state && state.jobDesc ? state.jobDesc : '';
+      }).filter(Boolean).join(' / ').slice(0, 500);
+
+      const { error: jErr } = await sb
+        .from('jobs')
+        .insert({
+          user_id: userId,
+          client_id: clientId,
+          quote_id: newQuote.id,
+          description: desc || null,
+          trade: trades[0],
+          amount: isFinite(total) ? total : 0,
+          status: 'quoted',
+        });
+      if (jErr) console.warn('job insert failed:', jErr);
+    }
+  } catch (e) {
+    console.warn('persistGeneratedQuote threw:', e);
+  }
 }
 
 async function refreshQuoteUsedFromServer() {
