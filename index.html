@@ -6237,8 +6237,8 @@ async function streamCompletion({ model, max_tokens, prompt, onProgress }) {
   return accumulated;
 }
 
-function clearForm() {
-  if (!confirm(t('confirm.clearForm'))) return;
+function clearForm(silent) {
+  if (!silent && !confirm(t('confirm.clearForm'))) return;
 
   const FIELD_DEFAULTS = [
     // Common
@@ -6554,11 +6554,18 @@ function enterFollowupComposeMode() {
   currentFollowup = null;
   const wrap = document.getElementById('followupWrap');
   if (wrap) wrap.classList.remove('visible');
-  const fNameInput = document.getElementById('followupCustomerName');
-  if (fNameInput) {
-    const fMatch = findClientByName(fNameInput.value);
-    selectedClientIdForFollowup = fMatch ? fMatch.id : null;
-  }
+  // Clear the follow-up form's text inputs so + New Follow-up
+  // always starts with empty customer + amount + job ref
+  const fieldsToClear = [
+    ['followupCustomerName', ''],
+    ['followupJobDesc', ''],
+    ['followupQuoteAmount', '0'],
+  ];
+  fieldsToClear.forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  });
+  selectedClientIdForFollowup = null;
   switchFollowupsSubView('compose');
 }
 
@@ -6778,12 +6785,10 @@ function enterComposeMode() {
   currentQuote = null;
   const wrap = document.getElementById('quoteWrap');
   if (wrap) wrap.classList.remove('visible');
-  // Re-resolve client lookup against the form's current value
-  const nameInput = document.getElementById('clientName');
-  if (nameInput) {
-    const match = findClientByName(nameInput.value);
-    selectedClientIdForQuote = match ? match.id : null;
-  }
+  // Silently clear all form fields so + New Quote always starts fresh
+  clearForm(true);
+  // Form is now empty → no client is selected
+  selectedClientIdForQuote = null;
   switchQuotesSubView('compose');
 }
 
