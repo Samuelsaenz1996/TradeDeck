@@ -355,6 +355,18 @@
     font-size: 11px;
     font-weight: 600;
   }
+  /* Card title row variant: title on left, action button on right */
+  .card-title.with-action {
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  /* Compact button for card-internal actions — smaller than the
+     primary header button so visual hierarchy stays right */
+  .card-title-action {
+    padding: 8px 14px !important;
+    font-size: 13px !important;
+    font-weight: 500;
+  }
   .card-sub { color: var(--ink-3); font-size: 13px; margin-bottom: 18px; }
 
   /* === Form Elements === */
@@ -2460,7 +2472,12 @@
           </div>
 
           <div class="card">
-            <div class="card-title" data-i18n="clientDetail.quotesTitle">Quotes for this client</div>
+            <div class="card-title with-action">
+              <span data-i18n="clientDetail.quotesTitle">Quotes for this client</span>
+              <button class="btn-primary card-title-action" id="clientDetailNewQuoteBtn" type="button">
+                + <span data-i18n="clientDetail.newQuote">New Quote</span>
+              </button>
+            </div>
             <div id="clientDetailQuotesEmpty" class="hidden"
                  style="text-align: center; padding: 24px; color: var(--ink-3);">
               <span data-i18n="clientDetail.noQuotes">No quotes for this client yet.</span>
@@ -2479,7 +2496,12 @@
           </div>
 
           <div class="card">
-            <div class="card-title" data-i18n="clientDetail.jobsTitle">Jobs for this client</div>
+            <div class="card-title with-action">
+              <span data-i18n="clientDetail.jobsTitle">Jobs for this client</span>
+              <button class="btn-primary card-title-action" id="clientDetailNewJobBtn" type="button">
+                + <span data-i18n="clientDetail.newJob">New Job</span>
+              </button>
+            </div>
             <div id="clientDetailJobsEmpty" class="hidden"
                  style="text-align: center; padding: 24px; color: var(--ink-3);">
               <span data-i18n="clientDetail.noJobs">No jobs for this client yet.</span>
@@ -2499,7 +2521,12 @@
           </div>
 
           <div class="card">
-            <div class="card-title" data-i18n="clientDetail.followupsTitle">Follow-ups for this client</div>
+            <div class="card-title with-action">
+              <span data-i18n="clientDetail.followupsTitle">Follow-ups for this client</span>
+              <button class="btn-primary card-title-action" id="clientDetailNewFollowupBtn" type="button">
+                + <span data-i18n="clientDetail.newFollowup">New Follow-up</span>
+              </button>
+            </div>
             <div id="clientDetailFollowupsEmpty" class="hidden"
                  style="text-align: center; padding: 24px; color: var(--ink-3);">
               <span data-i18n="clientDetail.noFollowups">No follow-ups for this client yet.</span>
@@ -3004,6 +3031,10 @@ const I18N = {
     'clientDetail.jobs.col.amount': 'Amount',
     'clientDetail.jobs.col.status': 'Status',
     'clientDetail.jobs.col.date': 'Date',
+    'clientDetail.newQuote': 'New Quote',
+    'clientDetail.newFollowup': 'New Follow-up',
+    'clientDetail.newJob': 'New Job',
+    'toast.newJobPlaceholder': 'Manual job creation coming in Sprint 2-E.',
     'toast.clientLoadFailed': 'Could not load client',
     'toast.clientSaveFailed': 'Could not save client changes',
     // Jobs
@@ -3468,6 +3499,10 @@ const I18N = {
     'clientDetail.jobs.col.amount': 'Monto',
     'clientDetail.jobs.col.status': 'Estado',
     'clientDetail.jobs.col.date': 'Fecha',
+    'clientDetail.newQuote': 'Nueva cotización',
+    'clientDetail.newFollowup': 'Nuevo seguimiento',
+    'clientDetail.newJob': 'Nuevo trabajo',
+    'toast.newJobPlaceholder': 'Creación manual de trabajos próximamente.',
     'toast.clientLoadFailed': 'No se pudo cargar el cliente',
     'toast.clientSaveFailed': 'No se pudieron guardar los cambios',
     // Jobs
@@ -4193,6 +4228,13 @@ function init() {
       scheduleClientSave();
     };
   });
+  // Bind client detail launcher buttons (top of each related-records card)
+  const newQuoteBtn = document.getElementById('clientDetailNewQuoteBtn');
+  if (newQuoteBtn) newQuoteBtn.onclick = launchNewQuoteForActiveClient;
+  const newFollowupBtn = document.getElementById('clientDetailNewFollowupBtn');
+  if (newFollowupBtn) newFollowupBtn.onclick = launchNewFollowupForActiveClient;
+  const newJobBtn = document.getElementById('clientDetailNewJobBtn');
+  if (newJobBtn) newJobBtn.onclick = launchNewJobForActiveClient;
   // Followups header bindings
   const followupsNewBtn = document.getElementById('followupsNewBtn');
   if (followupsNewBtn) followupsNewBtn.onclick = enterFollowupComposeMode;
@@ -7091,6 +7133,68 @@ async function openClientDetail(clientId) {
     console.warn('openClientDetail threw:', e);
     showToast(t('toast.clientLoadFailed'), true);
   }
+}
+
+// Given a client row, return the string to drop into a form's
+// "client name" or "customer name" field. Companies with a
+// contact get the Attn: convention so the printed quote / sent
+// email reads naturally.
+function clientDisplayNameForForm(client) {
+  if (!client || !client.name) return '';
+  const contact = (client.contact_name || '').trim();
+  if (client.type === 'company' && contact) {
+    return `${client.name} (Attn: ${contact})`;
+  }
+  return client.name;
+}
+
+// Launch "+ New Quote" from the active client. Flushes any pending
+// client autosave, then routes to the Quotes view's compose mode
+// with the client's info pre-filled and selectedClientIdForQuote set
+// so persistGeneratedQuote attaches the new quote to this client_id
+// directly (skips name lookup).
+function launchNewQuoteForActiveClient() {
+  if (!activeClientData) return;
+  const client = activeClientData;
+  clearTimeout(clientsSaveTimer);
+  if (activeClientId) {
+    saveClientEdits().catch(e => console.warn('flush save failed:', e));
+  }
+  switchView('quotes');
+  enterComposeMode();
+  const nameInput = document.getElementById('clientName');
+  const addrInput = document.getElementById('clientAddr');
+  if (nameInput) nameInput.value = clientDisplayNameForForm(client);
+  if (addrInput) addrInput.value = client.addr || '';
+  selectedClientIdForQuote = client.id;
+}
+
+// Launch "+ New Follow-up" from the active client. Bonus pre-fill:
+// if the client has saved quotes, default the form's quote amount
+// to the most recent quote's total.
+function launchNewFollowupForActiveClient() {
+  if (!activeClientData) return;
+  const client = activeClientData;
+  clearTimeout(clientsSaveTimer);
+  if (activeClientId) {
+    saveClientEdits().catch(e => console.warn('flush save failed:', e));
+  }
+  switchView('followups');
+  enterFollowupComposeMode();
+  const nameInput = document.getElementById('followupCustomerName');
+  if (nameInput) nameInput.value = clientDisplayNameForForm(client);
+  const recent = (clientDetailQuotesCache || [])[0];
+  if (recent && recent.total != null) {
+    const amtInput = document.getElementById('followupQuoteAmount');
+    if (amtInput) amtInput.value = String(recent.total);
+  }
+  selectedClientIdForFollowup = client.id;
+}
+
+// Placeholder for jobs — Jobs view doesn't exist yet (Sprint 2-E).
+function launchNewJobForActiveClient() {
+  if (!activeClientData) return;
+  showToast(t('toast.newJobPlaceholder'));
 }
 
 // Populate every form field from activeClientData, set type toggle,
