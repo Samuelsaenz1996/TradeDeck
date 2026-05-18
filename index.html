@@ -1239,6 +1239,8 @@
 </div>
 
 <div id="appContainer" class="hidden">
+<!-- Shared client autocomplete source — kept fresh by refreshClientsLookupCache() -->
+<datalist id="clientsDatalist"></datalist>
 <div class="app">
 
   <!-- Mobile drawer backdrop -->
@@ -1953,7 +1955,7 @@
         <div class="field-row cols-2">
           <div>
             <label class="label" data-i18n="who.clientName">Client name</label>
-            <input type="text" class="input" id="clientName" data-i18n-placeholder="who.clientNamePlaceholder" placeholder="Sarah Chen" />
+            <input type="text" class="input" id="clientName" list="clientsDatalist" autocomplete="off" data-i18n-placeholder="who.clientNamePlaceholder" placeholder="Sarah Chen" />
           </div>
           <div>
             <label class="label" data-i18n="who.address">Job address</label>
@@ -2209,7 +2211,7 @@
           <div class="field-row cols-2">
             <div>
               <label class="label" data-i18n="followup.customer">Customer name</label>
-              <input type="text" class="input" id="followupCustomerName" data-i18n-placeholder="who.clientNamePlaceholder" placeholder="Sarah Chen" />
+              <input type="text" class="input" id="followupCustomerName" list="clientsDatalist" autocomplete="off" data-i18n-placeholder="who.clientNamePlaceholder" placeholder="Sarah Chen" />
             </div>
             <div>
               <label class="label" data-i18n="followup.amount">Quote amount ($)</label>
@@ -3985,6 +3987,9 @@ let followupsSubView = 'list';        // 'list' | 'compose' | 'view'
 let savedFollowupsCache = [];
 let followupsSaveTimer = null;
 let clientDetailFollowupsCache = [];  // For the third card on client detail
+let clientsLookupCache = [];          // All clients for autocomplete
+let selectedClientIdForQuote = null;  // Captured at form-fill time
+let selectedClientIdForFollowup = null;
 
 // Map of pricing mode → input IDs whose values should persist per trade.
 const PRICING_INPUTS_BY_MODE = {
@@ -4197,6 +4202,9 @@ function init() {
   if (followupsEmptyCTA) followupsEmptyCTA.onclick = enterFollowupComposeMode;
   const followupsSearch = document.getElementById('followupsSearchInput');
   if (followupsSearch) followupsSearch.addEventListener('input', renderFollowupsList);
+  // Wire client autocomplete to quote + follow-up name inputs
+  bindClientLookupForQuote();
+  bindClientLookupForFollowup();
   // Apply persisted language preference. Runs after all dynamic surfaces have rendered
   // once in their default English form, then swaps everything in one pass.
   applyLanguage();
@@ -6390,11 +6398,13 @@ async function persistGeneratedQuote() {
     const total = parseAmount(document.getElementById('totalDisp').textContent);
 
     let clientId = null;
-    if (clientName) {
+    if (selectedClientIdForQuote) {
+      clientId = selectedClientIdForQuote;
+    } else if (clientName) {
       const { data: existing } = await sb
         .from('clients')
         .select('id')
-        .eq('name', clientName)
+        .ilike('name', clientName)
         .limit(1)
         .maybeSingle();
       if (existing && existing.id) {
@@ -6414,6 +6424,7 @@ async function persistGeneratedQuote() {
           console.warn('client insert failed:', cErr);
         } else if (newClient) {
           clientId = newClient.id;
+          refreshClientsLookupCache().catch(e => console.warn('lookup refresh:', e));
         }
       }
     }
@@ -6478,11 +6489,13 @@ async function persistGeneratedFollowup() {
     const customerName = (document.getElementById('followupCustomerName').value || '').trim();
 
     let clientId = null;
-    if (customerName) {
+    if (selectedClientIdForFollowup) {
+      clientId = selectedClientIdForFollowup;
+    } else if (customerName) {
       const { data: existing } = await sb
         .from('clients')
         .select('id')
-        .eq('name', customerName)
+        .ilike('name', customerName)
         .limit(1)
         .maybeSingle();
       if (existing && existing.id) clientId = existing.id;
@@ -6541,6 +6554,11 @@ function enterFollowupComposeMode() {
   currentFollowup = null;
   const wrap = document.getElementById('followupWrap');
   if (wrap) wrap.classList.remove('visible');
+  const fNameInput = document.getElementById('followupCustomerName');
+  if (fNameInput) {
+    const fMatch = findClientByName(fNameInput.value);
+    selectedClientIdForFollowup = fMatch ? fMatch.id : null;
+  }
   switchFollowupsSubView('compose');
 }
 
@@ -6760,11 +6778,103 @@ function enterComposeMode() {
   currentQuote = null;
   const wrap = document.getElementById('quoteWrap');
   if (wrap) wrap.classList.remove('visible');
+  // Re-resolve client lookup against the form's current value
+  const nameInput = document.getElementById('clientName');
+  if (nameInput) {
+    const match = findClientByName(nameInput.value);
+    selectedClientIdForQuote = match ? match.id : null;
+  }
   switchQuotesSubView('compose');
 }
 
-// Fetch the user's saved quotes from Supabase, ordered newest first.
-// Bypass users get an empty list.
+// Fetch all clients into clientsLookupCache and rebuild the
+// <datalist>. Bypass users get an empty cache. Called on session
+// ready, after any auto-create in persistGeneratedQuote, and
+// whenever the Clients view re-loads.
+async function refreshClientsLookupCache() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.access_token) {
+    clientsLookupCache = [];
+    renderClientsDatalist();
+    return;
+  }
+  try {
+    const { data, error } = await sb
+      .from('clients')
+      .select('id, name, type, contact_name, addr, email, phone')
+      .order('name', { ascending: true })
+      .limit(500);
+    if (error) throw error;
+    clientsLookupCache = data || [];
+  } catch (e) {
+    console.warn('refreshClientsLookupCache failed:', e);
+    clientsLookupCache = [];
+  }
+  renderClientsDatalist();
+}
+
+// Populate the <datalist>. Dedupes by name for display so the
+// dropdown doesn't show "Sarah Chen" three times if there are
+// three Sarah Chen records.
+function renderClientsDatalist() {
+  const list = document.getElementById('clientsDatalist');
+  if (!list) return;
+  const seen = new Set();
+  const unique = clientsLookupCache.filter(c => {
+    if (!c.name) return false;
+    const key = c.name.trim();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  list.innerHTML = unique.map(c =>
+    `<option value="${escapeHtml(c.name)}"></option>`
+  ).join('');
+}
+
+// Case-insensitive exact-match against clientsLookupCache. Returns
+// the FIRST match (so dupes resolve to the alphabetically-first by
+// virtue of how the cache is ordered). Returns null on no match.
+function findClientByName(name) {
+  if (!name) return null;
+  const target = name.trim().toLowerCase();
+  if (!target) return null;
+  return clientsLookupCache.find(c =>
+    (c.name || '').trim().toLowerCase() === target
+  ) || null;
+}
+
+// Wires the quote form's clientName input. On every input event,
+// try to match against the lookup cache; on match, capture id and
+// auto-fill address. On no match, clear the id.
+function bindClientLookupForQuote() {
+  const nameInput = document.getElementById('clientName');
+  const addrInput = document.getElementById('clientAddr');
+  if (!nameInput) return;
+  nameInput.addEventListener('input', () => {
+    const match = findClientByName(nameInput.value);
+    if (match) {
+      selectedClientIdForQuote = match.id;
+      if (addrInput && match.addr) {
+        addrInput.value = match.addr;
+      }
+    } else {
+      selectedClientIdForQuote = null;
+    }
+  });
+}
+
+// Same pattern for the follow-up form. Follow-ups don't have an
+// address field, so we only capture the id.
+function bindClientLookupForFollowup() {
+  const nameInput = document.getElementById('followupCustomerName');
+  if (!nameInput) return;
+  nameInput.addEventListener('input', () => {
+    const match = findClientByName(nameInput.value);
+    selectedClientIdForFollowup = match ? match.id : null;
+  });
+}
+
 // Fetch the user's clients from Supabase, then augment each row
 // with computed job count, revenue, and last-activity timestamp
 // by aggregating from the jobs and quotes tables. Bypass users
@@ -6830,6 +6940,15 @@ async function loadClients() {
     });
 
     clientsCache = clients.map(c => Object.assign({}, c, stats[c.id]));
+    clientsLookupCache = clients.map(c => ({
+      id: c.id,
+      name: c.name,
+      type: c.type,
+      contact_name: c.contact_name,
+      addr: c.addr,
+      email: c.email,
+      phone: c.phone,
+    }));
   } catch (e) {
     console.warn('loadClients failed:', e);
     clientsCache = [];
@@ -6837,6 +6956,7 @@ async function loadClients() {
 
   loading.classList.add('hidden');
   renderClientsList();
+  renderClientsDatalist();
 }
 
 // Render the list using the current search filter
@@ -7467,7 +7587,10 @@ function updateAuthUI(session) {
     authScreen.classList.add('hidden');
     appContainer.classList.remove('hidden');
     // Real Supabase session has an access_token; dev bypass is just { bypass: true }.
-    if (session.access_token) refreshQuoteUsedFromServer();
+    if (session.access_token) {
+      refreshQuoteUsedFromServer();
+      refreshClientsLookupCache();
+    }
   } else {
     authScreen.classList.remove('hidden');
     appContainer.classList.add('hidden');
