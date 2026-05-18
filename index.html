@@ -6108,12 +6108,11 @@ function switchQuotesSubView(view) {
 
 // "+ New Quote" entry: clean slate, then switch to compose mode.
 function enterComposeMode() {
+  // Clean break from any previously-viewed quote so future autosaves
+  // don't accidentally write to the old row
   currentQuote = null;
   const wrap = document.getElementById('quoteWrap');
   if (wrap) wrap.classList.remove('visible');
-  if (typeof clearForm === 'function') {
-    clearForm();
-  }
   switchQuotesSubView('compose');
 }
 
