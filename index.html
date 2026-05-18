@@ -3034,6 +3034,8 @@ const I18N = {
     'clientDetail.newQuote': 'New Quote',
     'clientDetail.newFollowup': 'New Follow-up',
     'clientDetail.newJob': 'New Job',
+    'clientDetail.newHeader': 'New client',
+    'toast.clientCreated': 'Client created',
     'toast.newJobPlaceholder': 'Manual job creation coming in Sprint 2-E.',
     'toast.clientLoadFailed': 'Could not load client',
     'toast.clientSaveFailed': 'Could not save client changes',
@@ -3502,6 +3504,8 @@ const I18N = {
     'clientDetail.newQuote': 'Nueva cotización',
     'clientDetail.newFollowup': 'Nuevo seguimiento',
     'clientDetail.newJob': 'Nuevo trabajo',
+    'clientDetail.newHeader': 'Nuevo cliente',
+    'toast.clientCreated': 'Cliente creado',
     'toast.newJobPlaceholder': 'Creación manual de trabajos próximamente.',
     'toast.clientLoadFailed': 'No se pudo cargar el cliente',
     'toast.clientSaveFailed': 'No se pudieron guardar los cambios',
@@ -4025,6 +4029,8 @@ let clientDetailFollowupsCache = [];  // For the third card on client detail
 let clientsLookupCache = [];          // All clients for autocomplete
 let selectedClientIdForQuote = null;  // Captured at form-fill time
 let selectedClientIdForFollowup = null;
+let isCreatingNewClient = false;  // True between "+ New Client" click
+                                  // and the first successful insert
 
 // Map of pricing mode → input IDs whose values should persist per trade.
 const PRICING_INPUTS_BY_MODE = {
@@ -4204,11 +4210,16 @@ function init() {
   if (clientsNewBtn) clientsNewBtn.onclick = enterNewClientMode;
   const clientsBackBtn = document.getElementById('clientsBackBtn');
   if (clientsBackBtn) clientsBackBtn.onclick = () => {
-    // Flush any pending debounced save synchronously, then return to list
     clearTimeout(clientsSaveTimer);
-    if (activeClientId) saveClientEdits().catch(e => console.warn('flush save failed:', e));
+    // Flush any pending save before navigating away (in update mode
+    // this saves edits; in new-client mode this either inserts the
+    // row if name is set or silently skips if not)
+    if (activeClientId || isCreatingNewClient) {
+      saveClientEdits().catch(e => console.warn('flush save failed:', e));
+    }
     activeClientId = null;
     activeClientData = null;
+    isCreatingNewClient = false;
     switchClientsSubView('list');
   };
   const clientsSearch = document.getElementById('clientsSearchInput');
@@ -7092,10 +7103,49 @@ function switchClientsSubView(view) {
   }
 }
 
-// "+ New Client" placeholder — 2-D.3 wires this to a real
-// add-client form. For now, just toast.
-function enterNewClientMode() {
-  showToast('Manual client creation coming in 2-D.3');
+// "+ New Client" entry: open the detail screen in "new mode" with a
+// blank form. The first meaningful edit triggers an INSERT via the
+// shared saveClientEdits autosave path.
+async function enterNewClientMode() {
+  // Flush any pending save from a previous open detail
+  clearTimeout(clientsSaveTimer);
+  if (activeClientId) {
+    await saveClientEdits().catch(e => console.warn('flush save failed:', e));
+  }
+
+  // Reset state for new client
+  isCreatingNewClient = true;
+  activeClientId = null;
+  activeClientData = null;
+  clientDetailQuotesCache = [];
+  clientDetailJobsCache = [];
+  clientDetailFollowupsCache = [];
+
+  // Blank the detail form fields
+  document.getElementById('clientDetailHeaderName').textContent =
+    t('clientDetail.newHeader');
+  document.getElementById('clientDetailName').value = '';
+  document.getElementById('clientDetailStatus').value = 'lead';
+  document.getElementById('clientDetailEmail').value = '';
+  document.getElementById('clientDetailPhone').value = '';
+  document.getElementById('clientDetailAddr').value = '';
+  document.getElementById('clientDetailNotes').value = '';
+  document.getElementById('clientDetailContactName').value = '';
+  document.getElementById('clientDetailContactTitle').value = '';
+  applyClientType('person');
+
+  // Clear related lists so previous client's records aren't shown
+  renderClientDetailQuotes();
+  renderClientDetailJobs();
+  renderClientDetailFollowups();
+
+  switchClientsSubView('detail');
+
+  // Focus the name field so user can start typing
+  const nameEl = document.getElementById('clientDetailName');
+  if (nameEl) {
+    nameEl.focus();
+  }
 }
 
 // Open a client's detail view: fetch full client row + related
@@ -7122,6 +7172,7 @@ async function openClientDetail(clientId) {
       showToast(t('toast.clientLoadFailed'), true);
       return;
     }
+    isCreatingNewClient = false;
     activeClientId = clientId;
     activeClientData = clientRes.data;
     clientDetailQuotesCache = quotesRes.data || [];
@@ -7236,7 +7287,10 @@ function applyClientType(type) {
 
 // Debounced autosave — called from every field's input/change.
 function scheduleClientSave() {
-  if (!activeClientId) return;
+  // In new-client mode, save is gated by name-not-empty check
+  // inside saveClientEdits — we still schedule the timer so the
+  // first non-trivial edit triggers an insert
+  if (!activeClientId && !isCreatingNewClient) return;
   clearTimeout(clientsSaveTimer);
   clientsSaveTimer = setTimeout(saveClientEdits, 1500);
 }
@@ -7245,15 +7299,24 @@ function scheduleClientSave() {
 // contact_name/title are nulled out so a person record never carries
 // stray contact data.
 async function saveClientEdits() {
-  if (!activeClientId) return;
   const { data: { session } } = await sb.auth.getSession();
   if (!session || !session.access_token) return;
+
   try {
     const activeTypeBtn = document.querySelector('#clientTypeToggle button.active');
     const type = activeTypeBtn ? activeTypeBtn.dataset.type : 'person';
-    const updates = {
+    const nameVal = document.getElementById('clientDetailName').value.trim();
+
+    // In new-client mode, require a non-empty name before persisting.
+    // Prevents accidentally inserting a junk row if the user clicks
+    // "+ New Client" and then back without typing anything.
+    if (isCreatingNewClient && !nameVal) {
+      return;
+    }
+
+    const payload = {
       type,
-      name: document.getElementById('clientDetailName').value.trim() || 'Unnamed',
+      name: nameVal || 'Unnamed',
       email: document.getElementById('clientDetailEmail').value.trim() || null,
       phone: document.getElementById('clientDetailPhone').value.trim() || null,
       addr:  document.getElementById('clientDetailAddr').value.trim() || null,
@@ -7266,16 +7329,40 @@ async function saveClientEdits() {
         ? (document.getElementById('clientDetailContactTitle').value.trim() || null)
         : null,
     };
-    const { data, error } = await sb.from('clients')
-      .update(updates).eq('id', activeClientId).select('*').single();
-    if (error) {
-      console.warn('saveClientEdits failed:', error);
-      showToast(t('toast.clientSaveFailed'), true);
-      return;
-    }
-    if (data) {
-      activeClientData = data;
-      document.getElementById('clientDetailHeaderName').textContent = data.name || '—';
+
+    if (isCreatingNewClient) {
+      // INSERT path
+      payload.user_id = session.user.id;
+      const { data, error } = await sb.from('clients')
+        .insert(payload).select('*').single();
+      if (error) {
+        console.warn('client insert failed:', error);
+        showToast(t('toast.clientSaveFailed'), true);
+        return;
+      }
+      if (data) {
+        activeClientId = data.id;
+        activeClientData = data;
+        isCreatingNewClient = false;
+        document.getElementById('clientDetailHeaderName').textContent =
+          data.name || '—';
+        refreshClientsLookupCache().catch(e => console.warn('lookup refresh:', e));
+        showToast(t('toast.clientCreated'));
+      }
+    } else if (activeClientId) {
+      // UPDATE path
+      const { data, error } = await sb.from('clients')
+        .update(payload).eq('id', activeClientId).select('*').single();
+      if (error) {
+        console.warn('saveClientEdits failed:', error);
+        showToast(t('toast.clientSaveFailed'), true);
+        return;
+      }
+      if (data) {
+        activeClientData = data;
+        document.getElementById('clientDetailHeaderName').textContent =
+          data.name || '—';
+      }
     }
   } catch (e) {
     console.warn('saveClientEdits threw:', e);
