@@ -2284,52 +2284,48 @@
       </div>
 
       <div id="clientsView" class="hidden">
-        <div class="info-banner" id="clientsPreviewBanner">
-          <span data-i18n="preview.banner">👀 Preview — this section is a mockup with sample data. Fully working version coming soon.</span>
-          <button onclick="this.closest('.info-banner').style.display='none'">×</button>
+        <div class="view-header" id="clientsHeader">
+          <button id="clientsBackBtn" type="button" class="btn-ghost hidden">
+            ← <span data-i18n="clients.backToList">Clients</span>
+          </button>
+          <div class="view-header-spacer"></div>
+          <button id="clientsNewBtn" type="button" class="btn-primary">
+            + <span data-i18n="clients.newButton">New Client</span>
+          </button>
         </div>
-        <div class="card">
-          <div class="field-row cols-3">
-            <div>
-              <div class="card-title" data-i18n="clients.title">Clients</div>
+
+        <div id="clientsListSub">
+          <div class="card">
+            <div class="card-title" data-i18n="clients.title">Clients</div>
+            <div class="card-sub" data-i18n="clients.sub">Everyone you've quoted. Click any row to open and edit.</div>
+            <input type="search" class="input" id="clientsSearchInput"
+                   data-i18n-placeholder="clients.searchPlaceholder"
+                   placeholder="Search by name..."
+                   style="max-width: 360px; margin-bottom: 16px;" />
+            <div id="clientsListEmpty" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
+              <div style="font-size: 48px; margin-bottom: 12px;">👥</div>
+              <p style="margin-bottom: 16px;" data-i18n="clients.empty">
+                No clients yet. Generate a quote with a client name and they'll appear here automatically.
+              </p>
             </div>
-            <div>
-              <input class="input" data-i18n-placeholder="clients.search" placeholder="Search clients..." disabled />
+            <div id="clientsListLoading" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
+              <span data-i18n="clients.loading">Loading...</span>
             </div>
-            <div style="display:flex; justify-content:flex-end; align-items:flex-end;">
-              <button class="btn-primary" disabled data-i18n="clients.add">+ Add client</button>
-            </div>
+            <table class="line-table" id="clientsListTable">
+              <thead>
+                <tr>
+                  <th style="width:40px;"></th>
+                  <th data-i18n="clients.col.name">Name</th>
+                  <th data-i18n="clients.col.contact">Contact</th>
+                  <th class="amt-col" data-i18n="clients.col.jobs">Jobs</th>
+                  <th class="amt-col" data-i18n="clients.col.revenue">Revenue</th>
+                  <th data-i18n="clients.col.lastActivity">Last activity</th>
+                  <th data-i18n="clients.col.status">Status</th>
+                </tr>
+              </thead>
+              <tbody id="clientsListBody"></tbody>
+            </table>
           </div>
-          <div class="field-row cols-3">
-            <div class="stat-card">
-              <div class="stat-card-title" data-i18n="clients.totalClients">Total clients</div>
-              <div class="stat-card-value">24</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-title" data-i18n="clients.activeMonth">Active this month</div>
-              <div class="stat-card-value">8</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-title" data-i18n="clients.repeatCustomers">Repeat customers</div>
-              <div class="stat-card-value">11</div>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <table class="line-table">
-            <thead>
-              <tr>
-                <th data-i18n="clients.col.client">Client</th>
-                <th data-i18n="clients.col.contact">Contact</th>
-                <th data-i18n="clients.col.jobs">Jobs</th>
-                <th data-i18n="clients.col.revenue">Total revenue</th>
-                <th data-i18n="clients.col.lastContact">Last contact</th>
-                <th data-i18n="clients.col.status">Status</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="clientsTableBody"></tbody>
-          </table>
         </div>
       </div>
 
@@ -2759,6 +2755,16 @@ const I18N = {
     'clients.col.lastContact': 'Last contact',
     'clients.col.status': 'Status',
     'clients.jobsUnit': 'jobs',
+    'clients.backToList': 'Clients',
+    'clients.newButton': 'New Client',
+    'clients.sub': "Everyone you've quoted. Click any row to open and edit.",
+    'clients.searchPlaceholder': 'Search by name...',
+    'clients.empty': "No clients yet. Generate a quote with a client name and they'll appear here automatically.",
+    'clients.loading': 'Loading...',
+    'clients.col.name': 'Name',
+    'clients.col.lastActivity': 'Last activity',
+    'clients.iconPerson': '👤',
+    'clients.iconCompany': '🏢',
     // Jobs
     'jobs.title': 'Jobs',
     'jobs.add': '+ New job',
@@ -3161,6 +3167,16 @@ const I18N = {
     'clients.col.lastContact': 'Último contacto',
     'clients.col.status': 'Estado',
     'clients.jobsUnit': 'trabajos',
+    'clients.backToList': 'Clientes',
+    'clients.newButton': 'Nuevo cliente',
+    'clients.sub': 'Todos los clientes a quienes les has cotizado. Haz clic en una fila para abrir y editar.',
+    'clients.searchPlaceholder': 'Buscar por nombre...',
+    'clients.empty': 'Aún no hay clientes. Genera una cotización con un nombre de cliente y aparecerá aquí automáticamente.',
+    'clients.loading': 'Cargando...',
+    'clients.col.name': 'Nombre',
+    'clients.col.lastActivity': 'Última actividad',
+    'clients.iconPerson': '👤',
+    'clients.iconCompany': '🏢',
     // Jobs
     'jobs.title': 'Trabajos',
     'jobs.add': '+ Nuevo trabajo',
@@ -3420,7 +3436,6 @@ function applyLanguage() {
   if (typeof renderTrades === 'function') renderTrades();
   if (typeof renderTradeTabs === 'function') renderTradeTabs();
   if (typeof renderFollowupTrades === 'function') renderFollowupTrades();
-  if (typeof renderClientsView === 'function') renderClientsView();
   if (typeof renderJobsView === 'function') renderJobsView();
   if (typeof renderPaymentsView === 'function') renderPaymentsView();
   // Update topbar to current view
@@ -3452,6 +3467,15 @@ function applyLanguage() {
       && Array.isArray(savedQuotesCache)
       && savedQuotesCache.length > 0) {
     renderQuotesList();
+  }
+  // Re-render the clients list for the same reason as the quotes
+  // list — row content is built with t() at template time.
+  if (typeof renderClientsList === 'function'
+      && typeof clientsSubView !== 'undefined'
+      && clientsSubView === 'list'
+      && Array.isArray(clientsCache)
+      && clientsCache.length > 0) {
+    renderClientsList();
   }
   // Pin quote-internal labels to the quote's content language (must run last
   // so it can override anything the refresh helpers above wrote)
@@ -3498,21 +3522,6 @@ const TRADE_DESC_EXAMPLES = {
   'Hauling & Trucking': 'e.g. Load and haul 12 cubic yards of construction debris to the dump, provide roll-off service, and handle site cleanup and disposal tickets.',
   Logistics: 'e.g. Rework freight pallets, stage shipments for cross-docking, coordinate last-mile delivery logistics, and manage accessorial handling.',
 };
-
-const MOCK_CLIENTS = [
-  { id: 'C001', name: 'Sarah Chen', contact: 'sarah@chenlandscaping.com', jobs: 4, revenue: 12500, lastContact: '2 days ago', status: 'Active' },
-  { id: 'C002', name: 'Mike Rodriguez', contact: '(555) 873-2105', jobs: 3, revenue: 9800, lastContact: '5 days ago', status: 'Active' },
-  { id: 'C003', name: 'Patel Construction LLC', contact: 'hello@patelconstruction.com', jobs: 5, revenue: 21800, lastContact: '1 day ago', status: 'Active' },
-  { id: 'C004', name: 'Riverside Hauling Co', contact: 'info@riversidehauling.com', jobs: 2, revenue: 6100, lastContact: '8 days ago', status: 'Active' },
-  { id: 'C005', name: 'Eastside Remodelers', contact: 'emily@eastsidebuild.com', jobs: 1, revenue: 3100, lastContact: '3 weeks ago', status: 'Active' },
-  { id: 'C006', name: 'Lakeview Interiors', contact: '(555) 412-9984', jobs: 2, revenue: 7800, lastContact: '12 days ago', status: 'Active' },
-  { id: 'C007', name: 'Hilltop Roofing', contact: 'team@hilltoproofing.com', jobs: 0, revenue: 0, lastContact: '10 days ago', status: 'Lead' },
-  { id: 'C008', name: 'Greenlane Landscaping', contact: 'sales@greenlane.co', jobs: 0, revenue: 0, lastContact: '7 days ago', status: 'Lead' },
-  { id: 'C009', name: 'Midtown Electric', contact: 'info@midtownelectric.com', jobs: 0, revenue: 0, lastContact: '13 days ago', status: 'Lead' },
-  { id: 'C010', name: 'Westport Plumbing', contact: 'westport@plumbingco.com', jobs: 1, revenue: 4400, lastContact: '2 months ago', status: 'Past' },
-  { id: 'C011', name: 'Summit Painting', contact: 'contact@summitpainting.com', jobs: 1, revenue: 5200, lastContact: '2 months ago', status: 'Past' },
-  { id: 'C012', name: 'Cedar Flooring', contact: 'service@cedarflooring.com', jobs: 1, revenue: 4600, lastContact: '4 months ago', status: 'Past' },
-];
 
 const MOCK_JOBS = [
   { id: 'J001', clientId: 'C001', clientName: 'Sarah Chen', trade: 'Plumbing', description: 'Replace 50ft drain line + repair drywall', amount: 7200, status: 'Quoted', date: '2 days ago' },
@@ -3572,28 +3581,6 @@ function tradeDisplay(name) {
 
 function statusDisplay(s) {
   return t('status.' + s);
-}
-
-function renderClientsView() {
-  const body = document.getElementById('clientsTableBody');
-  body.innerHTML = MOCK_CLIENTS.map(client => `
-    <tr class="clients-table-row">
-      <td>
-        <div class="table-avatar">
-          <span>${getClientInitials(client.name)}</span>
-          <div>
-            <div>${client.name}</div>
-          </div>
-        </div>
-      </td>
-      <td>${client.contact}</td>
-      <td>${client.jobs} ${t('clients.jobsUnit')}</td>
-      <td>${fmt(client.revenue)}</td>
-      <td>${client.lastContact}</td>
-      <td><span class="status-pill status-${client.status.toLowerCase()}">${statusDisplay(client.status)}</span></td>
-      <td style="text-align:right; color: var(--ink-3);">⋯</td>
-    </tr>
-  `).join('');
 }
 
 function renderJobsView() {
@@ -3672,6 +3659,11 @@ let quoteUsed = parseInt(localStorage.getItem('quoteUsed') || '0', 10);
 let quotesSubView = 'list';        // 'list' | 'compose' | 'view'
 let savedQuotesCache = [];        // Most recent fetch from the server
 let quotesSaveTimer = null;       // Debounce timer for inline edits
+let clientsSubView = 'list';      // 'list' | 'detail' — detail is built in 2-D.3
+let clientsCache = [];            // Most recent fetch from the server,
+                                  // each row augmented with .jobs_count
+                                  // and .revenue + .last_activity_at
+let activeClientId = null;        // Currently-viewed client (set by 2-D.3)
 
 // Map of pricing mode → input IDs whose values should persist per trade.
 const PRICING_INPUTS_BY_MODE = {
@@ -3829,7 +3821,6 @@ function init() {
   bindFollowupSignature();
   bindFollowupInputs();
   bindNav();
-  renderClientsView();
   renderJobsView();
   renderPaymentsView();
   updateUsageDisplay();
@@ -3847,6 +3838,13 @@ function init() {
   // Search input (unchanged from 2-C)
   const quotesSearch = document.getElementById('quotesSearchInput');
   if (quotesSearch) quotesSearch.addEventListener('input', renderQuotesList);
+  // Clients header bindings
+  const clientsNewBtn = document.getElementById('clientsNewBtn');
+  if (clientsNewBtn) clientsNewBtn.onclick = enterNewClientMode;
+  const clientsBackBtn = document.getElementById('clientsBackBtn');
+  if (clientsBackBtn) clientsBackBtn.onclick = () => switchClientsSubView('list');
+  const clientsSearch = document.getElementById('clientsSearchInput');
+  if (clientsSearch) clientsSearch.addEventListener('input', renderClientsList);
   // Apply persisted language preference. Runs after all dynamic surfaces have rendered
   // once in their default English form, then swaps everything in one pass.
   applyLanguage();
@@ -4252,6 +4250,9 @@ function switchView(view) {
 
   if (view === 'quotes') {
     switchQuotesSubView('list');
+  }
+  if (view === 'clients') {
+    switchClientsSubView('list');
   }
 }
 
@@ -6143,6 +6144,170 @@ function enterComposeMode() {
 
 // Fetch the user's saved quotes from Supabase, ordered newest first.
 // Bypass users get an empty list.
+// Fetch the user's clients from Supabase, then augment each row
+// with computed job count, revenue, and last-activity timestamp
+// by aggregating from the jobs and quotes tables. Bypass users
+// get an empty list. Failures show empty state, log to console.
+async function loadClients() {
+  const empty = document.getElementById('clientsListEmpty');
+  const loading = document.getElementById('clientsListLoading');
+  const table = document.getElementById('clientsListTable');
+
+  loading.classList.remove('hidden');
+  table.classList.add('hidden');
+  empty.classList.add('hidden');
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.access_token) {
+    clientsCache = [];
+    loading.classList.add('hidden');
+    empty.classList.remove('hidden');
+    return;
+  }
+
+  try {
+    const [clientsRes, jobsRes, quotesRes] = await Promise.all([
+      sb.from('clients')
+        .select('id, name, type, contact_name, contact_title, email, phone, addr, status, notes, created_at, updated_at')
+        .order('updated_at', { ascending: false })
+        .limit(200),
+      sb.from('jobs')
+        .select('client_id, amount, status, created_at, updated_at'),
+      sb.from('quotes')
+        .select('client_id, total, status, created_at, updated_at'),
+    ]);
+    if (clientsRes.error) throw clientsRes.error;
+    const clients = clientsRes.data || [];
+    const jobs = jobsRes.data || [];
+    const quotes = quotesRes.data || [];
+
+    const stats = {};
+    clients.forEach(c => {
+      stats[c.id] = {
+        jobs_count: 0,
+        revenue: 0,
+        last_activity_at: c.updated_at || c.created_at,
+      };
+    });
+    jobs.forEach(j => {
+      if (!j.client_id || !stats[j.client_id]) return;
+      stats[j.client_id].jobs_count += 1;
+      if (j.status === 'paid' || j.status === 'complete') {
+        stats[j.client_id].revenue += parseFloat(j.amount) || 0;
+      }
+      const ts = j.updated_at || j.created_at;
+      if (ts && ts > stats[j.client_id].last_activity_at) {
+        stats[j.client_id].last_activity_at = ts;
+      }
+    });
+    quotes.forEach(q => {
+      if (!q.client_id || !stats[q.client_id]) return;
+      const ts = q.updated_at || q.created_at;
+      if (ts && ts > stats[q.client_id].last_activity_at) {
+        stats[q.client_id].last_activity_at = ts;
+      }
+    });
+
+    clientsCache = clients.map(c => Object.assign({}, c, stats[c.id]));
+  } catch (e) {
+    console.warn('loadClients failed:', e);
+    clientsCache = [];
+  }
+
+  loading.classList.add('hidden');
+  renderClientsList();
+}
+
+// Render the list using the current search filter
+function renderClientsList() {
+  const tbody = document.getElementById('clientsListBody');
+  const table = document.getElementById('clientsListTable');
+  const empty = document.getElementById('clientsListEmpty');
+  const searchEl = document.getElementById('clientsSearchInput');
+  const q = (searchEl ? searchEl.value : '').trim().toLowerCase();
+
+  const filtered = clientsCache.filter(c => {
+    if (!q) return true;
+    const hay = [
+      c.name || '',
+      c.contact_name || '',
+      c.email || '',
+      c.phone || '',
+    ].join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    table.classList.add('hidden');
+    empty.classList.remove('hidden');
+    return;
+  }
+  table.classList.remove('hidden');
+  empty.classList.add('hidden');
+
+  tbody.innerHTML = filtered.map(c => {
+    const icon = c.type === 'company'
+      ? t('clients.iconCompany')
+      : t('clients.iconPerson');
+    const name = c.name || '—';
+    let contactBits;
+    if (c.type === 'company') {
+      contactBits = [c.contact_name, c.email || c.phone].filter(Boolean);
+    } else {
+      contactBits = [c.email || c.phone].filter(Boolean);
+    }
+    const contact = contactBits.join(' · ') || '—';
+    const statusKey = c.status || 'lead';
+    const statusDisp = (I18N[tdLang] && I18N[tdLang]['status.' + capitalizeFirst(statusKey)])
+                      || statusKey;
+    return `
+      <tr class="clients-list-row" data-client-id="${c.id}" style="cursor:pointer;">
+        <td style="font-size: 22px; text-align: center;">${icon}</td>
+        <td><strong>${escapeHtml(name)}</strong></td>
+        <td>${escapeHtml(contact)}</td>
+        <td class="amt-col">${c.jobs_count || 0}</td>
+        <td class="amt-col">${fmt(c.revenue || 0)}</td>
+        <td>${formatRelativeDate(c.last_activity_at)}</td>
+        <td><span class="status-pill status-${statusKey}">${statusDisp}</span></td>
+      </tr>
+    `;
+  }).join('');
+
+  tbody.querySelectorAll('.clients-list-row').forEach(row => {
+    row.addEventListener('click', () => {
+      if (typeof openClientDetail === 'function') {
+        openClientDetail(row.dataset.clientId);
+      }
+    });
+  });
+}
+
+// Switch among clients subview modes. Currently only 'list' is
+// implemented; 'detail' arrives in Sprint 2-D.3.
+function switchClientsSubView(view) {
+  const valid = ['list', 'detail'];
+  clientsSubView = valid.includes(view) ? view : 'list';
+
+  const list = document.getElementById('clientsListSub');
+  const backBtn = document.getElementById('clientsBackBtn');
+  const newBtn = document.getElementById('clientsNewBtn');
+
+  if (list) list.classList.toggle('hidden', clientsSubView !== 'list');
+  if (backBtn) backBtn.classList.toggle('hidden', clientsSubView === 'list');
+  if (newBtn) newBtn.classList.toggle('hidden', clientsSubView !== 'list');
+
+  if (clientsSubView === 'list') {
+    loadClients();
+  }
+}
+
+// "+ New Client" placeholder — 2-D.3 wires this to a real
+// add-client form. For now, just toast.
+function enterNewClientMode() {
+  showToast('Manual client creation coming in 2-D.3');
+}
+
 async function loadSavedQuotes() {
   const empty = document.getElementById('quotesListEmpty');
   const loading = document.getElementById('quotesListLoading');
