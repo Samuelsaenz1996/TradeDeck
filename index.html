@@ -4228,6 +4228,10 @@ function switchView(view) {
   });
 
   refreshTopbarForCurrentView();
+
+  if (view === 'quotes') {
+    switchQuotesSubView('list');
+  }
 }
 
 function renderFollowupTrades() {
