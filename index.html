@@ -1292,6 +1292,20 @@
     <div class="container">
       <div id="quotesView">
 
+      <!-- Quotes subview toggle: New quote vs My quotes (history) -->
+      <div class="pricing-toggle" id="quotesSubViewToggle"
+           role="group" aria-label="Quotes subview"
+           style="margin-bottom: 20px;">
+        <button data-subview="new" class="active" type="button"
+                data-i18n="quotes.tab.new">+ New quote</button>
+        <button data-subview="history" type="button">
+          <span data-i18n="quotes.tab.history">📋 My quotes</span>
+          <span id="quotesHistoryCount" style="margin-left:6px; opacity:0.6;"></span>
+        </button>
+      </div>
+
+      <div id="quotesNewSub">
+
       <!-- Form Card -->
       <div class="card" id="formCard">
         <div class="card-title">
@@ -2058,6 +2072,38 @@
 
       </div>
 
+      <div id="quotesHistorySub" class="hidden">
+        <div class="card">
+          <div class="card-title" data-i18n="quotes.history.title">My quotes</div>
+          <div class="card-sub" data-i18n="quotes.history.sub">All your saved quotes. Click any row to open and edit.</div>
+          <input type="search" class="input" id="quotesSearchInput"
+                 data-i18n-placeholder="quotes.history.searchPlaceholder"
+                 placeholder="Search by client name..."
+                 style="max-width: 360px; margin-bottom: 16px;" />
+          <div id="quotesListEmpty" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
+            <span data-i18n="quotes.history.empty">No quotes yet. Generate one to see it here.</span>
+          </div>
+          <div id="quotesListLoading" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
+            <span data-i18n="quotes.history.loading">Loading...</span>
+          </div>
+          <table class="line-table" id="quotesListTable">
+            <thead>
+              <tr>
+                <th data-i18n="quotes.history.col.client">Client</th>
+                <th data-i18n="quotes.history.col.trades">Trades</th>
+                <th class="amt-col" data-i18n="quotes.history.col.total">Total</th>
+                <th data-i18n="quotes.history.col.status">Status</th>
+                <th data-i18n="quotes.history.col.date">Date</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="quotesListBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      </div>
+
       <div id="followupView" class="hidden">
         <div class="card">
           <div class="card-title">
@@ -2738,6 +2784,26 @@ const I18N = {
     'toast.cleared': 'Cleared',
     'toast.flatRateExceeded': 'Flat rate exceeded by {amt}',
     'toast.quoteSaveFailed': 'Could not save to history',
+    'quotes.tab.new': '+ New quote',
+    'quotes.tab.history': '📋 My quotes',
+    'quotes.history.title': 'My quotes',
+    'quotes.history.sub': 'All your saved quotes. Click any row to open and edit.',
+    'quotes.history.searchPlaceholder': 'Search by client name...',
+    'quotes.history.empty': 'No quotes yet. Generate one to see it here.',
+    'quotes.history.loading': 'Loading...',
+    'quotes.history.col.client': 'Client',
+    'quotes.history.col.trades': 'Trades',
+    'quotes.history.col.total': 'Total',
+    'quotes.history.col.status': 'Status',
+    'quotes.history.col.date': 'Date',
+    'quotes.history.noClient': '(no client)',
+    'quotes.history.delete': 'Delete',
+    'quotes.history.confirmDelete': 'Delete this quote? This cannot be undone.',
+    'toast.quoteLoadFailed': 'Could not load quote',
+    'toast.quoteDeleteFailed': 'Could not delete quote',
+    'toast.quoteDeleted': 'Quote deleted',
+    'toast.editsSaved': 'Saved',
+    'toast.editSaveFailed': 'Could not save changes',
     'confirm.clearForm': 'Clear the form and quote?',
     // Auth
     'auth.title': 'Sign in to MyTradeDeck',
@@ -3112,6 +3178,26 @@ const I18N = {
     'toast.cleared': 'Limpiado',
     'toast.flatRateExceeded': 'Precio fijo excedido por {amt}',
     'toast.quoteSaveFailed': 'No se pudo guardar al historial',
+    'quotes.tab.new': '+ Nueva cotización',
+    'quotes.tab.history': '📋 Mis cotizaciones',
+    'quotes.history.title': 'Mis cotizaciones',
+    'quotes.history.sub': 'Todas tus cotizaciones guardadas. Haz clic en una fila para abrir y editar.',
+    'quotes.history.searchPlaceholder': 'Buscar por nombre del cliente...',
+    'quotes.history.empty': 'No hay cotizaciones todavía. Genera una para verla aquí.',
+    'quotes.history.loading': 'Cargando...',
+    'quotes.history.col.client': 'Cliente',
+    'quotes.history.col.trades': 'Oficios',
+    'quotes.history.col.total': 'Total',
+    'quotes.history.col.status': 'Estado',
+    'quotes.history.col.date': 'Fecha',
+    'quotes.history.noClient': '(sin cliente)',
+    'quotes.history.delete': 'Eliminar',
+    'quotes.history.confirmDelete': '¿Eliminar esta cotización? No se puede deshacer.',
+    'toast.quoteLoadFailed': 'No se pudo cargar la cotización',
+    'toast.quoteDeleteFailed': 'No se pudo eliminar la cotización',
+    'toast.quoteDeleted': 'Cotización eliminada',
+    'toast.editsSaved': 'Guardado',
+    'toast.editSaveFailed': 'No se pudieron guardar los cambios',
     'confirm.clearForm': '¿Limpiar el formulario y la cotización?',
     // Auth
     'auth.title': 'Inicia sesión en MyTradeDeck',
@@ -3514,6 +3600,9 @@ let followupSigName = localStorage.getItem('tdSigName') || '';
 let followupSigBusiness = localStorage.getItem('tdSigBusiness') || '';
 let followupSigContact = localStorage.getItem('tdSigContact') || '';
 let quoteUsed = parseInt(localStorage.getItem('quoteUsed') || '0', 10);
+let quotesSubView = 'new';        // 'new' | 'history'
+let savedQuotesCache = [];        // Most recent fetch from the server
+let quotesSaveTimer = null;       // Debounce timer for inline edits
 
 // Map of pricing mode → input IDs whose values should persist per trade.
 const PRICING_INPUTS_BY_MODE = {
@@ -3679,6 +3768,15 @@ function init() {
   // Upgrade button (was inline onclick previously — moved out so we can localize the alert)
   const upgradeBtn = document.getElementById('upgradeBtn');
   if (upgradeBtn) upgradeBtn.onclick = () => alert(t('sidebar.upgradeAlert'));
+  // Bind the quotes subview toggle
+  document.querySelectorAll('#quotesSubViewToggle button').forEach(btn => {
+    btn.onclick = () => switchQuotesSubView(btn.dataset.subview);
+  });
+  // Bind search input
+  const quotesSearch = document.getElementById('quotesSearchInput');
+  if (quotesSearch) {
+    quotesSearch.addEventListener('input', renderQuotesList);
+  }
   // Apply persisted language preference. Runs after all dynamic surfaces have rendered
   // once in their default English form, then swaps everything in one pass.
   applyLanguage();
@@ -4308,6 +4406,7 @@ function bindBilingualEditableSync() {
         currentQuote[key] = { en: '', es: '' };
       }
       currentQuote[key][tdLang] = el.textContent;
+      scheduleQuoteSave();
     });
   });
   const termsEl = document.getElementById('quoteTerms');
@@ -4322,6 +4421,7 @@ function bindBilingualEditableSync() {
       currentQuote.paymentTerms.userEdited = true;
       if (!currentQuote.paymentTerms.literal) currentQuote.paymentTerms.literal = { en: '', es: '' };
       currentQuote.paymentTerms.literal[tdLang] = termsEl.textContent;
+      scheduleQuoteSave();
     });
   }
   const followupFields = [
@@ -4339,6 +4439,22 @@ function bindBilingualEditableSync() {
       currentFollowup[key][tdLang] = el.textContent;
     });
   });
+  const clientNameDocEl = document.getElementById('quoteClientName');
+  if (clientNameDocEl) {
+    clientNameDocEl.addEventListener('blur', () => {
+      if (!currentQuote) return;
+      currentQuote.clientName = clientNameDocEl.textContent.trim();
+      scheduleQuoteSave();
+    });
+  }
+  const clientAddrDocEl = document.getElementById('quoteClientAddr');
+  if (clientAddrDocEl) {
+    clientAddrDocEl.addEventListener('blur', () => {
+      if (!currentQuote) return;
+      currentQuote.clientAddr = clientAddrDocEl.textContent.trim();
+      scheduleQuoteSave();
+    });
+  }
 }
 
 function refreshQuoteLangNotice() {
@@ -4579,6 +4695,11 @@ async function generateQuote() {
     });
 
     const parsed = parseModelOutput(text);
+    if (Array.isArray(parsed.lineItems)) {
+      parsed.lineItems = parsed.lineItems.filter(li =>
+        (parseFloat(li.amount) || 0) > 0
+      );
+    }
     parsed.tradePricingTargets = {};
     pricingContext.trades.forEach(td => {
       parsed.tradePricingTargets[td.name] = {
@@ -4950,14 +5071,6 @@ function renderQuote(data) {
   // and so per-language edits (blur handlers below) have somewhere to write back.
   currentQuote = data;
 
-  // Drop AI-generated $0 line items once at generation time. User-added $0
-  // lines (from "+ Add line item") are preserved on subsequent re-renders.
-  if (Array.isArray(currentQuote.lineItems)) {
-    currentQuote.lineItems = currentQuote.lineItems.filter(li =>
-      (parseFloat(li.amount) || 0) > 0
-    );
-  }
-
   const clientName = document.getElementById('clientName').value || t('quote.clientPlaceholder');
   const clientAddr = document.getElementById('clientAddr').value || t('quote.addressPlaceholder');
 
@@ -5053,6 +5166,7 @@ function createLineItemRow(item, index) {
       redistributeFlatRateTrade(li.trade, i);
       renderLineItemsTable();
     }
+    scheduleQuoteSave();
   }
 
   tr.querySelector('.delete-btn').onclick = () => {
@@ -5069,6 +5183,7 @@ function createLineItemRow(item, index) {
     }
     renderLineItemsTable();
     recalcTotals();
+    scheduleQuoteSave();
   };
 
   tr.querySelectorAll('.editable').forEach(el => {
@@ -5101,6 +5216,7 @@ function addLineItemForTrade(tradeName) {
 
   renderLineItemsTable();
   recalcTotals();
+  scheduleQuoteSave();
 }
 
 // Returns the flat-rate target for a trade, or null if the trade is not
@@ -5913,6 +6029,251 @@ async function persistGeneratedQuote() {
   } catch (e) {
     console.warn('persistGeneratedQuote threw:', e);
   }
+}
+
+// Switch between the "new quote" form/quote view and the "my quotes"
+// history list. Refreshes the list whenever we enter history view.
+function switchQuotesSubView(view) {
+  quotesSubView = (view === 'history') ? 'history' : 'new';
+  document.getElementById('quotesNewSub').classList.toggle('hidden', quotesSubView !== 'new');
+  document.getElementById('quotesHistorySub').classList.toggle('hidden', quotesSubView !== 'history');
+  document.querySelectorAll('#quotesSubViewToggle button').forEach(b => {
+    b.classList.toggle('active', b.dataset.subview === quotesSubView);
+  });
+  if (quotesSubView === 'history') {
+    loadSavedQuotes();
+  }
+}
+
+// Fetch the user's saved quotes from Supabase, ordered newest first.
+// Bypass users get an empty list.
+async function loadSavedQuotes() {
+  const empty = document.getElementById('quotesListEmpty');
+  const loading = document.getElementById('quotesListLoading');
+  const table = document.getElementById('quotesListTable');
+  const count = document.getElementById('quotesHistoryCount');
+
+  loading.classList.remove('hidden');
+  table.classList.add('hidden');
+  empty.classList.add('hidden');
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.access_token) {
+    savedQuotesCache = [];
+    loading.classList.add('hidden');
+    empty.classList.remove('hidden');
+    count.textContent = '';
+    return;
+  }
+
+  try {
+    const { data, error } = await sb
+      .from('quotes')
+      .select('id, client_name, client_addr, total, trades, status, created_at')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    savedQuotesCache = data || [];
+  } catch (e) {
+    console.warn('loadSavedQuotes failed:', e);
+    savedQuotesCache = [];
+  }
+
+  loading.classList.add('hidden');
+  count.textContent = savedQuotesCache.length ? `(${savedQuotesCache.length})` : '';
+  renderQuotesList();
+}
+
+// Render the list using the current search filter
+function renderQuotesList() {
+  const tbody = document.getElementById('quotesListBody');
+  const table = document.getElementById('quotesListTable');
+  const empty = document.getElementById('quotesListEmpty');
+  const searchEl = document.getElementById('quotesSearchInput');
+  const q = (searchEl ? searchEl.value : '').trim().toLowerCase();
+
+  const filtered = savedQuotesCache.filter(quote => {
+    if (!q) return true;
+    return (quote.client_name || '').toLowerCase().includes(q);
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    table.classList.add('hidden');
+    empty.classList.remove('hidden');
+    return;
+  }
+  table.classList.remove('hidden');
+  empty.classList.add('hidden');
+
+  tbody.innerHTML = filtered.map(quote => {
+    const clientName = quote.client_name || t('quotes.history.noClient');
+    const trades = (quote.trades || []).map(name => {
+      const tr = TRADES.find(td => td.name === name);
+      return tr ? `${tr.emoji} ${tradeDisplay(name)}` : tradeDisplay(name);
+    }).join(', ');
+    const totalDisp = fmt(parseFloat(quote.total) || 0);
+    const statusKey = (quote.status || 'draft');
+    const statusDisp = (I18N[tdLang] && I18N[tdLang]['status.' + capitalizeFirst(statusKey)])
+                      || statusKey;
+    const date = formatRelativeDate(quote.created_at);
+    return `
+      <tr class="quotes-list-row" data-quote-id="${quote.id}" style="cursor:pointer;">
+        <td><strong>${escapeHtml(clientName)}</strong></td>
+        <td>${escapeHtml(trades) || '—'}</td>
+        <td class="amt-col">${totalDisp}</td>
+        <td><span class="status-pill status-${statusKey}">${statusDisp}</span></td>
+        <td>${date}</td>
+        <td style="text-align:right;">
+          <button class="delete-btn" data-delete-id="${quote.id}" title="${t('quotes.history.delete')}"
+                  style="opacity:1; position: relative;">×</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  tbody.querySelectorAll('.quotes-list-row').forEach(row => {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('[data-delete-id]')) return;
+      openSavedQuote(row.dataset.quoteId);
+    });
+  });
+  tbody.querySelectorAll('[data-delete-id]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteSavedQuote(btn.dataset.deleteId);
+    });
+  });
+}
+
+// Open a saved quote: fetch full payload, restore state, switch subview.
+async function openSavedQuote(quoteId) {
+  try {
+    const { data, error } = await sb
+      .from('quotes')
+      .select('*')
+      .eq('id', quoteId)
+      .single();
+    if (error || !data) {
+      showToast(t('toast.quoteLoadFailed'), true);
+      return;
+    }
+
+    selectedTrades = (data.trades || []).map(name => {
+      const tr = TRADES.find(td => td.name === name);
+      return tr ? `${tr.emoji} ${name}` : name;
+    });
+    activeTradeIndex = selectedTrades.length > 0 ? 0 : -1;
+
+    document.getElementById('clientName').value = data.client_name || '';
+    document.getElementById('clientAddr').value = data.client_addr || '';
+
+    currentQuote = data.payload || {};
+    currentQuote.id = data.id;
+
+    renderTrades();
+    renderTradeTabs();
+    renderQuote(currentQuote);
+    document.getElementById('quoteWrap').classList.add('visible');
+
+    switchQuotesSubView('new');
+
+    document.getElementById('quoteWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) {
+    console.warn('openSavedQuote threw:', e);
+    showToast(t('toast.quoteLoadFailed'), true);
+  }
+}
+
+// Delete a saved quote (with confirm dialog).
+async function deleteSavedQuote(quoteId) {
+  if (!confirm(t('quotes.history.confirmDelete'))) return;
+  try {
+    const { error } = await sb.from('quotes').delete().eq('id', quoteId);
+    if (error) {
+      console.warn('deleteSavedQuote failed:', error);
+      showToast(t('toast.quoteDeleteFailed'), true);
+      return;
+    }
+    if (currentQuote && currentQuote.id === quoteId) {
+      currentQuote = null;
+      document.getElementById('quoteWrap').classList.remove('visible');
+    }
+    showToast(t('toast.quoteDeleted'));
+    loadSavedQuotes();
+  } catch (e) {
+    console.warn('deleteSavedQuote threw:', e);
+    showToast(t('toast.quoteDeleteFailed'), true);
+  }
+}
+
+// Debounced save — called from edit handlers. Skips if no saved quote
+// loaded (no currentQuote.id).
+function scheduleQuoteSave() {
+  if (!currentQuote || !currentQuote.id) return;
+  clearTimeout(quotesSaveTimer);
+  quotesSaveTimer = setTimeout(saveCurrentQuoteEdits, 1500);
+}
+
+// Persist the current quote payload + denormalized columns back to its
+// DB row. Bypass users skip. Failures log + toast.
+async function saveCurrentQuoteEdits() {
+  if (!currentQuote || !currentQuote.id) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.access_token) return;
+
+  try {
+    const clientNameEl = document.getElementById('quoteClientName');
+    const clientAddrEl = document.getElementById('quoteClientAddr');
+    const clientName = clientNameEl ? clientNameEl.textContent.trim() : '';
+    const clientAddr = clientAddrEl ? clientAddrEl.textContent.trim() : '';
+    const total = parseAmount(document.getElementById('totalDisp').textContent);
+    const trades = selectedTrades.map(tradeNameOf);
+
+    const { error } = await sb
+      .from('quotes')
+      .update({
+        client_name: clientName || null,
+        client_addr: clientAddr || null,
+        total: isFinite(total) ? total : 0,
+        trades: trades,
+        payload: currentQuote,
+      })
+      .eq('id', currentQuote.id);
+
+    if (error) {
+      console.warn('saveCurrentQuoteEdits failed:', error);
+      showToast(t('toast.editSaveFailed'), true);
+    }
+  } catch (e) {
+    console.warn('saveCurrentQuoteEdits threw:', e);
+  }
+}
+
+function capitalizeFirst(s) {
+  if (!s) return '';
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+function formatRelativeDate(iso) {
+  if (!iso) return '—';
+  const then = new Date(iso);
+  const ms = Date.now() - then.getTime();
+  const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+  if (days < 1) return tdLang === 'es' ? 'hoy' : 'today';
+  if (days === 1) return tdLang === 'es' ? 'ayer' : 'yesterday';
+  if (days < 7) return tdLang === 'es' ? `hace ${days} días` : `${days} days ago`;
+  if (days < 30) {
+    const w = Math.floor(days / 7);
+    return tdLang === 'es' ? `hace ${w} sem` : `${w}w ago`;
+  }
+  return then.toLocaleDateString(tdLang === 'es' ? 'es-MX' : 'en-US',
+    { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 async function refreshQuoteUsedFromServer() {
