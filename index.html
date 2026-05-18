@@ -2469,6 +2469,12 @@
                         data-i18n-placeholder="clientDetail.notesPlaceholder"
                         placeholder="Anything to remember — budget, preferences, schedule notes..."></textarea>
             </div>
+
+            <div class="field" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
+              <button id="clientDetailSaveBtn" type="button" class="btn-primary">
+                💾 <span data-i18n="clientDetail.save">Save</span>
+              </button>
+            </div>
           </div>
 
           <div class="card">
@@ -3035,7 +3041,10 @@ const I18N = {
     'clientDetail.newFollowup': 'New Follow-up',
     'clientDetail.newJob': 'New Job',
     'clientDetail.newHeader': 'New client',
+    'clientDetail.save': 'Save',
     'toast.clientCreated': 'Client created',
+    'toast.clientSaved': 'Client saved',
+    'toast.clientNameRequired': 'Client name is required',
     'toast.newJobPlaceholder': 'Manual job creation coming in Sprint 2-E.',
     'toast.clientLoadFailed': 'Could not load client',
     'toast.clientSaveFailed': 'Could not save client changes',
@@ -3505,7 +3514,10 @@ const I18N = {
     'clientDetail.newFollowup': 'Nuevo seguimiento',
     'clientDetail.newJob': 'Nuevo trabajo',
     'clientDetail.newHeader': 'Nuevo cliente',
+    'clientDetail.save': 'Guardar',
     'toast.clientCreated': 'Cliente creado',
+    'toast.clientSaved': 'Cliente guardado',
+    'toast.clientNameRequired': 'Se requiere el nombre del cliente',
     'toast.newJobPlaceholder': 'Creación manual de trabajos próximamente.',
     'toast.clientLoadFailed': 'No se pudo cargar el cliente',
     'toast.clientSaveFailed': 'No se pudieron guardar los cambios',
@@ -4239,6 +4251,10 @@ function init() {
       scheduleClientSave();
     };
   });
+  // Bind the explicit Save button (autosave still runs on field
+  // edits; this just gives users a clear save-now action)
+  const clientSaveBtn = document.getElementById('clientDetailSaveBtn');
+  if (clientSaveBtn) clientSaveBtn.onclick = clickClientDetailSave;
   // Bind client detail launcher buttons (top of each related-records card)
   const newQuoteBtn = document.getElementById('clientDetailNewQuoteBtn');
   if (newQuoteBtn) newQuoteBtn.onclick = launchNewQuoteForActiveClient;
@@ -7300,7 +7316,7 @@ function scheduleClientSave() {
 // stray contact data.
 async function saveClientEdits() {
   const { data: { session } } = await sb.auth.getSession();
-  if (!session || !session.access_token) return;
+  if (!session || !session.access_token) return null;
 
   try {
     const activeTypeBtn = document.querySelector('#clientTypeToggle button.active');
@@ -7311,7 +7327,7 @@ async function saveClientEdits() {
     // Prevents accidentally inserting a junk row if the user clicks
     // "+ New Client" and then back without typing anything.
     if (isCreatingNewClient && !nameVal) {
-      return;
+      return null;
     }
 
     const payload = {
@@ -7338,7 +7354,7 @@ async function saveClientEdits() {
       if (error) {
         console.warn('client insert failed:', error);
         showToast(t('toast.clientSaveFailed'), true);
-        return;
+        return null;
       }
       if (data) {
         activeClientId = data.id;
@@ -7348,7 +7364,9 @@ async function saveClientEdits() {
           data.name || '—';
         refreshClientsLookupCache().catch(e => console.warn('lookup refresh:', e));
         showToast(t('toast.clientCreated'));
+        return data;
       }
+      return null;
     } else if (activeClientId) {
       // UPDATE path
       const { data, error } = await sb.from('clients')
@@ -7356,16 +7374,54 @@ async function saveClientEdits() {
       if (error) {
         console.warn('saveClientEdits failed:', error);
         showToast(t('toast.clientSaveFailed'), true);
-        return;
+        return null;
       }
       if (data) {
         activeClientData = data;
         document.getElementById('clientDetailHeaderName').textContent =
           data.name || '—';
+        return data;
       }
+      return null;
     }
   } catch (e) {
     console.warn('saveClientEdits threw:', e);
+    return null;
+  }
+  return null;
+}
+
+// Explicit Save click — validates, cancels pending debounce,
+// immediately runs saveClientEdits, toasts on success. Disables
+// the button during save to prevent double-clicks.
+async function clickClientDetailSave() {
+  clearTimeout(clientsSaveTimer);
+
+  const nameVal = document.getElementById('clientDetailName').value.trim();
+  if (!nameVal) {
+    showToast(t('toast.clientNameRequired'), true);
+    const nameEl = document.getElementById('clientDetailName');
+    if (nameEl) nameEl.focus();
+    return;
+  }
+
+  const btn = document.getElementById('clientDetailSaveBtn');
+  if (btn) btn.disabled = true;
+
+  try {
+    const wasNew = isCreatingNewClient;
+    const result = await saveClientEdits();
+
+    // saveClientEdits already toasts:
+    //  - 'Client created' on successful INSERT (wasNew=true path)
+    //  - 'Could not save client changes' on any error
+    // For successful UPDATEs on existing clients, the autosave is
+    // intentionally silent. The explicit Save button SHOULD toast.
+    if (result && !wasNew) {
+      showToast(t('toast.clientSaved'));
+    }
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 
