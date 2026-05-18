@@ -2147,6 +2147,53 @@
       </div>
 
       <div id="followupView" class="hidden">
+        <div class="view-header" id="followupsHeader">
+          <button id="followupsBackBtn" type="button" class="btn-ghost hidden"
+                  aria-label="Back to my follow-ups">
+            ← <span data-i18n="followups.backToList">My follow-ups</span>
+          </button>
+          <div class="view-header-spacer"></div>
+          <button id="followupsNewBtn" type="button" class="btn-primary">
+            + <span data-i18n="followups.newButton">New Follow-up</span>
+          </button>
+        </div>
+
+        <div id="followupsListSub">
+          <div class="card">
+            <div class="card-title" data-i18n="followups.history.title">My follow-ups</div>
+            <div class="card-sub" data-i18n="followups.history.sub">All your saved follow-ups. Click any row to open and edit.</div>
+            <input type="search" class="input" id="followupsSearchInput"
+                   data-i18n-placeholder="followups.history.searchPlaceholder"
+                   placeholder="Search by customer name..."
+                   style="max-width: 360px; margin-bottom: 16px;" />
+            <div id="followupsListEmpty" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
+              <div style="font-size: 48px; margin-bottom: 12px;">💬</div>
+              <p style="margin-bottom: 16px;" data-i18n="followups.history.empty">
+                No follow-ups yet. Generate one to see it here.
+              </p>
+              <button class="btn-primary" id="followupsEmptyCTA" type="button">
+                + <span data-i18n="followups.history.emptyCTA">Generate your first follow-up</span>
+              </button>
+            </div>
+            <div id="followupsListLoading" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
+              <span data-i18n="followups.history.loading">Loading...</span>
+            </div>
+            <table class="line-table" id="followupsListTable">
+              <thead>
+                <tr>
+                  <th data-i18n="followups.history.col.customer">Customer</th>
+                  <th data-i18n="followups.history.col.scenario">Scenario</th>
+                  <th data-i18n="followups.history.col.channel">Channel</th>
+                  <th data-i18n="followups.history.col.date">Date</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="followupsListBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="followupsFormSub" class="hidden">
         <div class="card">
           <div class="card-title">
             <span class="card-title-num">1</span>
@@ -2256,6 +2303,10 @@
           <div class="progress-track"><div class="progress-fill"></div></div>
         </div>
 
+        </div>
+
+        <div id="followupsDocSub" class="hidden">
+
         <div class="quote-wrap" id="followupWrap">
           <div class="quote-actions-bar">
             <div class="left">
@@ -2280,6 +2331,8 @@
               <div class="topbar-meta" id="textCharCount" style="margin-top: 10px; display: none;">0 / 160 chars</div>
             </div>
           </div>
+        </div>
+
         </div>
       </div>
 
@@ -2440,6 +2493,24 @@
                 </tr>
               </thead>
               <tbody id="clientDetailJobsBody"></tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-title" data-i18n="clientDetail.followupsTitle">Follow-ups for this client</div>
+            <div id="clientDetailFollowupsEmpty" class="hidden"
+                 style="text-align: center; padding: 24px; color: var(--ink-3);">
+              <span data-i18n="clientDetail.noFollowups">No follow-ups for this client yet.</span>
+            </div>
+            <table class="line-table" id="clientDetailFollowupsTable">
+              <thead>
+                <tr>
+                  <th data-i18n="clientDetail.followups.col.scenario">Scenario</th>
+                  <th data-i18n="clientDetail.followups.col.channel">Channel</th>
+                  <th data-i18n="clientDetail.followups.col.date">Date</th>
+                </tr>
+              </thead>
+              <tbody id="clientDetailFollowupsBody"></tbody>
             </table>
           </div>
         </div>
@@ -2848,6 +2919,31 @@ const I18N = {
     'followup.channels.email': 'Email',
     'followup.channels.text': 'Text',
     'followup.metaLine': 'Follow-up message',
+    'followups.backToList': 'My follow-ups',
+    'followups.newButton': 'New Follow-up',
+    'followups.history.title': 'My follow-ups',
+    'followups.history.sub': 'All your saved follow-ups. Click any row to open and edit.',
+    'followups.history.searchPlaceholder': 'Search by customer name...',
+    'followups.history.empty': 'No follow-ups yet. Generate one to see it here.',
+    'followups.history.emptyCTA': 'Generate your first follow-up',
+    'followups.history.loading': 'Loading...',
+    'followups.history.col.customer': 'Customer',
+    'followups.history.col.scenario': 'Scenario',
+    'followups.history.col.channel': 'Channel',
+    'followups.history.col.date': 'Date',
+    'followups.history.noCustomer': '(no customer)',
+    'followups.history.delete': 'Delete Follow-up',
+    'followups.history.confirmDelete': 'Delete this follow-up? This cannot be undone.',
+    'clientDetail.followupsTitle': 'Follow-ups for this client',
+    'clientDetail.noFollowups': 'No follow-ups for this client yet.',
+    'clientDetail.followups.col.scenario': 'Scenario',
+    'clientDetail.followups.col.channel': 'Channel',
+    'clientDetail.followups.col.date': 'Date',
+    'toast.followupSaveFailed': 'Could not save follow-up to history',
+    'toast.followupLoadFailed': 'Could not load follow-up',
+    'toast.followupDeleteFailed': 'Could not delete follow-up',
+    'toast.followupDeleted': 'Follow-up deleted',
+    'toast.followupEditSaveFailed': 'Could not save changes',
     'followup.copyMessage': '📋 Copy message',
     'followup.regenerate': '♻ Regenerate',
     'followup.subject': 'Subject',
@@ -3287,6 +3383,31 @@ const I18N = {
     'followup.channels.email': 'Correo',
     'followup.channels.text': 'SMS',
     'followup.metaLine': 'Mensaje de seguimiento',
+    'followups.backToList': 'Mis seguimientos',
+    'followups.newButton': 'Nuevo seguimiento',
+    'followups.history.title': 'Mis seguimientos',
+    'followups.history.sub': 'Todos tus seguimientos guardados. Haz clic en una fila para abrir y editar.',
+    'followups.history.searchPlaceholder': 'Buscar por nombre del cliente...',
+    'followups.history.empty': 'Aún no hay seguimientos. Genera uno para verlo aquí.',
+    'followups.history.emptyCTA': 'Genera tu primer seguimiento',
+    'followups.history.loading': 'Cargando...',
+    'followups.history.col.customer': 'Cliente',
+    'followups.history.col.scenario': 'Escenario',
+    'followups.history.col.channel': 'Canal',
+    'followups.history.col.date': 'Fecha',
+    'followups.history.noCustomer': '(sin cliente)',
+    'followups.history.delete': 'Eliminar seguimiento',
+    'followups.history.confirmDelete': '¿Eliminar este seguimiento? No se puede deshacer.',
+    'clientDetail.followupsTitle': 'Seguimientos de este cliente',
+    'clientDetail.noFollowups': 'Aún no hay seguimientos para este cliente.',
+    'clientDetail.followups.col.scenario': 'Escenario',
+    'clientDetail.followups.col.channel': 'Canal',
+    'clientDetail.followups.col.date': 'Fecha',
+    'toast.followupSaveFailed': 'No se pudo guardar el seguimiento',
+    'toast.followupLoadFailed': 'No se pudo cargar el seguimiento',
+    'toast.followupDeleteFailed': 'No se pudo eliminar el seguimiento',
+    'toast.followupDeleted': 'Seguimiento eliminado',
+    'toast.followupEditSaveFailed': 'No se pudieron guardar los cambios',
     'followup.copyMessage': '📋 Copiar mensaje',
     'followup.regenerate': '♻ Volver a generar',
     'followup.subject': 'Asunto',
@@ -3638,6 +3759,14 @@ function applyLanguage() {
       && savedQuotesCache.length > 0) {
     renderQuotesList();
   }
+  // Re-render the followups list — same reason as the quotes list.
+  if (typeof renderFollowupsList === 'function'
+      && typeof followupsSubView !== 'undefined'
+      && followupsSubView === 'list'
+      && Array.isArray(savedFollowupsCache)
+      && savedFollowupsCache.length > 0) {
+    renderFollowupsList();
+  }
   // Re-render the clients list for the same reason as the quotes
   // list — row content is built with t() at template time.
   if (typeof renderClientsList === 'function'
@@ -3654,6 +3783,7 @@ function applyLanguage() {
       && clientsSubView === 'detail') {
     renderClientDetailQuotes();
     renderClientDetailJobs();
+    renderClientDetailFollowups();
   }
   // Refresh the type-dependent Name label for the active client
   if (typeof activeClientData !== 'undefined' && activeClientData
@@ -3851,6 +3981,10 @@ let activeClientData = null;        // Full client row, populated on open
 let clientDetailQuotesCache = [];   // Quotes for the active client
 let clientDetailJobsCache = [];     // Jobs for the active client
 let clientsSaveTimer = null;        // Debounce timer for field edits
+let followupsSubView = 'list';        // 'list' | 'compose' | 'view'
+let savedFollowupsCache = [];
+let followupsSaveTimer = null;
+let clientDetailFollowupsCache = [];  // For the third card on client detail
 
 // Map of pricing mode → input IDs whose values should persist per trade.
 const PRICING_INPUTS_BY_MODE = {
@@ -4054,6 +4188,15 @@ function init() {
       scheduleClientSave();
     };
   });
+  // Followups header bindings
+  const followupsNewBtn = document.getElementById('followupsNewBtn');
+  if (followupsNewBtn) followupsNewBtn.onclick = enterFollowupComposeMode;
+  const followupsBackBtn = document.getElementById('followupsBackBtn');
+  if (followupsBackBtn) followupsBackBtn.onclick = () => switchFollowupsSubView('list');
+  const followupsEmptyCTA = document.getElementById('followupsEmptyCTA');
+  if (followupsEmptyCTA) followupsEmptyCTA.onclick = enterFollowupComposeMode;
+  const followupsSearch = document.getElementById('followupsSearchInput');
+  if (followupsSearch) followupsSearch.addEventListener('input', renderFollowupsList);
   // Apply persisted language preference. Runs after all dynamic surfaces have rendered
   // once in their default English form, then swaps everything in one pass.
   applyLanguage();
@@ -4463,6 +4606,9 @@ function switchView(view) {
   if (view === 'clients') {
     switchClientsSubView('list');
   }
+  if (view === 'followups') {
+    switchFollowupsSubView('list');
+  }
 }
 
 function renderFollowupTrades() {
@@ -4659,6 +4805,7 @@ async function generateFollowup() {
     showToast(t('toast.followupDrafted'));
     completeProgress('followupProgress');
     setTimeout(() => hideProgress('followupProgress'), 600);
+    persistGeneratedFollowup().catch(e => console.warn('followup persist failed:', e));
   } catch (e) {
     console.error(e);
     showToast(e.message || t('toast.genFailed'), true);
@@ -4723,6 +4870,7 @@ function bindBilingualEditableSync() {
         currentFollowup[key] = { en: '', es: '' };
       }
       currentFollowup[key][tdLang] = el.textContent;
+      scheduleFollowupSave();
     });
   });
   const clientNameDocEl = document.getElementById('quoteClientName');
@@ -6317,6 +6465,270 @@ async function persistGeneratedQuote() {
   }
 }
 
+// Persist a freshly-generated follow-up to Supabase. Looks up the
+// client by name without auto-creating; if no match, stores with
+// null client_id + denormalized customer_name. Fire-and-forget.
+async function persistGeneratedFollowup() {
+  if (!currentFollowup) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.access_token) return;
+
+  try {
+    const userId = session.user.id;
+    const customerName = (document.getElementById('followupCustomerName').value || '').trim();
+
+    let clientId = null;
+    if (customerName) {
+      const { data: existing } = await sb
+        .from('clients')
+        .select('id')
+        .eq('name', customerName)
+        .limit(1)
+        .maybeSingle();
+      if (existing && existing.id) clientId = existing.id;
+    }
+
+    const { data: newFollowup, error: fErr } = await sb
+      .from('followups')
+      .insert({
+        user_id: userId,
+        client_id: clientId,
+        quote_id: null,
+        customer_name: customerName || null,
+        channel: followupChannel === 'Text' ? 'text' : 'email',
+        scenario: followupScenario || null,
+        payload: currentFollowup,
+      })
+      .select('id')
+      .single();
+    if (fErr) {
+      console.warn('followup insert failed:', fErr);
+      showToast(t('toast.followupSaveFailed'), true);
+      return;
+    }
+    if (newFollowup && newFollowup.id) {
+      currentFollowup.id = newFollowup.id;
+    }
+  } catch (e) {
+    console.warn('persistGeneratedFollowup threw:', e);
+  }
+}
+
+// Switch among the 3 follow-up subview modes: list / compose / view.
+function switchFollowupsSubView(view) {
+  const valid = ['list', 'compose', 'view'];
+  followupsSubView = valid.includes(view) ? view : 'list';
+
+  const list = document.getElementById('followupsListSub');
+  const form = document.getElementById('followupsFormSub');
+  const doc  = document.getElementById('followupsDocSub');
+  const backBtn = document.getElementById('followupsBackBtn');
+  const newBtn  = document.getElementById('followupsNewBtn');
+
+  if (list) list.classList.toggle('hidden', followupsSubView !== 'list');
+  if (form) form.classList.toggle('hidden', followupsSubView !== 'compose');
+  if (doc)  doc.classList.toggle('hidden', followupsSubView !== 'compose' && followupsSubView !== 'view');
+
+  if (backBtn) backBtn.classList.toggle('hidden', followupsSubView === 'list');
+  if (newBtn)  newBtn.classList.toggle('hidden', followupsSubView !== 'list');
+
+  if (followupsSubView === 'list') {
+    loadSavedFollowups();
+  }
+}
+
+function enterFollowupComposeMode() {
+  currentFollowup = null;
+  const wrap = document.getElementById('followupWrap');
+  if (wrap) wrap.classList.remove('visible');
+  switchFollowupsSubView('compose');
+}
+
+async function loadSavedFollowups() {
+  const empty = document.getElementById('followupsListEmpty');
+  const loading = document.getElementById('followupsListLoading');
+  const table = document.getElementById('followupsListTable');
+
+  loading.classList.remove('hidden');
+  table.classList.add('hidden');
+  empty.classList.add('hidden');
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.access_token) {
+    savedFollowupsCache = [];
+    loading.classList.add('hidden');
+    empty.classList.remove('hidden');
+    return;
+  }
+
+  try {
+    const { data, error } = await sb
+      .from('followups')
+      .select('id, customer_name, channel, scenario, created_at')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    savedFollowupsCache = data || [];
+  } catch (e) {
+    console.warn('loadSavedFollowups failed:', e);
+    savedFollowupsCache = [];
+  }
+
+  loading.classList.add('hidden');
+  renderFollowupsList();
+}
+
+function renderFollowupsList() {
+  const tbody = document.getElementById('followupsListBody');
+  const table = document.getElementById('followupsListTable');
+  const empty = document.getElementById('followupsListEmpty');
+  const searchEl = document.getElementById('followupsSearchInput');
+  const q = (searchEl ? searchEl.value : '').trim().toLowerCase();
+
+  const filtered = savedFollowupsCache.filter(f => {
+    if (!q) return true;
+    return (f.customer_name || '').toLowerCase().includes(q);
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    table.classList.add('hidden');
+    empty.classList.remove('hidden');
+    return;
+  }
+  table.classList.remove('hidden');
+  empty.classList.add('hidden');
+
+  tbody.innerHTML = filtered.map(f => {
+    const customer = f.customer_name || t('followups.history.noCustomer');
+    const scenario = f.scenario || '—';
+    const channel = f.channel === 'text'
+      ? t('followup.channels.text')
+      : t('followup.channels.email');
+    const date = formatRelativeDate(f.created_at);
+    return `
+      <tr class="followups-list-row" data-followup-id="${f.id}" style="cursor:pointer;">
+        <td><strong>${escapeHtml(customer)}</strong></td>
+        <td>${escapeHtml(scenario)}</td>
+        <td>${escapeHtml(channel)}</td>
+        <td>${date}</td>
+        <td style="text-align:right;">
+          <button class="btn-secondary btn-danger" data-delete-id="${f.id}"
+                  style="padding: 6px 12px; font-size: 13px;">${t('followups.history.delete')}</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  tbody.querySelectorAll('.followups-list-row').forEach(row => {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('[data-delete-id]')) return;
+      openSavedFollowup(row.dataset.followupId);
+    });
+  });
+  tbody.querySelectorAll('[data-delete-id]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteSavedFollowup(btn.dataset.deleteId);
+    });
+  });
+}
+
+async function openSavedFollowup(followupId) {
+  try {
+    const { data, error } = await sb
+      .from('followups')
+      .select('*')
+      .eq('id', followupId)
+      .single();
+    if (error || !data) {
+      showToast(t('toast.followupLoadFailed'), true);
+      return;
+    }
+
+    if (data.customer_name) {
+      document.getElementById('followupCustomerName').value = data.customer_name;
+    }
+    if (data.channel) {
+      followupChannel = data.channel === 'text' ? 'Text' : 'Email';
+      document.querySelectorAll('#followupChannelPills button').forEach(b => {
+        b.classList.toggle('active', b.dataset.channel === followupChannel);
+      });
+      document.getElementById('followupSubjectSection')
+        .classList.toggle('hidden', followupChannel === 'Text');
+    }
+    if (data.scenario) {
+      followupScenario = data.scenario;
+      document.querySelectorAll('#followupScenarioPills button').forEach(b => {
+        b.classList.toggle('active', b.dataset.scenario === data.scenario);
+      });
+    }
+
+    currentFollowup = data.payload || {};
+    currentFollowup.id = data.id;
+
+    renderFollowupMessage(currentFollowup);
+    document.getElementById('followupWrap').classList.add('visible');
+
+    switchFollowupsSubView('view');
+    document.getElementById('followupWrap')
+      .scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) {
+    console.warn('openSavedFollowup threw:', e);
+    showToast(t('toast.followupLoadFailed'), true);
+  }
+}
+
+async function deleteSavedFollowup(followupId) {
+  if (!confirm(t('followups.history.confirmDelete'))) return;
+  try {
+    const { error } = await sb.from('followups').delete().eq('id', followupId);
+    if (error) {
+      console.warn('deleteSavedFollowup failed:', error);
+      showToast(t('toast.followupDeleteFailed'), true);
+      return;
+    }
+    if (currentFollowup && currentFollowup.id === followupId) {
+      currentFollowup = null;
+      document.getElementById('followupWrap').classList.remove('visible');
+    }
+    showToast(t('toast.followupDeleted'));
+    loadSavedFollowups();
+  } catch (e) {
+    console.warn('deleteSavedFollowup threw:', e);
+    showToast(t('toast.followupDeleteFailed'), true);
+  }
+}
+
+function scheduleFollowupSave() {
+  if (!currentFollowup || !currentFollowup.id) return;
+  clearTimeout(followupsSaveTimer);
+  followupsSaveTimer = setTimeout(saveCurrentFollowupEdits, 1500);
+}
+
+async function saveCurrentFollowupEdits() {
+  if (!currentFollowup || !currentFollowup.id) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.access_token) return;
+
+  try {
+    const { error } = await sb
+      .from('followups')
+      .update({
+        channel: followupChannel === 'Text' ? 'text' : 'email',
+        scenario: followupScenario || null,
+        payload: currentFollowup,
+      })
+      .eq('id', currentFollowup.id);
+    if (error) {
+      console.warn('saveCurrentFollowupEdits failed:', error);
+      showToast(t('toast.followupEditSaveFailed'), true);
+    }
+  } catch (e) {
+    console.warn('saveCurrentFollowupEdits threw:', e);
+  }
+}
+
 // Switch among the 3 quote subview modes: list (default landing),
 // compose (generation form), view (read/edit a saved quote document).
 function switchQuotesSubView(view) {
@@ -6524,7 +6936,7 @@ function enterNewClientMode() {
 async function openClientDetail(clientId) {
   if (!clientId) return;
   try {
-    const [clientRes, quotesRes, jobsRes] = await Promise.all([
+    const [clientRes, quotesRes, jobsRes, followupsRes] = await Promise.all([
       sb.from('clients').select('*').eq('id', clientId).single(),
       sb.from('quotes')
         .select('id, total, trades, status, created_at')
@@ -6532,6 +6944,10 @@ async function openClientDetail(clientId) {
         .order('created_at', { ascending: false }),
       sb.from('jobs')
         .select('id, quote_id, description, trade, amount, status, created_at')
+        .eq('client_id', clientId)
+        .order('created_at', { ascending: false }),
+      sb.from('followups')
+        .select('id, scenario, channel, created_at')
         .eq('client_id', clientId)
         .order('created_at', { ascending: false }),
     ]);
@@ -6543,6 +6959,7 @@ async function openClientDetail(clientId) {
     activeClientData = clientRes.data;
     clientDetailQuotesCache = quotesRes.data || [];
     clientDetailJobsCache = jobsRes.data || [];
+    clientDetailFollowupsCache = followupsRes.data || [];
     renderClientDetail();
     switchClientsSubView('detail');
   } catch (e) {
@@ -6568,6 +6985,7 @@ function renderClientDetail() {
   applyClientType(c.type || 'person');
   renderClientDetailQuotes();
   renderClientDetailJobs();
+  renderClientDetailFollowups();
 }
 
 // Swap which fields are visible based on type. Also swaps the Name
@@ -6733,6 +7151,43 @@ function renderClientDetailJobs() {
       if (activeClientId) saveClientEdits().catch(e => console.warn('flush save:', e));
       switchView('quotes');
       openSavedQuote(qid);
+    });
+  });
+}
+
+function renderClientDetailFollowups() {
+  const tbody = document.getElementById('clientDetailFollowupsBody');
+  const table = document.getElementById('clientDetailFollowupsTable');
+  const empty = document.getElementById('clientDetailFollowupsEmpty');
+  if (!tbody) return;
+  const followups = clientDetailFollowupsCache || [];
+  if (!followups.length) {
+    tbody.innerHTML = '';
+    table.classList.add('hidden');
+    empty.classList.remove('hidden');
+    return;
+  }
+  table.classList.remove('hidden');
+  empty.classList.add('hidden');
+  tbody.innerHTML = followups.map(f => {
+    const scenario = f.scenario || '—';
+    const channel = f.channel === 'text'
+      ? t('followup.channels.text')
+      : t('followup.channels.email');
+    return `
+      <tr class="client-followup-row" data-followup-id="${f.id}" style="cursor: pointer;">
+        <td>${escapeHtml(scenario)}</td>
+        <td>${escapeHtml(channel)}</td>
+        <td>${formatRelativeDate(f.created_at)}</td>
+      </tr>
+    `;
+  }).join('');
+  tbody.querySelectorAll('.client-followup-row').forEach(row => {
+    row.addEventListener('click', () => {
+      clearTimeout(clientsSaveTimer);
+      if (activeClientId) saveClientEdits().catch(e => console.warn('flush save:', e));
+      switchView('followups');
+      openSavedFollowup(row.dataset.followupId);
     });
   });
 }
