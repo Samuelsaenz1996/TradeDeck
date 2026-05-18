@@ -2327,6 +2327,122 @@
             </table>
           </div>
         </div>
+
+        <div id="clientsDetailSub" class="hidden">
+          <div class="card">
+            <div class="card-title">
+              <span id="clientDetailHeaderName">—</span>
+            </div>
+            <div class="card-sub" data-i18n="clientDetail.sub">
+              Update info, view related quotes and jobs. Changes save automatically.
+            </div>
+
+            <div class="field">
+              <label class="label" data-i18n="clientDetail.type">Type</label>
+              <div class="pricing-toggle" id="clientTypeToggle"
+                   role="group" aria-label="Client type">
+                <button data-type="person" type="button" class="active">
+                  👤 <span data-i18n="clientDetail.typePerson">Person</span>
+                </button>
+                <button data-type="company" type="button">
+                  🏢 <span data-i18n="clientDetail.typeCompany">Company</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="field-row cols-2">
+              <div>
+                <label class="label" id="clientNameLabel" data-i18n="clientDetail.namePerson">Name</label>
+                <input type="text" class="input" id="clientDetailName" />
+              </div>
+              <div>
+                <label class="label" data-i18n="clientDetail.status">Status</label>
+                <select class="select" id="clientDetailStatus">
+                  <option value="lead" data-i18n="status.Lead">Lead</option>
+                  <option value="active" data-i18n="status.Active">Active</option>
+                  <option value="past" data-i18n="status.Past">Past</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field-row cols-2 hidden" id="clientDetailCompanyFields">
+              <div>
+                <label class="label" data-i18n="clientDetail.contactName">Contact name</label>
+                <input type="text" class="input" id="clientDetailContactName"
+                       data-i18n-placeholder="clientDetail.contactNamePlaceholder"
+                       placeholder="Raj Patel" />
+              </div>
+              <div>
+                <label class="label" data-i18n="clientDetail.contactTitle">Contact title</label>
+                <input type="text" class="input" id="clientDetailContactTitle"
+                       data-i18n-placeholder="clientDetail.contactTitlePlaceholder"
+                       placeholder="Project Manager" />
+              </div>
+            </div>
+
+            <div class="field-row cols-2">
+              <div>
+                <label class="label" data-i18n="clientDetail.email">Email</label>
+                <input type="email" class="input" id="clientDetailEmail" />
+              </div>
+              <div>
+                <label class="label" data-i18n="clientDetail.phone">Phone</label>
+                <input type="text" class="input" id="clientDetailPhone" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label" data-i18n="clientDetail.address">Address</label>
+              <input type="text" class="input" id="clientDetailAddr" />
+            </div>
+
+            <div class="field">
+              <label class="label" data-i18n="clientDetail.notes">Notes</label>
+              <textarea class="textarea" id="clientDetailNotes"
+                        data-i18n-placeholder="clientDetail.notesPlaceholder"
+                        placeholder="Anything to remember — budget, preferences, schedule notes..."></textarea>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title" data-i18n="clientDetail.quotesTitle">Quotes for this client</div>
+            <div id="clientDetailQuotesEmpty" class="hidden"
+                 style="text-align: center; padding: 24px; color: var(--ink-3);">
+              <span data-i18n="clientDetail.noQuotes">No quotes for this client yet.</span>
+            </div>
+            <table class="line-table" id="clientDetailQuotesTable">
+              <thead>
+                <tr>
+                  <th data-i18n="quotes.history.col.trades">Trades</th>
+                  <th class="amt-col" data-i18n="quotes.history.col.total">Total</th>
+                  <th data-i18n="quotes.history.col.status">Status</th>
+                  <th data-i18n="quotes.history.col.date">Date</th>
+                </tr>
+              </thead>
+              <tbody id="clientDetailQuotesBody"></tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-title" data-i18n="clientDetail.jobsTitle">Jobs for this client</div>
+            <div id="clientDetailJobsEmpty" class="hidden"
+                 style="text-align: center; padding: 24px; color: var(--ink-3);">
+              <span data-i18n="clientDetail.noJobs">No jobs for this client yet.</span>
+            </div>
+            <table class="line-table" id="clientDetailJobsTable">
+              <thead>
+                <tr>
+                  <th data-i18n="clientDetail.jobs.col.description">Description</th>
+                  <th data-i18n="clientDetail.jobs.col.trade">Trade</th>
+                  <th class="amt-col" data-i18n="clientDetail.jobs.col.amount">Amount</th>
+                  <th data-i18n="clientDetail.jobs.col.status">Status</th>
+                  <th data-i18n="clientDetail.jobs.col.date">Date</th>
+                </tr>
+              </thead>
+              <tbody id="clientDetailJobsBody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <div id="jobsView" class="hidden">
@@ -2765,6 +2881,33 @@ const I18N = {
     'clients.col.lastActivity': 'Last activity',
     'clients.iconPerson': '👤',
     'clients.iconCompany': '🏢',
+    'clientDetail.sub': 'Update info, view related quotes and jobs. Changes save automatically.',
+    'clientDetail.type': 'Type',
+    'clientDetail.typePerson': 'Person',
+    'clientDetail.typeCompany': 'Company',
+    'clientDetail.namePerson': 'Name',
+    'clientDetail.nameCompany': 'Company name',
+    'clientDetail.status': 'Status',
+    'clientDetail.contactName': 'Contact name',
+    'clientDetail.contactNamePlaceholder': 'Raj Patel',
+    'clientDetail.contactTitle': 'Contact title',
+    'clientDetail.contactTitlePlaceholder': 'Project Manager',
+    'clientDetail.email': 'Email',
+    'clientDetail.phone': 'Phone',
+    'clientDetail.address': 'Address',
+    'clientDetail.notes': 'Notes',
+    'clientDetail.notesPlaceholder': 'Anything to remember — budget, preferences, schedule notes...',
+    'clientDetail.quotesTitle': 'Quotes for this client',
+    'clientDetail.noQuotes': 'No quotes for this client yet.',
+    'clientDetail.jobsTitle': 'Jobs for this client',
+    'clientDetail.noJobs': 'No jobs for this client yet.',
+    'clientDetail.jobs.col.description': 'Description',
+    'clientDetail.jobs.col.trade': 'Trade',
+    'clientDetail.jobs.col.amount': 'Amount',
+    'clientDetail.jobs.col.status': 'Status',
+    'clientDetail.jobs.col.date': 'Date',
+    'toast.clientLoadFailed': 'Could not load client',
+    'toast.clientSaveFailed': 'Could not save client changes',
     // Jobs
     'jobs.title': 'Jobs',
     'jobs.add': '+ New job',
@@ -3177,6 +3320,33 @@ const I18N = {
     'clients.col.lastActivity': 'Última actividad',
     'clients.iconPerson': '👤',
     'clients.iconCompany': '🏢',
+    'clientDetail.sub': 'Actualiza datos, mira cotizaciones y trabajos relacionados. Los cambios se guardan automáticamente.',
+    'clientDetail.type': 'Tipo',
+    'clientDetail.typePerson': 'Persona',
+    'clientDetail.typeCompany': 'Empresa',
+    'clientDetail.namePerson': 'Nombre',
+    'clientDetail.nameCompany': 'Nombre de la empresa',
+    'clientDetail.status': 'Estado',
+    'clientDetail.contactName': 'Nombre del contacto',
+    'clientDetail.contactNamePlaceholder': 'Raj Patel',
+    'clientDetail.contactTitle': 'Cargo del contacto',
+    'clientDetail.contactTitlePlaceholder': 'Gerente de proyecto',
+    'clientDetail.email': 'Correo',
+    'clientDetail.phone': 'Teléfono',
+    'clientDetail.address': 'Dirección',
+    'clientDetail.notes': 'Notas',
+    'clientDetail.notesPlaceholder': 'Cualquier cosa para recordar — presupuesto, preferencias, notas de horario...',
+    'clientDetail.quotesTitle': 'Cotizaciones de este cliente',
+    'clientDetail.noQuotes': 'Aún no hay cotizaciones para este cliente.',
+    'clientDetail.jobsTitle': 'Trabajos de este cliente',
+    'clientDetail.noJobs': 'Aún no hay trabajos para este cliente.',
+    'clientDetail.jobs.col.description': 'Descripción',
+    'clientDetail.jobs.col.trade': 'Oficio',
+    'clientDetail.jobs.col.amount': 'Monto',
+    'clientDetail.jobs.col.status': 'Estado',
+    'clientDetail.jobs.col.date': 'Fecha',
+    'toast.clientLoadFailed': 'No se pudo cargar el cliente',
+    'toast.clientSaveFailed': 'No se pudieron guardar los cambios',
     // Jobs
     'jobs.title': 'Trabajos',
     'jobs.add': '+ Nuevo trabajo',
@@ -3477,6 +3647,19 @@ function applyLanguage() {
       && clientsCache.length > 0) {
     renderClientsList();
   }
+  // Re-render the client detail's related lists too — they use t()
+  // at template-build time like the main lists.
+  if (typeof renderClientDetailQuotes === 'function'
+      && typeof clientsSubView !== 'undefined'
+      && clientsSubView === 'detail') {
+    renderClientDetailQuotes();
+    renderClientDetailJobs();
+  }
+  // Refresh the type-dependent Name label for the active client
+  if (typeof activeClientData !== 'undefined' && activeClientData
+      && clientsSubView === 'detail') {
+    applyClientType(activeClientData.type || 'person');
+  }
   // Pin quote-internal labels to the quote's content language (must run last
   // so it can override anything the refresh helpers above wrote)
   applyQuoteContentLang();
@@ -3664,6 +3847,10 @@ let clientsCache = [];            // Most recent fetch from the server,
                                   // each row augmented with .jobs_count
                                   // and .revenue + .last_activity_at
 let activeClientId = null;        // Currently-viewed client (set by 2-D.3)
+let activeClientData = null;        // Full client row, populated on open
+let clientDetailQuotesCache = [];   // Quotes for the active client
+let clientDetailJobsCache = [];     // Jobs for the active client
+let clientsSaveTimer = null;        // Debounce timer for field edits
 
 // Map of pricing mode → input IDs whose values should persist per trade.
 const PRICING_INPUTS_BY_MODE = {
@@ -3842,9 +4029,31 @@ function init() {
   const clientsNewBtn = document.getElementById('clientsNewBtn');
   if (clientsNewBtn) clientsNewBtn.onclick = enterNewClientMode;
   const clientsBackBtn = document.getElementById('clientsBackBtn');
-  if (clientsBackBtn) clientsBackBtn.onclick = () => switchClientsSubView('list');
+  if (clientsBackBtn) clientsBackBtn.onclick = () => {
+    // Flush any pending debounced save synchronously, then return to list
+    clearTimeout(clientsSaveTimer);
+    if (activeClientId) saveClientEdits().catch(e => console.warn('flush save failed:', e));
+    activeClientId = null;
+    activeClientData = null;
+    switchClientsSubView('list');
+  };
   const clientsSearch = document.getElementById('clientsSearchInput');
   if (clientsSearch) clientsSearch.addEventListener('input', renderClientsList);
+  // Bind client detail form: every editable field triggers debounced save
+  ['clientDetailName','clientDetailEmail','clientDetailPhone',
+   'clientDetailAddr','clientDetailNotes',
+   'clientDetailContactName','clientDetailContactTitle'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', scheduleClientSave);
+  });
+  const statusSel = document.getElementById('clientDetailStatus');
+  if (statusSel) statusSel.addEventListener('change', scheduleClientSave);
+  document.querySelectorAll('#clientTypeToggle button').forEach(btn => {
+    btn.onclick = () => {
+      applyClientType(btn.dataset.type);
+      scheduleClientSave();
+    };
+  });
   // Apply persisted language preference. Runs after all dynamic surfaces have rendered
   // once in their default English form, then swaps everything in one pass.
   applyLanguage();
@@ -6290,12 +6499,14 @@ function switchClientsSubView(view) {
   clientsSubView = valid.includes(view) ? view : 'list';
 
   const list = document.getElementById('clientsListSub');
+  const detail = document.getElementById('clientsDetailSub');
   const backBtn = document.getElementById('clientsBackBtn');
   const newBtn = document.getElementById('clientsNewBtn');
 
-  if (list) list.classList.toggle('hidden', clientsSubView !== 'list');
+  if (list)   list.classList.toggle('hidden', clientsSubView !== 'list');
+  if (detail) detail.classList.toggle('hidden', clientsSubView !== 'detail');
   if (backBtn) backBtn.classList.toggle('hidden', clientsSubView === 'list');
-  if (newBtn) newBtn.classList.toggle('hidden', clientsSubView !== 'list');
+  if (newBtn)  newBtn.classList.toggle('hidden', clientsSubView !== 'list');
 
   if (clientsSubView === 'list') {
     loadClients();
@@ -6306,6 +6517,224 @@ function switchClientsSubView(view) {
 // add-client form. For now, just toast.
 function enterNewClientMode() {
   showToast('Manual client creation coming in 2-D.3');
+}
+
+// Open a client's detail view: fetch full client row + related
+// quotes + related jobs in parallel, then render and switch.
+async function openClientDetail(clientId) {
+  if (!clientId) return;
+  try {
+    const [clientRes, quotesRes, jobsRes] = await Promise.all([
+      sb.from('clients').select('*').eq('id', clientId).single(),
+      sb.from('quotes')
+        .select('id, total, trades, status, created_at')
+        .eq('client_id', clientId)
+        .order('created_at', { ascending: false }),
+      sb.from('jobs')
+        .select('id, quote_id, description, trade, amount, status, created_at')
+        .eq('client_id', clientId)
+        .order('created_at', { ascending: false }),
+    ]);
+    if (clientRes.error || !clientRes.data) {
+      showToast(t('toast.clientLoadFailed'), true);
+      return;
+    }
+    activeClientId = clientId;
+    activeClientData = clientRes.data;
+    clientDetailQuotesCache = quotesRes.data || [];
+    clientDetailJobsCache = jobsRes.data || [];
+    renderClientDetail();
+    switchClientsSubView('detail');
+  } catch (e) {
+    console.warn('openClientDetail threw:', e);
+    showToast(t('toast.clientLoadFailed'), true);
+  }
+}
+
+// Populate every form field from activeClientData, set type toggle,
+// re-render related lists. Called on open + after each save.
+function renderClientDetail() {
+  if (!activeClientData) return;
+  const c = activeClientData;
+  document.getElementById('clientDetailHeaderName').textContent = c.name || '—';
+  document.getElementById('clientDetailName').value = c.name || '';
+  document.getElementById('clientDetailStatus').value = c.status || 'lead';
+  document.getElementById('clientDetailEmail').value = c.email || '';
+  document.getElementById('clientDetailPhone').value = c.phone || '';
+  document.getElementById('clientDetailAddr').value = c.addr || '';
+  document.getElementById('clientDetailNotes').value = c.notes || '';
+  document.getElementById('clientDetailContactName').value = c.contact_name || '';
+  document.getElementById('clientDetailContactTitle').value = c.contact_title || '';
+  applyClientType(c.type || 'person');
+  renderClientDetailQuotes();
+  renderClientDetailJobs();
+}
+
+// Swap which fields are visible based on type. Also swaps the Name
+// label's i18n key so a later applyLanguage call gets the right text.
+function applyClientType(type) {
+  const t2 = (type === 'company') ? 'company' : 'person';
+  document.querySelectorAll('#clientTypeToggle button').forEach(b => {
+    b.classList.toggle('active', b.dataset.type === t2);
+  });
+  document.getElementById('clientDetailCompanyFields')
+    .classList.toggle('hidden', t2 !== 'company');
+  const lbl = document.getElementById('clientNameLabel');
+  if (lbl) {
+    const key = t2 === 'company' ? 'clientDetail.nameCompany' : 'clientDetail.namePerson';
+    lbl.setAttribute('data-i18n', key);
+    lbl.textContent = t(key);
+  }
+}
+
+// Debounced autosave — called from every field's input/change.
+function scheduleClientSave() {
+  if (!activeClientId) return;
+  clearTimeout(clientsSaveTimer);
+  clientsSaveTimer = setTimeout(saveClientEdits, 1500);
+}
+
+// Persist current form values to the clients row. When type=person,
+// contact_name/title are nulled out so a person record never carries
+// stray contact data.
+async function saveClientEdits() {
+  if (!activeClientId) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.access_token) return;
+  try {
+    const activeTypeBtn = document.querySelector('#clientTypeToggle button.active');
+    const type = activeTypeBtn ? activeTypeBtn.dataset.type : 'person';
+    const updates = {
+      type,
+      name: document.getElementById('clientDetailName').value.trim() || 'Unnamed',
+      email: document.getElementById('clientDetailEmail').value.trim() || null,
+      phone: document.getElementById('clientDetailPhone').value.trim() || null,
+      addr:  document.getElementById('clientDetailAddr').value.trim() || null,
+      status: document.getElementById('clientDetailStatus').value,
+      notes: document.getElementById('clientDetailNotes').value.trim() || null,
+      contact_name:  type === 'company'
+        ? (document.getElementById('clientDetailContactName').value.trim() || null)
+        : null,
+      contact_title: type === 'company'
+        ? (document.getElementById('clientDetailContactTitle').value.trim() || null)
+        : null,
+    };
+    const { data, error } = await sb.from('clients')
+      .update(updates).eq('id', activeClientId).select('*').single();
+    if (error) {
+      console.warn('saveClientEdits failed:', error);
+      showToast(t('toast.clientSaveFailed'), true);
+      return;
+    }
+    if (data) {
+      activeClientData = data;
+      document.getElementById('clientDetailHeaderName').textContent = data.name || '—';
+    }
+  } catch (e) {
+    console.warn('saveClientEdits threw:', e);
+  }
+}
+
+// Helper: localized job status label. Job status enum uses
+// 'in_progress' (underscore) which maps to 'In Progress' in I18N.
+function jobStatusLabel(statusKey) {
+  const englishLabelMap = {
+    quoted: 'Quoted',
+    in_progress: 'In Progress',
+    complete: 'Complete',
+    paid: 'Paid',
+  };
+  const englishLabel = englishLabelMap[statusKey] || capitalizeFirst(statusKey || '');
+  return (I18N[tdLang] && I18N[tdLang]['status.' + englishLabel]) || englishLabel;
+}
+
+// Render the related quotes table. Click a row → switch to Quotes
+// view + openSavedQuote so the user lands directly on that quote.
+function renderClientDetailQuotes() {
+  const tbody = document.getElementById('clientDetailQuotesBody');
+  const table = document.getElementById('clientDetailQuotesTable');
+  const empty = document.getElementById('clientDetailQuotesEmpty');
+  if (!tbody) return;
+  const quotes = clientDetailQuotesCache || [];
+  if (!quotes.length) {
+    tbody.innerHTML = '';
+    table.classList.add('hidden');
+    empty.classList.remove('hidden');
+    return;
+  }
+  table.classList.remove('hidden');
+  empty.classList.add('hidden');
+  tbody.innerHTML = quotes.map(q => {
+    const trades = (q.trades || []).map(name => {
+      const tr = TRADES.find(td => td.name === name);
+      return tr ? `${tr.emoji} ${tradeDisplay(name)}` : tradeDisplay(name);
+    }).join(', ');
+    const statusKey = q.status || 'draft';
+    const statusDisp = (I18N[tdLang] && I18N[tdLang]['status.' + capitalizeFirst(statusKey)]) || statusKey;
+    return `
+      <tr class="client-quote-row" data-quote-id="${q.id}" style="cursor: pointer;">
+        <td>${escapeHtml(trades) || '—'}</td>
+        <td class="amt-col">${fmt(parseFloat(q.total) || 0)}</td>
+        <td><span class="status-pill status-${statusKey}">${escapeHtml(statusDisp)}</span></td>
+        <td>${formatRelativeDate(q.created_at)}</td>
+      </tr>
+    `;
+  }).join('');
+  tbody.querySelectorAll('.client-quote-row').forEach(row => {
+    row.addEventListener('click', () => {
+      clearTimeout(clientsSaveTimer);
+      if (activeClientId) saveClientEdits().catch(e => console.warn('flush save:', e));
+      switchView('quotes');
+      openSavedQuote(row.dataset.quoteId);
+    });
+  });
+}
+
+// Render the related jobs table. Each job links to its source
+// quote (if any); rows without a quote_id are not clickable.
+function renderClientDetailJobs() {
+  const tbody = document.getElementById('clientDetailJobsBody');
+  const table = document.getElementById('clientDetailJobsTable');
+  const empty = document.getElementById('clientDetailJobsEmpty');
+  if (!tbody) return;
+  const jobs = clientDetailJobsCache || [];
+  if (!jobs.length) {
+    tbody.innerHTML = '';
+    table.classList.add('hidden');
+    empty.classList.remove('hidden');
+    return;
+  }
+  table.classList.remove('hidden');
+  empty.classList.add('hidden');
+  tbody.innerHTML = jobs.map(j => {
+    const tradeStr = j.trade
+      ? `${getTradeEmoji(j.trade)} ${tradeDisplay(j.trade)}`
+      : '—';
+    const statusKey = j.status || 'quoted';
+    const statusCss = statusKey.replace(/_/g, '-');
+    const statusDisp = jobStatusLabel(statusKey);
+    const hasQuote = !!j.quote_id;
+    return `
+      <tr class="client-job-row" data-quote-id="${j.quote_id || ''}"
+          style="${hasQuote ? 'cursor: pointer;' : ''}">
+        <td>${escapeHtml(j.description || '—')}</td>
+        <td>${escapeHtml(tradeStr)}</td>
+        <td class="amt-col">${fmt(parseFloat(j.amount) || 0)}</td>
+        <td><span class="status-pill status-${statusCss}">${escapeHtml(statusDisp)}</span></td>
+        <td>${formatRelativeDate(j.created_at)}</td>
+      </tr>
+    `;
+  }).join('');
+  tbody.querySelectorAll('.client-job-row').forEach(row => {
+    const qid = row.dataset.quoteId;
+    if (!qid) return;
+    row.addEventListener('click', () => {
+      clearTimeout(clientsSaveTimer);
+      if (activeClientId) saveClientEdits().catch(e => console.warn('flush save:', e));
+      switchView('quotes');
+      openSavedQuote(qid);
+    });
+  });
 }
 
 async function loadSavedQuotes() {
