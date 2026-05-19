@@ -1278,12 +1278,10 @@
     <div id="navClients" class="nav-item">
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"/></svg>
       <span data-i18n="nav.clients">Clients</span>
-      <span class="nav-preview-badge" data-i18n="nav.preview">Preview</span>
     </div>
     <div id="navJobs" class="nav-item">
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>
       <span data-i18n="nav.jobs">Jobs</span>
-      <span class="nav-preview-badge" data-i18n="nav.preview">Preview</span>
     </div>
     <div id="navPayments" class="nav-item">
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -2552,10 +2550,6 @@
       </div>
 
       <div id="jobsView" class="hidden">
-        <div class="info-banner" id="jobsPreviewBanner">
-          <span data-i18n="preview.banner">👀 Preview — this section is a mockup with sample data. Fully working version coming soon.</span>
-          <button onclick="this.closest('.info-banner').style.display='none'">×</button>
-        </div>
         <div class="card">
           <div class="field-row cols-2">
             <div>
@@ -2567,38 +2561,44 @@
           </div>
           <div class="field">
             <div class="timeline-pills" id="jobFilterPills">
-              <button class="active" disabled data-i18n="jobs.filter.all">All</button>
-              <button disabled data-i18n="jobs.filter.quoted">Quoted</button>
-              <button disabled data-i18n="jobs.filter.inProgress">In Progress</button>
-              <button disabled data-i18n="jobs.filter.complete">Complete</button>
-              <button disabled data-i18n="jobs.filter.paid">Paid</button>
+              <button class="active" data-filter="all" data-i18n="jobs.filter.all">All</button>
+              <button data-filter="quoted" data-i18n="jobs.filter.quoted">Quoted</button>
+              <button data-filter="in_progress" data-i18n="jobs.filter.inProgress">In Progress</button>
+              <button data-filter="complete" data-i18n="jobs.filter.complete">Complete</button>
+              <button data-filter="paid" data-i18n="jobs.filter.paid">Paid</button>
             </div>
           </div>
         </div>
         <div class="field-row cols-4">
           <div class="stat-card">
             <div class="stat-card-title" data-i18n="jobs.openQuotes">Open quotes</div>
-            <div class="stat-card-value">6</div>
-            <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$14,200</div>
+            <div class="stat-card-value" id="jobsStatOpenCount">0</div>
+            <div id="jobsStatOpenAmt" style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$0.00</div>
           </div>
           <div class="stat-card">
             <div class="stat-card-title" data-i18n="jobs.inProgress">In progress</div>
-            <div class="stat-card-value">4</div>
-            <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$28,500</div>
+            <div class="stat-card-value" id="jobsStatInProgressCount">0</div>
+            <div id="jobsStatInProgressAmt" style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$0.00</div>
           </div>
           <div class="stat-card">
             <div class="stat-card-title" data-i18n="jobs.awaiting">Awaiting payment</div>
-            <div class="stat-card-value">3</div>
-            <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$9,800</div>
+            <div class="stat-card-value" id="jobsStatAwaitingCount">0</div>
+            <div id="jobsStatAwaitingAmt" style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$0.00</div>
           </div>
           <div class="stat-card">
             <div class="stat-card-title" data-i18n="jobs.completed">Completed this month</div>
-            <div class="stat-card-value">11</div>
-            <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$42,300</div>
+            <div class="stat-card-value" id="jobsStatCompletedCount">0</div>
+            <div id="jobsStatCompletedAmt" style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$0.00</div>
           </div>
         </div>
         <div class="card">
-          <table class="line-table">
+          <div id="jobsListEmpty" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
+            <div style="font-size: 48px; margin-bottom: 12px;">🧰</div>
+            <p id="jobsEmptyMessage" style="margin-bottom: 0;" data-i18n="jobs.empty">
+              No jobs yet. Generate a quote and it will appear here automatically.
+            </p>
+          </div>
+          <table class="line-table" id="jobsListTable">
             <thead>
               <tr>
                 <th data-i18n="jobs.col.job">Job</th>
@@ -3066,6 +3066,8 @@ const I18N = {
     'jobs.col.quote': 'Quote',
     'jobs.col.status': 'Status',
     'jobs.col.date': 'Date',
+    'jobs.empty': 'No jobs yet. Generate a quote and it will appear here automatically.',
+    'jobs.emptyFilter': 'No jobs match this filter.',
     // Payments
     'payments.title': 'Payments',
     'payments.range': 'Last 30 days ▼',
@@ -3539,6 +3541,8 @@ const I18N = {
     'jobs.col.quote': 'Cotización',
     'jobs.col.status': 'Estado',
     'jobs.col.date': 'Fecha',
+    'jobs.empty': 'Aún no hay trabajos. Genera una cotización y aparecerá aquí automáticamente.',
+    'jobs.emptyFilter': 'Ningún trabajo coincide con este filtro.',
     // Payments
     'payments.title': 'Pagos',
     'payments.range': 'Últimos 30 días ▼',
@@ -3889,24 +3893,6 @@ const TRADE_DESC_EXAMPLES = {
   Logistics: 'e.g. Rework freight pallets, stage shipments for cross-docking, coordinate last-mile delivery logistics, and manage accessorial handling.',
 };
 
-const MOCK_JOBS = [
-  { id: 'J001', clientId: 'C001', clientName: 'Sarah Chen', trade: 'Plumbing', description: 'Replace 50ft drain line + repair drywall', amount: 7200, status: 'Quoted', date: '2 days ago' },
-  { id: 'J002', clientId: 'C002', clientName: 'Mike Rodriguez', trade: 'Electrical', description: 'Install outdoor lighting package + new outlets', amount: 4200, status: 'Quoted', date: '5 days ago' },
-  { id: 'J003', clientId: 'C004', clientName: 'Riverside Hauling Co', trade: 'Hauling & Trucking', description: 'Haul 10yd of debris + site cleanup', amount: 3100, status: 'Quoted', date: '8 days ago' },
-  { id: 'J004', clientId: 'C005', clientName: 'Eastside Remodelers', trade: 'Painting', description: 'Prime and paint kitchen + trim', amount: 2600, status: 'Quoted', date: '1 week ago' },
-  { id: 'J005', clientId: 'C003', clientName: 'Patel Construction LLC', trade: 'Roofing', description: 'Replace worn shingles + flashings', amount: 9800, status: 'In Progress', date: '2 weeks ago' },
-  { id: 'J006', clientId: 'C006', clientName: 'Lakeview Interiors', trade: 'Flooring', description: 'Install engineered hardwood in living room', amount: 14500, status: 'In Progress', date: '3 weeks ago' },
-  { id: 'J007', clientId: 'C001', clientName: 'Sarah Chen', trade: 'Plumbing', description: 'Install new cleanout and kitchen sink drain', amount: 5200, status: 'In Progress', date: '4 weeks ago' },
-  { id: 'J008', clientId: 'C010', clientName: 'Westport Plumbing', trade: 'Plumbing', description: 'Replace bathroom pipe routing + trap', amount: 3800, status: 'In Progress', date: '5 weeks ago' },
-  { id: 'J009', clientId: 'C011', clientName: 'Summit Painting', trade: 'Painting', description: 'Complete hallway repaint + door trim', amount: 3100, status: 'Complete', date: '3 weeks ago' },
-  { id: 'J010', clientId: 'C012', clientName: 'Cedar Flooring', trade: 'Flooring', description: 'Install vinyl plank on first floor', amount: 4600, status: 'Complete', date: '4 weeks ago' },
-  { id: 'J011', clientId: 'C004', clientName: 'Riverside Hauling Co', trade: 'Logistics', description: 'Move materials to offsite storage', amount: 2200, status: 'Complete', date: '5 weeks ago' },
-  { id: 'J012', clientId: 'C003', clientName: 'Patel Construction LLC', trade: 'Roofing', description: 'Repair flashing and replace ridge cap', amount: 6300, status: 'Paid', date: '1 day ago' },
-  { id: 'J013', clientId: 'C002', clientName: 'Mike Rodriguez', trade: 'Electrical', description: 'Upgrade panel + install new breakers', amount: 9100, status: 'Paid', date: '1 week ago' },
-  { id: 'J014', clientId: 'C001', clientName: 'Sarah Chen', trade: 'Landscaping', description: 'Install irrigation risers + mulch beds', amount: 5400, status: 'Paid', date: '2 weeks ago' },
-  { id: 'J015', clientId: 'C006', clientName: 'Lakeview Interiors', trade: 'HVAC', description: 'Service furnace + replace air filter', amount: 3800, status: 'Paid', date: '4 weeks ago' },
-];
-
 const MOCK_PAYMENTS = [
   { id: 'INV-1042', jobId: 'J003', clientId: 'C004', clientName: 'Riverside Hauling Co', job: 'Haul 10yd of debris + site cleanup', amount: 8200, status: 'Paid', date: '3 days ago' },
   { id: 'INV-1043', jobId: 'J006', clientId: 'C006', clientName: 'Lakeview Interiors', job: 'Install engineered hardwood in living room', amount: 5900, status: 'Paid', date: '5 days ago' },
@@ -3949,18 +3935,140 @@ function statusDisplay(s) {
   return t('status.' + s);
 }
 
+async function loadJobs() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.access_token) {
+    jobsCache = [];
+    renderJobsView();
+    return;
+  }
+  try {
+    if (!clientsLookupCache || clientsLookupCache.length === 0) {
+      await refreshClientsLookupCache();
+    }
+    const clientNameById = {};
+    clientsLookupCache.forEach(c => { clientNameById[c.id] = c.name; });
+    const { data, error } = await sb
+      .from('jobs')
+      .select('id, client_id, quote_id, description, trade, amount, status, created_at, updated_at')
+      .order('created_at', { ascending: false })
+      .limit(500);
+    if (error) throw error;
+    jobsCache = (data || []).map(j => ({
+      ...j,
+      client_name: j.client_id ? (clientNameById[j.client_id] || null) : null,
+    }));
+  } catch (e) {
+    console.warn('loadJobs failed:', e);
+    jobsCache = [];
+  }
+  renderJobsView();
+}
+
 function renderJobsView() {
+  renderJobsStats();
+  renderJobsList();
+}
+
+function renderJobsStats() {
+  const stats = {
+    quoted: { count: 0, sum: 0 },
+    in_progress: { count: 0, sum: 0 },
+    complete: { count: 0, sum: 0 },
+    paidThisMonth: { count: 0, sum: 0 },
+  };
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  jobsCache.forEach(j => {
+    const amt = parseFloat(j.amount) || 0;
+    if (j.status === 'quoted') {
+      stats.quoted.count += 1;
+      stats.quoted.sum += amt;
+    } else if (j.status === 'in_progress') {
+      stats.in_progress.count += 1;
+      stats.in_progress.sum += amt;
+    } else if (j.status === 'complete') {
+      stats.complete.count += 1;
+      stats.complete.sum += amt;
+    } else if (j.status === 'paid') {
+      const updatedTs = j.updated_at ? new Date(j.updated_at).getTime() : 0;
+      if (updatedTs >= startOfMonth) {
+        stats.paidThisMonth.count += 1;
+        stats.paidThisMonth.sum += amt;
+      }
+    }
+  });
+  document.getElementById('jobsStatOpenCount').textContent = stats.quoted.count;
+  document.getElementById('jobsStatOpenAmt').textContent = fmt(stats.quoted.sum);
+  document.getElementById('jobsStatInProgressCount').textContent = stats.in_progress.count;
+  document.getElementById('jobsStatInProgressAmt').textContent = fmt(stats.in_progress.sum);
+  document.getElementById('jobsStatAwaitingCount').textContent = stats.complete.count;
+  document.getElementById('jobsStatAwaitingAmt').textContent = fmt(stats.complete.sum);
+  document.getElementById('jobsStatCompletedCount').textContent = stats.paidThisMonth.count;
+  document.getElementById('jobsStatCompletedAmt').textContent = fmt(stats.paidThisMonth.sum);
+}
+
+function renderJobsList() {
   const body = document.getElementById('jobsTableBody');
-  body.innerHTML = MOCK_JOBS.map(job => `
-    <tr class="job-table-row">
-      <td>${job.description}</td>
-      <td>${job.clientName}</td>
-      <td>${getTradeEmoji(job.trade)} ${tradeDisplay(job.trade)}</td>
-      <td>${fmt(job.amount)}</td>
-      <td><span class="status-pill status-${job.status.toLowerCase().replace(/ /g, '-')}">${statusDisplay(job.status)}</span></td>
-      <td>${job.date}</td>
-    </tr>
-  `).join('');
+  const table = document.getElementById('jobsListTable');
+  const empty = document.getElementById('jobsListEmpty');
+  const msgEl = document.getElementById('jobsEmptyMessage');
+  const filtered = jobsCache.filter(j => {
+    if (jobsFilter === 'all') return true;
+    return j.status === jobsFilter;
+  });
+  if (filtered.length === 0) {
+    body.innerHTML = '';
+    table.classList.add('hidden');
+    empty.classList.remove('hidden');
+    if (msgEl) {
+      const key = jobsFilter === 'all' ? 'jobs.empty' : 'jobs.emptyFilter';
+      msgEl.setAttribute('data-i18n', key);
+      msgEl.textContent = t(key);
+    }
+    return;
+  }
+  table.classList.remove('hidden');
+  empty.classList.add('hidden');
+  body.innerHTML = filtered.map(j => {
+    const desc = j.description || '—';
+    const client = j.client_name || '—';
+    const tradeStr = j.trade ? `${getTradeEmoji(j.trade)} ${tradeDisplay(j.trade)}` : '—';
+    const amt = fmt(parseFloat(j.amount) || 0);
+    const statusKey = j.status || 'quoted';
+    const statusCss = statusKey.replace(/_/g, '-');
+    const statusDisp = jobStatusLabel(statusKey);
+    const date = formatRelativeDate(j.created_at);
+    const clickable = !!j.quote_id;
+    const dataAttr = j.quote_id ? `data-quote-id="${j.quote_id}"` : '';
+    return `
+      <tr class="job-table-row" ${dataAttr} style="cursor: ${clickable ? 'pointer' : 'default'};">
+        <td>${escapeHtml(desc)}</td>
+        <td>${escapeHtml(client)}</td>
+        <td>${escapeHtml(tradeStr)}</td>
+        <td class="amt-col">${amt}</td>
+        <td><span class="status-pill status-${statusCss}">${escapeHtml(statusDisp)}</span></td>
+        <td>${date}</td>
+      </tr>
+    `;
+  }).join('');
+  body.querySelectorAll('.job-table-row[data-quote-id]').forEach(row => {
+    row.addEventListener('click', () => {
+      switchView('quotes');
+      openSavedQuote(row.dataset.quoteId);
+    });
+  });
+}
+
+function bindJobsFilterPills() {
+  document.querySelectorAll('#jobFilterPills button').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('#jobFilterPills button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      jobsFilter = btn.dataset.filter || 'all';
+      renderJobsList();
+    };
+  });
 }
 
 function renderPaymentsView() {
@@ -4024,6 +4132,8 @@ let followupSigContact = localStorage.getItem('tdSigContact') || '';
 let quoteUsed = parseInt(localStorage.getItem('quoteUsed') || '0', 10);
 let quotesSubView = 'list';        // 'list' | 'compose' | 'view'
 let savedQuotesCache = [];        // Most recent fetch from the server
+let jobsCache = [];
+let jobsFilter = 'all';
 let quotesSaveTimer = null;       // Debounce timer for inline edits
 let clientsSubView = 'list';      // 'list' | 'detail' — detail is built in 2-D.3
 let clientsCache = [];            // Most recent fetch from the server,
@@ -4200,7 +4310,7 @@ function init() {
   bindFollowupSignature();
   bindFollowupInputs();
   bindNav();
-  renderJobsView();
+  bindJobsFilterPills();
   renderPaymentsView();
   updateUsageDisplay();
   bindBilingualEditableSync();
@@ -4685,6 +4795,9 @@ function switchView(view) {
   }
   if (view === 'followups') {
     switchFollowupsSubView('list');
+  }
+  if (view === 'jobs') {
+    loadJobs();
   }
 }
 
@@ -7843,6 +7956,7 @@ function updateAuthUI(session) {
     if (session.access_token) {
       refreshQuoteUsedFromServer();
       refreshClientsLookupCache();
+      loadJobs();
     }
   } else {
     authScreen.classList.remove('hidden');
