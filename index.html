@@ -2389,6 +2389,7 @@
                   <th class="amt-col" data-i18n="clients.col.revenue">Revenue</th>
                   <th data-i18n="clients.col.lastActivity">Last activity</th>
                   <th data-i18n="clients.col.status">Status</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody id="clientsListBody"></tbody>
@@ -2471,7 +2472,10 @@
                         placeholder="Anything to remember — budget, preferences, schedule notes..."></textarea>
             </div>
 
-            <div class="field" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
+            <div class="field" style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+              <button id="clientDetailDeleteBtn" type="button" class="btn-secondary btn-danger">
+                🗑 <span data-i18n="clientDetail.delete">Delete client</span>
+              </button>
               <button id="clientDetailSaveBtn" type="button" class="btn-primary">
                 💾 <span data-i18n="clientDetail.save">Save</span>
               </button>
@@ -2614,6 +2618,7 @@
                   <th data-i18n="jobs.col.quote">Quote</th>
                   <th data-i18n="jobs.col.status">Status</th>
                   <th data-i18n="jobs.col.date">Date</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody id="jobsTableBody"></tbody>
@@ -2662,7 +2667,10 @@
                         placeholder="Anything to remember about this job..."></textarea>
             </div>
 
-            <div class="field" style="margin-top: 20px; display: flex; justify-content: flex-end;">
+            <div class="field" style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+              <button id="jobDetailDeleteBtn" type="button" class="btn-secondary btn-danger">
+                🗑 <span data-i18n="jobDetail.delete">Delete job</span>
+              </button>
               <button id="jobDetailSaveBtn" type="button" class="btn-primary">
                 💾 <span data-i18n="jobDetail.save">Save</span>
               </button>
@@ -3196,6 +3204,17 @@ const I18N = {
     'toast.jobSaved': 'Job saved',
     'toast.jobCreatedFromQuote': 'Job created',
     'toast.jobCreateFailed': 'Could not create job',
+    'jobDetail.delete': 'Delete job',
+    'jobDetail.newHeader': 'New job',
+    'jobs.history.delete': 'Delete',
+    'jobs.history.confirmDelete': 'Delete this job? Linked quotes and follow-ups will keep their content but lose the link to this job. This cannot be undone.',
+    'toast.jobDeleted': 'Job deleted',
+    'toast.jobDeleteFailed': 'Could not delete job',
+    'clientDetail.delete': 'Delete client',
+    'clients.delete': 'Delete',
+    'clients.confirmDelete': 'Delete this client? Linked quotes, jobs, and follow-ups will keep their content but lose the link to this client. This cannot be undone.',
+    'toast.clientDeleted': 'Client deleted',
+    'toast.clientDeleteFailed': 'Could not delete client',
     // Payments
     'payments.title': 'Payments',
     'payments.range': 'Last 30 days ▼',
@@ -3694,6 +3713,17 @@ const I18N = {
     'toast.jobSaved': 'Trabajo guardado',
     'toast.jobCreatedFromQuote': 'Trabajo creado',
     'toast.jobCreateFailed': 'No se pudo crear el trabajo',
+    'jobDetail.delete': 'Eliminar trabajo',
+    'jobDetail.newHeader': 'Nuevo trabajo',
+    'jobs.history.delete': 'Eliminar',
+    'jobs.history.confirmDelete': '¿Eliminar este trabajo? Las cotizaciones y seguimientos vinculados conservarán su contenido pero perderán el enlace a este trabajo. No se puede deshacer.',
+    'toast.jobDeleted': 'Trabajo eliminado',
+    'toast.jobDeleteFailed': 'No se pudo eliminar el trabajo',
+    'clientDetail.delete': 'Eliminar cliente',
+    'clients.delete': 'Eliminar',
+    'clients.confirmDelete': '¿Eliminar este cliente? Las cotizaciones, trabajos y seguimientos vinculados conservarán su contenido pero perderán el enlace a este cliente. No se puede deshacer.',
+    'toast.clientDeleted': 'Cliente eliminado',
+    'toast.clientDeleteFailed': 'No se pudo eliminar el cliente',
     // Payments
     'payments.title': 'Pagos',
     'payments.range': 'Últimos 30 días ▼',
@@ -4208,12 +4238,23 @@ function renderJobsList() {
         <td class="amt-col">${amt}</td>
         <td><span class="status-pill status-${statusCss}">${escapeHtml(statusDisp)}</span></td>
         <td>${date}</td>
+        <td style="text-align:right;">
+          <button class="btn-secondary btn-danger" data-delete-id="${j.id}"
+                  style="padding: 6px 12px; font-size: 13px;">${t('jobs.history.delete')}</button>
+        </td>
       </tr>
     `;
   }).join('');
   body.querySelectorAll('.job-table-row').forEach(row => {
-    row.addEventListener('click', () => {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('[data-delete-id]')) return;
       openJobDetail(row.dataset.jobId);
+    });
+  });
+  body.querySelectorAll('[data-delete-id]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteSavedJob(btn.dataset.deleteId);
     });
   });
 }
@@ -4289,7 +4330,10 @@ function renderJobDetail() {
   if (!activeJobData) return;
   renderJobDetailTradeOptions();
   const j = activeJobData;
-  document.getElementById('jobDetailHeaderTitle').textContent = j.description || '—';
+  document.getElementById('jobDetailHeaderTitle').textContent =
+    isCreatingNewJob ? t('jobDetail.newHeader') : (j.description || '—');
+  const deleteBtn = document.getElementById('jobDetailDeleteBtn');
+  if (deleteBtn) deleteBtn.classList.toggle('hidden', isCreatingNewJob);
   document.getElementById('jobDetailDescription').value = j.description || '';
   document.getElementById('jobDetailTrade').value = j.trade || '';
   document.getElementById('jobDetailAmount').value = (j.amount != null) ? j.amount : '';
@@ -4414,38 +4458,90 @@ function scheduleJobSave() {
 }
 
 async function saveJobEdits() {
-  if (!activeJobId) return null;
   const { data: { session } } = await sb.auth.getSession();
   if (!session || !session.access_token) return null;
+  if (!isCreatingNewJob && !activeJobId) return null;
+
   try {
     const desc = document.getElementById('jobDetailDescription').value.trim();
     const trade = document.getElementById('jobDetailTrade').value;
     const amountRaw = parseFloat(document.getElementById('jobDetailAmount').value);
     const status = document.getElementById('jobDetailStatus').value;
     const notes = document.getElementById('jobDetailNotes').value.trim();
-    const { data, error } = await sb
-      .from('jobs')
-      .update({
-        description: desc || null,
-        trade: trade || null,
-        amount: isFinite(amountRaw) ? amountRaw : 0,
-        status: status || 'quoted',
-        notes: notes || null,
-      })
-      .eq('id', activeJobId)
-      .select('*')
-      .single();
-    if (error) {
-      console.warn('saveJobEdits failed:', error);
-      showToast(t('toast.jobSaveFailed'), true);
+
+    const payload = {
+      description: desc || null,
+      trade: trade || null,
+      amount: isFinite(amountRaw) ? amountRaw : 0,
+      status: status || 'quoted',
+      notes: notes || null,
+    };
+
+    if (isCreatingNewJob) {
+      // INSERT path
+      const sourceQuoteId = activeJobData && activeJobData.quote_id;
+      const clientId = activeJobData && activeJobData.client_id;
+      const insertPayload = Object.assign({}, payload, {
+        user_id: session.user.id,
+        client_id: clientId || null,
+        quote_id: sourceQuoteId || null,
+      });
+
+      const { data: newJob, error: jErr } = await sb
+        .from('jobs')
+        .insert(insertPayload)
+        .select('*')
+        .single();
+      if (jErr || !newJob) {
+        console.warn('job insert failed:', jErr);
+        showToast(t('toast.jobSaveFailed'), true);
+        return null;
+      }
+
+      // Link the source quote to the new job
+      if (sourceQuoteId) {
+        const { error: uErr } = await sb
+          .from('quotes')
+          .update({ job_id: newJob.id })
+          .eq('id', sourceQuoteId);
+        if (uErr) console.warn('quote-to-job link failed:', uErr);
+
+        if (currentQuote && currentQuote.id === sourceQuoteId) {
+          currentQuote.job_id = newJob.id;
+          if (typeof refreshQuoteCreateJobButton === 'function') refreshQuoteCreateJobButton();
+        }
+      }
+
+      // Flip out of new mode into normal detail mode
+      isCreatingNewJob = false;
+      activeJobId = newJob.id;
+      activeJobData = newJob;
+      document.getElementById('jobDetailHeaderTitle').textContent = newJob.description || '—';
+
+      const deleteBtn = document.getElementById('jobDetailDeleteBtn');
+      if (deleteBtn) deleteBtn.classList.remove('hidden');
+
+      return newJob;
+    } else {
+      // UPDATE path
+      const { data, error } = await sb
+        .from('jobs')
+        .update(payload)
+        .eq('id', activeJobId)
+        .select('*')
+        .single();
+      if (error) {
+        console.warn('saveJobEdits failed:', error);
+        showToast(t('toast.jobSaveFailed'), true);
+        return null;
+      }
+      if (data) {
+        activeJobData = data;
+        document.getElementById('jobDetailHeaderTitle').textContent = data.description || '—';
+        return data;
+      }
       return null;
     }
-    if (data) {
-      activeJobData = data;
-      document.getElementById('jobDetailHeaderTitle').textContent = data.description || '—';
-      return data;
-    }
-    return null;
   } catch (e) {
     console.warn('saveJobEdits threw:', e);
     return null;
@@ -4457,8 +4553,11 @@ async function clickJobDetailSave() {
   const btn = document.getElementById('jobDetailSaveBtn');
   if (btn) btn.disabled = true;
   try {
+    const wasNew = isCreatingNewJob;
     const result = await saveJobEdits();
-    if (result) showToast(t('toast.jobSaved'));
+    if (result) {
+      showToast(wasNew ? t('toast.jobCreatedFromQuote') : t('toast.jobSaved'));
+    }
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -4480,16 +4579,16 @@ async function createJobFromCurrentQuote() {
   const btn = document.getElementById('quoteCreateJobBtn');
   if (btn) btn.disabled = true;
   try {
-    const userId = session.user.id;
     const { data: quoteRow, error: qErr } = await sb
       .from('quotes')
-      .select('client_id, total, trades')
+      .select('id, client_id, total, trades, status, created_at')
       .eq('id', currentQuote.id)
       .single();
     if (qErr || !quoteRow) {
       showToast(t('toast.jobCreateFailed'), true);
       return;
     }
+
     let desc = '';
     if (selectedTrades.length > 0) {
       const firstName = tradeNameOf(selectedTrades[0]);
@@ -4502,39 +4601,42 @@ async function createJobFromCurrentQuote() {
         desc = firstName;
       }
     }
-    const trades = quoteRow.trades || [];
-    const firstTrade = trades[0] || null;
+    const firstTrade = (quoteRow.trades || [])[0] || null;
     const amount = parseFloat(quoteRow.total) || 0;
 
-    const { data: newJob, error: jErr } = await sb
-      .from('jobs')
-      .insert({
-        user_id: userId,
-        client_id: quoteRow.client_id,
-        quote_id: currentQuote.id,
-        description: desc || null,
-        trade: firstTrade,
-        amount: amount,
-        status: 'quoted',
-      })
-      .select('id')
-      .single();
-    if (jErr || !newJob) {
-      console.warn('createJobFromCurrentQuote insert failed:', jErr);
-      showToast(t('toast.jobCreateFailed'), true);
-      return;
+    // Make sure clients lookup cache is populated so the client card renders
+    if (!clientsLookupCache || clientsLookupCache.length === 0) {
+      await refreshClientsLookupCache();
     }
-    const { error: uErr } = await sb
-      .from('quotes')
-      .update({ job_id: newJob.id })
-      .eq('id', currentQuote.id);
-    if (uErr) console.warn('quote-to-job link failed:', uErr);
 
-    currentQuote.job_id = newJob.id;
-    refreshQuoteCreateJobButton();
-    showToast(t('toast.jobCreatedFromQuote'));
+    // Enter new mode — synthetic activeJobData holds the prefilled values,
+    // activeJobId stays null until Save commits the INSERT.
+    isCreatingNewJob = true;
+    activeJobId = null;
+    activeJobData = {
+      client_id: quoteRow.client_id,
+      quote_id: quoteRow.id,
+      description: desc || null,
+      trade: firstTrade,
+      amount: amount,
+      status: 'quoted',
+      notes: null,
+    };
+
+    // Pre-populate the quotes card with the source quote (it's not yet linked
+    // by job_id, but it WILL be after save; show it for context now)
+    jobDetailQuotesCache = [{
+      id: quoteRow.id,
+      total: quoteRow.total,
+      trades: quoteRow.trades,
+      status: quoteRow.status || 'draft',
+      created_at: quoteRow.created_at,
+    }];
+    jobDetailFollowupsCache = [];
+
     switchView('jobs');
-    openJobDetail(newJob.id);
+    renderJobDetail();
+    switchJobsSubView('detail');
   } catch (e) {
     console.warn('createJobFromCurrentQuote threw:', e);
     showToast(t('toast.jobCreateFailed'), true);
@@ -4612,6 +4714,7 @@ let activeJobData = null;
 let jobDetailQuotesCache = [];
 let jobDetailFollowupsCache = [];
 let jobsSaveTimer = null;
+let isCreatingNewJob = false;
 let quotesSaveTimer = null;       // Debounce timer for inline edits
 let clientsSubView = 'list';      // 'list' | 'detail' — detail is built in 2-D.3
 let clientsCache = [];            // Most recent fetch from the server,
@@ -4792,13 +4895,29 @@ function init() {
   const jobsBackBtn = document.getElementById('jobsBackBtn');
   if (jobsBackBtn) jobsBackBtn.onclick = () => {
     clearTimeout(jobsSaveTimer);
-    if (activeJobId) saveJobEdits().catch(e => console.warn('flush save:', e));
+    // Only flush save on existing jobs. New-mode discards on back.
+    if (activeJobId && !isCreatingNewJob) {
+      saveJobEdits().catch(e => console.warn('flush save:', e));
+    }
+    isCreatingNewJob = false;
     activeJobId = null;
     activeJobData = null;
     switchJobsSubView('list');
   };
   const jobDetailSaveBtn = document.getElementById('jobDetailSaveBtn');
   if (jobDetailSaveBtn) jobDetailSaveBtn.onclick = clickJobDetailSave;
+  const jobDetailDeleteBtn = document.getElementById('jobDetailDeleteBtn');
+  if (jobDetailDeleteBtn) jobDetailDeleteBtn.onclick = () => {
+    if (activeJobId && !isCreatingNewJob) {
+      deleteSavedJob(activeJobId);
+    }
+  };
+  const clientDetailDeleteBtn = document.getElementById('clientDetailDeleteBtn');
+  if (clientDetailDeleteBtn) clientDetailDeleteBtn.onclick = () => {
+    if (activeClientId && !isCreatingNewClient) {
+      deleteSavedClient(activeClientId);
+    }
+  };
   ['jobDetailDescription', 'jobDetailAmount', 'jobDetailNotes'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', scheduleJobSave);
@@ -7678,15 +7797,26 @@ function renderClientsList() {
         <td class="amt-col">${fmt(c.revenue || 0)}</td>
         <td>${formatRelativeDate(c.last_activity_at)}</td>
         <td><span class="status-pill status-${statusKey}">${statusDisp}</span></td>
+        <td style="text-align:right;">
+          <button class="btn-secondary btn-danger" data-delete-id="${c.id}"
+                  style="padding: 6px 12px; font-size: 13px;">${t('clients.delete')}</button>
+        </td>
       </tr>
     `;
   }).join('');
 
   tbody.querySelectorAll('.clients-list-row').forEach(row => {
-    row.addEventListener('click', () => {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('[data-delete-id]')) return;
       if (typeof openClientDetail === 'function') {
         openClientDetail(row.dataset.clientId);
       }
+    });
+  });
+  tbody.querySelectorAll('[data-delete-id]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteSavedClient(btn.dataset.deleteId);
     });
   });
 }
@@ -7747,6 +7877,10 @@ async function enterNewClientMode() {
   renderClientDetailQuotes();
   renderClientDetailJobs();
   renderClientDetailFollowups();
+
+  // Hide the Delete button in new mode (no real row yet)
+  const cDeleteBtn2 = document.getElementById('clientDetailDeleteBtn');
+  if (cDeleteBtn2) cDeleteBtn2.classList.add('hidden');
 
   switchClientsSubView('detail');
 
@@ -7872,6 +8006,8 @@ function renderClientDetail() {
   document.getElementById('clientDetailContactName').value = c.contact_name || '';
   document.getElementById('clientDetailContactTitle').value = c.contact_title || '';
   applyClientType(c.type || 'person');
+  const cDeleteBtn = document.getElementById('clientDetailDeleteBtn');
+  if (cDeleteBtn) cDeleteBtn.classList.toggle('hidden', !!isCreatingNewClient);
   renderClientDetailQuotes();
   renderClientDetailJobs();
   renderClientDetailFollowups();
@@ -8297,6 +8433,55 @@ async function openSavedQuote(quoteId) {
 }
 
 // Delete a saved quote (with confirm dialog).
+async function deleteSavedJob(jobId) {
+  if (!jobId) return;
+  if (!confirm(t('jobs.history.confirmDelete'))) return;
+  try {
+    const { error } = await sb.from('jobs').delete().eq('id', jobId);
+    if (error) {
+      console.warn('deleteSavedJob failed:', error);
+      showToast(t('toast.jobDeleteFailed'), true);
+      return;
+    }
+    if (activeJobId === jobId) {
+      activeJobId = null;
+      activeJobData = null;
+      isCreatingNewJob = false;
+      switchJobsSubView('list');
+    }
+    showToast(t('toast.jobDeleted'));
+    loadJobs();
+  } catch (e) {
+    console.warn('deleteSavedJob threw:', e);
+    showToast(t('toast.jobDeleteFailed'), true);
+  }
+}
+
+async function deleteSavedClient(clientId) {
+  if (!clientId) return;
+  if (!confirm(t('clients.confirmDelete'))) return;
+  try {
+    const { error } = await sb.from('clients').delete().eq('id', clientId);
+    if (error) {
+      console.warn('deleteSavedClient failed:', error);
+      showToast(t('toast.clientDeleteFailed'), true);
+      return;
+    }
+    if (activeClientId === clientId) {
+      activeClientId = null;
+      activeClientData = null;
+      isCreatingNewClient = false;
+      switchClientsSubView('list');
+    }
+    showToast(t('toast.clientDeleted'));
+    refreshClientsLookupCache().catch(e => console.warn('lookup refresh:', e));
+    loadClients();
+  } catch (e) {
+    console.warn('deleteSavedClient threw:', e);
+    showToast(t('toast.clientDeleteFailed'), true);
+  }
+}
+
 async function deleteSavedQuote(quoteId) {
   if (!confirm(t('quotes.history.confirmDelete'))) return;
   try {
