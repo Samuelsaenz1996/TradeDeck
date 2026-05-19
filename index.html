@@ -1192,9 +1192,8 @@
     vertical-align: middle;
   }
 
-  /* === Desktop list tables: contain to card width and truncate long
-         row content. Headers can still wrap. Mobile breakpoint rules
-         override these with !important for the phone viewport. === */
+  /* === Desktop list tables: contain to card width. Mobile breakpoint
+         rules override these with !important for the phone viewport. === */
   #clientsListTable,
   #jobsListTable,
   #quotesListTable,
@@ -1203,13 +1202,35 @@
     table-layout: fixed;
     min-width: 0;
   }
-  .clients-list-row td,
-  .job-table-row td,
-  .quotes-list-row td,
-  .followups-list-row td {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+
+  /* === All four lists on every viewport: collapse row Delete buttons
+         to a 32x26 icon-only square. Detail-screen delete buttons (e.g.
+         "Delete client") are NOT affected — these selectors target the
+         row-context [data-delete-id] only. === */
+  #jobsListTable [data-delete-id],
+  #clientsListTable [data-delete-id],
+  #quotesListTable [data-delete-id],
+  #followupsListTable [data-delete-id] {
+    width: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    height: 26px !important;
+    padding: 0 !important;
+    font-size: 0 !important;
+    line-height: 26px !important;
+    text-align: center !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    display: inline-block !important;
+  }
+  #jobsListTable [data-delete-id]::before,
+  #clientsListTable [data-delete-id]::before,
+  #quotesListTable [data-delete-id]::before,
+  #followupsListTable [data-delete-id]::before {
+    content: "🗑";
+    font-size: 12px !important;
+    line-height: 26px !important;
+    display: inline-block;
   }
 
   /* === Auth screen === */
@@ -1484,33 +1505,6 @@
     #followupsListTable th:nth-child(4),
     #followupsListTable td:nth-child(4) {
       display: none;
-    }
-
-    /* All four lists: collapse Delete buttons to icon-only */
-    #jobsListTable [data-delete-id],
-    #clientsListTable [data-delete-id],
-    #quotesListTable [data-delete-id],
-    #followupsListTable [data-delete-id] {
-      width: 32px !important;
-      min-width: 32px !important;
-      max-width: 32px !important;
-      height: 26px !important;
-      padding: 0 !important;
-      font-size: 0 !important;
-      line-height: 26px !important;
-      text-align: center !important;
-      overflow: hidden !important;
-      box-sizing: border-box !important;
-      display: inline-block !important;
-    }
-    #jobsListTable [data-delete-id]::before,
-    #clientsListTable [data-delete-id]::before,
-    #quotesListTable [data-delete-id]::before,
-    #followupsListTable [data-delete-id]::before {
-      content: "🗑";
-      font-size: 12px !important;
-      line-height: 26px !important;
-      display: inline-block;
     }
 
     /* All four lists: tighten cell padding + allow text columns to truncate */
