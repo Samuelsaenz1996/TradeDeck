@@ -1192,6 +1192,26 @@
     vertical-align: middle;
   }
 
+  /* === Desktop list tables: contain to card width and truncate long
+         row content. Headers can still wrap. Mobile breakpoint rules
+         override these with !important for the phone viewport. === */
+  #clientsListTable,
+  #jobsListTable,
+  #quotesListTable,
+  #followupsListTable {
+    width: 100%;
+    table-layout: fixed;
+    min-width: 0;
+  }
+  .clients-list-row td,
+  .job-table-row td,
+  .quotes-list-row td,
+  .followups-list-row td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   /* === Auth screen === */
   .auth-screen {
     min-height: 100vh;
