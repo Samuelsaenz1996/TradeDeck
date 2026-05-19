@@ -219,6 +219,20 @@
     letter-spacing: 0.02em;
     text-transform: uppercase;
   }
+  .status-pill-clickable {
+    cursor: pointer;
+    transition: filter 0.12s ease, transform 0.12s ease;
+  }
+  .status-pill-clickable:hover {
+    filter: brightness(0.94);
+  }
+  .status-pill-clickable:active {
+    transform: scale(0.96);
+  }
+  .status-pill-locked {
+    cursor: default;
+    opacity: 0.85;
+  }
   .status-active { background: rgba(47, 122, 77, 0.12); color: #2F7A4D; }
   .status-past { background: rgba(138, 143, 156, 0.12); color: #8A8F9C; }
   .status-lead { background: rgba(196, 90, 26, 0.14); color: #A04C10; }
@@ -3220,6 +3234,10 @@ const I18N = {
     'jobs.history.confirmDelete': 'Delete this job? Linked quotes and follow-ups will keep their content but lose the link to this job. This cannot be undone.',
     'toast.jobDeleted': 'Job deleted',
     'toast.jobDeleteFailed': 'Could not delete job',
+    'jobs.statusPill.cycleTooltip': 'Click to advance status',
+    'jobs.statusPill.lockedTooltip': 'Paid jobs cannot be cycled — use the detail screen to change status',
+    'toast.jobStatusUpdated': 'Status updated',
+    'toast.jobStatusFailed': 'Could not update status',
     'clientDetail.delete': 'Delete client',
     'clients.delete': 'Delete',
     'clients.confirmDelete': 'Delete this client? Linked quotes, jobs, and follow-ups will keep their content but lose the link to this client. This cannot be undone.',
@@ -3731,6 +3749,10 @@ const I18N = {
     'jobs.history.confirmDelete': '¿Eliminar este trabajo? Las cotizaciones y seguimientos vinculados conservarán su contenido pero perderán el enlace a este trabajo. No se puede deshacer.',
     'toast.jobDeleted': 'Trabajo eliminado',
     'toast.jobDeleteFailed': 'No se pudo eliminar el trabajo',
+    'jobs.statusPill.cycleTooltip': 'Haz clic para avanzar el estado',
+    'jobs.statusPill.lockedTooltip': 'Los trabajos pagados no se pueden ciclar — usa la pantalla de detalle para cambiar el estado',
+    'toast.jobStatusUpdated': 'Estado actualizado',
+    'toast.jobStatusFailed': 'No se pudo actualizar el estado',
     'clientDetail.delete': 'Eliminar cliente',
     'clients.delete': 'Eliminar',
     'clients.confirmDelete': '¿Eliminar este cliente? Las cotizaciones, trabajos y seguimientos vinculados conservarán su contenido pero perderán el enlace a este cliente. No se puede deshacer.',
@@ -4248,7 +4270,10 @@ function renderJobsList() {
         <td>${escapeHtml(client)}</td>
         <td>${escapeHtml(tradeStr)}</td>
         <td class="amt-col">${amt}</td>
-        <td><span class="status-pill status-${statusCss}">${escapeHtml(statusDisp)}</span></td>
+        <td><span class="status-pill status-${statusCss} ${j.status === 'paid' ? 'status-pill-locked' : 'status-pill-clickable'}"
+                  data-cycle-id="${j.id}"
+                  title="${j.status === 'paid' ? t('jobs.statusPill.lockedTooltip') : t('jobs.statusPill.cycleTooltip')}"
+            >${escapeHtml(statusDisp)}</span></td>
         <td>${date}</td>
         <td style="text-align:right;">
           <button class="btn-secondary btn-danger" data-delete-id="${j.id}"
@@ -4260,6 +4285,7 @@ function renderJobsList() {
   body.querySelectorAll('.job-table-row').forEach(row => {
     row.addEventListener('click', (e) => {
       if (e.target.closest('[data-delete-id]')) return;
+      if (e.target.closest('[data-cycle-id]')) return;
       openJobDetail(row.dataset.jobId);
     });
   });
@@ -4267,6 +4293,12 @@ function renderJobsList() {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       deleteSavedJob(btn.dataset.deleteId);
+    });
+  });
+  body.querySelectorAll('[data-cycle-id].status-pill-clickable').forEach(pill => {
+    pill.addEventListener('click', (e) => {
+      e.stopPropagation();
+      cycleJobStatus(pill.dataset.cycleId);
     });
   });
 }
@@ -8544,6 +8576,49 @@ async function openSavedQuote(quoteId) {
 }
 
 // Delete a saved quote (with confirm dialog).
+function nextJobStatus(current) {
+  const order = ['quoted', 'in_progress', 'complete', 'paid'];
+  const idx = order.indexOf(current);
+  if (idx < 0) return 'quoted';
+  if (idx === order.length - 1) return null;
+  return order[idx + 1];
+}
+
+async function cycleJobStatus(jobId) {
+  if (!jobId) return;
+  const row = (jobsCache || []).find(j => j.id === jobId);
+  if (!row) return;
+  const next = nextJobStatus(row.status);
+  if (!next) return;
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.access_token) return;
+
+  try {
+    const { data, error } = await sb
+      .from('jobs')
+      .update({ status: next })
+      .eq('id', jobId)
+      .select('id, status, updated_at')
+      .single();
+    if (error || !data) {
+      console.warn('cycleJobStatus failed:', error);
+      showToast(t('toast.jobStatusFailed'), true);
+      return;
+    }
+
+    row.status = data.status;
+    if (data.updated_at) row.updated_at = data.updated_at;
+
+    renderJobsStats();
+    renderJobsList();
+    showToast(t('toast.jobStatusUpdated'));
+  } catch (e) {
+    console.warn('cycleJobStatus threw:', e);
+    showToast(t('toast.jobStatusFailed'), true);
+  }
+}
+
 async function deleteSavedJob(jobId) {
   if (!jobId) return;
   if (!confirm(t('jobs.history.confirmDelete'))) return;
