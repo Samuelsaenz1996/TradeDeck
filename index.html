@@ -1487,17 +1487,19 @@
     /* Width hints for compact columns — table-layout: fixed honors these
        and distributes the remaining width across the flexible text columns.
        Delete column gets !important to win against the base button library
-       styles that would otherwise expand the cell. */
+       styles that would otherwise expand the cell. Status widths sized
+       for the widest expected Spanish pill (BORRADOR ~82px, PROSPECTO
+       ~85px, COMPLETADO ~95px in select). */
     #jobsListTable th:nth-child(4) { width: 60px !important; }   /* Amount */
-    #jobsListTable th:nth-child(5) { width: 80px !important; }   /* Status dropdown */
+    #jobsListTable th:nth-child(5) { width: 100px !important; }  /* Status dropdown */
     #jobsListTable th:nth-child(7) { width: 36px !important; }   /* Delete icon */
 
     #clientsListTable th:nth-child(1) { width: 30px !important; }  /* Icon */
-    #clientsListTable th:nth-child(7) { width: 70px !important; }  /* Status */
+    #clientsListTable th:nth-child(7) { width: 95px !important; }  /* Status */
     #clientsListTable th:nth-child(8) { width: 36px !important; }  /* Delete */
 
     #quotesListTable th:nth-child(3) { width: 65px !important; }   /* Total */
-    #quotesListTable th:nth-child(4) { width: 75px !important; }   /* Status */
+    #quotesListTable th:nth-child(4) { width: 95px !important; }   /* Status */
     #quotesListTable th:nth-child(6) { width: 36px !important; }   /* Delete */
 
     #followupsListTable th:nth-child(3) { width: 60px !important; } /* Channel */
