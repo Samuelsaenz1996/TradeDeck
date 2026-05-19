@@ -2562,7 +2562,7 @@
             ← <span data-i18n="jobs.backToList">Jobs</span>
           </button>
           <div class="view-header-spacer"></div>
-          <button id="jobsNewBtn" type="button" class="btn-primary" disabled>
+          <button id="jobsNewBtn" type="button" class="btn-primary">
             + <span data-i18n="jobs.newButton">New Job</span>
           </button>
         </div>
@@ -2615,7 +2615,7 @@
                   <th data-i18n="jobs.col.job">Job</th>
                   <th data-i18n="jobs.col.client">Client</th>
                   <th data-i18n="jobs.col.trade">Trade</th>
-                  <th data-i18n="jobs.col.quote">Quote</th>
+                  <th data-i18n="jobs.col.amount">Amount</th>
                   <th data-i18n="jobs.col.status">Status</th>
                   <th data-i18n="jobs.col.date">Date</th>
                   <th></th>
@@ -2633,6 +2633,14 @@
             </div>
             <div class="card-sub" data-i18n="jobDetail.sub">
               Update info, status, and related work. Changes save automatically.
+            </div>
+
+            <div class="field hidden" id="jobDetailClientField">
+              <label class="label" data-i18n="jobDetail.clientLabel">Client</label>
+              <input type="text" class="input" id="jobDetailClientInput"
+                     list="clientsDatalist" autocomplete="off"
+                     data-i18n-placeholder="jobDetail.clientPlaceholder"
+                     placeholder="Type or pick a client..." />
             </div>
 
             <div class="field">
@@ -2677,7 +2685,7 @@
             </div>
           </div>
 
-          <div class="card">
+          <div class="card" id="jobDetailClientCard">
             <div class="card-title" data-i18n="jobDetail.clientTitle">Client</div>
             <div id="jobDetailClientEmpty" class="hidden"
                  style="text-align: center; padding: 24px; color: var(--ink-3);">
@@ -3158,7 +3166,9 @@ const I18N = {
     'toast.clientCreated': 'Client created',
     'toast.clientSaved': 'Client saved',
     'toast.clientNameRequired': 'Client name is required',
-    'toast.newJobPlaceholder': 'Manual job creation coming in Sprint 2-E.',
+    'jobDetail.clientLabel': 'Client',
+    'jobDetail.clientPlaceholder': 'Type or pick a client...',
+    'toast.jobClientRequired': 'A client is required for this job',
     'toast.clientLoadFailed': 'Could not load client',
     'toast.clientSaveFailed': 'Could not save client changes',
     // Jobs
@@ -3176,7 +3186,7 @@ const I18N = {
     'jobs.col.job': 'Job',
     'jobs.col.client': 'Client',
     'jobs.col.trade': 'Trade',
-    'jobs.col.quote': 'Quote',
+    'jobs.col.amount': 'Amount',
     'jobs.col.status': 'Status',
     'jobs.col.date': 'Date',
     'jobs.empty': 'No jobs yet. Generate a quote and it will appear here automatically.',
@@ -3667,7 +3677,9 @@ const I18N = {
     'toast.clientCreated': 'Cliente creado',
     'toast.clientSaved': 'Cliente guardado',
     'toast.clientNameRequired': 'Se requiere el nombre del cliente',
-    'toast.newJobPlaceholder': 'Creación manual de trabajos próximamente.',
+    'jobDetail.clientLabel': 'Cliente',
+    'jobDetail.clientPlaceholder': 'Escribe o elige un cliente...',
+    'toast.jobClientRequired': 'Se requiere un cliente para este trabajo',
     'toast.clientLoadFailed': 'No se pudo cargar el cliente',
     'toast.clientSaveFailed': 'No se pudieron guardar los cambios',
     // Jobs
@@ -3685,7 +3697,7 @@ const I18N = {
     'jobs.col.job': 'Trabajo',
     'jobs.col.client': 'Cliente',
     'jobs.col.trade': 'Oficio',
-    'jobs.col.quote': 'Cotización',
+    'jobs.col.amount': 'Monto',
     'jobs.col.status': 'Estado',
     'jobs.col.date': 'Fecha',
     'jobs.empty': 'Aún no hay trabajos. Genera una cotización y aparecerá aquí automáticamente.',
@@ -4334,6 +4346,10 @@ function renderJobDetail() {
     isCreatingNewJob ? t('jobDetail.newHeader') : (j.description || '—');
   const deleteBtn = document.getElementById('jobDetailDeleteBtn');
   if (deleteBtn) deleteBtn.classList.toggle('hidden', isCreatingNewJob);
+  const clientField = document.getElementById('jobDetailClientField');
+  if (clientField) clientField.classList.toggle('hidden', !isCreatingNewJob);
+  const clientCard = document.getElementById('jobDetailClientCard');
+  if (clientCard) clientCard.classList.toggle('hidden', isCreatingNewJob);
   document.getElementById('jobDetailDescription').value = j.description || '';
   document.getElementById('jobDetailTrade').value = j.trade || '';
   document.getElementById('jobDetailAmount').value = (j.amount != null) ? j.amount : '';
@@ -4478,12 +4494,57 @@ async function saveJobEdits() {
     };
 
     if (isCreatingNewJob) {
-      // INSERT path
       const sourceQuoteId = activeJobData && activeJobData.quote_id;
-      const clientId = activeJobData && activeJobData.client_id;
+
+      // Resolve client. Priority:
+      //   1. selectedClientIdForJob (set by datalist match in picker)
+      //   2. activeJobData.client_id (set by seed when launched with a known client)
+      //   3. Typed name in picker → find-or-create
+      //   4. Reject if nothing
+      let clientId = selectedClientIdForJob
+        || (activeJobData && activeJobData.client_id)
+        || null;
+      const clientInput = document.getElementById('jobDetailClientInput');
+      const typedName = clientInput ? clientInput.value.trim() : '';
+
+      if (!clientId && typedName) {
+        const { data: existing } = await sb
+          .from('clients')
+          .select('id')
+          .ilike('name', typedName)
+          .limit(1)
+          .maybeSingle();
+        if (existing && existing.id) {
+          clientId = existing.id;
+        } else {
+          const { data: newClient, error: cErr } = await sb
+            .from('clients')
+            .insert({
+              user_id: session.user.id,
+              name: typedName,
+              status: 'lead',
+            })
+            .select('id')
+            .single();
+          if (cErr || !newClient) {
+            console.warn('client auto-create failed:', cErr);
+            showToast(t('toast.jobSaveFailed'), true);
+            return null;
+          }
+          clientId = newClient.id;
+          refreshClientsLookupCache().catch(e => console.warn('lookup refresh:', e));
+        }
+      }
+
+      if (!clientId) {
+        showToast(t('toast.jobClientRequired'), true);
+        if (clientInput) clientInput.focus();
+        return null;
+      }
+
       const insertPayload = Object.assign({}, payload, {
         user_id: session.user.id,
-        client_id: clientId || null,
+        client_id: clientId,
         quote_id: sourceQuoteId || null,
       });
 
@@ -4498,7 +4559,6 @@ async function saveJobEdits() {
         return null;
       }
 
-      // Link the source quote to the new job
       if (sourceQuoteId) {
         const { error: uErr } = await sb
           .from('quotes')
@@ -4512,14 +4572,21 @@ async function saveJobEdits() {
         }
       }
 
-      // Flip out of new mode into normal detail mode
       isCreatingNewJob = false;
       activeJobId = newJob.id;
       activeJobData = newJob;
+      selectedClientIdForJob = null;
       document.getElementById('jobDetailHeaderTitle').textContent = newJob.description || '—';
 
       const deleteBtn = document.getElementById('jobDetailDeleteBtn');
       if (deleteBtn) deleteBtn.classList.remove('hidden');
+      const clientField = document.getElementById('jobDetailClientField');
+      if (clientField) clientField.classList.add('hidden');
+      const clientCard = document.getElementById('jobDetailClientCard');
+      if (clientCard) clientCard.classList.remove('hidden');
+
+      // Re-render related cards (client card now needs to populate)
+      renderJobDetailClient();
 
       return newJob;
     } else {
@@ -4570,6 +4637,50 @@ function refreshQuoteCreateJobButton() {
   btn.classList.toggle('hidden', hide);
 }
 
+async function enterNewJobMode(seed) {
+  seed = seed || {};
+  clearTimeout(jobsSaveTimer);
+  if (activeJobId && !isCreatingNewJob) {
+    await saveJobEdits().catch(e => console.warn('flush save:', e));
+  }
+
+  if (!clientsLookupCache || clientsLookupCache.length === 0) {
+    await refreshClientsLookupCache();
+  }
+
+  isCreatingNewJob = true;
+  activeJobId = null;
+  selectedClientIdForJob = seed.client_id || null;
+
+  activeJobData = {
+    client_id: seed.client_id || null,
+    quote_id: seed.quote_id || null,
+    description: seed.description || null,
+    trade: seed.trade || null,
+    amount: seed.amount || 0,
+    status: seed.status || 'quoted',
+    notes: seed.notes || null,
+  };
+
+  jobDetailQuotesCache = seed.sourceQuoteForCard ? [seed.sourceQuoteForCard] : [];
+  jobDetailFollowupsCache = [];
+
+  // Pre-fill the client picker input with the client's name if known
+  const clientInput = document.getElementById('jobDetailClientInput');
+  if (clientInput) {
+    let clientName = '';
+    if (seed.client_id) {
+      const client = clientsLookupCache.find(c => c.id === seed.client_id);
+      if (client) clientName = client.name;
+    }
+    clientInput.value = clientName;
+  }
+
+  switchView('jobs');
+  renderJobDetail();
+  switchJobsSubView('detail');
+}
+
 async function createJobFromCurrentQuote() {
   if (!currentQuote || !currentQuote.id) return;
   if (currentQuote.job_id) return;
@@ -4601,42 +4712,22 @@ async function createJobFromCurrentQuote() {
         desc = firstName;
       }
     }
-    const firstTrade = (quoteRow.trades || [])[0] || null;
-    const amount = parseFloat(quoteRow.total) || 0;
 
-    // Make sure clients lookup cache is populated so the client card renders
-    if (!clientsLookupCache || clientsLookupCache.length === 0) {
-      await refreshClientsLookupCache();
-    }
-
-    // Enter new mode — synthetic activeJobData holds the prefilled values,
-    // activeJobId stays null until Save commits the INSERT.
-    isCreatingNewJob = true;
-    activeJobId = null;
-    activeJobData = {
+    await enterNewJobMode({
       client_id: quoteRow.client_id,
       quote_id: quoteRow.id,
       description: desc || null,
-      trade: firstTrade,
-      amount: amount,
+      trade: (quoteRow.trades || [])[0] || null,
+      amount: parseFloat(quoteRow.total) || 0,
       status: 'quoted',
-      notes: null,
-    };
-
-    // Pre-populate the quotes card with the source quote (it's not yet linked
-    // by job_id, but it WILL be after save; show it for context now)
-    jobDetailQuotesCache = [{
-      id: quoteRow.id,
-      total: quoteRow.total,
-      trades: quoteRow.trades,
-      status: quoteRow.status || 'draft',
-      created_at: quoteRow.created_at,
-    }];
-    jobDetailFollowupsCache = [];
-
-    switchView('jobs');
-    renderJobDetail();
-    switchJobsSubView('detail');
+      sourceQuoteForCard: {
+        id: quoteRow.id,
+        total: quoteRow.total,
+        trades: quoteRow.trades,
+        status: quoteRow.status || 'draft',
+        created_at: quoteRow.created_at,
+      },
+    });
   } catch (e) {
     console.warn('createJobFromCurrentQuote threw:', e);
     showToast(t('toast.jobCreateFailed'), true);
@@ -4715,6 +4806,7 @@ let jobDetailQuotesCache = [];
 let jobDetailFollowupsCache = [];
 let jobsSaveTimer = null;
 let isCreatingNewJob = false;
+let selectedClientIdForJob = null;
 let quotesSaveTimer = null;       // Debounce timer for inline edits
 let clientsSubView = 'list';      // 'list' | 'detail' — detail is built in 2-D.3
 let clientsCache = [];            // Most recent fetch from the server,
@@ -4892,6 +4984,8 @@ function init() {
   bindFollowupInputs();
   bindNav();
   bindJobsFilterPills();
+  const jobsNewBtn = document.getElementById('jobsNewBtn');
+  if (jobsNewBtn) jobsNewBtn.onclick = () => enterNewJobMode({});
   const jobsBackBtn = document.getElementById('jobsBackBtn');
   if (jobsBackBtn) jobsBackBtn.onclick = () => {
     clearTimeout(jobsSaveTimer);
@@ -4902,6 +4996,7 @@ function init() {
     isCreatingNewJob = false;
     activeJobId = null;
     activeJobData = null;
+    selectedClientIdForJob = null;
     switchJobsSubView('list');
   };
   const jobDetailSaveBtn = document.getElementById('jobDetailSaveBtn');
@@ -5000,6 +5095,7 @@ function init() {
   // Wire client autocomplete to quote + follow-up name inputs
   bindClientLookupForQuote();
   bindClientLookupForFollowup();
+  bindClientLookupForJob();
   // Apply persisted language preference. Runs after all dynamic surfaces have rendered
   // once in their default English form, then swaps everything in one pass.
   applyLanguage();
@@ -7661,6 +7757,15 @@ function bindClientLookupForFollowup() {
   });
 }
 
+function bindClientLookupForJob() {
+  const nameInput = document.getElementById('jobDetailClientInput');
+  if (!nameInput) return;
+  nameInput.addEventListener('input', () => {
+    const match = findClientByName(nameInput.value);
+    selectedClientIdForJob = match ? match.id : null;
+  });
+}
+
 // Fetch the user's clients from Supabase, then augment each row
 // with computed job count, revenue, and last-activity timestamp
 // by aggregating from the jobs and quotes tables. Bypass users
@@ -7988,7 +8093,13 @@ function launchNewFollowupForActiveClient() {
 // Placeholder for jobs — Jobs view doesn't exist yet (Sprint 2-E).
 function launchNewJobForActiveClient() {
   if (!activeClientData) return;
-  showToast(t('toast.newJobPlaceholder'));
+  clearTimeout(clientsSaveTimer);
+  if (activeClientId) {
+    saveClientEdits().catch(e => console.warn('flush save:', e));
+  }
+  enterNewJobMode({
+    client_id: activeClientData.id,
+  });
 }
 
 // Populate every form field from activeClientData, set type toggle,
