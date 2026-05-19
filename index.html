@@ -1262,6 +1262,37 @@
 
   @media (max-width: 640px) {
 
+    /* Force all four list tables to fit the viewport: fixed layout
+       distributes width across the visible columns, width:100% caps
+       the table to the available card width. Combined with the
+       text-overflow:ellipsis rule below, long content truncates
+       instead of forcing horizontal scroll. */
+    #jobsListTable,
+    #clientsListTable,
+    #quotesListTable,
+    #followupsListTable {
+      width: 100%;
+      table-layout: fixed;
+      min-width: 0;
+    }
+
+    /* Width hints for compact columns — table-layout: fixed honors these
+       and distributes the remaining width across the flexible text columns. */
+    #jobsListTable th:nth-child(4) { width: 70px; }   /* Amount */
+    #jobsListTable th:nth-child(5) { width: 90px; }   /* Status dropdown */
+    #jobsListTable th:nth-child(7) { width: 50px; }   /* Delete icon */
+
+    #clientsListTable th:nth-child(1) { width: 36px; }  /* Icon */
+    #clientsListTable th:nth-child(7) { width: 80px; }  /* Status */
+    #clientsListTable th:nth-child(8) { width: 50px; }  /* Delete */
+
+    #quotesListTable th:nth-child(3) { width: 75px; }   /* Total */
+    #quotesListTable th:nth-child(4) { width: 85px; }   /* Status */
+    #quotesListTable th:nth-child(6) { width: 50px; }   /* Delete */
+
+    #followupsListTable th:nth-child(3) { width: 70px; } /* Channel */
+    #followupsListTable th:nth-child(5) { width: 50px; } /* Delete */
+
     /* Jobs list: hide Trade (col 3) and Date (col 6) */
     #jobsListTable th:nth-child(3),
     #jobsListTable td:nth-child(3),
@@ -1322,7 +1353,6 @@
     #followupsListTable td {
       padding: 8px 6px;
       font-size: 13px;
-      max-width: 140px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
