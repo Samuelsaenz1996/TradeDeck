@@ -1279,27 +1279,30 @@
     #clientsListTable,
     #quotesListTable,
     #followupsListTable {
-      width: 100%;
-      table-layout: fixed;
-      min-width: 0;
+      width: 100% !important;
+      table-layout: fixed !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
     }
 
     /* Width hints for compact columns — table-layout: fixed honors these
-       and distributes the remaining width across the flexible text columns. */
-    #jobsListTable th:nth-child(4) { width: 60px; }   /* Amount */
-    #jobsListTable th:nth-child(5) { width: 80px; }   /* Status dropdown */
-    #jobsListTable th:nth-child(7) { width: 40px; }   /* Delete icon */
+       and distributes the remaining width across the flexible text columns.
+       Delete column gets !important to win against the base button library
+       styles that would otherwise expand the cell. */
+    #jobsListTable th:nth-child(4) { width: 60px !important; }   /* Amount */
+    #jobsListTable th:nth-child(5) { width: 80px !important; }   /* Status dropdown */
+    #jobsListTable th:nth-child(7) { width: 36px !important; }   /* Delete icon */
 
-    #clientsListTable th:nth-child(1) { width: 30px; }  /* Icon */
-    #clientsListTable th:nth-child(7) { width: 70px; }  /* Status */
-    #clientsListTable th:nth-child(8) { width: 40px; }  /* Delete */
+    #clientsListTable th:nth-child(1) { width: 30px !important; }  /* Icon */
+    #clientsListTable th:nth-child(7) { width: 70px !important; }  /* Status */
+    #clientsListTable th:nth-child(8) { width: 36px !important; }  /* Delete */
 
-    #quotesListTable th:nth-child(3) { width: 65px; }   /* Total */
-    #quotesListTable th:nth-child(4) { width: 75px; }   /* Status */
-    #quotesListTable th:nth-child(6) { width: 40px; }   /* Delete */
+    #quotesListTable th:nth-child(3) { width: 65px !important; }   /* Total */
+    #quotesListTable th:nth-child(4) { width: 75px !important; }   /* Status */
+    #quotesListTable th:nth-child(6) { width: 36px !important; }   /* Delete */
 
-    #followupsListTable th:nth-child(3) { width: 60px; } /* Channel */
-    #followupsListTable th:nth-child(5) { width: 40px; } /* Delete */
+    #followupsListTable th:nth-child(3) { width: 60px !important; } /* Channel */
+    #followupsListTable th:nth-child(5) { width: 36px !important; } /* Delete */
 
     /* Jobs list: hide Trade (col 3) and Date (col 6) */
     #jobsListTable th:nth-child(3),
@@ -1338,17 +1341,26 @@
     #clientsListTable [data-delete-id],
     #quotesListTable [data-delete-id],
     #followupsListTable [data-delete-id] {
-      font-size: 0;
-      padding: 4px 6px;
-      min-width: 32px;
-      box-sizing: border-box;
+      width: 32px !important;
+      min-width: 32px !important;
+      max-width: 32px !important;
+      height: 26px !important;
+      padding: 0 !important;
+      font-size: 0 !important;
+      line-height: 26px !important;
+      text-align: center !important;
+      overflow: hidden !important;
+      box-sizing: border-box !important;
+      display: inline-block !important;
     }
     #jobsListTable [data-delete-id]::before,
     #clientsListTable [data-delete-id]::before,
     #quotesListTable [data-delete-id]::before,
     #followupsListTable [data-delete-id]::before {
       content: "🗑";
-      font-size: 14px;
+      font-size: 12px !important;
+      line-height: 26px !important;
+      display: inline-block;
     }
 
     /* All four lists: tighten cell padding + allow text columns to truncate */
