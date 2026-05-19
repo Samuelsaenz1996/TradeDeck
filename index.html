@@ -219,19 +219,35 @@
     letter-spacing: 0.02em;
     text-transform: uppercase;
   }
-  .status-pill-clickable {
+  .status-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding: 4px 24px 4px 10px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    line-height: 1.4;
     cursor: pointer;
-    transition: filter 0.12s ease, transform 0.12s ease;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path d='M3 4.5l3 3 3-3' stroke='currentColor' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 12px;
+    transition: filter 0.12s ease;
   }
-  .status-pill-clickable:hover {
+  .status-select:hover {
     filter: brightness(0.94);
   }
-  .status-pill-clickable:active {
-    transform: scale(0.96);
+  .status-select:focus {
+    outline: 2px solid var(--brand, #2b7fff);
+    outline-offset: 1px;
   }
-  .status-pill-locked {
-    cursor: default;
-    opacity: 0.85;
+  .status-select option {
+    background: #fff;
+    color: #1a1a1a;
+    font-weight: 500;
   }
   .status-active { background: rgba(47, 122, 77, 0.12); color: #2F7A4D; }
   .status-past { background: rgba(138, 143, 156, 0.12); color: #8A8F9C; }
@@ -3234,8 +3250,6 @@ const I18N = {
     'jobs.history.confirmDelete': 'Delete this job? Linked quotes and follow-ups will keep their content but lose the link to this job. This cannot be undone.',
     'toast.jobDeleted': 'Job deleted',
     'toast.jobDeleteFailed': 'Could not delete job',
-    'jobs.statusPill.cycleTooltip': 'Click to advance status',
-    'jobs.statusPill.lockedTooltip': 'Paid jobs cannot be cycled — use the detail screen to change status',
     'toast.jobStatusUpdated': 'Status updated',
     'toast.jobStatusFailed': 'Could not update status',
     'clientDetail.delete': 'Delete client',
@@ -3749,8 +3763,6 @@ const I18N = {
     'jobs.history.confirmDelete': '¿Eliminar este trabajo? Las cotizaciones y seguimientos vinculados conservarán su contenido pero perderán el enlace a este trabajo. No se puede deshacer.',
     'toast.jobDeleted': 'Trabajo eliminado',
     'toast.jobDeleteFailed': 'No se pudo eliminar el trabajo',
-    'jobs.statusPill.cycleTooltip': 'Haz clic para avanzar el estado',
-    'jobs.statusPill.lockedTooltip': 'Los trabajos pagados no se pueden ciclar — usa la pantalla de detalle para cambiar el estado',
     'toast.jobStatusUpdated': 'Estado actualizado',
     'toast.jobStatusFailed': 'No se pudo actualizar el estado',
     'clientDetail.delete': 'Eliminar cliente',
@@ -4255,6 +4267,12 @@ function renderJobsList() {
   }
   table.classList.remove('hidden');
   empty.classList.add('hidden');
+  const statusLabels = {
+    quoted: jobStatusLabel('quoted'),
+    in_progress: jobStatusLabel('in_progress'),
+    complete: jobStatusLabel('complete'),
+    paid: jobStatusLabel('paid'),
+  };
   body.innerHTML = filtered.map(j => {
     const desc = j.description || '—';
     const client = j.client_name || '—';
@@ -4262,7 +4280,6 @@ function renderJobsList() {
     const amt = fmt(parseFloat(j.amount) || 0);
     const statusKey = j.status || 'quoted';
     const statusCss = statusKey.replace(/_/g, '-');
-    const statusDisp = jobStatusLabel(statusKey);
     const date = formatRelativeDate(j.created_at);
     return `
       <tr class="job-table-row" data-job-id="${j.id}" style="cursor: pointer;">
@@ -4270,10 +4287,14 @@ function renderJobsList() {
         <td>${escapeHtml(client)}</td>
         <td>${escapeHtml(tradeStr)}</td>
         <td class="amt-col">${amt}</td>
-        <td><span class="status-pill status-${statusCss} ${j.status === 'paid' ? 'status-pill-locked' : 'status-pill-clickable'}"
-                  data-cycle-id="${j.id}"
-                  title="${j.status === 'paid' ? t('jobs.statusPill.lockedTooltip') : t('jobs.statusPill.cycleTooltip')}"
-            >${escapeHtml(statusDisp)}</span></td>
+        <td><select class="status-select status-${statusCss}"
+                    data-status-id="${j.id}"
+                    aria-label="${escapeHtml(t('jobs.col.status'))}">
+              <option value="quoted" ${j.status === 'quoted' ? 'selected' : ''}>${escapeHtml(statusLabels.quoted)}</option>
+              <option value="in_progress" ${j.status === 'in_progress' ? 'selected' : ''}>${escapeHtml(statusLabels.in_progress)}</option>
+              <option value="complete" ${j.status === 'complete' ? 'selected' : ''}>${escapeHtml(statusLabels.complete)}</option>
+              <option value="paid" ${j.status === 'paid' ? 'selected' : ''}>${escapeHtml(statusLabels.paid)}</option>
+            </select></td>
         <td>${date}</td>
         <td style="text-align:right;">
           <button class="btn-secondary btn-danger" data-delete-id="${j.id}"
@@ -4285,7 +4306,7 @@ function renderJobsList() {
   body.querySelectorAll('.job-table-row').forEach(row => {
     row.addEventListener('click', (e) => {
       if (e.target.closest('[data-delete-id]')) return;
-      if (e.target.closest('[data-cycle-id]')) return;
+      if (e.target.closest('[data-status-id]')) return;
       openJobDetail(row.dataset.jobId);
     });
   });
@@ -4295,10 +4316,11 @@ function renderJobsList() {
       deleteSavedJob(btn.dataset.deleteId);
     });
   });
-  body.querySelectorAll('[data-cycle-id].status-pill-clickable').forEach(pill => {
-    pill.addEventListener('click', (e) => {
+  body.querySelectorAll('[data-status-id]').forEach(sel => {
+    sel.addEventListener('click', (e) => e.stopPropagation());
+    sel.addEventListener('change', (e) => {
       e.stopPropagation();
-      cycleJobStatus(pill.dataset.cycleId);
+      updateJobStatus(sel.dataset.statusId, sel.value);
     });
   });
 }
@@ -8576,34 +8598,29 @@ async function openSavedQuote(quoteId) {
 }
 
 // Delete a saved quote (with confirm dialog).
-function nextJobStatus(current) {
-  const order = ['quoted', 'in_progress', 'complete', 'paid'];
-  const idx = order.indexOf(current);
-  if (idx < 0) return 'quoted';
-  if (idx === order.length - 1) return null;
-  return order[idx + 1];
-}
-
-async function cycleJobStatus(jobId) {
-  if (!jobId) return;
+async function updateJobStatus(jobId, newStatus) {
+  if (!jobId || !newStatus) return;
   const row = (jobsCache || []).find(j => j.id === jobId);
   if (!row) return;
-  const next = nextJobStatus(row.status);
-  if (!next) return;
+  if (row.status === newStatus) return;
 
   const { data: { session } } = await sb.auth.getSession();
-  if (!session || !session.access_token) return;
+  if (!session || !session.access_token) {
+    renderJobsList();
+    return;
+  }
 
   try {
     const { data, error } = await sb
       .from('jobs')
-      .update({ status: next })
+      .update({ status: newStatus })
       .eq('id', jobId)
       .select('id, status, updated_at')
       .single();
     if (error || !data) {
-      console.warn('cycleJobStatus failed:', error);
+      console.warn('updateJobStatus failed:', error);
       showToast(t('toast.jobStatusFailed'), true);
+      renderJobsList();
       return;
     }
 
@@ -8614,8 +8631,9 @@ async function cycleJobStatus(jobId) {
     renderJobsList();
     showToast(t('toast.jobStatusUpdated'));
   } catch (e) {
-    console.warn('cycleJobStatus threw:', e);
+    console.warn('updateJobStatus threw:', e);
     showToast(t('toast.jobStatusFailed'), true);
+    renderJobsList();
   }
 }
 
