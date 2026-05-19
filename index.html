@@ -1203,6 +1203,34 @@
     min-width: 0;
   }
 
+  /* Desktop column width hints. table-layout: fixed distributes column
+     widths from these hints; columns without an explicit width (the
+     flex text columns: Client, Name, Contact, Trades, Job description,
+     Scenario) absorb the remainder. Without these, equal-width
+     distribution starves text columns and content overlaps. Mobile
+     rules in the @media block below override these with !important. */
+  #jobsListTable th:nth-child(3) { width: 110px; }   /* Trade */
+  #jobsListTable th:nth-child(4) { width: 100px; }   /* Amount */
+  #jobsListTable th:nth-child(5) { width: 130px; }   /* Status */
+  #jobsListTable th:nth-child(6) { width: 130px; }   /* Date */
+  #jobsListTable th:nth-child(7) { width: 50px; }    /* Delete */
+
+  #clientsListTable th:nth-child(1) { width: 50px; }  /* Icon */
+  #clientsListTable th:nth-child(4) { width: 70px; }  /* Jobs count */
+  #clientsListTable th:nth-child(5) { width: 110px; } /* Revenue */
+  #clientsListTable th:nth-child(6) { width: 140px; } /* Last activity */
+  #clientsListTable th:nth-child(7) { width: 110px; } /* Status */
+  #clientsListTable th:nth-child(8) { width: 50px; }  /* Delete */
+
+  #quotesListTable th:nth-child(3) { width: 110px; } /* Total */
+  #quotesListTable th:nth-child(4) { width: 120px; } /* Status */
+  #quotesListTable th:nth-child(5) { width: 140px; } /* Date */
+  #quotesListTable th:nth-child(6) { width: 50px; }  /* Delete */
+
+  #followupsListTable th:nth-child(3) { width: 90px; }  /* Channel */
+  #followupsListTable th:nth-child(4) { width: 140px; } /* Date */
+  #followupsListTable th:nth-child(5) { width: 50px; }  /* Delete */
+
   /* === All four lists on every viewport: collapse row Delete buttons
          to a 32x26 icon-only square. Detail-screen delete buttons (e.g.
          "Delete client") are NOT affected — these selectors target the
