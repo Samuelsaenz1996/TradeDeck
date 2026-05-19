@@ -258,6 +258,11 @@
   .status-paid { background: rgba(47, 122, 77, 0.12); color: #2F7A4D; }
   .status-pending { background: rgba(255, 182, 45, 0.16); color: #B8731F; }
   .status-overdue { background: rgba(179, 58, 42, 0.14); color: #B33A2A; }
+  .status-draft { background: rgba(138, 143, 156, 0.14); color: #5A6070; }
+  .status-sent { background: rgba(16, 103, 229, 0.12); color: #1067E5; }
+  .status-accepted { background: rgba(47, 122, 77, 0.12); color: #2F7A4D; }
+  .status-declined { background: rgba(179, 58, 42, 0.14); color: #B33A2A; }
+  .status-invoiced { background: rgba(196, 90, 26, 0.12); color: #A04C10; }
   .overdue-row { background: rgba(179, 58, 42, 0.06); }
   .payment-chart {
     width: 100%;
@@ -1554,8 +1559,9 @@
       white-space: nowrap;
     }
 
-    /* Status dropdowns on jobs list: compact padding for narrow viewports */
-    #jobsListTable .status-select {
+    /* Status dropdowns on jobs + quotes lists: compact padding for narrow viewports */
+    #jobsListTable .status-select,
+    #quotesListTable .status-select {
       padding: 3px 14px 3px 4px;
       font-size: 11px;
       background-size: 8px;
@@ -1564,7 +1570,7 @@
       box-sizing: border-box;
     }
 
-    /* Status pills on clients/quotes lists: compact padding */
+    /* Status pills on clients list: compact padding */
     #clientsListTable .status-pill,
     #quotesListTable .status-pill {
       padding: 3px 8px;
@@ -3631,6 +3637,8 @@ const I18N = {
     'toast.jobDeleteFailed': 'Could not delete job',
     'toast.jobStatusUpdated': 'Status updated',
     'toast.jobStatusFailed': 'Could not update status',
+    'toast.quoteStatusUpdated': 'Status updated',
+    'toast.quoteStatusFailed': 'Could not update status',
     'clientDetail.delete': 'Delete client',
     'clients.delete': 'Delete',
     'clients.confirmDelete': 'Delete this client? Linked quotes, jobs, and follow-ups will keep their content but lose the link to this client. This cannot be undone.',
@@ -4172,6 +4180,8 @@ const I18N = {
     'toast.jobDeleteFailed': 'No se pudo eliminar el trabajo',
     'toast.jobStatusUpdated': 'Estado actualizado',
     'toast.jobStatusFailed': 'No se pudo actualizar el estado',
+    'toast.quoteStatusUpdated': 'Estado actualizado',
+    'toast.quoteStatusFailed': 'No se pudo actualizar el estado',
     'clientDetail.delete': 'Eliminar cliente',
     'clients.delete': 'Eliminar',
     'clients.confirmDelete': '¿Eliminar este cliente? Las cotizaciones, trabajos y seguimientos vinculados conservarán su contenido pero perderán el enlace a este cliente. No se puede deshacer.',
@@ -9140,6 +9150,14 @@ function renderQuotesList() {
   table.classList.remove('hidden');
   empty.classList.add('hidden');
 
+  const quoteStatusLabels = {
+    draft: t('status.Draft'),
+    sent: t('status.Sent'),
+    accepted: t('status.Accepted'),
+    declined: t('status.Declined'),
+    invoiced: t('status.Invoiced'),
+  };
+
   tbody.innerHTML = filtered.map(quote => {
     const clientName = quote.client_name || t('quotes.history.noClient');
     const trades = (quote.trades || []).map(name => {
@@ -9148,15 +9166,21 @@ function renderQuotesList() {
     }).join(', ');
     const totalDisp = fmt(parseFloat(quote.total) || 0);
     const statusKey = (quote.status || 'draft');
-    const statusDisp = (I18N[tdLang] && I18N[tdLang]['status.' + capitalizeFirst(statusKey)])
-                      || statusKey;
     const date = formatRelativeDate(quote.created_at);
     return `
       <tr class="quotes-list-row" data-quote-id="${quote.id}" style="cursor:pointer;">
         <td><strong>${escapeHtml(clientName)}</strong></td>
         <td>${escapeHtml(trades) || '—'}</td>
         <td class="amt-col">${totalDisp}</td>
-        <td><span class="status-pill status-${statusKey}">${statusDisp}</span></td>
+        <td><select class="status-select status-${statusKey}"
+                    data-status-id="${quote.id}"
+                    aria-label="${escapeHtml(t('quotes.history.col.status'))}">
+              <option value="draft" ${statusKey === 'draft' ? 'selected' : ''}>${escapeHtml(quoteStatusLabels.draft)}</option>
+              <option value="sent" ${statusKey === 'sent' ? 'selected' : ''}>${escapeHtml(quoteStatusLabels.sent)}</option>
+              <option value="accepted" ${statusKey === 'accepted' ? 'selected' : ''}>${escapeHtml(quoteStatusLabels.accepted)}</option>
+              <option value="declined" ${statusKey === 'declined' ? 'selected' : ''}>${escapeHtml(quoteStatusLabels.declined)}</option>
+              <option value="invoiced" ${statusKey === 'invoiced' ? 'selected' : ''}>${escapeHtml(quoteStatusLabels.invoiced)}</option>
+            </select></td>
         <td>${date}</td>
         <td style="text-align:right;">
           <button class="btn-secondary btn-danger" data-delete-id="${quote.id}"
@@ -9169,6 +9193,7 @@ function renderQuotesList() {
   tbody.querySelectorAll('.quotes-list-row').forEach(row => {
     row.addEventListener('click', (e) => {
       if (e.target.closest('[data-delete-id]')) return;
+      if (e.target.closest('[data-status-id]')) return;
       openSavedQuote(row.dataset.quoteId);
     });
   });
@@ -9176,6 +9201,13 @@ function renderQuotesList() {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       deleteSavedQuote(btn.dataset.deleteId);
+    });
+  });
+  tbody.querySelectorAll('[data-status-id]').forEach(sel => {
+    sel.addEventListener('click', (e) => e.stopPropagation());
+    sel.addEventListener('change', (e) => {
+      e.stopPropagation();
+      updateQuoteStatus(sel.dataset.statusId, sel.value);
     });
   });
 }
@@ -9222,6 +9254,44 @@ async function openSavedQuote(quoteId) {
 }
 
 // Delete a saved quote (with confirm dialog).
+async function updateQuoteStatus(quoteId, newStatus) {
+  if (!quoteId || !newStatus) return;
+  const row = (savedQuotesCache || []).find(q => q.id === quoteId);
+  if (!row) return;
+  if (row.status === newStatus) return;
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.access_token) {
+    renderQuotesList();
+    return;
+  }
+
+  try {
+    const { data, error } = await sb
+      .from('quotes')
+      .update({ status: newStatus })
+      .eq('id', quoteId)
+      .select('id, status')
+      .single();
+    if (error || !data) {
+      console.warn('updateQuoteStatus failed:', error);
+      showToast(t('toast.quoteStatusFailed'), true);
+      renderQuotesList();
+      return;
+    }
+    row.status = data.status;
+    if (currentQuote && currentQuote.id === quoteId) {
+      currentQuote.status = data.status;
+    }
+    renderQuotesList();
+    showToast(t('toast.quoteStatusUpdated'));
+  } catch (e) {
+    console.warn('updateQuoteStatus threw:', e);
+    showToast(t('toast.quoteStatusFailed'), true);
+    renderQuotesList();
+  }
+}
+
 async function updateJobStatus(jobId, newStatus) {
   if (!jobId || !newStatus) return;
   const row = (jobsCache || []).find(j => j.id === jobId);
