@@ -1082,6 +1082,27 @@
   /* === Hidden state === */
   .hidden { display: none !important; }
 
+  /* === Archived rows in cross-reference cards === */
+  .archived-row {
+    opacity: 0.55;
+  }
+  .archived-row:hover {
+    opacity: 0.75;
+  }
+  .archived-badge {
+    display: inline-block;
+    background: var(--surface-2);
+    color: var(--ink-3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
   /* === Auth screen === */
   .auth-screen {
     min-height: 100vh;
@@ -1520,6 +1541,16 @@
         <div class="card">
           <div class="card-title" data-i18n="quotes.history.title">My quotes</div>
           <div class="card-sub" data-i18n="quotes.history.sub">All your saved quotes. Click any row to open and edit.</div>
+          <div style="margin-bottom: 16px;">
+            <div class="pricing-toggle" id="archiveTabsQuotes" role="group" aria-label="Archive filter">
+              <button data-arch="active" class="active" type="button">
+                <span data-i18n="archive.tab.active">Active</span>
+              </button>
+              <button data-arch="archived" type="button">
+                <span data-i18n="archive.tab.archived">Archived</span>
+              </button>
+            </div>
+          </div>
           <input type="search" class="input" id="quotesSearchInput"
                  data-i18n-placeholder="quotes.history.searchPlaceholder"
                  placeholder="Search by client name..."
@@ -2230,6 +2261,9 @@
             <button class="action-btn" id="quoteCreateJobBtn" onclick="createJobFromCurrentQuote()">
               <span id="quoteCreateJobBtnText" data-i18n="quote.createJob">🔧 Create job</span>
             </button>
+            <button class="action-btn" id="quoteArchiveBtn" onclick="toggleArchiveCurrentQuote()">
+              📦 <span id="quoteArchiveBtnLabel" data-i18n="archive.button.archive">Archive</span>
+            </button>
             <button class="action-btn primary" onclick="convertToInvoice()" data-i18n="quote.convertInvoice">→ Convert to invoice</button>
           </div>
         </div>
@@ -2345,6 +2379,16 @@
           <div class="card">
             <div class="card-title" data-i18n="followups.history.title">My follow-ups</div>
             <div class="card-sub" data-i18n="followups.history.sub">All your saved follow-ups. Click any row to open and edit.</div>
+            <div style="margin-bottom: 16px;">
+              <div class="pricing-toggle" id="archiveTabsFollowups" role="group" aria-label="Archive filter">
+                <button data-arch="active" class="active" type="button">
+                  <span data-i18n="archive.tab.active">Active</span>
+                </button>
+                <button data-arch="archived" type="button">
+                  <span data-i18n="archive.tab.archived">Archived</span>
+                </button>
+              </div>
+            </div>
             <input type="search" class="input" id="followupsSearchInput"
                    data-i18n-placeholder="followups.history.searchPlaceholder"
                    placeholder="Search by customer name..."
@@ -2498,6 +2542,9 @@
             </div>
             <div class="right">
               <button class="action-btn" onclick="copyFollowupMessage()" data-i18n="followup.copyMessage">📋 Copy message</button>
+              <button class="action-btn" id="followupArchiveBtn" onclick="toggleArchiveCurrentFollowup()">
+                📦 <span id="followupArchiveBtnLabel" data-i18n="archive.button.archive">Archive</span>
+              </button>
               <button class="action-btn primary" onclick="regenerateFollowup()" data-i18n="followup.regenerate">♻ Regenerate</button>
             </div>
           </div>
@@ -2534,6 +2581,16 @@
           <div class="card">
             <div class="card-title" data-i18n="clients.title">Clients</div>
             <div class="card-sub" data-i18n="clients.sub">Everyone you've quoted. Click any row to open and edit.</div>
+            <div style="margin-bottom: 16px;">
+              <div class="pricing-toggle" id="archiveTabsClients" role="group" aria-label="Archive filter">
+                <button data-arch="active" class="active" type="button">
+                  <span data-i18n="archive.tab.active">Active</span>
+                </button>
+                <button data-arch="archived" type="button">
+                  <span data-i18n="archive.tab.archived">Archived</span>
+                </button>
+              </div>
+            </div>
             <input type="search" class="input" id="clientsSearchInput"
                    data-i18n-placeholder="clients.searchPlaceholder"
                    placeholder="Search by name..."
@@ -2640,13 +2697,18 @@
                         placeholder="Anything to remember — budget, preferences, schedule notes..."></textarea>
             </div>
 
-            <div class="field" style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div class="field" style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
               <button id="clientDetailDeleteBtn" type="button" class="btn-secondary btn-danger">
                 🗑 <span data-i18n="clientDetail.delete">Delete client</span>
               </button>
-              <button id="clientDetailSaveBtn" type="button" class="btn-primary">
-                💾 <span data-i18n="clientDetail.save">Save</span>
-              </button>
+              <div style="display: flex; gap: 12px;">
+                <button id="clientDetailArchiveBtn" type="button" class="btn-secondary">
+                  📦 <span id="clientDetailArchiveBtnLabel" data-i18n="archive.button.archive">Archive</span>
+                </button>
+                <button id="clientDetailSaveBtn" type="button" class="btn-primary">
+                  💾 <span data-i18n="clientDetail.save">Save</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -2738,6 +2800,16 @@
         <div id="jobsListSub">
           <div class="card">
             <div class="card-title" data-i18n="jobs.title">Jobs</div>
+            <div class="field">
+              <div class="pricing-toggle" id="archiveTabsJobs" role="group" aria-label="Archive filter">
+                <button data-arch="active" class="active" type="button">
+                  <span data-i18n="archive.tab.active">Active</span>
+                </button>
+                <button data-arch="archived" type="button">
+                  <span data-i18n="archive.tab.archived">Archived</span>
+                </button>
+              </div>
+            </div>
             <div class="field">
               <div class="timeline-pills" id="jobFilterPills">
                 <button class="active" data-filter="all" data-i18n="jobs.filter.all">All</button>
@@ -2843,13 +2915,18 @@
                         placeholder="Anything to remember about this job..."></textarea>
             </div>
 
-            <div class="field" style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div class="field" style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
               <button id="jobDetailDeleteBtn" type="button" class="btn-secondary btn-danger">
                 🗑 <span data-i18n="jobDetail.delete">Delete job</span>
               </button>
-              <button id="jobDetailSaveBtn" type="button" class="btn-primary">
-                💾 <span data-i18n="jobDetail.save">Save</span>
-              </button>
+              <div style="display: flex; gap: 12px;">
+                <button id="jobDetailArchiveBtn" type="button" class="btn-secondary">
+                  📦 <span id="jobDetailArchiveBtnLabel" data-i18n="archive.button.archive">Archive</span>
+                </button>
+                <button id="jobDetailSaveBtn" type="button" class="btn-primary">
+                  💾 <span data-i18n="jobDetail.save">Save</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -3487,6 +3564,20 @@ const I18N = {
     'aria.openMenu': 'Open navigation menu',
     'aria.closeMenu': 'Close navigation',
     'aria.mainNav': 'Main navigation',
+    // Archive
+    'archive.tab.active': 'Active',
+    'archive.tab.archived': 'Archived',
+    'archive.badge': 'Archived',
+    'archive.button.archive': 'Archive',
+    'archive.button.unarchive': 'Unarchive',
+    'toast.archived': 'Archived',
+    'toast.unarchived': 'Unarchived',
+    'toast.archiveFailed': 'Could not archive',
+    'toast.unarchiveFailed': 'Could not unarchive',
+    'clients.emptyArchived': 'No archived clients.',
+    'jobs.emptyArchived': 'No archived jobs.',
+    'quotes.history.emptyArchived': 'No archived quotes.',
+    'followups.history.emptyArchived': 'No archived follow-ups.',
   },
   es: {
     // Sidebar
@@ -4000,6 +4091,20 @@ const I18N = {
     'aria.openMenu': 'Abrir menú de navegación',
     'aria.closeMenu': 'Cerrar navegación',
     'aria.mainNav': 'Navegación principal',
+    // Archive
+    'archive.tab.active': 'Activos',
+    'archive.tab.archived': 'Archivados',
+    'archive.badge': 'Archivado',
+    'archive.button.archive': 'Archivar',
+    'archive.button.unarchive': 'Desarchivar',
+    'toast.archived': 'Archivado',
+    'toast.unarchived': 'Desarchivado',
+    'toast.archiveFailed': 'No se pudo archivar',
+    'toast.unarchiveFailed': 'No se pudo desarchivar',
+    'clients.emptyArchived': 'No hay clientes archivados.',
+    'jobs.emptyArchived': 'No hay trabajos archivados.',
+    'quotes.history.emptyArchived': 'No hay cotizaciones archivadas.',
+    'followups.history.emptyArchived': 'No hay seguimientos archivados.',
   },
 };
 
@@ -4323,11 +4428,14 @@ async function loadJobs() {
     }
     const clientNameById = {};
     clientsLookupCache.forEach(c => { clientNameById[c.id] = c.name; });
-    const { data, error } = await sb
-      .from('jobs')
-      .select('id, client_id, quote_id, description, trade, amount, status, created_at, updated_at')
+    let q = sb.from('jobs')
+      .select('id, client_id, quote_id, description, trade, amount, status, created_at, updated_at, archived_at')
       .order('created_at', { ascending: false })
       .limit(500);
+    q = viewingArchivedJobs
+      ? q.not('archived_at', 'is', null)
+      : q.is('archived_at', null);
+    const { data, error } = await q;
     if (error) throw error;
     jobsCache = (data || []).map(j => ({
       ...j,
@@ -4397,7 +4505,9 @@ function renderJobsList() {
     table.classList.add('hidden');
     empty.classList.remove('hidden');
     if (msgEl) {
-      const key = jobsFilter === 'all' ? 'jobs.empty' : 'jobs.emptyFilter';
+      const key = viewingArchivedJobs
+        ? 'jobs.emptyArchived'
+        : (jobsFilter === 'all' ? 'jobs.empty' : 'jobs.emptyFilter');
       msgEl.setAttribute('data-i18n', key);
       msgEl.textContent = t(key);
     }
@@ -4497,11 +4607,11 @@ async function openJobDetail(jobId) {
     const [jobRes, quotesRes, followupsRes] = await Promise.all([
       sb.from('jobs').select('*').eq('id', jobId).single(),
       sb.from('quotes')
-        .select('id, total, trades, status, created_at')
+        .select('id, total, trades, status, created_at, archived_at')
         .eq('job_id', jobId)
         .order('created_at', { ascending: false }),
       sb.from('followups')
-        .select('id, scenario, channel, created_at')
+        .select('id, scenario, channel, created_at, archived_at')
         .eq('job_id', jobId)
         .order('created_at', { ascending: false }),
     ]);
@@ -4542,6 +4652,14 @@ function renderJobDetail() {
   if (clientField) clientField.classList.toggle('hidden', !isCreatingNewJob);
   const clientCard = document.getElementById('jobDetailClientCard');
   if (clientCard) clientCard.classList.toggle('hidden', isCreatingNewJob);
+  const jobArchLbl = document.getElementById('jobDetailArchiveBtnLabel');
+  if (jobArchLbl) {
+    const isArchived = !!j.archived_at;
+    jobArchLbl.setAttribute('data-i18n', isArchived ? 'archive.button.unarchive' : 'archive.button.archive');
+    jobArchLbl.textContent = t(isArchived ? 'archive.button.unarchive' : 'archive.button.archive');
+  }
+  const jobArchBtn2 = document.getElementById('jobDetailArchiveBtn');
+  if (jobArchBtn2) jobArchBtn2.classList.toggle('hidden', !!isCreatingNewJob);
   document.getElementById('jobDetailDescription').value = j.description || '';
   document.getElementById('jobDetailTrade').value = j.trade || '';
   document.getElementById('jobDetailAmount').value = (j.amount != null) ? j.amount : '';
@@ -4606,8 +4724,8 @@ function renderJobDetailQuotes() {
     const statusKey = q.status || 'draft';
     const statusDisp = (I18N[tdLang] && I18N[tdLang]['status.' + capitalizeFirst(statusKey)]) || statusKey;
     return `
-      <tr class="job-detail-quote-row" data-quote-id="${q.id}" style="cursor: pointer;">
-        <td>${escapeHtml(trades) || '—'}</td>
+      <tr class="job-detail-quote-row ${q.archived_at ? 'archived-row' : ''}" data-quote-id="${q.id}" style="cursor: pointer;">
+        <td>${escapeHtml(trades) || '—'}${q.archived_at ? ` <span class="archived-badge">${t('archive.badge')}</span>` : ''}</td>
         <td class="amt-col">${fmt(parseFloat(q.total) || 0)}</td>
         <td><span class="status-pill status-${statusKey}">${escapeHtml(statusDisp)}</span></td>
         <td>${formatRelativeDate(q.created_at)}</td>
@@ -4642,8 +4760,8 @@ function renderJobDetailFollowups() {
     const scenario = f.scenario || '—';
     const channel = f.channel === 'text' ? t('followup.channels.text') : t('followup.channels.email');
     return `
-      <tr class="job-detail-followup-row" data-followup-id="${f.id}" style="cursor: pointer;">
-        <td>${escapeHtml(scenario)}</td>
+      <tr class="job-detail-followup-row ${f.archived_at ? 'archived-row' : ''}" data-followup-id="${f.id}" style="cursor: pointer;">
+        <td>${escapeHtml(scenario)}${f.archived_at ? ` <span class="archived-badge">${t('archive.badge')}</span>` : ''}</td>
         <td>${escapeHtml(channel)}</td>
         <td>${formatRelativeDate(f.created_at)}</td>
       </tr>
@@ -4704,6 +4822,7 @@ async function saveJobEdits() {
           .from('clients')
           .select('id')
           .ilike('name', typedName)
+          .is('archived_at', null)
           .limit(1)
           .maybeSingle();
         if (existing && existing.id) {
@@ -5018,6 +5137,10 @@ let selectedClientIdForQuote = null;  // Captured at form-fill time
 let selectedClientIdForFollowup = null;
 let isCreatingNewClient = false;  // True between "+ New Client" click
                                   // and the first successful insert
+let viewingArchivedClients = false;
+let viewingArchivedJobs = false;
+let viewingArchivedQuotes = false;
+let viewingArchivedFollowups = false;
 
 // Map of pricing mode → input IDs whose values should persist per trade.
 const PRICING_INPUTS_BY_MODE = {
@@ -5292,6 +5415,52 @@ function init() {
   // once in their default English form, then swaps everything in one pass.
   applyLanguage();
   if (selectedTrades.length === 0) hideAllPricingPanels();
+
+  // Wire archive segmented controls + detail-screen archive buttons
+  function bindArchiveTabs(containerId, setStateAndReload) {
+    const buttons = document.querySelectorAll(`#${containerId} button`);
+    buttons.forEach(btn => {
+      btn.onclick = () => {
+        buttons.forEach(b => b.classList.toggle('active', b === btn));
+        setStateAndReload(btn.dataset.arch === 'archived');
+      };
+    });
+  }
+  bindArchiveTabs('archiveTabsClients', (archived) => {
+    viewingArchivedClients = archived;
+    loadClients();
+  });
+  bindArchiveTabs('archiveTabsJobs', (archived) => {
+    viewingArchivedJobs = archived;
+    loadJobs();
+  });
+  bindArchiveTabs('archiveTabsQuotes', (archived) => {
+    viewingArchivedQuotes = archived;
+    loadSavedQuotes();
+  });
+  bindArchiveTabs('archiveTabsFollowups', (archived) => {
+    viewingArchivedFollowups = archived;
+    loadSavedFollowups();
+  });
+  const clientArchBtn = document.getElementById('clientDetailArchiveBtn');
+  if (clientArchBtn) clientArchBtn.onclick = () => {
+    if (!activeClientId || isCreatingNewClient) return;
+    if (activeClientData && activeClientData.archived_at) {
+      unarchiveClient(activeClientId);
+    } else {
+      archiveClient(activeClientId);
+    }
+  };
+  const jobArchBtn = document.getElementById('jobDetailArchiveBtn');
+  if (jobArchBtn) jobArchBtn.onclick = () => {
+    if (!activeJobId || isCreatingNewJob) return;
+    if (activeJobData && activeJobData.archived_at) {
+      unarchiveJob(activeJobId);
+    } else {
+      archiveJob(activeJobId);
+    }
+  };
+
   // Default landing state for Quotes view
   switchQuotesSubView('list');
 }
@@ -6047,6 +6216,7 @@ function renderFollowupMessage(data) {
   document.getElementById('followupBody').textContent = pickLang(data.body).trim();
   refreshFollowupMetaLine();
   updateTextCharCount();
+  refreshFollowupArchiveButton();
 }
 
 function copyFollowupMessage() {
@@ -6655,6 +6825,7 @@ function renderQuote(data) {
   recalcTotals();
   refreshQuoteLangNotice();
   refreshQuoteCreateJobButton();
+  refreshQuoteArchiveButton();
 }
 
 // Pure factory: creates a <tr> for a single line item. Does NOT append.
@@ -7493,6 +7664,7 @@ async function persistGeneratedQuote() {
         .from('clients')
         .select('id')
         .ilike('name', clientName)
+        .is('archived_at', null)
         .limit(1)
         .maybeSingle();
       if (existing && existing.id) {
@@ -7565,6 +7737,7 @@ async function persistGeneratedFollowup() {
         .from('clients')
         .select('id')
         .ilike('name', customerName)
+        .is('archived_at', null)
         .limit(1)
         .maybeSingle();
       if (existing && existing.id) clientId = existing.id;
@@ -7656,11 +7829,14 @@ async function loadSavedFollowups() {
   }
 
   try {
-    const { data, error } = await sb
-      .from('followups')
-      .select('id, customer_name, channel, scenario, created_at')
+    let q = sb.from('followups')
+      .select('id, customer_name, channel, scenario, created_at, archived_at')
       .order('created_at', { ascending: false })
       .limit(50);
+    q = viewingArchivedFollowups
+      ? q.not('archived_at', 'is', null)
+      : q.is('archived_at', null);
+    const { data, error } = await q;
     if (error) throw error;
     savedFollowupsCache = data || [];
   } catch (e) {
@@ -7688,6 +7864,14 @@ function renderFollowupsList() {
     tbody.innerHTML = '';
     table.classList.add('hidden');
     empty.classList.remove('hidden');
+    const emptyMsg3 = empty.querySelector('p');
+    if (emptyMsg3) {
+      const key = viewingArchivedFollowups ? 'followups.history.emptyArchived' : 'followups.history.empty';
+      emptyMsg3.setAttribute('data-i18n', key);
+      emptyMsg3.textContent = t(key);
+    }
+    const ctaF = document.getElementById('followupsEmptyCTA');
+    if (ctaF) ctaF.classList.toggle('hidden', viewingArchivedFollowups);
     return;
   }
   table.classList.remove('hidden');
@@ -7760,6 +7944,7 @@ async function openSavedFollowup(followupId) {
 
     currentFollowup = data.payload || {};
     currentFollowup.id = data.id;
+    currentFollowup.archived_at = data.archived_at || null;
 
     renderFollowupMessage(currentFollowup);
     document.getElementById('followupWrap').classList.add('visible');
@@ -7875,7 +8060,7 @@ async function refreshClientsLookupCache() {
   try {
     const { data, error } = await sb
       .from('clients')
-      .select('id, name, type, contact_name, addr, email, phone')
+      .select('id, name, type, contact_name, addr, email, phone, archived_at')
       .order('name', { ascending: true })
       .limit(500);
     if (error) throw error;
@@ -7896,6 +8081,7 @@ function renderClientsDatalist() {
   const seen = new Set();
   const unique = clientsLookupCache.filter(c => {
     if (!c.name) return false;
+    if (c.archived_at) return false;
     const key = c.name.trim();
     if (seen.has(key)) return false;
     seen.add(key);
@@ -7914,7 +8100,7 @@ function findClientByName(name) {
   const target = name.trim().toLowerCase();
   if (!target) return null;
   return clientsLookupCache.find(c =>
-    (c.name || '').trim().toLowerCase() === target
+    !c.archived_at && (c.name || '').trim().toLowerCase() === target
   ) || null;
 }
 
@@ -7982,7 +8168,7 @@ async function loadClients() {
   try {
     const [clientsRes, jobsRes, quotesRes] = await Promise.all([
       sb.from('clients')
-        .select('id, name, type, contact_name, contact_title, email, phone, addr, status, notes, created_at, updated_at')
+        .select('id, name, type, contact_name, contact_title, email, phone, addr, status, notes, created_at, updated_at, archived_at')
         .order('updated_at', { ascending: false })
         .limit(200),
       sb.from('jobs')
@@ -8031,6 +8217,7 @@ async function loadClients() {
       addr: c.addr,
       email: c.email,
       phone: c.phone,
+      archived_at: c.archived_at,
     }));
   } catch (e) {
     console.warn('loadClients failed:', e);
@@ -8051,6 +8238,9 @@ function renderClientsList() {
   const q = (searchEl ? searchEl.value : '').trim().toLowerCase();
 
   const filtered = clientsCache.filter(c => {
+    const isArchived = !!c.archived_at;
+    if (viewingArchivedClients && !isArchived) return false;
+    if (!viewingArchivedClients && isArchived) return false;
     if (!q) return true;
     const hay = [
       c.name || '',
@@ -8065,6 +8255,12 @@ function renderClientsList() {
     tbody.innerHTML = '';
     table.classList.add('hidden');
     empty.classList.remove('hidden');
+    const emptyMsg = empty.querySelector('p');
+    if (emptyMsg) {
+      const key = viewingArchivedClients ? 'clients.emptyArchived' : 'clients.empty';
+      emptyMsg.setAttribute('data-i18n', key);
+      emptyMsg.textContent = t(key);
+    }
     return;
   }
   table.classList.remove('hidden');
@@ -8196,15 +8392,15 @@ async function openClientDetail(clientId) {
     const [clientRes, quotesRes, jobsRes, followupsRes] = await Promise.all([
       sb.from('clients').select('*').eq('id', clientId).single(),
       sb.from('quotes')
-        .select('id, total, trades, status, created_at')
+        .select('id, total, trades, status, created_at, archived_at')
         .eq('client_id', clientId)
         .order('created_at', { ascending: false }),
       sb.from('jobs')
-        .select('id, quote_id, description, trade, amount, status, created_at')
+        .select('id, quote_id, description, trade, amount, status, created_at, archived_at')
         .eq('client_id', clientId)
         .order('created_at', { ascending: false }),
       sb.from('followups')
-        .select('id, scenario, channel, created_at')
+        .select('id, scenario, channel, created_at, archived_at')
         .eq('client_id', clientId)
         .order('created_at', { ascending: false }),
     ]);
@@ -8309,6 +8505,14 @@ function renderClientDetail() {
   document.getElementById('clientDetailContactName').value = c.contact_name || '';
   document.getElementById('clientDetailContactTitle').value = c.contact_title || '';
   applyClientType(c.type || 'person');
+  const clientArchLbl = document.getElementById('clientDetailArchiveBtnLabel');
+  if (clientArchLbl) {
+    const isArchived = !!c.archived_at;
+    clientArchLbl.setAttribute('data-i18n', isArchived ? 'archive.button.unarchive' : 'archive.button.archive');
+    clientArchLbl.textContent = t(isArchived ? 'archive.button.unarchive' : 'archive.button.archive');
+  }
+  const clientArchBtn2 = document.getElementById('clientDetailArchiveBtn');
+  if (clientArchBtn2) clientArchBtn2.classList.toggle('hidden', !!isCreatingNewClient);
   const cDeleteBtn = document.getElementById('clientDetailDeleteBtn');
   if (cDeleteBtn) cDeleteBtn.classList.toggle('hidden', !!isCreatingNewClient);
   renderClientDetailQuotes();
@@ -8494,8 +8698,8 @@ function renderClientDetailQuotes() {
     const statusKey = q.status || 'draft';
     const statusDisp = (I18N[tdLang] && I18N[tdLang]['status.' + capitalizeFirst(statusKey)]) || statusKey;
     return `
-      <tr class="client-quote-row" data-quote-id="${q.id}" style="cursor: pointer;">
-        <td>${escapeHtml(trades) || '—'}</td>
+      <tr class="client-quote-row ${q.archived_at ? 'archived-row' : ''}" data-quote-id="${q.id}" style="cursor: pointer;">
+        <td>${escapeHtml(trades) || '—'}${q.archived_at ? ` <span class="archived-badge">${t('archive.badge')}</span>` : ''}</td>
         <td class="amt-col">${fmt(parseFloat(q.total) || 0)}</td>
         <td><span class="status-pill status-${statusKey}">${escapeHtml(statusDisp)}</span></td>
         <td>${formatRelativeDate(q.created_at)}</td>
@@ -8537,9 +8741,9 @@ function renderClientDetailJobs() {
     const statusDisp = jobStatusLabel(statusKey);
     const hasQuote = !!j.quote_id;
     return `
-      <tr class="client-job-row" data-quote-id="${j.quote_id || ''}"
+      <tr class="client-job-row ${j.archived_at ? 'archived-row' : ''}" data-quote-id="${j.quote_id || ''}"
           style="${hasQuote ? 'cursor: pointer;' : ''}">
-        <td>${escapeHtml(j.description || '—')}</td>
+        <td>${escapeHtml(j.description || '—')}${j.archived_at ? ` <span class="archived-badge">${t('archive.badge')}</span>` : ''}</td>
         <td>${escapeHtml(tradeStr)}</td>
         <td class="amt-col">${fmt(parseFloat(j.amount) || 0)}</td>
         <td><span class="status-pill status-${statusCss}">${escapeHtml(statusDisp)}</span></td>
@@ -8579,8 +8783,8 @@ function renderClientDetailFollowups() {
       ? t('followup.channels.text')
       : t('followup.channels.email');
     return `
-      <tr class="client-followup-row" data-followup-id="${f.id}" style="cursor: pointer;">
-        <td>${escapeHtml(scenario)}</td>
+      <tr class="client-followup-row ${f.archived_at ? 'archived-row' : ''}" data-followup-id="${f.id}" style="cursor: pointer;">
+        <td>${escapeHtml(scenario)}${f.archived_at ? ` <span class="archived-badge">${t('archive.badge')}</span>` : ''}</td>
         <td>${escapeHtml(channel)}</td>
         <td>${formatRelativeDate(f.created_at)}</td>
       </tr>
@@ -8616,11 +8820,14 @@ async function loadSavedQuotes() {
   }
 
   try {
-    const { data, error } = await sb
-      .from('quotes')
-      .select('id, client_name, client_addr, total, trades, status, created_at')
+    let q = sb.from('quotes')
+      .select('id, client_name, client_addr, total, trades, status, created_at, archived_at')
       .order('created_at', { ascending: false })
       .limit(50);
+    q = viewingArchivedQuotes
+      ? q.not('archived_at', 'is', null)
+      : q.is('archived_at', null);
+    const { data, error } = await q;
     if (error) throw error;
     savedQuotesCache = data || [];
   } catch (e) {
@@ -8650,6 +8857,14 @@ function renderQuotesList() {
     tbody.innerHTML = '';
     table.classList.add('hidden');
     empty.classList.remove('hidden');
+    const emptyMsg2 = empty.querySelector('p');
+    if (emptyMsg2) {
+      const key = viewingArchivedQuotes ? 'quotes.history.emptyArchived' : 'quotes.history.empty';
+      emptyMsg2.setAttribute('data-i18n', key);
+      emptyMsg2.textContent = t(key);
+    }
+    const cta = document.getElementById('quotesEmptyCTA');
+    if (cta) cta.classList.toggle('hidden', viewingArchivedQuotes);
     return;
   }
   table.classList.remove('hidden');
@@ -8720,6 +8935,7 @@ async function openSavedQuote(quoteId) {
     currentQuote = data.payload || {};
     currentQuote.id = data.id;
     currentQuote.job_id = data.job_id || null;
+    currentQuote.archived_at = data.archived_at || null;
 
     renderTrades();
     renderTradeTabs();
@@ -8797,6 +9013,145 @@ async function deleteSavedJob(jobId) {
     console.warn('deleteSavedJob threw:', e);
     showToast(t('toast.jobDeleteFailed'), true);
   }
+}
+
+async function setArchivedState(table, id, archived) {
+  if (!id) return { ok: false };
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.access_token) return { ok: false };
+  try {
+    const archived_at = archived ? new Date().toISOString() : null;
+    const { error } = await sb.from(table).update({ archived_at }).eq('id', id);
+    if (error) {
+      console.warn(`setArchivedState ${table} failed:`, error);
+      return { ok: false, error };
+    }
+    return { ok: true };
+  } catch (e) {
+    console.warn(`setArchivedState ${table} threw:`, e);
+    return { ok: false, error: e };
+  }
+}
+
+async function archiveClient(id) {
+  const res = await setArchivedState('clients', id, true);
+  if (!res.ok) { showToast(t('toast.archiveFailed'), true); return; }
+  if (activeClientId === id) {
+    activeClientId = null;
+    activeClientData = null;
+    switchClientsSubView('list');
+  }
+  showToast(t('toast.archived'));
+  refreshClientsLookupCache().catch(e => console.warn('lookup refresh:', e));
+  loadClients();
+}
+async function unarchiveClient(id) {
+  const res = await setArchivedState('clients', id, false);
+  if (!res.ok) { showToast(t('toast.unarchiveFailed'), true); return; }
+  if (activeClientId === id && activeClientData) {
+    activeClientData.archived_at = null;
+    renderClientDetail();
+  }
+  showToast(t('toast.unarchived'));
+  refreshClientsLookupCache().catch(e => console.warn('lookup refresh:', e));
+  loadClients();
+}
+
+async function archiveJob(id) {
+  const res = await setArchivedState('jobs', id, true);
+  if (!res.ok) { showToast(t('toast.archiveFailed'), true); return; }
+  if (activeJobId === id) {
+    activeJobId = null;
+    activeJobData = null;
+    switchJobsSubView('list');
+  }
+  showToast(t('toast.archived'));
+  loadJobs();
+}
+async function unarchiveJob(id) {
+  const res = await setArchivedState('jobs', id, false);
+  if (!res.ok) { showToast(t('toast.unarchiveFailed'), true); return; }
+  if (activeJobId === id && activeJobData) {
+    activeJobData.archived_at = null;
+    renderJobDetail();
+  }
+  showToast(t('toast.unarchived'));
+  loadJobs();
+}
+
+async function archiveQuote(id) {
+  const res = await setArchivedState('quotes', id, true);
+  if (!res.ok) { showToast(t('toast.archiveFailed'), true); return; }
+  if (currentQuote && currentQuote.id === id) {
+    currentQuote = null;
+    document.getElementById('quoteWrap').classList.remove('visible');
+    switchQuotesSubView('list');
+  }
+  showToast(t('toast.archived'));
+  loadSavedQuotes();
+}
+async function unarchiveQuote(id) {
+  const res = await setArchivedState('quotes', id, false);
+  if (!res.ok) { showToast(t('toast.unarchiveFailed'), true); return; }
+  if (currentQuote && currentQuote.id === id) {
+    currentQuote.archived_at = null;
+    refreshQuoteArchiveButton();
+  }
+  showToast(t('toast.unarchived'));
+  loadSavedQuotes();
+}
+
+async function archiveFollowup(id) {
+  const res = await setArchivedState('followups', id, true);
+  if (!res.ok) { showToast(t('toast.archiveFailed'), true); return; }
+  if (currentFollowup && currentFollowup.id === id) {
+    currentFollowup = null;
+    document.getElementById('followupWrap').classList.remove('visible');
+    switchFollowupsSubView('list');
+  }
+  showToast(t('toast.archived'));
+  loadSavedFollowups();
+}
+async function unarchiveFollowup(id) {
+  const res = await setArchivedState('followups', id, false);
+  if (!res.ok) { showToast(t('toast.unarchiveFailed'), true); return; }
+  if (currentFollowup && currentFollowup.id === id) {
+    currentFollowup.archived_at = null;
+    refreshFollowupArchiveButton();
+  }
+  showToast(t('toast.unarchived'));
+  loadSavedFollowups();
+}
+
+function toggleArchiveCurrentQuote() {
+  if (!currentQuote || !currentQuote.id) return;
+  if (currentQuote.archived_at) {
+    unarchiveQuote(currentQuote.id);
+  } else {
+    archiveQuote(currentQuote.id);
+  }
+}
+function toggleArchiveCurrentFollowup() {
+  if (!currentFollowup || !currentFollowup.id) return;
+  if (currentFollowup.archived_at) {
+    unarchiveFollowup(currentFollowup.id);
+  } else {
+    archiveFollowup(currentFollowup.id);
+  }
+}
+function refreshQuoteArchiveButton() {
+  const lbl = document.getElementById('quoteArchiveBtnLabel');
+  if (!lbl || !currentQuote) return;
+  const isArchived = !!currentQuote.archived_at;
+  lbl.setAttribute('data-i18n', isArchived ? 'archive.button.unarchive' : 'archive.button.archive');
+  lbl.textContent = t(isArchived ? 'archive.button.unarchive' : 'archive.button.archive');
+}
+function refreshFollowupArchiveButton() {
+  const lbl = document.getElementById('followupArchiveBtnLabel');
+  if (!lbl || !currentFollowup) return;
+  const isArchived = !!currentFollowup.archived_at;
+  lbl.setAttribute('data-i18n', isArchived ? 'archive.button.unarchive' : 'archive.button.archive');
+  lbl.textContent = t(isArchived ? 'archive.button.unarchive' : 'archive.button.archive');
 }
 
 async function deleteSavedClient(clientId) {
