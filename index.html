@@ -1262,6 +1262,14 @@
 
   @media (max-width: 640px) {
 
+    /* Reduce card padding on mobile so list tables get more horizontal room */
+    #jobsView .card,
+    #clientsView .card,
+    #quotesView .card,
+    #followupsView .card {
+      padding: 8px;
+    }
+
     /* Force all four list tables to fit the viewport: fixed layout
        distributes width across the visible columns, width:100% caps
        the table to the available card width. Combined with the
@@ -1278,20 +1286,20 @@
 
     /* Width hints for compact columns — table-layout: fixed honors these
        and distributes the remaining width across the flexible text columns. */
-    #jobsListTable th:nth-child(4) { width: 70px; }   /* Amount */
-    #jobsListTable th:nth-child(5) { width: 90px; }   /* Status dropdown */
-    #jobsListTable th:nth-child(7) { width: 50px; }   /* Delete icon */
+    #jobsListTable th:nth-child(4) { width: 60px; }   /* Amount */
+    #jobsListTable th:nth-child(5) { width: 80px; }   /* Status dropdown */
+    #jobsListTable th:nth-child(7) { width: 40px; }   /* Delete icon */
 
-    #clientsListTable th:nth-child(1) { width: 36px; }  /* Icon */
-    #clientsListTable th:nth-child(7) { width: 80px; }  /* Status */
-    #clientsListTable th:nth-child(8) { width: 50px; }  /* Delete */
+    #clientsListTable th:nth-child(1) { width: 30px; }  /* Icon */
+    #clientsListTable th:nth-child(7) { width: 70px; }  /* Status */
+    #clientsListTable th:nth-child(8) { width: 40px; }  /* Delete */
 
-    #quotesListTable th:nth-child(3) { width: 75px; }   /* Total */
-    #quotesListTable th:nth-child(4) { width: 85px; }   /* Status */
-    #quotesListTable th:nth-child(6) { width: 50px; }   /* Delete */
+    #quotesListTable th:nth-child(3) { width: 65px; }   /* Total */
+    #quotesListTable th:nth-child(4) { width: 75px; }   /* Status */
+    #quotesListTable th:nth-child(6) { width: 40px; }   /* Delete */
 
-    #followupsListTable th:nth-child(3) { width: 70px; } /* Channel */
-    #followupsListTable th:nth-child(5) { width: 50px; } /* Delete */
+    #followupsListTable th:nth-child(3) { width: 60px; } /* Channel */
+    #followupsListTable th:nth-child(5) { width: 40px; } /* Delete */
 
     /* Jobs list: hide Trade (col 3) and Date (col 6) */
     #jobsListTable th:nth-child(3),
@@ -1331,8 +1339,9 @@
     #quotesListTable [data-delete-id],
     #followupsListTable [data-delete-id] {
       font-size: 0;
-      padding: 6px 8px;
-      min-width: 36px;
+      padding: 4px 6px;
+      min-width: 32px;
+      box-sizing: border-box;
     }
     #jobsListTable [data-delete-id]::before,
     #clientsListTable [data-delete-id]::before,
@@ -1351,8 +1360,9 @@
     #quotesListTable td,
     #followupsListTable th,
     #followupsListTable td {
-      padding: 8px 6px;
-      font-size: 13px;
+      box-sizing: border-box;
+      padding: 6px 4px;
+      font-size: 12px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -1360,10 +1370,12 @@
 
     /* Status dropdowns on jobs list: compact padding for narrow viewports */
     #jobsListTable .status-select {
-      padding: 4px 18px 4px 6px;
-      font-size: 12px;
-      background-size: 10px;
-      background-position: right 6px center;
+      padding: 3px 14px 3px 4px;
+      font-size: 11px;
+      background-size: 8px;
+      background-position: right 4px center;
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     /* Status pills on clients/quotes lists: compact padding */
