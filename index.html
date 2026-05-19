@@ -1082,6 +1082,95 @@
   /* === Hidden state === */
   .hidden { display: none !important; }
 
+  /* === Confirmation modal === */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+    opacity: 0;
+    transition: opacity 120ms ease;
+  }
+  .modal-backdrop.hidden {
+    display: none;
+  }
+  .modal-backdrop.visible {
+    opacity: 1;
+  }
+  .modal-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    padding: 24px;
+    max-width: 420px;
+    width: 100%;
+    max-height: calc(100vh - 32px);
+    overflow: auto;
+  }
+  .modal-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .modal-body {
+    font-size: 14px;
+    color: var(--ink-2);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  .modal-body:empty {
+    display: none;
+  }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  .modal-btn {
+    padding: 9px 18px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.12s, border-color 0.12s;
+    font-family: inherit;
+  }
+  .modal-btn-cancel {
+    background: var(--surface-2);
+    color: var(--ink);
+    border-color: var(--line);
+  }
+  .modal-btn-cancel:hover {
+    background: var(--surface);
+    border-color: var(--ink-3);
+  }
+  .modal-btn-primary {
+    background: var(--brand, #3b82f6);
+    color: white;
+  }
+  .modal-btn-primary:hover {
+    filter: brightness(0.92);
+  }
+  .modal-btn-danger {
+    background: #ef4444;
+    color: white;
+  }
+  .modal-btn-danger:hover {
+    background: #dc2626;
+  }
+  .modal-btn:focus-visible {
+    outline: 2px solid var(--brand, #3b82f6);
+    outline-offset: 2px;
+  }
+
   /* === Archived rows in cross-reference cards === */
   .archived-row {
     opacity: 0.55;
@@ -1282,6 +1371,26 @@
   }
 
   @media (max-width: 640px) {
+
+    /* Confirmation modal sizing on mobile */
+    .modal-backdrop {
+      padding: 12px;
+    }
+    .modal-card {
+      max-width: none;
+      width: 100%;
+      padding: 20px;
+    }
+    .modal-title {
+      font-size: 18px;
+    }
+    .modal-body {
+      font-size: 15px;
+    }
+    .modal-btn {
+      padding: 11px 18px;
+      font-size: 15px;
+    }
 
     /* Reduce card padding on mobile so list tables get more horizontal room */
     #jobsView .card,
@@ -3041,6 +3150,17 @@
 
 <div class="toast" id="toast"></div>
 
+<div id="confirmModalBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+  <div class="modal-card" role="document">
+    <div class="modal-title" id="confirmModalTitle"></div>
+    <div class="modal-body" id="confirmModalBody"></div>
+    <div class="modal-actions">
+      <button id="confirmModalCancel" type="button" class="modal-btn modal-btn-cancel"></button>
+      <button id="confirmModalConfirm" type="button" class="modal-btn modal-btn-primary"></button>
+    </div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = "https://cqmctdhxticryelvhhze.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_YOWddbCqAPdFrg-9otLSzw_akBdoAPh";
@@ -3578,6 +3698,20 @@ const I18N = {
     'jobs.emptyArchived': 'No archived jobs.',
     'quotes.history.emptyArchived': 'No archived quotes.',
     'followups.history.emptyArchived': 'No archived follow-ups.',
+    // Confirmation modal
+    'modal.cancel': 'Cancel',
+    'modal.confirm': 'Confirm',
+    'modal.delete': 'Delete',
+    'archive.confirm.body': 'You can unarchive it later from the Archived tab.',
+    'archive.confirm.client.title': 'Archive this client?',
+    'archive.confirm.job.title': 'Archive this job?',
+    'archive.confirm.quote.title': 'Archive this quote?',
+    'archive.confirm.followup.title': 'Archive this follow-up?',
+    'delete.confirm.body': 'This cannot be undone.',
+    'delete.confirm.client.title': 'Delete this client?',
+    'delete.confirm.job.title': 'Delete this job?',
+    'delete.confirm.quote.title': 'Delete this quote?',
+    'delete.confirm.followup.title': 'Delete this follow-up?',
   },
   es: {
     // Sidebar
@@ -4105,6 +4239,20 @@ const I18N = {
     'jobs.emptyArchived': 'No hay trabajos archivados.',
     'quotes.history.emptyArchived': 'No hay cotizaciones archivadas.',
     'followups.history.emptyArchived': 'No hay seguimientos archivados.',
+    // Confirmation modal
+    'modal.cancel': 'Cancelar',
+    'modal.confirm': 'Confirmar',
+    'modal.delete': 'Eliminar',
+    'archive.confirm.body': 'Puedes desarchivarlo más tarde desde la pestaña Archivados.',
+    'archive.confirm.client.title': '¿Archivar este cliente?',
+    'archive.confirm.job.title': '¿Archivar este trabajo?',
+    'archive.confirm.quote.title': '¿Archivar esta cotización?',
+    'archive.confirm.followup.title': '¿Archivar este seguimiento?',
+    'delete.confirm.body': 'Esto no se puede deshacer.',
+    'delete.confirm.client.title': '¿Eliminar este cliente?',
+    'delete.confirm.job.title': '¿Eliminar este trabajo?',
+    'delete.confirm.quote.title': '¿Eliminar esta cotización?',
+    'delete.confirm.followup.title': '¿Eliminar este seguimiento?',
   },
 };
 
@@ -7412,6 +7560,68 @@ function showToast(msg, isError = false) {
   showToast._timer = setTimeout(() => t.classList.remove('show'), 2400);
 }
 
+function confirmModal({ title, body, confirmLabel, cancelLabel, variant } = {}) {
+  return new Promise(resolve => {
+    const backdrop = document.getElementById('confirmModalBackdrop');
+    const titleEl = document.getElementById('confirmModalTitle');
+    const bodyEl = document.getElementById('confirmModalBody');
+    const cancelBtn = document.getElementById('confirmModalCancel');
+    const confirmBtn = document.getElementById('confirmModalConfirm');
+    if (!backdrop || !titleEl || !bodyEl || !cancelBtn || !confirmBtn) {
+      resolve(false);
+      return;
+    }
+    titleEl.textContent = title || '';
+    bodyEl.textContent = body || '';
+    cancelBtn.textContent = cancelLabel || t('modal.cancel');
+    confirmBtn.textContent = confirmLabel || t('modal.confirm');
+    confirmBtn.classList.remove('modal-btn-primary', 'modal-btn-danger');
+    confirmBtn.classList.add(variant === 'danger' ? 'modal-btn-danger' : 'modal-btn-primary');
+    const prevActive = document.activeElement;
+    backdrop.classList.remove('hidden');
+    requestAnimationFrame(() => backdrop.classList.add('visible'));
+    setTimeout(() => { try { cancelBtn.focus(); } catch (e) {} }, 50);
+    function cleanup(result) {
+      backdrop.classList.remove('visible');
+      setTimeout(() => backdrop.classList.add('hidden'), 130);
+      cancelBtn.onclick = null;
+      confirmBtn.onclick = null;
+      backdrop.onclick = null;
+      document.removeEventListener('keydown', onKey, true);
+      try { if (prevActive && prevActive.focus) prevActive.focus(); } catch (e) {}
+      resolve(result);
+    }
+    function onKey(e) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        cleanup(false);
+      } else if (e.key === 'Enter') {
+        if (document.activeElement === confirmBtn) {
+          e.preventDefault();
+          cleanup(true);
+        } else if (document.activeElement === cancelBtn) {
+          e.preventDefault();
+          cleanup(false);
+        }
+      } else if (e.key === 'Tab') {
+        if (document.activeElement === cancelBtn && !e.shiftKey) {
+          e.preventDefault();
+          confirmBtn.focus();
+        } else if (document.activeElement === confirmBtn && e.shiftKey) {
+          e.preventDefault();
+          cancelBtn.focus();
+        }
+      }
+    }
+    cancelBtn.onclick = () => cleanup(false);
+    confirmBtn.onclick = () => cleanup(true);
+    backdrop.onclick = (e) => {
+      if (e.target === backdrop) cleanup(false);
+    };
+    document.addEventListener('keydown', onKey, true);
+  });
+}
+
 function showProgress(id) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -7496,8 +7706,17 @@ async function streamCompletion({ model, max_tokens, prompt, onProgress }) {
   return accumulated;
 }
 
-function clearForm(silent) {
-  if (!silent && !confirm(t('confirm.clearForm'))) return;
+async function clearForm(silent) {
+  if (!silent) {
+    const ok = await confirmModal({
+      title: t('confirm.clearForm'),
+      body: '',
+      confirmLabel: t('actions.clear'),
+      cancelLabel: t('modal.cancel'),
+      variant: 'danger',
+    });
+    if (!ok) return;
+  }
 
   const FIELD_DEFAULTS = [
     // Common
@@ -7959,7 +8178,14 @@ async function openSavedFollowup(followupId) {
 }
 
 async function deleteSavedFollowup(followupId) {
-  if (!confirm(t('followups.history.confirmDelete'))) return;
+  const ok = await confirmModal({
+    title: t('delete.confirm.followup.title'),
+    body: t('delete.confirm.body'),
+    confirmLabel: t('modal.delete'),
+    cancelLabel: t('modal.cancel'),
+    variant: 'danger',
+  });
+  if (!ok) return;
   try {
     const { error } = await sb.from('followups').delete().eq('id', followupId);
     if (error) {
@@ -8993,7 +9219,14 @@ async function updateJobStatus(jobId, newStatus) {
 
 async function deleteSavedJob(jobId) {
   if (!jobId) return;
-  if (!confirm(t('jobs.history.confirmDelete'))) return;
+  const ok = await confirmModal({
+    title: t('delete.confirm.job.title'),
+    body: t('delete.confirm.body'),
+    confirmLabel: t('modal.delete'),
+    cancelLabel: t('modal.cancel'),
+    variant: 'danger',
+  });
+  if (!ok) return;
   try {
     const { error } = await sb.from('jobs').delete().eq('id', jobId);
     if (error) {
@@ -9034,6 +9267,14 @@ async function setArchivedState(table, id, archived) {
 }
 
 async function archiveClient(id) {
+  const ok = await confirmModal({
+    title: t('archive.confirm.client.title'),
+    body: t('archive.confirm.body'),
+    confirmLabel: t('archive.button.archive'),
+    cancelLabel: t('modal.cancel'),
+    variant: 'primary',
+  });
+  if (!ok) return;
   const res = await setArchivedState('clients', id, true);
   if (!res.ok) { showToast(t('toast.archiveFailed'), true); return; }
   if (activeClientId === id) {
@@ -9058,6 +9299,14 @@ async function unarchiveClient(id) {
 }
 
 async function archiveJob(id) {
+  const ok = await confirmModal({
+    title: t('archive.confirm.job.title'),
+    body: t('archive.confirm.body'),
+    confirmLabel: t('archive.button.archive'),
+    cancelLabel: t('modal.cancel'),
+    variant: 'primary',
+  });
+  if (!ok) return;
   const res = await setArchivedState('jobs', id, true);
   if (!res.ok) { showToast(t('toast.archiveFailed'), true); return; }
   if (activeJobId === id) {
@@ -9080,6 +9329,14 @@ async function unarchiveJob(id) {
 }
 
 async function archiveQuote(id) {
+  const ok = await confirmModal({
+    title: t('archive.confirm.quote.title'),
+    body: t('archive.confirm.body'),
+    confirmLabel: t('archive.button.archive'),
+    cancelLabel: t('modal.cancel'),
+    variant: 'primary',
+  });
+  if (!ok) return;
   const res = await setArchivedState('quotes', id, true);
   if (!res.ok) { showToast(t('toast.archiveFailed'), true); return; }
   if (currentQuote && currentQuote.id === id) {
@@ -9102,6 +9359,14 @@ async function unarchiveQuote(id) {
 }
 
 async function archiveFollowup(id) {
+  const ok = await confirmModal({
+    title: t('archive.confirm.followup.title'),
+    body: t('archive.confirm.body'),
+    confirmLabel: t('archive.button.archive'),
+    cancelLabel: t('modal.cancel'),
+    variant: 'primary',
+  });
+  if (!ok) return;
   const res = await setArchivedState('followups', id, true);
   if (!res.ok) { showToast(t('toast.archiveFailed'), true); return; }
   if (currentFollowup && currentFollowup.id === id) {
@@ -9156,7 +9421,14 @@ function refreshFollowupArchiveButton() {
 
 async function deleteSavedClient(clientId) {
   if (!clientId) return;
-  if (!confirm(t('clients.confirmDelete'))) return;
+  const ok = await confirmModal({
+    title: t('delete.confirm.client.title'),
+    body: t('delete.confirm.body'),
+    confirmLabel: t('modal.delete'),
+    cancelLabel: t('modal.cancel'),
+    variant: 'danger',
+  });
+  if (!ok) return;
   try {
     const { error } = await sb.from('clients').delete().eq('id', clientId);
     if (error) {
@@ -9180,7 +9452,14 @@ async function deleteSavedClient(clientId) {
 }
 
 async function deleteSavedQuote(quoteId) {
-  if (!confirm(t('quotes.history.confirmDelete'))) return;
+  const ok = await confirmModal({
+    title: t('delete.confirm.quote.title'),
+    body: t('delete.confirm.body'),
+    confirmLabel: t('modal.delete'),
+    cancelLabel: t('modal.cancel'),
+    variant: 'danger',
+  });
+  if (!ok) return;
   try {
     const { error } = await sb.from('quotes').delete().eq('id', quoteId);
     if (error) {
