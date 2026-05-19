@@ -2059,6 +2059,9 @@
             <button class="action-btn" onclick="downloadPdf()" data-i18n="quote.downloadPdf">⬇ Download PDF</button>
             <button class="action-btn" onclick="sendQuoteEmail()" data-i18n="quote.email">✉ Email</button>
             <button class="action-btn" onclick="sendQuoteText()" data-i18n="quote.text">💬 Text</button>
+            <button class="action-btn" id="quoteCreateJobBtn" onclick="createJobFromCurrentQuote()">
+              <span id="quoteCreateJobBtnText" data-i18n="quote.createJob">🔧 Create job</span>
+            </button>
             <button class="action-btn primary" onclick="convertToInvoice()" data-i18n="quote.convertInvoice">→ Convert to invoice</button>
           </div>
         </div>
@@ -2550,67 +2553,169 @@
       </div>
 
       <div id="jobsView" class="hidden">
-        <div class="card">
-          <div class="field-row cols-2">
-            <div>
-              <div class="card-title" data-i18n="jobs.title">Jobs</div>
-            </div>
-            <div style="display:flex; justify-content:flex-end; align-items:flex-end;">
-              <button class="btn-primary" disabled data-i18n="jobs.add">+ New job</button>
+        <div class="view-header" id="jobsHeader">
+          <button id="jobsBackBtn" type="button" class="btn-ghost hidden">
+            ← <span data-i18n="jobs.backToList">Jobs</span>
+          </button>
+          <div class="view-header-spacer"></div>
+          <button id="jobsNewBtn" type="button" class="btn-primary" disabled>
+            + <span data-i18n="jobs.newButton">New Job</span>
+          </button>
+        </div>
+
+        <div id="jobsListSub">
+          <div class="card">
+            <div class="card-title" data-i18n="jobs.title">Jobs</div>
+            <div class="field">
+              <div class="timeline-pills" id="jobFilterPills">
+                <button class="active" data-filter="all" data-i18n="jobs.filter.all">All</button>
+                <button data-filter="quoted" data-i18n="jobs.filter.quoted">Quoted</button>
+                <button data-filter="in_progress" data-i18n="jobs.filter.inProgress">In Progress</button>
+                <button data-filter="complete" data-i18n="jobs.filter.complete">Complete</button>
+                <button data-filter="paid" data-i18n="jobs.filter.paid">Paid</button>
+              </div>
             </div>
           </div>
-          <div class="field">
-            <div class="timeline-pills" id="jobFilterPills">
-              <button class="active" data-filter="all" data-i18n="jobs.filter.all">All</button>
-              <button data-filter="quoted" data-i18n="jobs.filter.quoted">Quoted</button>
-              <button data-filter="in_progress" data-i18n="jobs.filter.inProgress">In Progress</button>
-              <button data-filter="complete" data-i18n="jobs.filter.complete">Complete</button>
-              <button data-filter="paid" data-i18n="jobs.filter.paid">Paid</button>
+          <div class="field-row cols-4">
+            <div class="stat-card">
+              <div class="stat-card-title" data-i18n="jobs.openQuotes">Open quotes</div>
+              <div class="stat-card-value" id="jobsStatOpenCount">0</div>
+              <div id="jobsStatOpenAmt" style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$0.00</div>
             </div>
+            <div class="stat-card">
+              <div class="stat-card-title" data-i18n="jobs.inProgress">In progress</div>
+              <div class="stat-card-value" id="jobsStatInProgressCount">0</div>
+              <div id="jobsStatInProgressAmt" style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$0.00</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-title" data-i18n="jobs.awaiting">Awaiting payment</div>
+              <div class="stat-card-value" id="jobsStatAwaitingCount">0</div>
+              <div id="jobsStatAwaitingAmt" style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$0.00</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-title" data-i18n="jobs.completed">Completed this month</div>
+              <div class="stat-card-value" id="jobsStatCompletedCount">0</div>
+              <div id="jobsStatCompletedAmt" style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$0.00</div>
+            </div>
+          </div>
+          <div class="card">
+            <div id="jobsListEmpty" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
+              <div style="font-size: 48px; margin-bottom: 12px;">🧰</div>
+              <p id="jobsEmptyMessage" style="margin-bottom: 0;" data-i18n="jobs.empty">
+                No jobs yet. Generate a quote and it will appear here automatically.
+              </p>
+            </div>
+            <table class="line-table" id="jobsListTable">
+              <thead>
+                <tr>
+                  <th data-i18n="jobs.col.job">Job</th>
+                  <th data-i18n="jobs.col.client">Client</th>
+                  <th data-i18n="jobs.col.trade">Trade</th>
+                  <th data-i18n="jobs.col.quote">Quote</th>
+                  <th data-i18n="jobs.col.status">Status</th>
+                  <th data-i18n="jobs.col.date">Date</th>
+                </tr>
+              </thead>
+              <tbody id="jobsTableBody"></tbody>
+            </table>
           </div>
         </div>
-        <div class="field-row cols-4">
-          <div class="stat-card">
-            <div class="stat-card-title" data-i18n="jobs.openQuotes">Open quotes</div>
-            <div class="stat-card-value" id="jobsStatOpenCount">0</div>
-            <div id="jobsStatOpenAmt" style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$0.00</div>
+
+        <div id="jobsDetailSub" class="hidden">
+          <div class="card">
+            <div class="card-title">
+              <span id="jobDetailHeaderTitle">—</span>
+            </div>
+            <div class="card-sub" data-i18n="jobDetail.sub">
+              Update info, status, and related work. Changes save automatically.
+            </div>
+
+            <div class="field">
+              <label class="label" data-i18n="jobDetail.description">Description</label>
+              <textarea class="textarea" id="jobDetailDescription"></textarea>
+            </div>
+
+            <div class="field-row cols-3">
+              <div>
+                <label class="label" data-i18n="jobDetail.trade">Trade</label>
+                <select class="select" id="jobDetailTrade"></select>
+              </div>
+              <div>
+                <label class="label" data-i18n="jobDetail.amount">Amount ($)</label>
+                <input type="number" class="input" id="jobDetailAmount" min="0" step="0.01" />
+              </div>
+              <div>
+                <label class="label" data-i18n="jobDetail.status">Status</label>
+                <select class="select" id="jobDetailStatus">
+                  <option value="quoted" data-i18n="status.Quoted">Quoted</option>
+                  <option value="in_progress" data-i18n="status.In Progress">In Progress</option>
+                  <option value="complete" data-i18n="status.Complete">Complete</option>
+                  <option value="paid" data-i18n="status.Paid">Paid</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label" data-i18n="jobDetail.notes">Notes</label>
+              <textarea class="textarea" id="jobDetailNotes"
+                        data-i18n-placeholder="jobDetail.notesPlaceholder"
+                        placeholder="Anything to remember about this job..."></textarea>
+            </div>
+
+            <div class="field" style="margin-top: 20px; display: flex; justify-content: flex-end;">
+              <button id="jobDetailSaveBtn" type="button" class="btn-primary">
+                💾 <span data-i18n="jobDetail.save">Save</span>
+              </button>
+            </div>
           </div>
-          <div class="stat-card">
-            <div class="stat-card-title" data-i18n="jobs.inProgress">In progress</div>
-            <div class="stat-card-value" id="jobsStatInProgressCount">0</div>
-            <div id="jobsStatInProgressAmt" style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$0.00</div>
+
+          <div class="card">
+            <div class="card-title" data-i18n="jobDetail.clientTitle">Client</div>
+            <div id="jobDetailClientEmpty" class="hidden"
+                 style="text-align: center; padding: 24px; color: var(--ink-3);">
+              <span data-i18n="jobDetail.noClient">(no client)</span>
+            </div>
+            <table class="line-table" id="jobDetailClientTable">
+              <tbody id="jobDetailClientBody"></tbody>
+            </table>
           </div>
-          <div class="stat-card">
-            <div class="stat-card-title" data-i18n="jobs.awaiting">Awaiting payment</div>
-            <div class="stat-card-value" id="jobsStatAwaitingCount">0</div>
-            <div id="jobsStatAwaitingAmt" style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$0.00</div>
+
+          <div class="card">
+            <div class="card-title" data-i18n="jobDetail.quotesTitle">Quotes for this job</div>
+            <div id="jobDetailQuotesEmpty" class="hidden"
+                 style="text-align: center; padding: 24px; color: var(--ink-3);">
+              <span data-i18n="jobDetail.noQuotes">No quotes attached to this job yet.</span>
+            </div>
+            <table class="line-table" id="jobDetailQuotesTable">
+              <thead>
+                <tr>
+                  <th data-i18n="quotes.history.col.trades">Trades</th>
+                  <th class="amt-col" data-i18n="quotes.history.col.total">Total</th>
+                  <th data-i18n="quotes.history.col.status">Status</th>
+                  <th data-i18n="quotes.history.col.date">Date</th>
+                </tr>
+              </thead>
+              <tbody id="jobDetailQuotesBody"></tbody>
+            </table>
           </div>
-          <div class="stat-card">
-            <div class="stat-card-title" data-i18n="jobs.completed">Completed this month</div>
-            <div class="stat-card-value" id="jobsStatCompletedCount">0</div>
-            <div id="jobsStatCompletedAmt" style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$0.00</div>
+
+          <div class="card">
+            <div class="card-title" data-i18n="jobDetail.followupsTitle">Follow-ups for this job</div>
+            <div id="jobDetailFollowupsEmpty" class="hidden"
+                 style="text-align: center; padding: 24px; color: var(--ink-3);">
+              <span data-i18n="jobDetail.noFollowups">No follow-ups attached to this job yet.</span>
+            </div>
+            <table class="line-table" id="jobDetailFollowupsTable">
+              <thead>
+                <tr>
+                  <th data-i18n="clientDetail.followups.col.scenario">Scenario</th>
+                  <th data-i18n="clientDetail.followups.col.channel">Channel</th>
+                  <th data-i18n="clientDetail.followups.col.date">Date</th>
+                </tr>
+              </thead>
+              <tbody id="jobDetailFollowupsBody"></tbody>
+            </table>
           </div>
-        </div>
-        <div class="card">
-          <div id="jobsListEmpty" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
-            <div style="font-size: 48px; margin-bottom: 12px;">🧰</div>
-            <p id="jobsEmptyMessage" style="margin-bottom: 0;" data-i18n="jobs.empty">
-              No jobs yet. Generate a quote and it will appear here automatically.
-            </p>
-          </div>
-          <table class="line-table" id="jobsListTable">
-            <thead>
-              <tr>
-                <th data-i18n="jobs.col.job">Job</th>
-                <th data-i18n="jobs.col.client">Client</th>
-                <th data-i18n="jobs.col.trade">Trade</th>
-                <th data-i18n="jobs.col.quote">Quote</th>
-                <th data-i18n="jobs.col.status">Status</th>
-                <th data-i18n="jobs.col.date">Date</th>
-              </tr>
-            </thead>
-            <tbody id="jobsTableBody"></tbody>
-          </table>
         </div>
       </div>
 
@@ -3068,6 +3173,29 @@ const I18N = {
     'jobs.col.date': 'Date',
     'jobs.empty': 'No jobs yet. Generate a quote and it will appear here automatically.',
     'jobs.emptyFilter': 'No jobs match this filter.',
+    'jobs.backToList': 'Jobs',
+    'jobs.newButton': 'New Job',
+    'jobDetail.sub': 'Update info, status, and related work. Changes save automatically.',
+    'jobDetail.description': 'Description',
+    'jobDetail.trade': 'Trade',
+    'jobDetail.amount': 'Amount ($)',
+    'jobDetail.status': 'Status',
+    'jobDetail.notes': 'Notes',
+    'jobDetail.notesPlaceholder': 'Anything to remember about this job...',
+    'jobDetail.save': 'Save',
+    'jobDetail.clientTitle': 'Client',
+    'jobDetail.noClient': '(no client)',
+    'jobDetail.quotesTitle': 'Quotes for this job',
+    'jobDetail.noQuotes': 'No quotes attached to this job yet.',
+    'jobDetail.followupsTitle': 'Follow-ups for this job',
+    'jobDetail.noFollowups': 'No follow-ups attached to this job yet.',
+    'quote.createJob': '🔧 Create job',
+    'quote.viewJob': '→ View job',
+    'toast.jobLoadFailed': 'Could not load job',
+    'toast.jobSaveFailed': 'Could not save job changes',
+    'toast.jobSaved': 'Job saved',
+    'toast.jobCreatedFromQuote': 'Job created',
+    'toast.jobCreateFailed': 'Could not create job',
     // Payments
     'payments.title': 'Payments',
     'payments.range': 'Last 30 days ▼',
@@ -3543,6 +3671,29 @@ const I18N = {
     'jobs.col.date': 'Fecha',
     'jobs.empty': 'Aún no hay trabajos. Genera una cotización y aparecerá aquí automáticamente.',
     'jobs.emptyFilter': 'Ningún trabajo coincide con este filtro.',
+    'jobs.backToList': 'Trabajos',
+    'jobs.newButton': 'Nuevo trabajo',
+    'jobDetail.sub': 'Actualiza datos, estado y trabajos relacionados. Los cambios se guardan automáticamente.',
+    'jobDetail.description': 'Descripción',
+    'jobDetail.trade': 'Oficio',
+    'jobDetail.amount': 'Monto ($)',
+    'jobDetail.status': 'Estado',
+    'jobDetail.notes': 'Notas',
+    'jobDetail.notesPlaceholder': 'Algo para recordar sobre este trabajo...',
+    'jobDetail.save': 'Guardar',
+    'jobDetail.clientTitle': 'Cliente',
+    'jobDetail.noClient': '(sin cliente)',
+    'jobDetail.quotesTitle': 'Cotizaciones de este trabajo',
+    'jobDetail.noQuotes': 'Aún no hay cotizaciones para este trabajo.',
+    'jobDetail.followupsTitle': 'Seguimientos de este trabajo',
+    'jobDetail.noFollowups': 'Aún no hay seguimientos para este trabajo.',
+    'quote.createJob': '🔧 Crear trabajo',
+    'quote.viewJob': '→ Ver trabajo',
+    'toast.jobLoadFailed': 'No se pudo cargar el trabajo',
+    'toast.jobSaveFailed': 'No se pudieron guardar los cambios',
+    'toast.jobSaved': 'Trabajo guardado',
+    'toast.jobCreatedFromQuote': 'Trabajo creado',
+    'toast.jobCreateFailed': 'No se pudo crear el trabajo',
     // Payments
     'payments.title': 'Pagos',
     'payments.range': 'Últimos 30 días ▼',
@@ -3842,6 +3993,16 @@ function applyLanguage() {
     renderClientDetailJobs();
     renderClientDetailFollowups();
   }
+  if (typeof renderJobDetailTradeOptions === 'function') renderJobDetailTradeOptions();
+  if (typeof renderJobDetail === 'function'
+      && typeof jobsSubView !== 'undefined'
+      && jobsSubView === 'detail'
+      && activeJobData) {
+    renderJobDetailClient();
+    renderJobDetailQuotes();
+    renderJobDetailFollowups();
+  }
+  if (typeof refreshQuoteCreateJobButton === 'function') refreshQuoteCreateJobButton();
   // Refresh the type-dependent Name label for the active client
   if (typeof activeClientData !== 'undefined' && activeClientData
       && clientsSubView === 'detail') {
@@ -4039,10 +4200,8 @@ function renderJobsList() {
     const statusCss = statusKey.replace(/_/g, '-');
     const statusDisp = jobStatusLabel(statusKey);
     const date = formatRelativeDate(j.created_at);
-    const clickable = !!j.quote_id;
-    const dataAttr = j.quote_id ? `data-quote-id="${j.quote_id}"` : '';
     return `
-      <tr class="job-table-row" ${dataAttr} style="cursor: ${clickable ? 'pointer' : 'default'};">
+      <tr class="job-table-row" data-job-id="${j.id}" style="cursor: pointer;">
         <td>${escapeHtml(desc)}</td>
         <td>${escapeHtml(client)}</td>
         <td>${escapeHtml(tradeStr)}</td>
@@ -4052,10 +4211,9 @@ function renderJobsList() {
       </tr>
     `;
   }).join('');
-  body.querySelectorAll('.job-table-row[data-quote-id]').forEach(row => {
+  body.querySelectorAll('.job-table-row').forEach(row => {
     row.addEventListener('click', () => {
-      switchView('quotes');
-      openSavedQuote(row.dataset.quoteId);
+      openJobDetail(row.dataset.jobId);
     });
   });
 }
@@ -4069,6 +4227,320 @@ function bindJobsFilterPills() {
       renderJobsList();
     };
   });
+}
+
+function switchJobsSubView(view) {
+  const valid = ['list', 'detail'];
+  jobsSubView = valid.includes(view) ? view : 'list';
+  const list = document.getElementById('jobsListSub');
+  const detail = document.getElementById('jobsDetailSub');
+  const backBtn = document.getElementById('jobsBackBtn');
+  const newBtn = document.getElementById('jobsNewBtn');
+  if (list)   list.classList.toggle('hidden', jobsSubView !== 'list');
+  if (detail) detail.classList.toggle('hidden', jobsSubView !== 'detail');
+  if (backBtn) backBtn.classList.toggle('hidden', jobsSubView === 'list');
+  if (newBtn)  newBtn.classList.toggle('hidden', jobsSubView !== 'list');
+  if (jobsSubView === 'list') loadJobs();
+}
+
+async function openJobDetail(jobId) {
+  if (!jobId) return;
+  try {
+    if (!clientsLookupCache || clientsLookupCache.length === 0) {
+      await refreshClientsLookupCache();
+    }
+    const [jobRes, quotesRes, followupsRes] = await Promise.all([
+      sb.from('jobs').select('*').eq('id', jobId).single(),
+      sb.from('quotes')
+        .select('id, total, trades, status, created_at')
+        .eq('job_id', jobId)
+        .order('created_at', { ascending: false }),
+      sb.from('followups')
+        .select('id, scenario, channel, created_at')
+        .eq('job_id', jobId)
+        .order('created_at', { ascending: false }),
+    ]);
+    if (jobRes.error || !jobRes.data) {
+      showToast(t('toast.jobLoadFailed'), true);
+      return;
+    }
+    activeJobId = jobId;
+    activeJobData = jobRes.data;
+    jobDetailQuotesCache = quotesRes.data || [];
+    jobDetailFollowupsCache = followupsRes.data || [];
+    renderJobDetail();
+    switchJobsSubView('detail');
+  } catch (e) {
+    console.warn('openJobDetail threw:', e);
+    showToast(t('toast.jobLoadFailed'), true);
+  }
+}
+
+function renderJobDetailTradeOptions() {
+  const sel = document.getElementById('jobDetailTrade');
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = '<option value="">—</option>' +
+    TRADES.map(td => `<option value="${td.name}">${td.emoji} ${tradeDisplay(td.name)}</option>`).join('');
+  if (current) sel.value = current;
+}
+
+function renderJobDetail() {
+  if (!activeJobData) return;
+  renderJobDetailTradeOptions();
+  const j = activeJobData;
+  document.getElementById('jobDetailHeaderTitle').textContent = j.description || '—';
+  document.getElementById('jobDetailDescription').value = j.description || '';
+  document.getElementById('jobDetailTrade').value = j.trade || '';
+  document.getElementById('jobDetailAmount').value = (j.amount != null) ? j.amount : '';
+  document.getElementById('jobDetailStatus').value = j.status || 'quoted';
+  document.getElementById('jobDetailNotes').value = j.notes || '';
+  renderJobDetailClient();
+  renderJobDetailQuotes();
+  renderJobDetailFollowups();
+}
+
+function renderJobDetailClient() {
+  const body = document.getElementById('jobDetailClientBody');
+  const table = document.getElementById('jobDetailClientTable');
+  const empty = document.getElementById('jobDetailClientEmpty');
+  if (!body) return;
+  const clientId = activeJobData && activeJobData.client_id;
+  const client = clientId ? clientsLookupCache.find(c => c.id === clientId) : null;
+  if (!client) {
+    body.innerHTML = '';
+    table.classList.add('hidden');
+    empty.classList.remove('hidden');
+    return;
+  }
+  table.classList.remove('hidden');
+  empty.classList.add('hidden');
+  const icon = client.type === 'company' ? t('clients.iconCompany') : t('clients.iconPerson');
+  body.innerHTML = `
+    <tr class="job-detail-client-row" data-client-id="${client.id}" style="cursor: pointer;">
+      <td style="font-size: 22px; text-align: center; width: 40px;">${icon}</td>
+      <td><strong>${escapeHtml(client.name || '—')}</strong></td>
+      <td style="text-align: right; color: var(--ink-3); width: 40px;">→</td>
+    </tr>
+  `;
+  const row = body.querySelector('.job-detail-client-row');
+  if (row) row.addEventListener('click', () => {
+    clearTimeout(jobsSaveTimer);
+    if (activeJobId) saveJobEdits().catch(e => console.warn('flush save:', e));
+    switchView('clients');
+    openClientDetail(client.id);
+  });
+}
+
+function renderJobDetailQuotes() {
+  const tbody = document.getElementById('jobDetailQuotesBody');
+  const table = document.getElementById('jobDetailQuotesTable');
+  const empty = document.getElementById('jobDetailQuotesEmpty');
+  if (!tbody) return;
+  const quotes = jobDetailQuotesCache || [];
+  if (!quotes.length) {
+    tbody.innerHTML = '';
+    table.classList.add('hidden');
+    empty.classList.remove('hidden');
+    return;
+  }
+  table.classList.remove('hidden');
+  empty.classList.add('hidden');
+  tbody.innerHTML = quotes.map(q => {
+    const trades = (q.trades || []).map(name => {
+      const tr = TRADES.find(td => td.name === name);
+      return tr ? `${tr.emoji} ${tradeDisplay(name)}` : tradeDisplay(name);
+    }).join(', ');
+    const statusKey = q.status || 'draft';
+    const statusDisp = (I18N[tdLang] && I18N[tdLang]['status.' + capitalizeFirst(statusKey)]) || statusKey;
+    return `
+      <tr class="job-detail-quote-row" data-quote-id="${q.id}" style="cursor: pointer;">
+        <td>${escapeHtml(trades) || '—'}</td>
+        <td class="amt-col">${fmt(parseFloat(q.total) || 0)}</td>
+        <td><span class="status-pill status-${statusKey}">${escapeHtml(statusDisp)}</span></td>
+        <td>${formatRelativeDate(q.created_at)}</td>
+      </tr>
+    `;
+  }).join('');
+  tbody.querySelectorAll('.job-detail-quote-row').forEach(row => {
+    row.addEventListener('click', () => {
+      clearTimeout(jobsSaveTimer);
+      if (activeJobId) saveJobEdits().catch(e => console.warn('flush save:', e));
+      switchView('quotes');
+      openSavedQuote(row.dataset.quoteId);
+    });
+  });
+}
+
+function renderJobDetailFollowups() {
+  const tbody = document.getElementById('jobDetailFollowupsBody');
+  const table = document.getElementById('jobDetailFollowupsTable');
+  const empty = document.getElementById('jobDetailFollowupsEmpty');
+  if (!tbody) return;
+  const followups = jobDetailFollowupsCache || [];
+  if (!followups.length) {
+    tbody.innerHTML = '';
+    table.classList.add('hidden');
+    empty.classList.remove('hidden');
+    return;
+  }
+  table.classList.remove('hidden');
+  empty.classList.add('hidden');
+  tbody.innerHTML = followups.map(f => {
+    const scenario = f.scenario || '—';
+    const channel = f.channel === 'text' ? t('followup.channels.text') : t('followup.channels.email');
+    return `
+      <tr class="job-detail-followup-row" data-followup-id="${f.id}" style="cursor: pointer;">
+        <td>${escapeHtml(scenario)}</td>
+        <td>${escapeHtml(channel)}</td>
+        <td>${formatRelativeDate(f.created_at)}</td>
+      </tr>
+    `;
+  }).join('');
+  tbody.querySelectorAll('.job-detail-followup-row').forEach(row => {
+    row.addEventListener('click', () => {
+      clearTimeout(jobsSaveTimer);
+      if (activeJobId) saveJobEdits().catch(e => console.warn('flush save:', e));
+      switchView('followups');
+      openSavedFollowup(row.dataset.followupId);
+    });
+  });
+}
+
+function scheduleJobSave() {
+  if (!activeJobId) return;
+  clearTimeout(jobsSaveTimer);
+  jobsSaveTimer = setTimeout(saveJobEdits, 1500);
+}
+
+async function saveJobEdits() {
+  if (!activeJobId) return null;
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.access_token) return null;
+  try {
+    const desc = document.getElementById('jobDetailDescription').value.trim();
+    const trade = document.getElementById('jobDetailTrade').value;
+    const amountRaw = parseFloat(document.getElementById('jobDetailAmount').value);
+    const status = document.getElementById('jobDetailStatus').value;
+    const notes = document.getElementById('jobDetailNotes').value.trim();
+    const { data, error } = await sb
+      .from('jobs')
+      .update({
+        description: desc || null,
+        trade: trade || null,
+        amount: isFinite(amountRaw) ? amountRaw : 0,
+        status: status || 'quoted',
+        notes: notes || null,
+      })
+      .eq('id', activeJobId)
+      .select('*')
+      .single();
+    if (error) {
+      console.warn('saveJobEdits failed:', error);
+      showToast(t('toast.jobSaveFailed'), true);
+      return null;
+    }
+    if (data) {
+      activeJobData = data;
+      document.getElementById('jobDetailHeaderTitle').textContent = data.description || '—';
+      return data;
+    }
+    return null;
+  } catch (e) {
+    console.warn('saveJobEdits threw:', e);
+    return null;
+  }
+}
+
+async function clickJobDetailSave() {
+  clearTimeout(jobsSaveTimer);
+  const btn = document.getElementById('jobDetailSaveBtn');
+  if (btn) btn.disabled = true;
+  try {
+    const result = await saveJobEdits();
+    if (result) showToast(t('toast.jobSaved'));
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+function refreshQuoteCreateJobButton() {
+  const btn = document.getElementById('quoteCreateJobBtn');
+  if (!btn) return;
+  const hide = !!(currentQuote && currentQuote.job_id);
+  btn.classList.toggle('hidden', hide);
+}
+
+async function createJobFromCurrentQuote() {
+  if (!currentQuote || !currentQuote.id) return;
+  if (currentQuote.job_id) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.access_token) return;
+
+  const btn = document.getElementById('quoteCreateJobBtn');
+  if (btn) btn.disabled = true;
+  try {
+    const userId = session.user.id;
+    const { data: quoteRow, error: qErr } = await sb
+      .from('quotes')
+      .select('client_id, total, trades')
+      .eq('id', currentQuote.id)
+      .single();
+    if (qErr || !quoteRow) {
+      showToast(t('toast.jobCreateFailed'), true);
+      return;
+    }
+    let desc = '';
+    if (selectedTrades.length > 0) {
+      const firstName = tradeNameOf(selectedTrades[0]);
+      const state = tradePricingState[firstName];
+      if (state && state.jobDesc) {
+        desc = state.jobDesc;
+      } else if (currentQuote.scope) {
+        desc = pickLang(currentQuote.scope).slice(0, 200);
+      } else {
+        desc = firstName;
+      }
+    }
+    const trades = quoteRow.trades || [];
+    const firstTrade = trades[0] || null;
+    const amount = parseFloat(quoteRow.total) || 0;
+
+    const { data: newJob, error: jErr } = await sb
+      .from('jobs')
+      .insert({
+        user_id: userId,
+        client_id: quoteRow.client_id,
+        quote_id: currentQuote.id,
+        description: desc || null,
+        trade: firstTrade,
+        amount: amount,
+        status: 'quoted',
+      })
+      .select('id')
+      .single();
+    if (jErr || !newJob) {
+      console.warn('createJobFromCurrentQuote insert failed:', jErr);
+      showToast(t('toast.jobCreateFailed'), true);
+      return;
+    }
+    const { error: uErr } = await sb
+      .from('quotes')
+      .update({ job_id: newJob.id })
+      .eq('id', currentQuote.id);
+    if (uErr) console.warn('quote-to-job link failed:', uErr);
+
+    currentQuote.job_id = newJob.id;
+    refreshQuoteCreateJobButton();
+    showToast(t('toast.jobCreatedFromQuote'));
+    switchView('jobs');
+    openJobDetail(newJob.id);
+  } catch (e) {
+    console.warn('createJobFromCurrentQuote threw:', e);
+    showToast(t('toast.jobCreateFailed'), true);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
 
 function renderPaymentsView() {
@@ -4134,6 +4606,12 @@ let quotesSubView = 'list';        // 'list' | 'compose' | 'view'
 let savedQuotesCache = [];        // Most recent fetch from the server
 let jobsCache = [];
 let jobsFilter = 'all';
+let jobsSubView = 'list';
+let activeJobId = null;
+let activeJobData = null;
+let jobDetailQuotesCache = [];
+let jobDetailFollowupsCache = [];
+let jobsSaveTimer = null;
 let quotesSaveTimer = null;       // Debounce timer for inline edits
 let clientsSubView = 'list';      // 'list' | 'detail' — detail is built in 2-D.3
 let clientsCache = [];            // Most recent fetch from the server,
@@ -4311,6 +4789,25 @@ function init() {
   bindFollowupInputs();
   bindNav();
   bindJobsFilterPills();
+  const jobsBackBtn = document.getElementById('jobsBackBtn');
+  if (jobsBackBtn) jobsBackBtn.onclick = () => {
+    clearTimeout(jobsSaveTimer);
+    if (activeJobId) saveJobEdits().catch(e => console.warn('flush save:', e));
+    activeJobId = null;
+    activeJobData = null;
+    switchJobsSubView('list');
+  };
+  const jobDetailSaveBtn = document.getElementById('jobDetailSaveBtn');
+  if (jobDetailSaveBtn) jobDetailSaveBtn.onclick = clickJobDetailSave;
+  ['jobDetailDescription', 'jobDetailAmount', 'jobDetailNotes'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', scheduleJobSave);
+  });
+  ['jobDetailTrade', 'jobDetailStatus'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', scheduleJobSave);
+  });
+  renderJobDetailTradeOptions();
   renderPaymentsView();
   updateUsageDisplay();
   bindBilingualEditableSync();
@@ -4797,7 +5294,7 @@ function switchView(view) {
     switchFollowupsSubView('list');
   }
   if (view === 'jobs') {
-    loadJobs();
+    switchJobsSubView('list');
   }
 }
 
@@ -5750,6 +6247,7 @@ function renderQuote(data) {
 
   recalcTotals();
   refreshQuoteLangNotice();
+  refreshQuoteCreateJobButton();
 }
 
 // Pure factory: creates a <tr> for a single line item. Does NOT append.
@@ -6634,26 +7132,7 @@ async function persistGeneratedQuote() {
     if (!newQuote || !newQuote.id) return;
 
     currentQuote.id = newQuote.id;
-
-    if (clientId && trades.length > 0) {
-      const desc = trades.map(name => {
-        const state = tradePricingState[name];
-        return state && state.jobDesc ? state.jobDesc : '';
-      }).filter(Boolean).join(' / ').slice(0, 500);
-
-      const { error: jErr } = await sb
-        .from('jobs')
-        .insert({
-          user_id: userId,
-          client_id: clientId,
-          quote_id: newQuote.id,
-          description: desc || null,
-          trade: trades[0],
-          amount: isFinite(total) ? total : 0,
-          status: 'quoted',
-        });
-      if (jErr) console.warn('job insert failed:', jErr);
-    }
+    currentQuote.job_id = null;
   } catch (e) {
     console.warn('persistGeneratedQuote threw:', e);
   }
@@ -7801,6 +8280,7 @@ async function openSavedQuote(quoteId) {
 
     currentQuote = data.payload || {};
     currentQuote.id = data.id;
+    currentQuote.job_id = data.job_id || null;
 
     renderTrades();
     renderTradeTabs();
