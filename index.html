@@ -9129,7 +9129,7 @@ async function loadProfileCache() {
     const { data: { session } } = await sb.auth.getSession();
     const user = session && session.user;
     if (!user) { profileCache = null; return null; }
-    const { data, error } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
+    const { data, error } = await sb.from('profiles').select('*').eq('user_id', user.id).maybeSingle();
     if (error) { console.warn('loadProfileCache:', error); return null; }
     profileCache = data || null;
     return profileCache;
@@ -9261,7 +9261,7 @@ async function saveProfileHandler() {
     const { data: { session } } = await sb.auth.getSession();
     const user = session && session.user;
     if (!user) { showToast(t('profile.save.failed'), true); return; }
-    const { error } = await sb.from('profiles').update(payload).eq('id', user.id);
+    const { error } = await sb.from('profiles').update(payload).eq('user_id', user.id);
     if (error) {
       console.warn('saveProfile:', error);
       showToast(t('profile.save.failed'), true);
