@@ -3522,6 +3522,15 @@
             <label class="label" for="profileDefaultDeposit" data-i18n="profile.defaults.deposit">Default deposit (%)</label>
             <input type="number" class="input" id="profileDefaultDeposit" min="0" max="100" step="1" style="max-width: 160px;" />
           </div>
+          <div class="field">
+            <label class="label" for="profileDefaultWarrantyEn" data-i18n="profile.defaults.warrantyEn">Default warranty (English)</label>
+            <textarea class="textarea" id="profileDefaultWarrantyEn" maxlength="500" placeholder="e.g. 1-year workmanship warranty. Manufacturer warranty applies to materials."></textarea>
+            <small style="color: var(--ink-3); font-size: 11px; display: block; margin-top: 4px;" data-i18n="profile.defaults.warrantyHelp">Leave blank to let the AI generate a warranty appropriate for each trade.</small>
+          </div>
+          <div class="field">
+            <label class="label" for="profileDefaultWarrantyEs" data-i18n="profile.defaults.warrantyEs">Default warranty (Spanish)</label>
+            <textarea class="textarea" id="profileDefaultWarrantyEs" maxlength="500" placeholder="p.ej. Garantía de mano de obra de 1 año. Piezas y materiales con garantía del fabricante."></textarea>
+          </div>
         </div>
 
         <div class="field" style="display: flex; justify-content: flex-end; margin: 8px 0 24px;">
@@ -4186,6 +4195,9 @@ const I18N = {
     'profile.defaults.title': 'Workflow defaults',
     'profile.defaults.sub': 'Pre-filled when you create a new quote. You can still change them per quote.',
     'profile.defaults.deposit': 'Default deposit (%)',
+    'profile.defaults.warrantyEn': 'Default warranty (English)',
+    'profile.defaults.warrantyEs': 'Default warranty (Spanish)',
+    'profile.defaults.warrantyHelp': 'Leave blank to let the AI generate a warranty appropriate for each trade.',
     'profile.plan.free': 'Free',
     'profile.plan.pro': 'Pro',
     'profile.plan.freeName': 'Free plan',
@@ -4783,6 +4795,9 @@ const I18N = {
     'profile.defaults.title': 'Valores predeterminados',
     'profile.defaults.sub': 'Se completan automáticamente al crear una cotización. Puedes cambiarlos en cada cotización.',
     'profile.defaults.deposit': 'Depósito predeterminado (%)',
+    'profile.defaults.warrantyEn': 'Garantía predeterminada (Inglés)',
+    'profile.defaults.warrantyEs': 'Garantía predeterminada (Español)',
+    'profile.defaults.warrantyHelp': 'Déjalo en blanco para que la IA genere una garantía apropiada para cada oficio.',
     'profile.plan.free': 'Gratis',
     'profile.plan.pro': 'Pro',
     'profile.plan.freeName': 'Plan gratis',
@@ -7269,6 +7284,17 @@ async function generateQuote() {
         target: td.total || 0,
       };
     });
+    if (profileCache) {
+      if (typeof parsed.warranty !== 'object' || parsed.warranty === null) {
+        parsed.warranty = { en: '', es: '' };
+      }
+      if (profileCache.default_warranty_en && profileCache.default_warranty_en.trim()) {
+        parsed.warranty.en = profileCache.default_warranty_en.trim();
+      }
+      if (profileCache.default_warranty_es && profileCache.default_warranty_es.trim()) {
+        parsed.warranty.es = profileCache.default_warranty_es.trim();
+      }
+    }
     renderQuote(parsed);
 
     document.getElementById('quoteWrap').classList.add('visible');
@@ -9188,6 +9214,8 @@ async function loadProfileData() {
   setVal('profileBusinessAddress', p.business_address);
   setVal('profileLicenseNumber', p.license_number);
   setVal('profileDefaultDeposit', p.default_deposit_percent);
+  setVal('profileDefaultWarrantyEn', p.default_warranty_en);
+  setVal('profileDefaultWarrantyEs', p.default_warranty_es);
 
   // Plan + quota. The RPC returns { quotes_used }. There is no Pro plan
   // yet (Stripe is a later sprint), so isPro stays false and the limit
@@ -9255,6 +9283,8 @@ async function saveProfileHandler() {
     business_address: get('profileBusinessAddress') || null,
     license_number: get('profileLicenseNumber') || null,
     default_deposit_percent: deposit,
+    default_warranty_en: get('profileDefaultWarrantyEn') || null,
+    default_warranty_es: get('profileDefaultWarrantyEs') || null,
   };
   btn.disabled = true;
   try {
