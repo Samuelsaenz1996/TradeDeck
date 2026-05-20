@@ -1274,6 +1274,101 @@
     vertical-align: middle;
   }
 
+  /* === Profile screen === */
+  .profile-identity-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .profile-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    font-size: 24px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    text-transform: uppercase;
+  }
+  .profile-identity-info { flex: 1; min-width: 0; }
+  .profile-email {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    word-break: break-all;
+  }
+  .profile-plan-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--surface-2);
+    color: var(--ink-2);
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 6px;
+  }
+  .profile-plan-badge.pro { background: #f59e0b; color: white; }
+  .profile-plan-name { font-size: 14px; color: var(--ink-2); margin-bottom: 12px; }
+  .profile-progress-bar {
+    height: 8px;
+    background: var(--surface-2);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .profile-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.3s;
+    border-radius: 4px;
+    width: 0%;
+  }
+  .profile-progress-fill.warning { background: #f59e0b; }
+  .profile-progress-fill.full { background: #ef4444; }
+  .profile-progress-text { font-size: 13px; color: var(--ink-2); }
+  .profile-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .profile-stat {
+    background: var(--surface-2);
+    border-radius: 8px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .profile-stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+  .profile-stat-label {
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-top: 4px;
+  }
+  .profile-account-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .profile-account-row:last-child { border-bottom: none; }
+  .profile-account-row span:first-child { color: var(--ink-3); }
+  .profile-account-row span:last-child {
+    color: var(--ink);
+    font-weight: 500;
+    text-align: right;
+  }
+
   /* === Desktop list tables: contain to card width. Mobile breakpoint
          rules override these with !important for the phone viewport. === */
   #clientsListTable,
@@ -1690,6 +1785,11 @@
       padding: 6px 2px;
     }
 
+    /* Profile: tighter stats grid + smaller avatar on phones */
+    .profile-stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .profile-stat-value { font-size: 20px; }
+    .profile-avatar { width: 48px; height: 48px; font-size: 20px; }
+
     /* Quote + follow-up action bars: the buttons live in the nested
        .right flex group, which doesn't wrap on its own. Let it wrap to
        multiple rows and tighten the buttons so 6 fit the viewport.
@@ -1767,7 +1867,7 @@
     </div>
 
     <div class="nav-section" data-i18n="nav.account">Account</div>
-    <div class="nav-item">
+    <div id="navProfile" class="nav-item">
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       <span data-i18n="nav.profile">Profile</span>
     </div>
@@ -3366,6 +3466,117 @@
         </div>
       </div>
 
+      <div id="profileView" class="hidden">
+        <div class="view-header">
+          <h1 data-i18n="profile.title">Profile</h1>
+        </div>
+
+        <div class="card profile-identity-card">
+          <div class="profile-avatar" id="profileAvatar">?</div>
+          <div class="profile-identity-info">
+            <div class="profile-email" id="profileEmail">—</div>
+            <div class="profile-plan-badge" id="profilePlanBadge" data-i18n="profile.plan.free">Free</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" data-i18n="profile.personal.title">Personal info</div>
+          <div class="card-sub" data-i18n="profile.personal.sub">Your name and contact info.</div>
+          <div class="field-row cols-2">
+            <div class="field">
+              <label class="label" for="profileFirstName" data-i18n="profile.personal.firstName">First name</label>
+              <input type="text" class="input" id="profileFirstName" maxlength="60" autocomplete="given-name" />
+            </div>
+            <div class="field">
+              <label class="label" for="profileLastName" data-i18n="profile.personal.lastName">Last name</label>
+              <input type="text" class="input" id="profileLastName" maxlength="60" autocomplete="family-name" />
+            </div>
+          </div>
+          <div class="field">
+            <label class="label" for="profilePhone" data-i18n="profile.personal.phone">Phone</label>
+            <input type="tel" class="input" id="profilePhone" maxlength="40" autocomplete="tel" />
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" data-i18n="profile.business.title">Business</div>
+          <div class="card-sub" data-i18n="profile.business.sub">Appears on the quotes you send to customers.</div>
+          <div class="field">
+            <label class="label" for="profileCompanyName" data-i18n="profile.business.companyName">Company name</label>
+            <input type="text" class="input" id="profileCompanyName" maxlength="120" autocomplete="organization" />
+          </div>
+          <div class="field">
+            <label class="label" for="profileBusinessAddress" data-i18n="profile.business.address">Business address</label>
+            <input type="text" class="input" id="profileBusinessAddress" maxlength="250" autocomplete="street-address" />
+          </div>
+          <div class="field">
+            <label class="label" for="profileLicenseNumber" data-i18n="profile.business.license">License number (optional)</label>
+            <input type="text" class="input" id="profileLicenseNumber" maxlength="60" />
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" data-i18n="profile.defaults.title">Workflow defaults</div>
+          <div class="card-sub" data-i18n="profile.defaults.sub">Pre-filled when you create a new quote. You can still change them per quote.</div>
+          <div class="field">
+            <label class="label" for="profileDefaultDeposit" data-i18n="profile.defaults.deposit">Default deposit (%)</label>
+            <input type="number" class="input" id="profileDefaultDeposit" min="0" max="100" step="1" style="max-width: 160px;" />
+          </div>
+        </div>
+
+        <div class="field" style="display: flex; justify-content: flex-end; margin: 8px 0 24px;">
+          <button id="profileSaveBtn" type="button" class="btn-primary">
+            💾 <span data-i18n="profile.save">Save profile</span>
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-title" data-i18n="profile.usage.title">Plan & Usage</div>
+          <div class="profile-plan-name" id="profilePlanName">—</div>
+          <div class="profile-progress">
+            <div class="profile-progress-bar"><div class="profile-progress-fill" id="profileProgressFill"></div></div>
+            <div class="profile-progress-text" id="profileProgressText">—</div>
+          </div>
+          <button id="profileUpgradeBtn" type="button" class="btn-primary hidden" style="margin-top: 12px;">
+            ⭐ <span data-i18n="profile.usage.upgrade">Upgrade to Pro</span>
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-title" data-i18n="profile.stats.title">Activity</div>
+          <div class="profile-stats-grid">
+            <div class="profile-stat">
+              <div class="profile-stat-value" id="profileStatClients">0</div>
+              <div class="profile-stat-label" data-i18n="profile.stats.clients">Clients</div>
+            </div>
+            <div class="profile-stat">
+              <div class="profile-stat-value" id="profileStatJobs">0</div>
+              <div class="profile-stat-label" data-i18n="profile.stats.jobs">Jobs</div>
+            </div>
+            <div class="profile-stat">
+              <div class="profile-stat-value" id="profileStatQuotes">0</div>
+              <div class="profile-stat-label" data-i18n="profile.stats.quotes">Quotes</div>
+            </div>
+            <div class="profile-stat">
+              <div class="profile-stat-value" id="profileStatFollowups">0</div>
+              <div class="profile-stat-label" data-i18n="profile.stats.followups">Follow-ups</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" data-i18n="profile.account.title">Account</div>
+          <div class="profile-account-row">
+            <span data-i18n="profile.account.email">Email</span>
+            <span id="profileAccountEmail">—</span>
+          </div>
+          <div class="profile-account-row">
+            <span data-i18n="profile.account.memberSince">Member since</span>
+            <span id="profileMemberSince">—</span>
+          </div>
+        </div>
+      </div>
+
     </div>
   </main>
 </div>
@@ -3956,6 +4167,41 @@ const I18N = {
     'toast.bulkUnarchiveFailed': 'Could not unarchive selection',
     'toast.bulkDeleteFailed': 'Could not delete selection',
     'toast.deleted': 'Deleted',
+    // Profile
+    'profile.title': 'Profile',
+    'profile.save': 'Save profile',
+    'profile.save.saved': 'Profile saved',
+    'profile.save.failed': 'Could not save profile',
+    'profile.save.depositInvalid': 'Deposit must be between 0 and 100',
+    'profile.personal.title': 'Personal info',
+    'profile.personal.sub': 'Your name and contact info.',
+    'profile.personal.firstName': 'First name',
+    'profile.personal.lastName': 'Last name',
+    'profile.personal.phone': 'Phone',
+    'profile.business.title': 'Business',
+    'profile.business.sub': 'Appears on the quotes you send to customers.',
+    'profile.business.companyName': 'Company name',
+    'profile.business.address': 'Business address',
+    'profile.business.license': 'License number (optional)',
+    'profile.defaults.title': 'Workflow defaults',
+    'profile.defaults.sub': 'Pre-filled when you create a new quote. You can still change them per quote.',
+    'profile.defaults.deposit': 'Default deposit (%)',
+    'profile.plan.free': 'Free',
+    'profile.plan.pro': 'Pro',
+    'profile.plan.freeName': 'Free plan',
+    'profile.plan.proName': 'Pro plan',
+    'profile.usage.title': 'Plan & Usage',
+    'profile.usage.quotaLine': '{used} of {limit} quotes used this month',
+    'profile.usage.unlimited': 'Unlimited quotes this month',
+    'profile.usage.upgrade': 'Upgrade to Pro',
+    'profile.stats.title': 'Activity',
+    'profile.stats.clients': 'Clients',
+    'profile.stats.jobs': 'Jobs',
+    'profile.stats.quotes': 'Quotes',
+    'profile.stats.followups': 'Follow-ups',
+    'profile.account.title': 'Account',
+    'profile.account.email': 'Email',
+    'profile.account.memberSince': 'Member since',
   },
   es: {
     // Sidebar
@@ -4518,6 +4764,41 @@ const I18N = {
     'toast.bulkUnarchiveFailed': 'No se pudo desarchivar la selección',
     'toast.bulkDeleteFailed': 'No se pudo eliminar la selección',
     'toast.deleted': 'Eliminado',
+    // Profile
+    'profile.title': 'Perfil',
+    'profile.save': 'Guardar perfil',
+    'profile.save.saved': 'Perfil guardado',
+    'profile.save.failed': 'No se pudo guardar el perfil',
+    'profile.save.depositInvalid': 'El depósito debe estar entre 0 y 100',
+    'profile.personal.title': 'Información personal',
+    'profile.personal.sub': 'Tu nombre e información de contacto.',
+    'profile.personal.firstName': 'Nombre',
+    'profile.personal.lastName': 'Apellido',
+    'profile.personal.phone': 'Teléfono',
+    'profile.business.title': 'Negocio',
+    'profile.business.sub': 'Aparece en las cotizaciones que envías a tus clientes.',
+    'profile.business.companyName': 'Nombre de la empresa',
+    'profile.business.address': 'Dirección del negocio',
+    'profile.business.license': 'Número de licencia (opcional)',
+    'profile.defaults.title': 'Valores predeterminados',
+    'profile.defaults.sub': 'Se completan automáticamente al crear una cotización. Puedes cambiarlos en cada cotización.',
+    'profile.defaults.deposit': 'Depósito predeterminado (%)',
+    'profile.plan.free': 'Gratis',
+    'profile.plan.pro': 'Pro',
+    'profile.plan.freeName': 'Plan gratis',
+    'profile.plan.proName': 'Plan Pro',
+    'profile.usage.title': 'Plan y uso',
+    'profile.usage.quotaLine': '{used} de {limit} cotizaciones usadas este mes',
+    'profile.usage.unlimited': 'Cotizaciones ilimitadas este mes',
+    'profile.usage.upgrade': 'Mejorar a Pro',
+    'profile.stats.title': 'Actividad',
+    'profile.stats.clients': 'Clientes',
+    'profile.stats.jobs': 'Trabajos',
+    'profile.stats.quotes': 'Cotizaciones',
+    'profile.stats.followups': 'Seguimientos',
+    'profile.account.title': 'Cuenta',
+    'profile.account.email': 'Correo',
+    'profile.account.memberSince': 'Miembro desde',
   },
 };
 
@@ -4669,6 +4950,11 @@ function applyLanguage() {
   if (typeof renderFollowupTrades === 'function') renderFollowupTrades();
   if (typeof renderJobsView === 'function') renderJobsView();
   if (typeof renderPaymentsView === 'function') renderPaymentsView();
+  // Re-render the Profile screen's dynamic text (plan name, quota line,
+  // member-since) in the new language — only when it's the active view.
+  if (typeof loadProfileData === 'function' && typeof currentView !== 'undefined' && currentView === 'profile') {
+    loadProfileData();
+  }
   // Update topbar to current view
   if (typeof refreshTopbarForCurrentView === 'function') refreshTopbarForCurrentView();
   // Logistics qty label: re-trigger labelling logic since current map keys use t()
@@ -5565,6 +5851,7 @@ let viewingArchivedClients = false;
 let viewingArchivedJobs = false;
 let viewingArchivedQuotes = false;
 let viewingArchivedFollowups = false;
+let profileCache = null;
 
 // Bulk-selection controller. One config entry per list entity; the
 // generic bulk helpers read everything they need from here, so adding
@@ -5851,6 +6138,15 @@ function init() {
   // Upgrade button (was inline onclick previously — moved out so we can localize the alert)
   const upgradeBtn = document.getElementById('upgradeBtn');
   if (upgradeBtn) upgradeBtn.onclick = () => alert(t('sidebar.upgradeAlert'));
+  // Profile save button + the Profile card's Upgrade button (reuse sidebar
+  // upgrade behavior until the Stripe sprint replaces it)
+  const profileSaveBtn = document.getElementById('profileSaveBtn');
+  if (profileSaveBtn) profileSaveBtn.onclick = saveProfileHandler;
+  const profileUpgradeBtn = document.getElementById('profileUpgradeBtn');
+  if (profileUpgradeBtn) profileUpgradeBtn.onclick = () => alert(t('sidebar.upgradeAlert'));
+  // Populate the profile cache on boot (fire-and-forget; powers the
+  // new-quote deposit pre-fill + contractor info on rendered quotes)
+  loadProfileCache().catch(e => console.warn('initial profile load:', e));
   // Bind quotes header buttons
   const quotesNewBtn = document.getElementById('quotesNewBtn');
   if (quotesNewBtn) quotesNewBtn.onclick = enterComposeMode;
@@ -6348,6 +6644,7 @@ function bindNav() {
   document.getElementById('navClients').onclick = () => { switchView('clients'); closeDrawer(); };
   document.getElementById('navJobs').onclick = () => { switchView('jobs'); closeDrawer(); };
   document.getElementById('navPayments').onclick = () => { switchView('payments'); closeDrawer(); };
+  document.getElementById('navProfile').onclick = () => { switchView('profile'); closeDrawer(); };
   bindDrawer();
 }
 
@@ -6393,6 +6690,7 @@ const VIEW_TOPBAR = {
   clients:   { titleHtml: 'topbar.clients',         meta: 'topbar.previewOnly' },
   jobs:      { titleHtml: 'topbar.jobs',            meta: 'topbar.previewOnly' },
   payments:  { titleHtml: 'topbar.payments',        meta: 'topbar.previewOnly' },
+  profile:   { titleHtml: 'profile.title',          meta: '' },
 };
 
 function refreshTopbarForCurrentView() {
@@ -6414,8 +6712,9 @@ function switchView(view) {
   document.getElementById('clientsView').classList.toggle('hidden', view !== 'clients');
   document.getElementById('jobsView').classList.toggle('hidden', view !== 'jobs');
   document.getElementById('paymentsView').classList.toggle('hidden', view !== 'payments');
+  document.getElementById('profileView').classList.toggle('hidden', view !== 'profile');
 
-  ['navQuotes', 'navFollowups', 'navClients', 'navJobs', 'navPayments'].forEach(id => {
+  ['navQuotes', 'navFollowups', 'navClients', 'navJobs', 'navPayments', 'navProfile'].forEach(id => {
     document.getElementById(id).classList.toggle('active', id === `nav${view.charAt(0).toUpperCase()}${view.slice(1)}`);
   });
 
@@ -6432,6 +6731,9 @@ function switchView(view) {
   }
   if (view === 'jobs') {
     switchJobsSubView('list');
+  }
+  if (view === 'profile') {
+    loadProfileData();
   }
 }
 
@@ -7326,6 +7628,29 @@ function localeForDate() {
   return tdLang === 'es' ? 'es-MX' : 'en-US';
 }
 
+// Populate the contractor identity on the rendered quote from the
+// profile. Reuses the EXISTING editable .quote-company-name / .quote-company-tag
+// fields rather than adding a duplicate block. Only overrides when the
+// profile actually has a value, so users without a profile keep the
+// editable placeholder defaults. Address + license share the tag line.
+function applyProfileToQuoteHeader() {
+  const p = profileCache || {};
+  const nameEl = document.querySelector('.quote-company-name');
+  const tagEl = document.querySelector('.quote-company-tag');
+  if (nameEl && p.company_name) {
+    nameEl.textContent = p.company_name;
+  }
+  if (tagEl) {
+    const bits = [];
+    if (p.business_address) bits.push(p.business_address);
+    if (p.license_number) {
+      const lbl = t('profile.business.license').replace(/\s*\((optional|opcional)\)/i, '');
+      bits.push(`${lbl}: ${p.license_number}`);
+    }
+    if (bits.length) tagEl.textContent = bits.join(' · ');
+  }
+}
+
 function renderQuote(data) {
   // Hold onto the bilingual payload so language toggles can re-render in place
   // and so per-language edits (blur handlers below) have somewhere to write back.
@@ -7347,6 +7672,7 @@ function renderQuote(data) {
   clientAddrEl.removeAttribute('data-i18n');
   clientNameEl.textContent = clientName;
   clientAddrEl.textContent = clientAddr;
+  applyProfileToQuoteHeader();
   document.getElementById('quoteTradeMeta').innerHTML = `<strong>${selectedTradeDisplay()}</strong><br/>${timelineLabel(timeline)}`;
   document.getElementById('quoteScope').textContent = pickLang(data.scope);
   // If AI returned legacy string-shaped paymentTerms, wrap it as a literal
@@ -8131,6 +8457,13 @@ async function clearForm(silent) {
     if (!ok) return;
   }
 
+  // New quotes pre-fill the deposit from the profile default (still
+  // editable per quote). Falls back to 50 when no profile value is set.
+  const resolvedDeposit = (profileCache && profileCache.default_deposit_percent != null
+    && isFinite(Number(profileCache.default_deposit_percent)))
+    ? Number(profileCache.default_deposit_percent)
+    : 50;
+
   const FIELD_DEFAULTS = [
     // Common
     ['jobDesc', ''], ['clientName', ''], ['clientAddr', ''],
@@ -8164,14 +8497,14 @@ async function clearForm(silent) {
     ['roofingFlatQty', '0'], ['roofingFlatUnit', 'squares'], ['roofingFlatCustomUnit', ''], ['roofingFlatMaterial', '0'], ['roofingFlatRate', '0'],
     // Rush surcharge
     ['rushSurcharge', '0'],
-    ['depositPercent', '50'],
+    ['depositPercent', String(resolvedDeposit)],
   ];
   FIELD_DEFAULTS.forEach(([id, val]) => {
     const el = document.getElementById(id);
     if (el) el.value = val;
   });
-  depositPercent = 50;
-  localStorage.setItem('tdDepositPercent', '50');
+  depositPercent = resolvedDeposit;
+  localStorage.setItem('tdDepositPercent', String(resolvedDeposit));
 
   // Timeline → Standard, hide rush surcharge field
   timeline = 'Standard';
@@ -8785,6 +9118,165 @@ function bindClientLookupForJob() {
     const match = findClientByName(nameInput.value);
     selectedClientIdForJob = match ? match.id : null;
   });
+}
+
+// Fetch the current user's profile row into profileCache. Powers the
+// Profile screen, the new-quote deposit pre-fill, and the contractor
+// identity shown on rendered quotes. Bypass users (no session) leave
+// the cache null. Fire-and-forget safe.
+async function loadProfileCache() {
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const user = session && session.user;
+    if (!user) { profileCache = null; return null; }
+    const { data, error } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
+    if (error) { console.warn('loadProfileCache:', error); return null; }
+    profileCache = data || null;
+    return profileCache;
+  } catch (e) {
+    console.warn('loadProfileCache threw:', e);
+    return null;
+  }
+}
+
+// Populate the Profile screen: identity, form fields (from profileCache),
+// plan/usage (reusing the get_quote_status RPC), activity counts, account.
+async function loadProfileData() {
+  const emailEl = document.getElementById('profileEmail');
+  const acctEmailEl = document.getElementById('profileAccountEmail');
+  const memberSinceEl = document.getElementById('profileMemberSince');
+  const avatarEl = document.getElementById('profileAvatar');
+  const planBadge = document.getElementById('profilePlanBadge');
+  const planName = document.getElementById('profilePlanName');
+  const progressFill = document.getElementById('profileProgressFill');
+  const progressText = document.getElementById('profileProgressText');
+  const upgradeBtn = document.getElementById('profileUpgradeBtn');
+
+  [emailEl, acctEmailEl, memberSinceEl, planName, progressText].forEach(el => { if (el) el.textContent = '—'; });
+  if (avatarEl) avatarEl.textContent = '?';
+  if (progressFill) { progressFill.style.width = '0%'; progressFill.classList.remove('warning', 'full'); }
+  if (upgradeBtn) upgradeBtn.classList.add('hidden');
+
+  // Auth user (session-based, consistent with the rest of the app)
+  let user = null;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    user = (session && session.user) || null;
+  } catch (e) { console.warn('profile auth:', e); }
+  if (user) {
+    const email = user.email || '—';
+    if (emailEl) emailEl.textContent = email;
+    if (acctEmailEl) acctEmailEl.textContent = email;
+    if (avatarEl) avatarEl.textContent = (email[0] || '?').toUpperCase();
+    if (user.created_at && memberSinceEl) {
+      const date = new Date(user.created_at);
+      const locale = tdLang === 'es' ? 'es-ES' : 'en-US';
+      memberSinceEl.textContent = date.toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+  } else {
+    if (emailEl) emailEl.textContent = 'Bypass mode';
+  }
+
+  // Refresh the profile cache then populate the form
+  await loadProfileCache();
+  const p = profileCache || {};
+  const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = (val == null ? '' : val); };
+  setVal('profileFirstName', p.first_name);
+  setVal('profileLastName', p.last_name);
+  setVal('profilePhone', p.phone);
+  setVal('profileCompanyName', p.company_name);
+  setVal('profileBusinessAddress', p.business_address);
+  setVal('profileLicenseNumber', p.license_number);
+  setVal('profileDefaultDeposit', p.default_deposit_percent);
+
+  // Plan + quota. The RPC returns { quotes_used }. There is no Pro plan
+  // yet (Stripe is a later sprint), so isPro stays false and the limit
+  // is the same hardcoded 5 the sidebar uses.
+  try {
+    const { data: status } = await sb.rpc('get_quote_status');
+    const isPro = !!(status && (status.unlimited || status.plan === 'pro' || status.plan === 'Pro'));
+    if (planBadge) {
+      planBadge.textContent = isPro ? t('profile.plan.pro') : t('profile.plan.free');
+      planBadge.classList.toggle('pro', isPro);
+    }
+    if (planName) planName.textContent = isPro ? t('profile.plan.proName') : t('profile.plan.freeName');
+    const used = (status && typeof status.quotes_used === 'number') ? status.quotes_used : 0;
+    const limit = (status && typeof status.limit === 'number') ? status.limit : 5;
+    if (isPro) {
+      if (progressFill) progressFill.style.width = '100%';
+      if (progressText) progressText.textContent = t('profile.usage.unlimited');
+    } else {
+      const pct = Math.min(100, Math.round((used / limit) * 100));
+      if (progressFill) {
+        progressFill.style.width = pct + '%';
+        progressFill.classList.toggle('warning', pct >= 60 && pct < 100);
+        progressFill.classList.toggle('full', pct >= 100);
+      }
+      if (progressText) {
+        progressText.textContent = t('profile.usage.quotaLine')
+          .replace('{used}', used)
+          .replace('{limit}', limit);
+      }
+    }
+    if (upgradeBtn) upgradeBtn.classList.toggle('hidden', isPro);
+  } catch (e) { console.warn('profile plan:', e); }
+
+  // Activity counts (non-archived)
+  try {
+    const [c, j, q, f] = await Promise.all([
+      sb.from('clients').select('id', { count: 'exact', head: true }).is('archived_at', null),
+      sb.from('jobs').select('id', { count: 'exact', head: true }).is('archived_at', null),
+      sb.from('quotes').select('id', { count: 'exact', head: true }).is('archived_at', null),
+      sb.from('followups').select('id', { count: 'exact', head: true }).is('archived_at', null),
+    ]);
+    const setStat = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || 0; };
+    setStat('profileStatClients', c.count);
+    setStat('profileStatJobs', j.count);
+    setStat('profileStatQuotes', q.count);
+    setStat('profileStatFollowups', f.count);
+  } catch (e) { console.warn('profile stats:', e); }
+}
+
+async function saveProfileHandler() {
+  const btn = document.getElementById('profileSaveBtn');
+  if (!btn) return;
+  const get = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const depositRaw = get('profileDefaultDeposit');
+  let deposit = depositRaw === '' ? null : Number(depositRaw);
+  if (deposit !== null && (isNaN(deposit) || deposit < 0 || deposit > 100)) {
+    showToast(t('profile.save.depositInvalid'), true);
+    return;
+  }
+  const payload = {
+    first_name: get('profileFirstName') || null,
+    last_name: get('profileLastName') || null,
+    phone: get('profilePhone') || null,
+    company_name: get('profileCompanyName') || null,
+    business_address: get('profileBusinessAddress') || null,
+    license_number: get('profileLicenseNumber') || null,
+    default_deposit_percent: deposit,
+  };
+  btn.disabled = true;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const user = session && session.user;
+    if (!user) { showToast(t('profile.save.failed'), true); return; }
+    const { error } = await sb.from('profiles').upsert({ id: user.id, ...payload }, { onConflict: 'id' });
+    if (error) {
+      console.warn('saveProfile:', error);
+      showToast(t('profile.save.failed'), true);
+      return;
+    }
+    // Update cache so quote pre-fill + render see new values immediately
+    if (!profileCache) profileCache = {};
+    Object.assign(profileCache, payload);
+    showToast(t('profile.save.saved'));
+  } catch (e) {
+    console.warn('saveProfile threw:', e);
+    showToast(t('profile.save.failed'), true);
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 // Fetch the user's clients from Supabase, then augment each row
@@ -10310,6 +10802,7 @@ function updateAuthUI(session) {
       refreshQuoteUsedFromServer();
       refreshClientsLookupCache();
       loadJobs();
+      loadProfileCache().catch(e => console.warn('profile load on auth:', e));
     }
   } else {
     authScreen.classList.remove('hidden');
