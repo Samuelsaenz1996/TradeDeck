@@ -9261,7 +9261,7 @@ async function saveProfileHandler() {
     const { data: { session } } = await sb.auth.getSession();
     const user = session && session.user;
     if (!user) { showToast(t('profile.save.failed'), true); return; }
-    const { error } = await sb.from('profiles').upsert({ id: user.id, ...payload }, { onConflict: 'id' });
+    const { error } = await sb.from('profiles').update(payload).eq('id', user.id);
     if (error) {
       console.warn('saveProfile:', error);
       showToast(t('profile.save.failed'), true);
