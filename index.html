@@ -1199,6 +1199,81 @@
     vertical-align: middle;
   }
 
+  /* === Bulk selection bar + checkbox column === */
+  .bulk-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+  .bulk-bar.hidden {
+    display: none;
+  }
+  .bulk-clear {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-2);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+  }
+  .bulk-clear:hover {
+    background: var(--surface);
+    color: var(--ink);
+  }
+  .bulk-count {
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 14px;
+    margin-right: auto;
+  }
+  .bulk-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .bulk-actions button {
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    font-family: inherit;
+  }
+  .bulk-actions button:hover {
+    background: var(--surface-2);
+  }
+  .bulk-actions .bulk-action-delete {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+  }
+  .bulk-actions .bulk-action-delete:hover {
+    background: #dc2626;
+  }
+  .bulk-cb-col {
+    width: 36px;
+    text-align: center;
+    padding: 8px 4px;
+  }
+  .bulk-cb-col input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    margin: 0;
+    vertical-align: middle;
+  }
+
   /* === Desktop list tables: contain to card width. Mobile breakpoint
          rules override these with !important for the phone viewport. === */
   #clientsListTable,
@@ -1216,27 +1291,33 @@
      Scenario) absorb the remainder. Without these, equal-width
      distribution starves text columns and content overlaps. Mobile
      rules in the @media block below override these with !important. */
-  #jobsListTable th:nth-child(3) { width: 110px; }   /* Trade */
-  #jobsListTable th:nth-child(4) { width: 100px; }   /* Amount */
-  #jobsListTable th:nth-child(5) { width: 130px; }   /* Status */
-  #jobsListTable th:nth-child(6) { width: 130px; }   /* Date */
-  #jobsListTable th:nth-child(7) { width: 50px; }    /* Delete */
+  /* Col 1 is the bulk-select checkbox on every list. */
+  #jobsListTable th:nth-child(1),
+  #clientsListTable th:nth-child(1),
+  #quotesListTable th:nth-child(1),
+  #followupsListTable th:nth-child(1) { width: 36px; }  /* Checkbox */
 
-  #clientsListTable th:nth-child(1) { width: 50px; }  /* Icon */
-  #clientsListTable th:nth-child(4) { width: 70px; }  /* Jobs count */
-  #clientsListTable th:nth-child(5) { width: 110px; } /* Revenue */
-  #clientsListTable th:nth-child(6) { width: 140px; } /* Last activity */
-  #clientsListTable th:nth-child(7) { width: 110px; } /* Status */
-  #clientsListTable th:nth-child(8) { width: 50px; }  /* Delete */
+  #jobsListTable th:nth-child(4) { width: 110px; }   /* Trade */
+  #jobsListTable th:nth-child(5) { width: 100px; }   /* Amount */
+  #jobsListTable th:nth-child(6) { width: 130px; }   /* Status */
+  #jobsListTable th:nth-child(7) { width: 130px; }   /* Date */
+  #jobsListTable th:nth-child(8) { width: 50px; }    /* Delete */
 
-  #quotesListTable th:nth-child(3) { width: 110px; } /* Total */
-  #quotesListTable th:nth-child(4) { width: 120px; } /* Status */
-  #quotesListTable th:nth-child(5) { width: 140px; } /* Date */
-  #quotesListTable th:nth-child(6) { width: 50px; }  /* Delete */
+  #clientsListTable th:nth-child(2) { width: 50px; }  /* Icon */
+  #clientsListTable th:nth-child(5) { width: 70px; }  /* Jobs count */
+  #clientsListTable th:nth-child(6) { width: 110px; } /* Revenue */
+  #clientsListTable th:nth-child(7) { width: 140px; } /* Last activity */
+  #clientsListTable th:nth-child(8) { width: 110px; } /* Status */
+  #clientsListTable th:nth-child(9) { width: 50px; }  /* Delete */
 
-  #followupsListTable th:nth-child(3) { width: 90px; }  /* Channel */
-  #followupsListTable th:nth-child(4) { width: 140px; } /* Date */
-  #followupsListTable th:nth-child(5) { width: 50px; }  /* Delete */
+  #quotesListTable th:nth-child(4) { width: 110px; } /* Total */
+  #quotesListTable th:nth-child(5) { width: 120px; } /* Status */
+  #quotesListTable th:nth-child(6) { width: 140px; } /* Date */
+  #quotesListTable th:nth-child(7) { width: 50px; }  /* Delete */
+
+  #followupsListTable th:nth-child(4) { width: 90px; }  /* Channel */
+  #followupsListTable th:nth-child(5) { width: 140px; } /* Date */
+  #followupsListTable th:nth-child(6) { width: 50px; }  /* Delete */
 
   /* === All four lists on every viewport: collapse row Delete buttons
          to a 32x26 icon-only square. Detail-screen delete buttons (e.g.
@@ -1497,50 +1578,57 @@
        styles that would otherwise expand the cell. Status widths sized
        for the widest expected Spanish pill (BORRADOR ~82px, PROSPECTO
        ~85px, COMPLETADO ~95px in select). */
-    #jobsListTable th:nth-child(4) { width: 60px !important; }   /* Amount */
-    #jobsListTable th:nth-child(5) { width: 115px !important; }  /* Status dropdown */
-    #jobsListTable th:nth-child(7) { width: 36px !important; }   /* Delete icon */
+    /* Col 1 is the bulk-select checkbox (all indices below shifted +1
+       from the pre-bulk layout to account for it). */
+    #jobsListTable th:nth-child(1),
+    #clientsListTable th:nth-child(1),
+    #quotesListTable th:nth-child(1),
+    #followupsListTable th:nth-child(1) { width: 30px !important; } /* Checkbox */
 
-    #clientsListTable th:nth-child(1) { width: 30px !important; }  /* Icon */
-    #clientsListTable th:nth-child(7) { width: 115px !important; } /* Status */
-    #clientsListTable th:nth-child(8) { width: 36px !important; }  /* Delete */
+    #jobsListTable th:nth-child(5) { width: 60px !important; }   /* Amount */
+    #jobsListTable th:nth-child(6) { width: 115px !important; }  /* Status dropdown */
+    #jobsListTable th:nth-child(8) { width: 36px !important; }   /* Delete icon */
 
-    #quotesListTable th:nth-child(3) { width: 65px !important; }   /* Total */
-    #quotesListTable th:nth-child(4) { width: 115px !important; }  /* Status */
-    #quotesListTable th:nth-child(6) { width: 36px !important; }   /* Delete */
+    #clientsListTable th:nth-child(2) { width: 30px !important; }  /* Icon */
+    #clientsListTable th:nth-child(8) { width: 115px !important; } /* Status */
+    #clientsListTable th:nth-child(9) { width: 36px !important; }  /* Delete */
 
-    #followupsListTable th:nth-child(3) { width: 60px !important; } /* Channel */
-    #followupsListTable th:nth-child(5) { width: 36px !important; } /* Delete */
+    #quotesListTable th:nth-child(4) { width: 65px !important; }   /* Total */
+    #quotesListTable th:nth-child(5) { width: 115px !important; }  /* Status */
+    #quotesListTable th:nth-child(7) { width: 36px !important; }   /* Delete */
 
-    /* Jobs list: hide Trade (col 3) and Date (col 6) */
-    #jobsListTable th:nth-child(3),
-    #jobsListTable td:nth-child(3),
-    #jobsListTable th:nth-child(6),
-    #jobsListTable td:nth-child(6) {
+    #followupsListTable th:nth-child(4) { width: 60px !important; } /* Channel */
+    #followupsListTable th:nth-child(6) { width: 36px !important; } /* Delete */
+
+    /* Jobs list: hide Trade (col 4) and Date (col 7) */
+    #jobsListTable th:nth-child(4),
+    #jobsListTable td:nth-child(4),
+    #jobsListTable th:nth-child(7),
+    #jobsListTable td:nth-child(7) {
       display: none;
     }
 
-    /* Clients list: hide Jobs count (col 4), Revenue (col 5), Last activity (col 6) */
-    #clientsListTable th:nth-child(4),
-    #clientsListTable td:nth-child(4),
+    /* Clients list: hide Jobs count (col 5), Revenue (col 6), Last activity (col 7) */
     #clientsListTable th:nth-child(5),
     #clientsListTable td:nth-child(5),
     #clientsListTable th:nth-child(6),
-    #clientsListTable td:nth-child(6) {
+    #clientsListTable td:nth-child(6),
+    #clientsListTable th:nth-child(7),
+    #clientsListTable td:nth-child(7) {
       display: none;
     }
 
-    /* Quotes list: hide Trades (col 2) and Date (col 5) */
-    #quotesListTable th:nth-child(2),
-    #quotesListTable td:nth-child(2),
-    #quotesListTable th:nth-child(5),
-    #quotesListTable td:nth-child(5) {
+    /* Quotes list: hide Trades (col 3) and Date (col 6) */
+    #quotesListTable th:nth-child(3),
+    #quotesListTable td:nth-child(3),
+    #quotesListTable th:nth-child(6),
+    #quotesListTable td:nth-child(6) {
       display: none;
     }
 
-    /* Follow-ups list: hide Date (col 4) */
-    #followupsListTable th:nth-child(4),
-    #followupsListTable td:nth-child(4) {
+    /* Follow-ups list: hide Date (col 5) */
+    #followupsListTable th:nth-child(5),
+    #followupsListTable td:nth-child(5) {
       display: none;
     }
 
@@ -1582,6 +1670,24 @@
     #quotesListTable .status-pill {
       padding: 3px 8px;
       font-size: 12px;
+    }
+
+    /* Bulk bar wraps on narrow viewports; checkbox column slightly tighter */
+    .bulk-bar {
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 8px;
+    }
+    .bulk-count {
+      margin-right: 0;
+    }
+    .bulk-actions {
+      width: 100%;
+      justify-content: flex-end;
+    }
+    .bulk-cb-col {
+      width: 30px;
+      padding: 6px 2px;
     }
   }
 </style>
@@ -1733,9 +1839,20 @@
           <div id="quotesListLoading" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
             <span data-i18n="quotes.history.loading">Loading...</span>
           </div>
+          <div class="bulk-bar hidden" id="bulkBarQuotes">
+            <button class="bulk-clear" id="bulkClearQuotes" type="button" aria-label="Clear selection">✕</button>
+            <span class="bulk-count" id="bulkCountQuotes"></span>
+            <span class="bulk-actions">
+              <button class="bulk-action-archive" id="bulkArchiveQuotes" type="button"></button>
+              <button class="bulk-action-delete" id="bulkDeleteQuotes" type="button"></button>
+            </span>
+          </div>
           <table class="line-table" id="quotesListTable">
             <thead>
               <tr>
+                <th class="bulk-cb-col">
+                  <input type="checkbox" class="bulk-select-all" id="bulkSelectAllQuotes" aria-label="Select all" />
+                </th>
                 <th data-i18n="quotes.history.col.client">Client</th>
                 <th data-i18n="quotes.history.col.trades">Trades</th>
                 <th class="amt-col" data-i18n="quotes.history.col.total">Total</th>
@@ -2571,9 +2688,20 @@
             <div id="followupsListLoading" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
               <span data-i18n="followups.history.loading">Loading...</span>
             </div>
+            <div class="bulk-bar hidden" id="bulkBarFollowups">
+              <button class="bulk-clear" id="bulkClearFollowups" type="button" aria-label="Clear selection">✕</button>
+              <span class="bulk-count" id="bulkCountFollowups"></span>
+              <span class="bulk-actions">
+                <button class="bulk-action-archive" id="bulkArchiveFollowups" type="button"></button>
+                <button class="bulk-action-delete" id="bulkDeleteFollowups" type="button"></button>
+              </span>
+            </div>
             <table class="line-table" id="followupsListTable">
               <thead>
                 <tr>
+                  <th class="bulk-cb-col">
+                    <input type="checkbox" class="bulk-select-all" id="bulkSelectAllFollowups" aria-label="Select all" />
+                  </th>
                   <th data-i18n="followups.history.col.customer">Customer</th>
                   <th data-i18n="followups.history.col.scenario">Scenario</th>
                   <th data-i18n="followups.history.col.channel">Channel</th>
@@ -2770,9 +2898,20 @@
             <div id="clientsListLoading" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
               <span data-i18n="clients.loading">Loading...</span>
             </div>
+            <div class="bulk-bar hidden" id="bulkBarClients">
+              <button class="bulk-clear" id="bulkClearClients" type="button" aria-label="Clear selection">✕</button>
+              <span class="bulk-count" id="bulkCountClients"></span>
+              <span class="bulk-actions">
+                <button class="bulk-action-archive" id="bulkArchiveClients" type="button"></button>
+                <button class="bulk-action-delete" id="bulkDeleteClients" type="button"></button>
+              </span>
+            </div>
             <table class="line-table" id="clientsListTable">
               <thead>
                 <tr>
+                  <th class="bulk-cb-col">
+                    <input type="checkbox" class="bulk-select-all" id="bulkSelectAllClients" aria-label="Select all" />
+                  </th>
                   <th style="width:40px;"></th>
                   <th data-i18n="clients.col.name">Name</th>
                   <th data-i18n="clients.col.contact">Contact</th>
@@ -3015,9 +3154,20 @@
                 No jobs yet. Generate a quote and it will appear here automatically.
               </p>
             </div>
+            <div class="bulk-bar hidden" id="bulkBarJobs">
+              <button class="bulk-clear" id="bulkClearJobs" type="button" aria-label="Clear selection">✕</button>
+              <span class="bulk-count" id="bulkCountJobs"></span>
+              <span class="bulk-actions">
+                <button class="bulk-action-archive" id="bulkArchiveJobs" type="button"></button>
+                <button class="bulk-action-delete" id="bulkDeleteJobs" type="button"></button>
+              </span>
+            </div>
             <table class="line-table" id="jobsListTable">
               <thead>
                 <tr>
+                  <th class="bulk-cb-col">
+                    <input type="checkbox" class="bulk-select-all" id="bulkSelectAllJobs" aria-label="Select all" />
+                  </th>
                   <th data-i18n="jobs.col.job">Job</th>
                   <th data-i18n="jobs.col.client">Client</th>
                   <th data-i18n="jobs.col.trade">Trade</th>
@@ -3773,6 +3923,23 @@ const I18N = {
     'delete.confirm.job.title': 'Delete this job?',
     'delete.confirm.quote.title': 'Delete this quote?',
     'delete.confirm.followup.title': 'Delete this follow-up?',
+    // Bulk selection
+    'bulk.selected': '{count} selected',
+    'archive.bulk.title.client': 'Archive {count} clients?',
+    'archive.bulk.title.job': 'Archive {count} jobs?',
+    'archive.bulk.title.quote': 'Archive {count} quotes?',
+    'archive.bulk.title.followup': 'Archive {count} follow-ups?',
+    'delete.bulk.title.client': 'Delete {count} clients?',
+    'delete.bulk.title.job': 'Delete {count} jobs?',
+    'delete.bulk.title.quote': 'Delete {count} quotes?',
+    'delete.bulk.title.followup': 'Delete {count} follow-ups?',
+    'toast.bulkArchived': '{count} items archived',
+    'toast.bulkUnarchived': '{count} items unarchived',
+    'toast.bulkDeleted': '{count} items deleted',
+    'toast.bulkArchiveFailed': 'Could not archive selection',
+    'toast.bulkUnarchiveFailed': 'Could not unarchive selection',
+    'toast.bulkDeleteFailed': 'Could not delete selection',
+    'toast.deleted': 'Deleted',
   },
   es: {
     // Sidebar
@@ -4318,6 +4485,23 @@ const I18N = {
     'delete.confirm.job.title': '¿Eliminar este trabajo?',
     'delete.confirm.quote.title': '¿Eliminar esta cotización?',
     'delete.confirm.followup.title': '¿Eliminar este seguimiento?',
+    // Bulk selection
+    'bulk.selected': '{count} seleccionados',
+    'archive.bulk.title.client': '¿Archivar {count} clientes?',
+    'archive.bulk.title.job': '¿Archivar {count} trabajos?',
+    'archive.bulk.title.quote': '¿Archivar {count} cotizaciones?',
+    'archive.bulk.title.followup': '¿Archivar {count} seguimientos?',
+    'delete.bulk.title.client': '¿Eliminar {count} clientes?',
+    'delete.bulk.title.job': '¿Eliminar {count} trabajos?',
+    'delete.bulk.title.quote': '¿Eliminar {count} cotizaciones?',
+    'delete.bulk.title.followup': '¿Eliminar {count} seguimientos?',
+    'toast.bulkArchived': '{count} elementos archivados',
+    'toast.bulkUnarchived': '{count} elementos desarchivados',
+    'toast.bulkDeleted': '{count} elementos eliminados',
+    'toast.bulkArchiveFailed': 'No se pudo archivar la selección',
+    'toast.bulkUnarchiveFailed': 'No se pudo desarchivar la selección',
+    'toast.bulkDeleteFailed': 'No se pudo eliminar la selección',
+    'toast.deleted': 'Eliminado',
   },
 };
 
@@ -4744,6 +4928,9 @@ function renderJobsList() {
     const date = formatRelativeDate(j.created_at);
     return `
       <tr class="job-table-row" data-job-id="${j.id}" style="cursor: pointer;">
+        <td class="bulk-cb-col" onclick="event.stopPropagation()">
+          <input type="checkbox" class="bulk-row-cb" data-id="${j.id}" />
+        </td>
         <td>${escapeHtml(desc)}</td>
         <td>${escapeHtml(client)}</td>
         <td>${escapeHtml(tradeStr)}</td>
@@ -4784,6 +4971,7 @@ function renderJobsList() {
       updateJobStatus(sel.dataset.statusId, sel.value);
     });
   });
+  reapplyBulkSelection('jobs');
 }
 
 function bindJobsFilterPills() {
@@ -5362,6 +5550,90 @@ let viewingArchivedJobs = false;
 let viewingArchivedQuotes = false;
 let viewingArchivedFollowups = false;
 
+// Bulk-selection controller. One config entry per list entity; the
+// generic bulk helpers read everything they need from here, so adding
+// bulk to a 5th entity is a config entry, not new functions.
+// NOTE: tableId / rowCheckboxSelector use the REAL table IDs in this
+// codebase (clientsListTable / quotesListTable / followupsListTable).
+const BULK = {
+  clients: {
+    selection: new Set(),
+    table: 'clients',
+    tableId: 'clientsListTable',
+    rowCheckboxSelector: '#clientsListTable .bulk-row-cb',
+    barId: 'bulkBarClients',
+    countId: 'bulkCountClients',
+    clearBtnId: 'bulkClearClients',
+    archiveBtnId: 'bulkArchiveClients',
+    deleteBtnId: 'bulkDeleteClients',
+    selectAllId: 'bulkSelectAllClients',
+    archiveTitleKey: 'archive.bulk.title.client',
+    deleteTitleKey: 'delete.bulk.title.client',
+    archiveSingularKey: 'archive.confirm.client.title',
+    deleteSingularKey: 'delete.confirm.client.title',
+    isViewingArchived: () => viewingArchivedClients,
+    reload: () => loadClients(),
+    afterAction: () => refreshClientsLookupCache().catch(e => console.warn('lookup refresh:', e)),
+  },
+  jobs: {
+    selection: new Set(),
+    table: 'jobs',
+    tableId: 'jobsListTable',
+    rowCheckboxSelector: '#jobsListTable .bulk-row-cb',
+    barId: 'bulkBarJobs',
+    countId: 'bulkCountJobs',
+    clearBtnId: 'bulkClearJobs',
+    archiveBtnId: 'bulkArchiveJobs',
+    deleteBtnId: 'bulkDeleteJobs',
+    selectAllId: 'bulkSelectAllJobs',
+    archiveTitleKey: 'archive.bulk.title.job',
+    deleteTitleKey: 'delete.bulk.title.job',
+    archiveSingularKey: 'archive.confirm.job.title',
+    deleteSingularKey: 'delete.confirm.job.title',
+    isViewingArchived: () => viewingArchivedJobs,
+    reload: () => loadJobs(),
+    afterAction: null,
+  },
+  quotes: {
+    selection: new Set(),
+    table: 'quotes',
+    tableId: 'quotesListTable',
+    rowCheckboxSelector: '#quotesListTable .bulk-row-cb',
+    barId: 'bulkBarQuotes',
+    countId: 'bulkCountQuotes',
+    clearBtnId: 'bulkClearQuotes',
+    archiveBtnId: 'bulkArchiveQuotes',
+    deleteBtnId: 'bulkDeleteQuotes',
+    selectAllId: 'bulkSelectAllQuotes',
+    archiveTitleKey: 'archive.bulk.title.quote',
+    deleteTitleKey: 'delete.bulk.title.quote',
+    archiveSingularKey: 'archive.confirm.quote.title',
+    deleteSingularKey: 'delete.confirm.quote.title',
+    isViewingArchived: () => viewingArchivedQuotes,
+    reload: () => loadSavedQuotes(),
+    afterAction: null,
+  },
+  followups: {
+    selection: new Set(),
+    table: 'followups',
+    tableId: 'followupsListTable',
+    rowCheckboxSelector: '#followupsListTable .bulk-row-cb',
+    barId: 'bulkBarFollowups',
+    countId: 'bulkCountFollowups',
+    clearBtnId: 'bulkClearFollowups',
+    archiveBtnId: 'bulkArchiveFollowups',
+    deleteBtnId: 'bulkDeleteFollowups',
+    selectAllId: 'bulkSelectAllFollowups',
+    archiveTitleKey: 'archive.bulk.title.followup',
+    deleteTitleKey: 'delete.bulk.title.followup',
+    archiveSingularKey: 'archive.confirm.followup.title',
+    deleteSingularKey: 'delete.confirm.followup.title',
+    isViewingArchived: () => viewingArchivedFollowups,
+    reload: () => loadSavedFollowups(),
+    afterAction: null,
+  },
+};
+
 // Map of pricing mode → input IDs whose values should persist per trade.
 const PRICING_INPUTS_BY_MODE = {
   hourly:    ['hours', 'rate', 'materials'],
@@ -5648,19 +5920,72 @@ function init() {
   }
   bindArchiveTabs('archiveTabsClients', (archived) => {
     viewingArchivedClients = archived;
+    clearBulkSelection('clients');
     loadClients();
   });
   bindArchiveTabs('archiveTabsJobs', (archived) => {
     viewingArchivedJobs = archived;
+    clearBulkSelection('jobs');
     loadJobs();
   });
   bindArchiveTabs('archiveTabsQuotes', (archived) => {
     viewingArchivedQuotes = archived;
+    clearBulkSelection('quotes');
     loadSavedQuotes();
   });
   bindArchiveTabs('archiveTabsFollowups', (archived) => {
     viewingArchivedFollowups = archived;
+    clearBulkSelection('followups');
     loadSavedFollowups();
+  });
+
+  // Wire bulk-selection UI for all four list entities
+  Object.keys(BULK).forEach(entity => {
+    const cfg = BULK[entity];
+
+    // Row checkbox change (event delegation on the table)
+    const table = document.getElementById(cfg.tableId);
+    if (table) {
+      table.addEventListener('change', (e) => {
+        const cb = e.target.closest('input.bulk-row-cb');
+        if (!cb) return;
+        const id = cb.dataset.id;
+        if (cb.checked) cfg.selection.add(id);
+        else cfg.selection.delete(id);
+        refreshBulkBar(entity);
+        refreshSelectAll(entity);
+      });
+    }
+
+    // Select-all header checkbox
+    const sa = document.getElementById(cfg.selectAllId);
+    if (sa) {
+      sa.onchange = () => {
+        const checked = sa.checked;
+        document.querySelectorAll(cfg.rowCheckboxSelector).forEach(cb => {
+          cb.checked = checked;
+          if (checked) cfg.selection.add(cb.dataset.id);
+          else cfg.selection.delete(cb.dataset.id);
+        });
+        refreshBulkBar(entity);
+        refreshSelectAll(entity);
+      };
+    }
+
+    // Clear button
+    const clearBtn = document.getElementById(cfg.clearBtnId);
+    if (clearBtn) clearBtn.onclick = () => clearBulkSelection(entity);
+
+    // Archive / Unarchive button (toggles based on current tab)
+    const archBtn = document.getElementById(cfg.archiveBtnId);
+    if (archBtn) archBtn.onclick = () => {
+      if (cfg.isViewingArchived()) bulkUnarchive(entity);
+      else bulkArchive(entity);
+    };
+
+    // Delete button
+    const delBtn = document.getElementById(cfg.deleteBtnId);
+    if (delBtn) delBtn.onclick = () => bulkDelete(entity);
   });
   const clientArchBtn = document.getElementById('clientDetailArchiveBtn');
   if (clientArchBtn) clientArchBtn.onclick = () => {
@@ -8177,6 +8502,9 @@ function renderFollowupsList() {
     const date = formatRelativeDate(f.created_at);
     return `
       <tr class="followups-list-row" data-followup-id="${f.id}" style="cursor:pointer;">
+        <td class="bulk-cb-col" onclick="event.stopPropagation()">
+          <input type="checkbox" class="bulk-row-cb" data-id="${f.id}" />
+        </td>
         <td><strong>${escapeHtml(customer)}</strong></td>
         <td>${escapeHtml(scenario)}</td>
         <td>${escapeHtml(channel)}</td>
@@ -8201,6 +8529,7 @@ function renderFollowupsList() {
       deleteSavedFollowup(btn.dataset.deleteId);
     });
   });
+  reapplyBulkSelection('followups');
 }
 
 async function openSavedFollowup(followupId) {
@@ -8579,6 +8908,9 @@ function renderClientsList() {
     const statusKey = c.status || 'lead';
     return `
       <tr class="clients-list-row" data-client-id="${c.id}" style="cursor:pointer;">
+        <td class="bulk-cb-col" onclick="event.stopPropagation()">
+          <input type="checkbox" class="bulk-row-cb" data-id="${c.id}" />
+        </td>
         <td style="font-size: 22px; text-align: center;">${icon}</td>
         <td><strong>${escapeHtml(name)}</strong></td>
         <td>${escapeHtml(contact)}</td>
@@ -8616,6 +8948,7 @@ function renderClientsList() {
       updateClientStatus(sel.dataset.statusId, sel.value);
     });
   });
+  reapplyBulkSelection('clients');
 }
 
 // Switch among clients subview modes. Currently only 'list' is
@@ -9206,6 +9539,9 @@ function renderQuotesList() {
     const date = formatRelativeDate(quote.created_at);
     return `
       <tr class="quotes-list-row" data-quote-id="${quote.id}" style="cursor:pointer;">
+        <td class="bulk-cb-col" onclick="event.stopPropagation()">
+          <input type="checkbox" class="bulk-row-cb" data-id="${quote.id}" />
+        </td>
         <td><strong>${escapeHtml(clientName)}</strong></td>
         <td>${escapeHtml(trades) || '—'}</td>
         <td class="amt-col">${totalDisp}</td>
@@ -9247,6 +9583,7 @@ function renderQuotesList() {
       updateQuoteStatus(sel.dataset.statusId, sel.value);
     });
   });
+  reapplyBulkSelection('quotes');
 }
 
 // Open a saved quote: fetch full payload, restore state, switch subview.
@@ -9502,6 +9839,127 @@ async function setArchivedState(table, id, archived) {
     console.warn(`setArchivedState ${table} threw:`, e);
     return { ok: false, error: e };
   }
+}
+
+// ============================================================================
+// Bulk selection helpers (generic — driven by the BULK config object)
+// ============================================================================
+function refreshBulkBar(entity) {
+  const cfg = BULK[entity];
+  const bar = document.getElementById(cfg.barId);
+  const countEl = document.getElementById(cfg.countId);
+  const archBtn = document.getElementById(cfg.archiveBtnId);
+  const delBtn = document.getElementById(cfg.deleteBtnId);
+  if (!bar || !countEl) return;
+  const n = cfg.selection.size;
+  if (n === 0) { bar.classList.add('hidden'); return; }
+  bar.classList.remove('hidden');
+  countEl.textContent = t('bulk.selected').replace('{count}', n);
+  if (archBtn) archBtn.textContent = t(cfg.isViewingArchived() ? 'archive.button.unarchive' : 'archive.button.archive');
+  if (delBtn) delBtn.textContent = t('modal.delete');
+}
+
+function refreshSelectAll(entity) {
+  const cfg = BULK[entity];
+  const sa = document.getElementById(cfg.selectAllId);
+  if (!sa) return;
+  const visible = document.querySelectorAll(cfg.rowCheckboxSelector);
+  const total = visible.length;
+  let checked = 0;
+  visible.forEach(cb => { if (cb.checked) checked++; });
+  sa.checked = total > 0 && checked === total;
+  sa.indeterminate = checked > 0 && checked < total;
+}
+
+function reapplyBulkSelection(entity) {
+  const cfg = BULK[entity];
+  document.querySelectorAll(cfg.rowCheckboxSelector).forEach(cb => {
+    cb.checked = cfg.selection.has(cb.dataset.id);
+  });
+  refreshSelectAll(entity);
+  refreshBulkBar(entity);
+}
+
+function clearBulkSelection(entity) {
+  const cfg = BULK[entity];
+  cfg.selection.clear();
+  document.querySelectorAll(cfg.rowCheckboxSelector).forEach(cb => { cb.checked = false; });
+  const sa = document.getElementById(cfg.selectAllId);
+  if (sa) { sa.checked = false; sa.indeterminate = false; }
+  refreshBulkBar(entity);
+}
+
+async function bulkArchive(entity) {
+  const cfg = BULK[entity];
+  const ids = Array.from(cfg.selection);
+  if (ids.length === 0) return;
+  const count = ids.length;
+  const title = count === 1
+    ? t(cfg.archiveSingularKey)
+    : t(cfg.archiveTitleKey).replace('{count}', count);
+  const ok = await confirmModal({
+    title,
+    body: t('archive.confirm.body'),
+    confirmLabel: t('archive.button.archive'),
+    cancelLabel: t('modal.cancel'),
+    variant: 'primary',
+  });
+  if (!ok) return;
+  const { error } = await sb.from(cfg.table).update({ archived_at: new Date().toISOString() }).in('id', ids);
+  if (error) {
+    console.warn(`bulkArchive ${entity} failed:`, error);
+    showToast(t('toast.bulkArchiveFailed'), true);
+    return;
+  }
+  showToast(count === 1 ? t('toast.archived') : t('toast.bulkArchived').replace('{count}', count));
+  clearBulkSelection(entity);
+  if (cfg.afterAction) cfg.afterAction();
+  cfg.reload();
+}
+
+async function bulkUnarchive(entity) {
+  const cfg = BULK[entity];
+  const ids = Array.from(cfg.selection);
+  if (ids.length === 0) return;
+  const count = ids.length;
+  const { error } = await sb.from(cfg.table).update({ archived_at: null }).in('id', ids);
+  if (error) {
+    console.warn(`bulkUnarchive ${entity} failed:`, error);
+    showToast(t('toast.bulkUnarchiveFailed'), true);
+    return;
+  }
+  showToast(count === 1 ? t('toast.unarchived') : t('toast.bulkUnarchived').replace('{count}', count));
+  clearBulkSelection(entity);
+  if (cfg.afterAction) cfg.afterAction();
+  cfg.reload();
+}
+
+async function bulkDelete(entity) {
+  const cfg = BULK[entity];
+  const ids = Array.from(cfg.selection);
+  if (ids.length === 0) return;
+  const count = ids.length;
+  const title = count === 1
+    ? t(cfg.deleteSingularKey)
+    : t(cfg.deleteTitleKey).replace('{count}', count);
+  const ok = await confirmModal({
+    title,
+    body: t('delete.confirm.body'),
+    confirmLabel: t('modal.delete'),
+    cancelLabel: t('modal.cancel'),
+    variant: 'danger',
+  });
+  if (!ok) return;
+  const { error } = await sb.from(cfg.table).delete().in('id', ids);
+  if (error) {
+    console.warn(`bulkDelete ${entity} failed:`, error);
+    showToast(t('toast.bulkDeleteFailed'), true);
+    return;
+  }
+  showToast(count === 1 ? t('toast.deleted') : t('toast.bulkDeleted').replace('{count}', count));
+  clearBulkSelection(entity);
+  if (cfg.afterAction) cfg.afterAction();
+  cfg.reload();
 }
 
 async function archiveClient(id) {
