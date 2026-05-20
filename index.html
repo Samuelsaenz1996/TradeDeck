@@ -1570,6 +1570,26 @@
     line-height: 1.5;
   }
   .auth-status.error { background: rgba(179, 58, 42, 0.08); color: var(--bad); }
+  .auth-tabs { display: flex; width: 100%; margin-bottom: 20px; }
+  .auth-tabs button { flex: 1; }
+  .auth-links {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .auth-link {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+  }
+  .auth-link:hover { text-decoration: underline; }
+  .auth-link:disabled { opacity: 0.5; cursor: default; text-decoration: none; }
 
   /* === Mobile nav (hamburger + drawer + backdrop) === */
   .topbar-left {
@@ -1854,12 +1874,53 @@
       <div class="brand-mark">M</div>
       <div class="brand-name">My<em>TradeDeck</em></div>
     </div>
-    <h1 class="auth-title" data-i18n="auth.title">Sign in to MyTradeDeck</h1>
-    <p class="auth-sub" data-i18n="auth.sub">Enter your email and we'll send you a magic link.</p>
-    <input type="email" class="auth-input" id="authEmail" placeholder="you@yourbusiness.com" autocomplete="email" />
-    <button class="auth-btn" id="authSendBtn" data-i18n="auth.sendBtn">Send magic link</button>
+    <div class="pricing-toggle auth-tabs" id="authTabs" role="group" aria-label="Sign in or sign up">
+      <button data-authtab="signin" class="active" type="button" data-i18n="auth.tab.signin">Sign in</button>
+      <button data-authtab="signup" type="button" data-i18n="auth.tab.signup">Sign up</button>
+    </div>
+
+    <div id="authSigninMode">
+      <h1 class="auth-title" data-i18n="auth.signin.title">Welcome back</h1>
+      <p class="auth-sub" data-i18n="auth.signin.sub">Sign in to your account.</p>
+      <input type="email" class="auth-input" id="signinEmail" autocomplete="email" data-i18n-placeholder="auth.ph.email" placeholder="you@yourbusiness.com" />
+      <input type="password" class="auth-input" id="signinPassword" autocomplete="current-password" data-i18n-placeholder="auth.ph.password" placeholder="Password" />
+      <button class="auth-btn" id="signinBtn" data-i18n="auth.signin.btn">Sign in</button>
+      <div class="auth-links">
+        <button type="button" class="auth-link" id="forgotLink" data-i18n="auth.forgot.link">Forgot password?</button>
+        <button type="button" class="auth-link" id="magicLink" data-i18n="auth.magic.link">Email me a link instead</button>
+      </div>
+    </div>
+
+    <div id="authSignupMode" class="hidden">
+      <h1 class="auth-title" data-i18n="auth.signup.title">Create your account</h1>
+      <p class="auth-sub" data-i18n="auth.signup.sub">Start drafting quotes in minutes.</p>
+      <input type="email" class="auth-input" id="signupEmail" autocomplete="email" data-i18n-placeholder="auth.ph.email" placeholder="you@yourbusiness.com" />
+      <input type="password" class="auth-input" id="signupPassword" autocomplete="new-password" data-i18n-placeholder="auth.ph.passwordNew" placeholder="Password (8+ characters)" />
+      <input type="password" class="auth-input" id="signupPasswordConfirm" autocomplete="new-password" data-i18n-placeholder="auth.ph.passwordConfirm" placeholder="Re-enter password" />
+      <button class="auth-btn" id="signupBtn" data-i18n="auth.signup.btn">Create account</button>
+    </div>
+
+    <div id="authForgotMode" class="hidden">
+      <h1 class="auth-title" data-i18n="auth.forgot.title">Reset your password</h1>
+      <p class="auth-sub" data-i18n="auth.forgot.sub">We'll email you a link to set a new password.</p>
+      <input type="email" class="auth-input" id="forgotEmail" autocomplete="email" data-i18n-placeholder="auth.ph.email" placeholder="you@yourbusiness.com" />
+      <button class="auth-btn" id="forgotBtn" data-i18n="auth.forgot.btn">Send reset link</button>
+      <div class="auth-links">
+        <button type="button" class="auth-link" id="forgotBackLink" data-i18n="auth.forgot.back">Back to sign in</button>
+      </div>
+    </div>
+
+    <div id="authRecoveryMode" class="hidden">
+      <h1 class="auth-title" data-i18n="auth.recovery.title">Set a new password</h1>
+      <p class="auth-sub" data-i18n="auth.recovery.sub">Enter your new password below.</p>
+      <input type="password" class="auth-input" id="recoveryPassword" autocomplete="new-password" data-i18n-placeholder="auth.ph.passwordNew" placeholder="New password (8+ characters)" />
+      <input type="password" class="auth-input" id="recoveryPasswordConfirm" autocomplete="new-password" data-i18n-placeholder="auth.ph.passwordConfirm" placeholder="Re-enter password" />
+      <button class="auth-btn" id="recoveryBtn" data-i18n="auth.recovery.btn">Update password</button>
+    </div>
+
     <div class="auth-status hidden" id="authStatus"></div>
-    <button class="auth-btn-dev" id="authBypassBtn" data-i18n="auth.bypassBtn">Skip auth (dev only)</button>
+
+    <button class="auth-btn-dev hidden" id="authBypassBtn" data-i18n="auth.bypassBtn">Skip auth (dev only)</button>
   </div>
 </div>
 
@@ -4179,6 +4240,45 @@ const I18N = {
     'auth.sent': '✓ Check your email — click the link to sign in.',
     'auth.emailRequired': 'Enter your email first',
     'auth.signInFailed': 'Could not send link: ',
+    'auth.tab.signin': 'Sign in',
+    'auth.tab.signup': 'Sign up',
+    'auth.signin.title': 'Welcome back',
+    'auth.signin.sub': 'Sign in to your account.',
+    'auth.signin.btn': 'Sign in',
+    'auth.signin.signingIn': 'Signing in…',
+    'auth.signin.required': 'Enter your email and password',
+    'auth.signin.failed': 'Invalid email or password',
+    'auth.signin.notConfirmed': 'Please confirm your email first — check your inbox.',
+    'auth.signup.title': 'Create your account',
+    'auth.signup.sub': 'Start drafting quotes in minutes.',
+    'auth.signup.btn': 'Create account',
+    'auth.signup.creating': 'Creating account…',
+    'auth.signup.checkEmail': '✓ Account created — check your email to confirm, then sign in.',
+    'auth.signup.success': '✓ Account created!',
+    'auth.signup.failed': 'Could not create account: ',
+    'auth.pwTooShort': 'Password must be at least 8 characters',
+    'auth.pwMismatch': 'Passwords do not match',
+    'auth.forgot.link': 'Forgot password?',
+    'auth.forgot.title': 'Reset your password',
+    'auth.forgot.sub': "We'll email you a link to set a new password.",
+    'auth.forgot.btn': 'Send reset link',
+    'auth.forgot.sending': 'Sending…',
+    'auth.forgot.sent': '✓ Check your email for the reset link.',
+    'auth.forgot.failed': 'Could not send reset link: ',
+    'auth.forgot.back': 'Back to sign in',
+    'auth.magic.link': 'Email me a link instead',
+    'auth.magic.sent': '✓ Check your email — click the link to sign in.',
+    'auth.magic.failed': 'Could not send link: ',
+    'auth.recovery.title': 'Set a new password',
+    'auth.recovery.sub': 'Enter your new password below.',
+    'auth.recovery.btn': 'Update password',
+    'auth.recovery.updating': 'Updating…',
+    'auth.recovery.success': '✓ Password updated!',
+    'auth.recovery.failed': 'Could not update password: ',
+    'auth.ph.email': 'you@yourbusiness.com',
+    'auth.ph.password': 'Password',
+    'auth.ph.passwordNew': 'Password (8+ characters)',
+    'auth.ph.passwordConfirm': 'Re-enter password',
     'auth.bypassBtn': 'Skip auth (dev only)',
     'nav.signOut': 'Sign out',
     // Aria labels
@@ -4792,6 +4892,45 @@ const I18N = {
     'auth.sent': '✓ Revisa tu correo — haz clic en el enlace para entrar.',
     'auth.emailRequired': 'Escribe tu correo primero',
     'auth.signInFailed': 'No se pudo enviar el enlace: ',
+    'auth.tab.signin': 'Iniciar sesión',
+    'auth.tab.signup': 'Registrarse',
+    'auth.signin.title': 'Bienvenido de nuevo',
+    'auth.signin.sub': 'Inicia sesión en tu cuenta.',
+    'auth.signin.btn': 'Iniciar sesión',
+    'auth.signin.signingIn': 'Iniciando sesión…',
+    'auth.signin.required': 'Escribe tu correo y contraseña',
+    'auth.signin.failed': 'Correo o contraseña inválidos',
+    'auth.signin.notConfirmed': 'Confirma tu correo primero — revisa tu bandeja de entrada.',
+    'auth.signup.title': 'Crea tu cuenta',
+    'auth.signup.sub': 'Empieza a generar cotizaciones en minutos.',
+    'auth.signup.btn': 'Crear cuenta',
+    'auth.signup.creating': 'Creando cuenta…',
+    'auth.signup.checkEmail': '✓ Cuenta creada — revisa tu correo para confirmar, luego inicia sesión.',
+    'auth.signup.success': '✓ ¡Cuenta creada!',
+    'auth.signup.failed': 'No se pudo crear la cuenta: ',
+    'auth.pwTooShort': 'La contraseña debe tener al menos 8 caracteres',
+    'auth.pwMismatch': 'Las contraseñas no coinciden',
+    'auth.forgot.link': '¿Olvidaste tu contraseña?',
+    'auth.forgot.title': 'Restablece tu contraseña',
+    'auth.forgot.sub': 'Te enviaremos un enlace para crear una nueva contraseña.',
+    'auth.forgot.btn': 'Enviar enlace',
+    'auth.forgot.sending': 'Enviando…',
+    'auth.forgot.sent': '✓ Revisa tu correo para el enlace de restablecimiento.',
+    'auth.forgot.failed': 'No se pudo enviar el enlace: ',
+    'auth.forgot.back': 'Volver a iniciar sesión',
+    'auth.magic.link': 'Enviarme un enlace en su lugar',
+    'auth.magic.sent': '✓ Revisa tu correo — haz clic en el enlace para entrar.',
+    'auth.magic.failed': 'No se pudo enviar el enlace: ',
+    'auth.recovery.title': 'Crea una nueva contraseña',
+    'auth.recovery.sub': 'Escribe tu nueva contraseña abajo.',
+    'auth.recovery.btn': 'Actualizar contraseña',
+    'auth.recovery.updating': 'Actualizando…',
+    'auth.recovery.success': '✓ ¡Contraseña actualizada!',
+    'auth.recovery.failed': 'No se pudo actualizar la contraseña: ',
+    'auth.ph.email': 'tu@negocio.com',
+    'auth.ph.password': 'Contraseña',
+    'auth.ph.passwordNew': 'Contraseña (8+ caracteres)',
+    'auth.ph.passwordConfirm': 'Vuelve a escribir la contraseña',
     'auth.bypassBtn': 'Saltar inicio (solo dev)',
     'nav.signOut': 'Cerrar sesión',
     // Aria labels
@@ -11059,26 +11198,201 @@ async function refreshQuoteUsedFromServer() {
   }
 }
 
+let authMode = 'signin';
+let authInRecovery = false;
+
+function authV(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+
+function authStatus(msg, isError) {
+  const status = document.getElementById('authStatus');
+  if (!status) return;
+  status.textContent = msg;
+  status.classList.remove('hidden');
+  status.classList.toggle('error', !!isError);
+}
+
+function setAuthMode(mode) {
+  authMode = mode;
+  const modes = { signin: 'authSigninMode', signup: 'authSignupMode', forgot: 'authForgotMode', recovery: 'authRecoveryMode' };
+  Object.keys(modes).forEach(m => {
+    const el = document.getElementById(modes[m]);
+    if (el) el.classList.toggle('hidden', m !== mode);
+  });
+  const tabs = document.getElementById('authTabs');
+  if (tabs) tabs.classList.toggle('hidden', mode !== 'signin' && mode !== 'signup');
+  document.querySelectorAll('#authTabs button').forEach(b => {
+    b.classList.toggle('active', b.dataset.authtab === mode);
+  });
+  const status = document.getElementById('authStatus');
+  if (status) { status.classList.add('hidden'); status.classList.remove('error'); }
+}
+
+async function handleSignUp() {
+  const email = authV('signupEmail').trim();
+  const pw = authV('signupPassword');
+  const pw2 = authV('signupPasswordConfirm');
+  if (!email) { authStatus(t('auth.emailRequired'), true); document.getElementById('signupEmail').focus(); return; }
+  if (pw.length < 8) { authStatus(t('auth.pwTooShort'), true); return; }
+  if (pw !== pw2) { authStatus(t('auth.pwMismatch'), true); document.getElementById('signupPasswordConfirm').focus(); return; }
+  const btn = document.getElementById('signupBtn');
+  btn.disabled = true; btn.textContent = t('auth.signup.creating');
+  try {
+    const { data, error } = await sb.auth.signUp({
+      email, password: pw,
+      options: { emailRedirectTo: window.location.origin },
+    });
+    if (error) throw error;
+    if (data && data.session) {
+      authStatus(t('auth.signup.success'), false);
+    } else {
+      authStatus(t('auth.signup.checkEmail'), false);
+    }
+  } catch (e) {
+    authStatus(t('auth.signup.failed') + (e.message || String(e)), true);
+  } finally {
+    btn.disabled = false; btn.textContent = t('auth.signup.btn');
+  }
+}
+
+async function handleSignInPassword() {
+  const email = authV('signinEmail').trim();
+  const pw = authV('signinPassword');
+  if (!email || !pw) { authStatus(t('auth.signin.required'), true); return; }
+  const btn = document.getElementById('signinBtn');
+  btn.disabled = true; btn.textContent = t('auth.signin.signingIn');
+  try {
+    const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+    if (error) throw error;
+    // onAuthStateChange handles the UI swap to the app
+  } catch (e) {
+    const msg = (e.message || '').toLowerCase();
+    if (msg.includes('confirm')) {
+      authStatus(t('auth.signin.notConfirmed'), true);
+    } else {
+      authStatus(t('auth.signin.failed'), true);
+    }
+  } finally {
+    btn.disabled = false; btn.textContent = t('auth.signin.btn');
+  }
+}
+
+async function handleForgotPassword() {
+  const email = authV('forgotEmail').trim();
+  if (!email) { authStatus(t('auth.emailRequired'), true); document.getElementById('forgotEmail').focus(); return; }
+  const btn = document.getElementById('forgotBtn');
+  btn.disabled = true; btn.textContent = t('auth.forgot.sending');
+  try {
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+    if (error) throw error;
+    authStatus(t('auth.forgot.sent'), false);
+  } catch (e) {
+    authStatus(t('auth.forgot.failed') + (e.message || String(e)), true);
+  } finally {
+    btn.disabled = false; btn.textContent = t('auth.forgot.btn');
+  }
+}
+
+async function handleMagicLink() {
+  const email = authV('signinEmail').trim();
+  if (!email) { authStatus(t('auth.emailRequired'), true); document.getElementById('signinEmail').focus(); return; }
+  const link = document.getElementById('magicLink');
+  if (link) link.disabled = true;
+  try {
+    const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } });
+    if (error) throw error;
+    authStatus(t('auth.magic.sent'), false);
+  } catch (e) {
+    authStatus(t('auth.magic.failed') + (e.message || String(e)), true);
+  } finally {
+    if (link) link.disabled = false;
+  }
+}
+
+async function handleRecovery() {
+  const pw = authV('recoveryPassword');
+  const pw2 = authV('recoveryPasswordConfirm');
+  if (pw.length < 8) { authStatus(t('auth.pwTooShort'), true); return; }
+  if (pw !== pw2) { authStatus(t('auth.pwMismatch'), true); document.getElementById('recoveryPasswordConfirm').focus(); return; }
+  const btn = document.getElementById('recoveryBtn');
+  btn.disabled = true; btn.textContent = t('auth.recovery.updating');
+  try {
+    const { error } = await sb.auth.updateUser({ password: pw });
+    if (error) throw error;
+    authStatus(t('auth.recovery.success'), false);
+    // The recovery token already established a session; USER_UPDATED will
+    // fire and updateAuthUI will show the app. Reset to signin for cleanliness.
+    setTimeout(() => setAuthMode('signin'), 1500);
+  } catch (e) {
+    authStatus(t('auth.recovery.failed') + (e.message || String(e)), true);
+  } finally {
+    btn.disabled = false; btn.textContent = t('auth.recovery.btn');
+  }
+}
+
 async function initAuth() {
-  const { data: { session } } = await sb.auth.getSession();
-  updateAuthUI(session);
-  sb.auth.onAuthStateChange((_event, newSession) => {
+  // Register the listener BEFORE awaiting getSession so we don't miss the
+  // PASSWORD_RECOVERY event the client emits while parsing the redirect URL.
+  sb.auth.onAuthStateChange((event, newSession) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      authInRecovery = true;
+      document.getElementById('authScreen').classList.remove('hidden');
+      document.getElementById('appContainer').classList.add('hidden');
+      setAuthMode('recovery');
+      return;
+    }
+    if (authInRecovery && event === 'USER_UPDATED') {
+      authInRecovery = false;
+      updateAuthUI(newSession);
+      return;
+    }
+    if (authInRecovery) return;
     updateAuthUI(newSession);
   });
-  document.getElementById('authSendBtn').onclick = handleSignIn;
-  document.getElementById('authEmail').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') handleSignIn();
+
+  // Tabs
+  document.querySelectorAll('#authTabs button').forEach(btn => {
+    btn.onclick = () => setAuthMode(btn.dataset.authtab);
   });
+  // Sign in
+  document.getElementById('signinBtn').onclick = handleSignInPassword;
+  document.getElementById('signinPassword').addEventListener('keydown', e => { if (e.key === 'Enter') handleSignInPassword(); });
+  // Sign up
+  document.getElementById('signupBtn').onclick = handleSignUp;
+  document.getElementById('signupPasswordConfirm').addEventListener('keydown', e => { if (e.key === 'Enter') handleSignUp(); });
+  // Forgot password
+  document.getElementById('forgotLink').onclick = () => setAuthMode('forgot');
+  document.getElementById('forgotBtn').onclick = handleForgotPassword;
+  document.getElementById('forgotBackLink').onclick = () => setAuthMode('signin');
+  // Magic link fallback
+  document.getElementById('magicLink').onclick = handleMagicLink;
+  // Recovery
+  document.getElementById('recoveryBtn').onclick = handleRecovery;
+  // Sign out
   document.getElementById('navSignOut').onclick = handleSignOut;
-  // DEV ONLY — bypass auth for local testing. Remove before production.
-  // Resets the localStorage counter on each bypass click so testers always
-  // start a clean 5/5 session without DevTools surgery.
-  document.getElementById('authBypassBtn').onclick = () => {
-    quoteUsed = 0;
-    localStorage.setItem('quoteUsed', '0');
-    updateUsageDisplay();
-    updateAuthUI({ bypass: true });
-  };
+
+  // Dev bypass — localhost only. Hidden + inert in production.
+  const bypassBtn = document.getElementById('authBypassBtn');
+  if (bypassBtn) {
+    const host = window.location.hostname;
+    const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '';
+    if (isLocal) {
+      bypassBtn.classList.remove('hidden');
+      bypassBtn.onclick = () => {
+        quoteUsed = 0;
+        localStorage.setItem('quoteUsed', '0');
+        updateUsageDisplay();
+        updateAuthUI({ bypass: true });
+      };
+    } else {
+      bypassBtn.classList.add('hidden');
+    }
+  }
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!authInRecovery) {
+    updateAuthUI(session);
+    setAuthMode('signin');
+  }
 }
 
 function updateAuthUI(session) {
@@ -11097,40 +11411,7 @@ function updateAuthUI(session) {
   } else {
     authScreen.classList.remove('hidden');
     appContainer.classList.add('hidden');
-  }
-}
-
-async function handleSignIn() {
-  const emailEl = document.getElementById('authEmail');
-  const btn = document.getElementById('authSendBtn');
-  const status = document.getElementById('authStatus');
-  const email = emailEl.value.trim();
-  if (!email) {
-    status.textContent = t('auth.emailRequired');
-    status.classList.remove('hidden');
-    status.classList.add('error');
-    emailEl.focus();
-    return;
-  }
-  btn.disabled = true;
-  btn.textContent = t('auth.sending');
-  status.classList.add('hidden');
-  status.classList.remove('error');
-  try {
-    const { error } = await sb.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin },
-    });
-    if (error) throw error;
-    status.textContent = t('auth.sent');
-    status.classList.remove('hidden', 'error');
-  } catch (e) {
-    status.textContent = t('auth.signInFailed') + (e.message || String(e));
-    status.classList.remove('hidden');
-    status.classList.add('error');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = t('auth.sendBtn');
+    if (typeof setAuthMode === 'function') setAuthMode('signin');
   }
 }
 
