@@ -10810,6 +10810,7 @@ async function archiveJob(id) {
   showToast(t('toast.archived'));
   loadJobs();
 }
+
 async function unarchiveJob(id) {
   const res = await setArchivedState('jobs', id, false);
   if (!res.ok) { showToast(t('toast.unarchiveFailed'), true); return; }
