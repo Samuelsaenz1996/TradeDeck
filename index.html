@@ -9261,12 +9261,21 @@ async function saveProfileHandler() {
     const { data: { session } } = await sb.auth.getSession();
     const user = session && session.user;
     if (!user) { showToast(t('profile.save.failed'), true); return; }
-    const { error } = await sb.from('profiles').update(payload).eq('user_id', user.id);
+    const { data, error } = await sb.from('profiles')
+      .update(payload)
+      .eq('user_id', user.id)
+      .select();
     if (error) {
-      console.warn('saveProfile:', error);
+      console.warn('saveProfile error:', error);
       showToast(t('profile.save.failed'), true);
       return;
     }
+    if (!data || data.length === 0) {
+      console.warn('saveProfile: 0 rows updated. user.id=', user.id, 'payload=', payload);
+      showToast(t('profile.save.failed'), true);
+      return;
+    }
+    console.log('saveProfile: updated row', data[0]);
     // Update cache so quote pre-fill + render see new values immediately
     if (!profileCache) profileCache = {};
     Object.assign(profileCache, payload);
