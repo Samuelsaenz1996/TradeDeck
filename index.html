@@ -223,22 +223,24 @@
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    padding: 4px 24px 4px 10px;
+    padding: 4px 26px 4px 11px;
     border-radius: 999px;
-    border: 1px solid transparent;
+    border: 1px solid rgba(26, 31, 46, 0.14);
     font-size: 13px;
     font-weight: 600;
     font-family: inherit;
     line-height: 1.4;
     cursor: pointer;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path d='M3 4.5l3 3 3-3' stroke='currentColor' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path d='M3 4.5l3 3 3-3' stroke='currentColor' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
     background-repeat: no-repeat;
     background-position: right 8px center;
     background-size: 12px;
-    transition: filter 0.12s ease;
+    transition: filter 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
   }
   .status-select:hover {
-    filter: brightness(0.94);
+    filter: brightness(0.97);
+    border-color: rgba(26, 31, 46, 0.32);
+    box-shadow: var(--shadow-sm);
   }
   .status-select:focus {
     outline: 2px solid var(--brand, #2b7fff);
@@ -1567,10 +1569,10 @@
     #clientDetailQuotesTable .status-select,
     #clientDetailJobsTable .status-select,
     #jobDetailQuotesTable .status-select {
-      padding: 3px 14px 3px 4px;
+      padding: 3px 16px 3px 6px;
       font-size: 11px;
-      background-size: 8px;
-      background-position: right 4px center;
+      background-size: 9px;
+      background-position: right 5px center;
       max-width: 100%;
       box-sizing: border-box;
     }
