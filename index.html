@@ -1689,6 +1689,22 @@
       width: 30px;
       padding: 6px 2px;
     }
+
+    /* Quote + follow-up action bars: the buttons live in the nested
+       .right flex group, which doesn't wrap on its own. Let it wrap to
+       multiple rows and tighten the buttons so 6 fit the viewport.
+       Both views share .quote-actions-bar. */
+    .quote-actions-bar .right {
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: flex-start;
+    }
+    .quote-actions-bar .action-btn {
+      padding: 7px 11px;
+      font-size: 12px;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
   }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
