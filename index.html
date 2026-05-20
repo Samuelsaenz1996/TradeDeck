@@ -1559,9 +1559,14 @@
       white-space: nowrap;
     }
 
-    /* Status dropdowns on jobs + quotes lists: compact padding for narrow viewports */
+    /* Status dropdowns on every list + cross-reference card: compact
+       padding for narrow viewports */
     #jobsListTable .status-select,
-    #quotesListTable .status-select {
+    #quotesListTable .status-select,
+    #clientsListTable .status-select,
+    #clientDetailQuotesTable .status-select,
+    #clientDetailJobsTable .status-select,
+    #jobDetailQuotesTable .status-select {
       padding: 3px 14px 3px 4px;
       font-size: 11px;
       background-size: 8px;
@@ -3639,6 +3644,8 @@ const I18N = {
     'toast.jobStatusFailed': 'Could not update status',
     'toast.quoteStatusUpdated': 'Status updated',
     'toast.quoteStatusFailed': 'Could not update status',
+    'toast.clientStatusUpdated': 'Status updated',
+    'toast.clientStatusFailed': 'Could not update status',
     'clientDetail.delete': 'Delete client',
     'clients.delete': 'Delete',
     'clients.confirmDelete': 'Delete this client? Linked quotes, jobs, and follow-ups will keep their content but lose the link to this client. This cannot be undone.',
@@ -4182,6 +4189,8 @@ const I18N = {
     'toast.jobStatusFailed': 'No se pudo actualizar el estado',
     'toast.quoteStatusUpdated': 'Estado actualizado',
     'toast.quoteStatusFailed': 'No se pudo actualizar el estado',
+    'toast.clientStatusUpdated': 'Estado actualizado',
+    'toast.clientStatusFailed': 'No se pudo actualizar el estado',
     'clientDetail.delete': 'Eliminar cliente',
     'clients.delete': 'Eliminar',
     'clients.confirmDelete': '¿Eliminar este cliente? Las cotizaciones, trabajos y seguimientos vinculados conservarán su contenido pero perderán el enlace a este cliente. No se puede deshacer.',
@@ -4924,22 +4933,29 @@ function renderJobDetailQuotes() {
       return tr ? `${tr.emoji} ${tradeDisplay(name)}` : tradeDisplay(name);
     }).join(', ');
     const statusKey = q.status || 'draft';
-    const statusDisp = (I18N[tdLang] && I18N[tdLang]['status.' + capitalizeFirst(statusKey)]) || statusKey;
     return `
       <tr class="job-detail-quote-row ${q.archived_at ? 'archived-row' : ''}" data-quote-id="${q.id}" style="cursor: pointer;">
         <td>${escapeHtml(trades) || '—'}${q.archived_at ? ` <span class="archived-badge">${t('archive.badge')}</span>` : ''}</td>
         <td class="amt-col">${fmt(parseFloat(q.total) || 0)}</td>
-        <td><span class="status-pill status-${statusKey}">${escapeHtml(statusDisp)}</span></td>
+        <td>${statusSelectHtml('quote', q.id, statusKey)}</td>
         <td>${formatRelativeDate(q.created_at)}</td>
       </tr>
     `;
   }).join('');
   tbody.querySelectorAll('.job-detail-quote-row').forEach(row => {
-    row.addEventListener('click', () => {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('[data-status-id]')) return;
       clearTimeout(jobsSaveTimer);
       if (activeJobId) saveJobEdits().catch(e => console.warn('flush save:', e));
       switchView('quotes');
       openSavedQuote(row.dataset.quoteId);
+    });
+  });
+  tbody.querySelectorAll('[data-status-id]').forEach(sel => {
+    sel.addEventListener('click', (e) => e.stopPropagation());
+    sel.addEventListener('change', (e) => {
+      e.stopPropagation();
+      updateJobDetailQuoteStatus(sel.dataset.statusId, sel.value);
     });
   });
 }
@@ -8559,8 +8575,6 @@ function renderClientsList() {
     }
     const contact = contactBits.join(' · ') || '—';
     const statusKey = c.status || 'lead';
-    const statusDisp = (I18N[tdLang] && I18N[tdLang]['status.' + capitalizeFirst(statusKey)])
-                      || statusKey;
     return `
       <tr class="clients-list-row" data-client-id="${c.id}" style="cursor:pointer;">
         <td style="font-size: 22px; text-align: center;">${icon}</td>
@@ -8569,7 +8583,7 @@ function renderClientsList() {
         <td class="amt-col">${c.jobs_count || 0}</td>
         <td class="amt-col">${fmt(c.revenue || 0)}</td>
         <td>${formatRelativeDate(c.last_activity_at)}</td>
-        <td><span class="status-pill status-${statusKey}">${statusDisp}</span></td>
+        <td>${statusSelectHtml('client', c.id, statusKey)}</td>
         <td style="text-align:right;">
           <button class="btn-secondary btn-danger" data-delete-id="${c.id}"
                   style="padding: 6px 12px; font-size: 13px;">${t('clients.delete')}</button>
@@ -8581,6 +8595,7 @@ function renderClientsList() {
   tbody.querySelectorAll('.clients-list-row').forEach(row => {
     row.addEventListener('click', (e) => {
       if (e.target.closest('[data-delete-id]')) return;
+      if (e.target.closest('[data-status-id]')) return;
       if (typeof openClientDetail === 'function') {
         openClientDetail(row.dataset.clientId);
       }
@@ -8590,6 +8605,13 @@ function renderClientsList() {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       deleteSavedClient(btn.dataset.deleteId);
+    });
+  });
+  tbody.querySelectorAll('[data-status-id]').forEach(sel => {
+    sel.addEventListener('click', (e) => e.stopPropagation());
+    sel.addEventListener('change', (e) => {
+      e.stopPropagation();
+      updateClientStatus(sel.dataset.statusId, sel.value);
     });
   });
 }
@@ -8976,22 +8998,29 @@ function renderClientDetailQuotes() {
       return tr ? `${tr.emoji} ${tradeDisplay(name)}` : tradeDisplay(name);
     }).join(', ');
     const statusKey = q.status || 'draft';
-    const statusDisp = (I18N[tdLang] && I18N[tdLang]['status.' + capitalizeFirst(statusKey)]) || statusKey;
     return `
       <tr class="client-quote-row ${q.archived_at ? 'archived-row' : ''}" data-quote-id="${q.id}" style="cursor: pointer;">
         <td>${escapeHtml(trades) || '—'}${q.archived_at ? ` <span class="archived-badge">${t('archive.badge')}</span>` : ''}</td>
         <td class="amt-col">${fmt(parseFloat(q.total) || 0)}</td>
-        <td><span class="status-pill status-${statusKey}">${escapeHtml(statusDisp)}</span></td>
+        <td>${statusSelectHtml('quote', q.id, statusKey)}</td>
         <td>${formatRelativeDate(q.created_at)}</td>
       </tr>
     `;
   }).join('');
   tbody.querySelectorAll('.client-quote-row').forEach(row => {
-    row.addEventListener('click', () => {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('[data-status-id]')) return;
       clearTimeout(clientsSaveTimer);
       if (activeClientId) saveClientEdits().catch(e => console.warn('flush save:', e));
       switchView('quotes');
       openSavedQuote(row.dataset.quoteId);
+    });
+  });
+  tbody.querySelectorAll('[data-status-id]').forEach(sel => {
+    sel.addEventListener('click', (e) => e.stopPropagation());
+    sel.addEventListener('change', (e) => {
+      e.stopPropagation();
+      updateClientDetailQuoteStatus(sel.dataset.statusId, sel.value);
     });
   });
 }
@@ -9017,8 +9046,6 @@ function renderClientDetailJobs() {
       ? `${getTradeEmoji(j.trade)} ${tradeDisplay(j.trade)}`
       : '—';
     const statusKey = j.status || 'quoted';
-    const statusCss = statusKey.replace(/_/g, '-');
-    const statusDisp = jobStatusLabel(statusKey);
     const hasQuote = !!j.quote_id;
     return `
       <tr class="client-job-row ${j.archived_at ? 'archived-row' : ''}" data-quote-id="${j.quote_id || ''}"
@@ -9026,7 +9053,7 @@ function renderClientDetailJobs() {
         <td>${escapeHtml(j.description || '—')}${j.archived_at ? ` <span class="archived-badge">${t('archive.badge')}</span>` : ''}</td>
         <td>${escapeHtml(tradeStr)}</td>
         <td class="amt-col">${fmt(parseFloat(j.amount) || 0)}</td>
-        <td><span class="status-pill status-${statusCss}">${escapeHtml(statusDisp)}</span></td>
+        <td>${statusSelectHtml('job', j.id, statusKey)}</td>
         <td>${formatRelativeDate(j.created_at)}</td>
       </tr>
     `;
@@ -9034,11 +9061,19 @@ function renderClientDetailJobs() {
   tbody.querySelectorAll('.client-job-row').forEach(row => {
     const qid = row.dataset.quoteId;
     if (!qid) return;
-    row.addEventListener('click', () => {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('[data-status-id]')) return;
       clearTimeout(clientsSaveTimer);
       if (activeClientId) saveClientEdits().catch(e => console.warn('flush save:', e));
       switchView('quotes');
       openSavedQuote(qid);
+    });
+  });
+  tbody.querySelectorAll('[data-status-id]').forEach(sel => {
+    sel.addEventListener('click', (e) => e.stopPropagation());
+    sel.addEventListener('change', (e) => {
+      e.stopPropagation();
+      updateClientDetailJobStatus(sel.dataset.statusId, sel.value);
     });
   });
 }
@@ -9251,6 +9286,93 @@ async function openSavedQuote(quoteId) {
     console.warn('openSavedQuote threw:', e);
     showToast(t('toast.quoteLoadFailed'), true);
   }
+}
+
+// Build an editable status <select> for list/table rows. kind is
+// 'quote' | 'job' | 'client'. Caller binds the change handler via the
+// [data-status-id] attribute. Mirrors the inline markup used by the
+// Jobs and Quotes main lists so styling stays consistent.
+function statusSelectHtml(kind, id, currentStatus) {
+  const OPTIONS = {
+    quote:  [['draft','status.Draft'],['sent','status.Sent'],['accepted','status.Accepted'],['declined','status.Declined'],['invoiced','status.Invoiced']],
+    job:    [['quoted','status.Quoted'],['in_progress','status.In Progress'],['complete','status.Complete'],['paid','status.Paid']],
+    client: [['lead','status.Lead'],['active','status.Active'],['past','status.Past']],
+  };
+  const ARIA = { quote: 'quotes.history.col.status', job: 'jobs.col.status', client: 'clients.col.status' };
+  const list = OPTIONS[kind] || [];
+  const cur = currentStatus || (list[0] && list[0][0]) || '';
+  const statusCss = String(cur).replace(/_/g, '-');
+  const options = list.map(([val, key]) =>
+    `<option value="${val}" ${cur === val ? 'selected' : ''}>${escapeHtml(t(key))}</option>`
+  ).join('');
+  return `<select class="status-select status-${statusCss}" data-status-id="${escapeHtml(String(id))}" aria-label="${escapeHtml(t(ARIA[kind] || ''))}">${options}</select>`;
+}
+
+// Persist a status change to any table. Returns { ok, data }.
+async function persistEntityStatus(table, id, newStatus) {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.access_token) return { ok: false };
+  try {
+    const { data, error } = await sb.from(table)
+      .update({ status: newStatus }).eq('id', id)
+      .select('id, status').single();
+    if (error || !data) {
+      console.warn(`persistEntityStatus ${table} failed:`, error);
+      return { ok: false };
+    }
+    return { ok: true, data };
+  } catch (e) {
+    console.warn(`persistEntityStatus ${table} threw:`, e);
+    return { ok: false };
+  }
+}
+
+// Clients main list status change.
+async function updateClientStatus(clientId, newStatus) {
+  const row = (clientsCache || []).find(c => c.id === clientId);
+  if (!row || row.status === newStatus) return;
+  const res = await persistEntityStatus('clients', clientId, newStatus);
+  if (!res.ok) { showToast(t('toast.clientStatusFailed'), true); renderClientsList(); return; }
+  row.status = res.data.status;
+  if (activeClientData && activeClientData.id === clientId) activeClientData.status = res.data.status;
+  renderClientsList();
+  showToast(t('toast.clientStatusUpdated'));
+}
+
+// Client detail → "Quotes for this client" card status change.
+async function updateClientDetailQuoteStatus(quoteId, newStatus) {
+  const row = (clientDetailQuotesCache || []).find(q => q.id === quoteId);
+  if (!row || row.status === newStatus) return;
+  const res = await persistEntityStatus('quotes', quoteId, newStatus);
+  if (!res.ok) { showToast(t('toast.quoteStatusFailed'), true); renderClientDetailQuotes(); return; }
+  row.status = res.data.status;
+  if (currentQuote && currentQuote.id === quoteId) currentQuote.status = res.data.status;
+  renderClientDetailQuotes();
+  showToast(t('toast.quoteStatusUpdated'));
+}
+
+// Client detail → "Jobs for this client" card status change.
+async function updateClientDetailJobStatus(jobId, newStatus) {
+  const row = (clientDetailJobsCache || []).find(j => j.id === jobId);
+  if (!row || row.status === newStatus) return;
+  const res = await persistEntityStatus('jobs', jobId, newStatus);
+  if (!res.ok) { showToast(t('toast.jobStatusFailed'), true); renderClientDetailJobs(); return; }
+  row.status = res.data.status;
+  if (activeJobData && activeJobData.id === jobId) activeJobData.status = res.data.status;
+  renderClientDetailJobs();
+  showToast(t('toast.jobStatusUpdated'));
+}
+
+// Job detail → "Quotes for this job" card status change.
+async function updateJobDetailQuoteStatus(quoteId, newStatus) {
+  const row = (jobDetailQuotesCache || []).find(q => q.id === quoteId);
+  if (!row || row.status === newStatus) return;
+  const res = await persistEntityStatus('quotes', quoteId, newStatus);
+  if (!res.ok) { showToast(t('toast.quoteStatusFailed'), true); renderJobDetailQuotes(); return; }
+  row.status = res.data.status;
+  if (currentQuote && currentQuote.id === quoteId) currentQuote.status = res.data.status;
+  renderJobDetailQuotes();
+  showToast(t('toast.quoteStatusUpdated'));
 }
 
 // Delete a saved quote (with confirm dialog).
