@@ -790,7 +790,43 @@
     left: 0;
     right: 0;
     height: 6px;
-    background: linear-gradient(90deg, var(--accent) 0%, var(--gold) 100%);
+    background: linear-gradient(90deg, var(--quote-brand, var(--accent)) 0%, var(--quote-brand-end, var(--gold)) 100%);
+  }
+  .quote-logo-box {
+    width: 160px;
+    height: 64px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  .quote-logo-box.hidden { display: none; }
+  .quote-logo {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  .profile-logo-preview {
+    width: 160px;
+    height: 64px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .profile-logo-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  .profile-logo-preview.empty::after {
+    content: '—';
+    color: var(--ink-3);
   }
   .quote.pdf-export {
     padding: 28px 32px;
@@ -2681,6 +2717,9 @@
           </div>
           <div class="quote-header">
             <div>
+              <div class="quote-logo-box hidden" id="quoteLogoBox">
+                <img class="quote-logo" id="quoteLogo" alt="" crossorigin="anonymous" />
+              </div>
               <div class="quote-company-name editable" contenteditable="true">Your Company Name</div>
               <div class="quote-company-tag editable" contenteditable="true">Licensed · Insured · Family-owned since 2009</div>
             </div>
@@ -3513,6 +3552,25 @@
             <label class="label" for="profileLicenseNumber" data-i18n="profile.business.license">License number (optional)</label>
             <input type="text" class="input" id="profileLicenseNumber" maxlength="60" />
           </div>
+          <div class="field">
+            <label class="label" data-i18n="profile.business.logo">Logo</label>
+            <div class="profile-logo-preview empty" id="profileLogoPreview"></div>
+            <div style="display:flex; gap:10px; align-items:center;">
+              <input type="file" id="profileLogoInput" accept="image/png,image/jpeg" style="display:none;" />
+              <button type="button" class="btn-secondary" id="profileLogoUploadBtn" data-i18n="profile.logo.upload">Upload logo</button>
+              <button type="button" class="btn-secondary btn-danger hidden" id="profileLogoRemoveBtn" data-i18n="profile.logo.remove">Remove</button>
+            </div>
+            <small style="color: var(--ink-3); font-size: 11px; display:block; margin-top:6px;" data-i18n="profile.business.logoHelp">PNG or JPG, max 2MB. Appears on the quotes you send.</small>
+          </div>
+          <div class="field">
+            <label class="label" data-i18n="profile.business.brandColor">Brand color</label>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <input type="checkbox" id="profileBrandColorEnabled" />
+              <label for="profileBrandColorEnabled" data-i18n="profile.brand.enable">Use a custom brand color</label>
+              <input type="color" id="profileBrandColor" value="#C45A1A" disabled />
+            </div>
+            <small style="color: var(--ink-3); font-size: 11px; display:block; margin-top:6px;" data-i18n="profile.brand.help">Applied to the accent bar at the top of your quotes. Leave off to use the default.</small>
+          </div>
         </div>
 
         <div class="card">
@@ -4188,6 +4246,20 @@ const I18N = {
     'profile.business.companyName': 'Company name',
     'profile.business.address': 'Business address',
     'profile.business.license': 'License number (optional)',
+    'profile.business.logo': 'Logo',
+    'profile.business.logoHelp': 'PNG or JPG, max 2MB. Appears on the quotes you send.',
+    'profile.logo.upload': 'Upload logo',
+    'profile.logo.replace': 'Replace logo',
+    'profile.logo.remove': 'Remove',
+    'profile.logo.uploaded': 'Logo uploaded',
+    'profile.logo.removed': 'Logo removed',
+    'profile.logo.invalidType': 'Logo must be a PNG or JPG',
+    'profile.logo.tooLarge': 'Logo must be under 2MB',
+    'profile.logo.uploadFailed': 'Could not upload logo',
+    'profile.logo.removeFailed': 'Could not remove logo',
+    'profile.business.brandColor': 'Brand color',
+    'profile.brand.enable': 'Use a custom brand color',
+    'profile.brand.help': 'Applied to the accent bar at the top of your quotes. Leave off to use the default.',
     'profile.defaults.title': 'Workflow defaults',
     'profile.defaults.sub': 'Pre-filled when you create a new quote. You can still change them per quote.',
     'profile.defaults.deposit': 'Default deposit (%)',
@@ -4787,6 +4859,20 @@ const I18N = {
     'profile.business.companyName': 'Nombre de la empresa',
     'profile.business.address': 'Dirección del negocio',
     'profile.business.license': 'Número de licencia (opcional)',
+    'profile.business.logo': 'Logotipo',
+    'profile.business.logoHelp': 'PNG o JPG, máx 2MB. Aparece en las cotizaciones que envías.',
+    'profile.logo.upload': 'Subir logotipo',
+    'profile.logo.replace': 'Cambiar logotipo',
+    'profile.logo.remove': 'Quitar',
+    'profile.logo.uploaded': 'Logotipo subido',
+    'profile.logo.removed': 'Logotipo eliminado',
+    'profile.logo.invalidType': 'El logotipo debe ser PNG o JPG',
+    'profile.logo.tooLarge': 'El logotipo debe ser menor a 2MB',
+    'profile.logo.uploadFailed': 'No se pudo subir el logotipo',
+    'profile.logo.removeFailed': 'No se pudo eliminar el logotipo',
+    'profile.business.brandColor': 'Color de marca',
+    'profile.brand.enable': 'Usar un color de marca personalizado',
+    'profile.brand.help': 'Se aplica a la barra superior de tus cotizaciones. Déjalo desactivado para usar el predeterminado.',
     'profile.defaults.title': 'Valores predeterminados',
     'profile.defaults.sub': 'Se completan automáticamente al crear una cotización. Puedes cambiarlos en cada cotización.',
     'profile.defaults.deposit': 'Depósito predeterminado (%)',
@@ -6171,6 +6257,7 @@ function init() {
   // upgrade behavior until the Stripe sprint replaces it)
   const profileSaveBtn = document.getElementById('profileSaveBtn');
   if (profileSaveBtn) profileSaveBtn.onclick = saveProfileHandler;
+  bindProfileBrandControls();
   const profileUpgradeBtn = document.getElementById('profileUpgradeBtn');
   if (profileUpgradeBtn) profileUpgradeBtn.onclick = () => alert(t('sidebar.upgradeAlert'));
   // Populate the profile cache on boot (fire-and-forget; powers the
@@ -7689,6 +7776,29 @@ function applyProfileToQuoteHeader() {
     }
     if (bits.length) tagEl.textContent = bits.join(' · ');
   }
+  // Logo
+  const logoBox = document.getElementById('quoteLogoBox');
+  const logoImg = document.getElementById('quoteLogo');
+  if (logoBox && logoImg) {
+    if (p.logo_url) {
+      logoImg.src = p.logo_url;
+      logoBox.classList.remove('hidden');
+    } else {
+      logoImg.removeAttribute('src');
+      logoBox.classList.add('hidden');
+    }
+  }
+  // Brand color on the top accent bar
+  const quoteDoc = document.getElementById('quoteDoc');
+  if (quoteDoc) {
+    if (p.brand_color) {
+      quoteDoc.style.setProperty('--quote-brand', p.brand_color);
+      quoteDoc.style.setProperty('--quote-brand-end', p.brand_color);
+    } else {
+      quoteDoc.style.removeProperty('--quote-brand');
+      quoteDoc.style.removeProperty('--quote-brand-end');
+    }
+  }
 }
 
 function renderQuote(data) {
@@ -8150,6 +8260,11 @@ async function generateQuotePdfBlob() {
   }
 
   try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch (e) {}
+
+  const logoForPdf = quoteEl.querySelector('.quote-logo');
+  if (logoForPdf && logoForPdf.getAttribute('src')) {
+    try { if (!logoForPdf.complete) await logoForPdf.decode(); } catch (e) {}
+  }
 
   const savedScroll = window.scrollY;
   window.scrollTo(0, 0);
@@ -9179,6 +9294,100 @@ async function loadProfileCache() {
   }
 }
 
+function renderProfileLogoPreview() {
+  const box = document.getElementById('profileLogoPreview');
+  const removeBtn = document.getElementById('profileLogoRemoveBtn');
+  const uploadBtn = document.getElementById('profileLogoUploadBtn');
+  if (!box) return;
+  const url = profileCache && profileCache.logo_url;
+  if (url) {
+    box.classList.remove('empty');
+    box.innerHTML = '<img src="' + url + '" alt="" crossorigin="anonymous" />';
+    if (removeBtn) removeBtn.classList.remove('hidden');
+    if (uploadBtn) uploadBtn.textContent = t('profile.logo.replace');
+  } else {
+    box.classList.add('empty');
+    box.innerHTML = '';
+    if (removeBtn) removeBtn.classList.add('hidden');
+    if (uploadBtn) uploadBtn.textContent = t('profile.logo.upload');
+  }
+}
+
+async function handleLogoUpload(file) {
+  if (!file) return;
+  if (!['image/png', 'image/jpeg'].includes(file.type)) {
+    showToast(t('profile.logo.invalidType'), true); return;
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    showToast(t('profile.logo.tooLarge'), true); return;
+  }
+  const { data: { session } } = await sb.auth.getSession();
+  const user = session && session.user;
+  if (!user) { showToast(t('profile.logo.uploadFailed'), true); return; }
+  const uploadBtn = document.getElementById('profileLogoUploadBtn');
+  if (uploadBtn) uploadBtn.disabled = true;
+  try {
+    const path = user.id + '/logo';
+    const { error: upErr } = await sb.storage.from('logos')
+      .upload(path, file, { upsert: true, contentType: file.type });
+    if (upErr) { console.warn('logo upload:', upErr); showToast(t('profile.logo.uploadFailed'), true); return; }
+    const { data: pub } = sb.storage.from('logos').getPublicUrl(path);
+    const url = pub.publicUrl + '?t=' + Date.now();
+    const { error: dbErr } = await sb.from('profiles')
+      .update({ logo_url: url }).eq('user_id', user.id);
+    if (dbErr) { console.warn('logo url save:', dbErr); showToast(t('profile.logo.uploadFailed'), true); return; }
+    if (!profileCache) profileCache = {};
+    profileCache.logo_url = url;
+    renderProfileLogoPreview();
+    showToast(t('profile.logo.uploaded'));
+  } catch (e) {
+    console.warn('handleLogoUpload threw:', e);
+    showToast(t('profile.logo.uploadFailed'), true);
+  } finally {
+    if (uploadBtn) uploadBtn.disabled = false;
+  }
+}
+
+async function handleLogoRemove() {
+  const { data: { session } } = await sb.auth.getSession();
+  const user = session && session.user;
+  if (!user) return;
+  const removeBtn = document.getElementById('profileLogoRemoveBtn');
+  if (removeBtn) removeBtn.disabled = true;
+  try {
+    await sb.storage.from('logos').remove([user.id + '/logo']);
+    const { error: dbErr } = await sb.from('profiles')
+      .update({ logo_url: null }).eq('user_id', user.id);
+    if (dbErr) { console.warn('logo remove db:', dbErr); showToast(t('profile.logo.removeFailed'), true); return; }
+    if (profileCache) profileCache.logo_url = null;
+    renderProfileLogoPreview();
+    showToast(t('profile.logo.removed'));
+  } catch (e) {
+    console.warn('handleLogoRemove threw:', e);
+    showToast(t('profile.logo.removeFailed'), true);
+  } finally {
+    if (removeBtn) removeBtn.disabled = false;
+  }
+}
+
+function bindProfileBrandControls() {
+  const fileInput = document.getElementById('profileLogoInput');
+  const uploadBtn = document.getElementById('profileLogoUploadBtn');
+  const removeBtn = document.getElementById('profileLogoRemoveBtn');
+  const cbEnabled = document.getElementById('profileBrandColorEnabled');
+  const colorInput = document.getElementById('profileBrandColor');
+  if (uploadBtn && fileInput) uploadBtn.onclick = () => fileInput.click();
+  if (fileInput) fileInput.onchange = () => {
+    const f = fileInput.files && fileInput.files[0];
+    if (f) handleLogoUpload(f);
+    fileInput.value = '';
+  };
+  if (removeBtn) removeBtn.onclick = handleLogoRemove;
+  if (cbEnabled && colorInput) {
+    cbEnabled.onchange = () => { colorInput.disabled = !cbEnabled.checked; };
+  }
+}
+
 // Populate the Profile screen: identity, form fields (from profileCache),
 // plan/usage (reusing the get_quote_status RPC), activity counts, account.
 async function loadProfileData(opts) {
@@ -9235,6 +9444,22 @@ async function loadProfileData(opts) {
     profileWarrantyDraft = { en: p.default_warranty_en || '', es: p.default_warranty_es || '' };
   }
   renderWarrantyBox();
+  // Brand color
+  const brandCb = document.getElementById('profileBrandColorEnabled');
+  const brandInput = document.getElementById('profileBrandColor');
+  if (brandCb && brandInput) {
+    if (p.brand_color) {
+      brandCb.checked = true;
+      brandInput.disabled = false;
+      brandInput.value = p.brand_color;
+    } else {
+      brandCb.checked = false;
+      brandInput.disabled = true;
+      brandInput.value = '#C45A1A';
+    }
+  }
+  // Logo preview
+  renderProfileLogoPreview();
 
   // Plan + quota. The RPC returns { quotes_used }. There is no Pro plan
   // yet (Stripe is a later sprint), so isPro stays false and the limit
@@ -9306,6 +9531,10 @@ async function saveProfileHandler() {
     default_deposit_percent: deposit,
     default_warranty_en: profileWarrantyDraft.en || null,
     default_warranty_es: profileWarrantyDraft.es || null,
+    brand_color: (document.getElementById('profileBrandColorEnabled') &&
+                  document.getElementById('profileBrandColorEnabled').checked)
+      ? (document.getElementById('profileBrandColor').value || null)
+      : null,
   };
   btn.disabled = true;
   try {
