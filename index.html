@@ -3523,13 +3523,9 @@
             <input type="number" class="input" id="profileDefaultDeposit" min="0" max="100" step="1" style="max-width: 160px;" />
           </div>
           <div class="field">
-            <label class="label" for="profileDefaultWarrantyEn" data-i18n="profile.defaults.warrantyEn">Default warranty (English)</label>
-            <textarea class="textarea" id="profileDefaultWarrantyEn" maxlength="500" placeholder="e.g. 1-year workmanship warranty. Manufacturer warranty applies to materials."></textarea>
-            <small style="color: var(--ink-3); font-size: 11px; display: block; margin-top: 4px;" data-i18n="profile.defaults.warrantyHelp">Leave blank to let the AI generate a warranty appropriate for each trade.</small>
-          </div>
-          <div class="field">
-            <label class="label" for="profileDefaultWarrantyEs" data-i18n="profile.defaults.warrantyEs">Default warranty (Spanish)</label>
-            <textarea class="textarea" id="profileDefaultWarrantyEs" maxlength="500" placeholder="p.ej. Garantía de mano de obra de 1 año. Piezas y materiales con garantía del fabricante."></textarea>
+            <label class="label" for="profileDefaultWarranty" data-i18n="profile.defaults.warranty">Default warranty</label>
+            <textarea class="textarea" id="profileDefaultWarranty" maxlength="500" placeholder="e.g. 1-year workmanship warranty. Manufacturer warranty applies to materials."></textarea>
+            <small style="color: var(--ink-3); font-size: 11px; display: block; margin-top: 4px;" data-i18n="profile.defaults.warrantyHelp">Saved per language — switch the app language to set the other version. Leave blank to let the AI generate one.</small>
           </div>
         </div>
 
@@ -4195,9 +4191,8 @@ const I18N = {
     'profile.defaults.title': 'Workflow defaults',
     'profile.defaults.sub': 'Pre-filled when you create a new quote. You can still change them per quote.',
     'profile.defaults.deposit': 'Default deposit (%)',
-    'profile.defaults.warrantyEn': 'Default warranty (English)',
-    'profile.defaults.warrantyEs': 'Default warranty (Spanish)',
-    'profile.defaults.warrantyHelp': 'Leave blank to let the AI generate a warranty appropriate for each trade.',
+    'profile.defaults.warranty': 'Default warranty',
+    'profile.defaults.warrantyHelp': 'Saved per language — switch the app language to set the other version. Leave blank to let the AI generate one.',
     'profile.plan.free': 'Free',
     'profile.plan.pro': 'Pro',
     'profile.plan.freeName': 'Free plan',
@@ -4795,9 +4790,8 @@ const I18N = {
     'profile.defaults.title': 'Valores predeterminados',
     'profile.defaults.sub': 'Se completan automáticamente al crear una cotización. Puedes cambiarlos en cada cotización.',
     'profile.defaults.deposit': 'Depósito predeterminado (%)',
-    'profile.defaults.warrantyEn': 'Garantía predeterminada (Inglés)',
-    'profile.defaults.warrantyEs': 'Garantía predeterminada (Español)',
-    'profile.defaults.warrantyHelp': 'Déjalo en blanco para que la IA genere una garantía apropiada para cada oficio.',
+    'profile.defaults.warranty': 'Garantía predeterminada',
+    'profile.defaults.warrantyHelp': 'Se guarda por idioma — cambia el idioma de la app para definir la otra versión. Déjalo en blanco para que la IA genere una.',
     'profile.plan.free': 'Gratis',
     'profile.plan.pro': 'Pro',
     'profile.plan.freeName': 'Plan gratis',
@@ -4968,7 +4962,7 @@ function applyLanguage() {
   // Re-render the Profile screen's dynamic text (plan name, quota line,
   // member-since) in the new language — only when it's the active view.
   if (typeof loadProfileData === 'function' && typeof currentView !== 'undefined' && currentView === 'profile') {
-    loadProfileData();
+    loadProfileData({ langRefresh: true });
   }
   // Update topbar to current view
   if (typeof refreshTopbarForCurrentView === 'function') refreshTopbarForCurrentView();
@@ -5046,7 +5040,26 @@ function applyLanguage() {
   applyQuoteContentLang();
 }
 
+// Single warranty box backed by a per-language draft so toggling the app
+// language doesn't lose unsaved text. The box shows the active language's
+// value; both languages persist in profileWarrantyDraft and are written on save.
+function renderWarrantyBox() {
+  const box = document.getElementById('profileDefaultWarranty');
+  if (!box) return;
+  box.value = (profileWarrantyDraft && profileWarrantyDraft[tdLang]) || '';
+  box.setAttribute('placeholder', tdLang === 'es'
+    ? 'p.ej. Garantía de mano de obra de 1 año. Piezas y materiales con garantía del fabricante.'
+    : 'e.g. 1-year workmanship warranty. Manufacturer warranty applies to materials.');
+}
+function captureWarrantyDraft() {
+  const box = document.getElementById('profileDefaultWarranty');
+  if (!box || !profileWarrantyDraft) return;
+  profileWarrantyDraft[tdLang] = box.value.trim();
+}
+
 function setLanguage(lang) {
+  // Capture the box into the draft against the OLD language before switching.
+  captureWarrantyDraft();
   tdLang = (lang === 'es') ? 'es' : 'en';
   localStorage.setItem('tdLang', tdLang);
   applyLanguage();
@@ -5867,6 +5880,7 @@ let viewingArchivedJobs = false;
 let viewingArchivedQuotes = false;
 let viewingArchivedFollowups = false;
 let profileCache = null;
+let profileWarrantyDraft = { en: '', es: '' };
 
 // Bulk-selection controller. One config entry per list entity; the
 // generic bulk helpers read everything they need from here, so adding
@@ -9167,7 +9181,8 @@ async function loadProfileCache() {
 
 // Populate the Profile screen: identity, form fields (from profileCache),
 // plan/usage (reusing the get_quote_status RPC), activity counts, account.
-async function loadProfileData() {
+async function loadProfileData(opts) {
+  const langRefresh = !!(opts && opts.langRefresh);
   const emailEl = document.getElementById('profileEmail');
   const acctEmailEl = document.getElementById('profileAccountEmail');
   const memberSinceEl = document.getElementById('profileMemberSince');
@@ -9214,8 +9229,12 @@ async function loadProfileData() {
   setVal('profileBusinessAddress', p.business_address);
   setVal('profileLicenseNumber', p.license_number);
   setVal('profileDefaultDeposit', p.default_deposit_percent);
-  setVal('profileDefaultWarrantyEn', p.default_warranty_en);
-  setVal('profileDefaultWarrantyEs', p.default_warranty_es);
+  // Seed the warranty draft from saved data on a fresh load only. On a
+  // language toggle (langRefresh) keep the draft so unsaved edits survive.
+  if (!langRefresh) {
+    profileWarrantyDraft = { en: p.default_warranty_en || '', es: p.default_warranty_es || '' };
+  }
+  renderWarrantyBox();
 
   // Plan + quota. The RPC returns { quotes_used }. There is no Pro plan
   // yet (Stripe is a later sprint), so isPro stays false and the limit
@@ -9269,6 +9288,8 @@ async function saveProfileHandler() {
   const btn = document.getElementById('profileSaveBtn');
   if (!btn) return;
   const get = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  // Sync the visible box into the draft for the active language before saving.
+  captureWarrantyDraft();
   const depositRaw = get('profileDefaultDeposit');
   let deposit = depositRaw === '' ? null : Number(depositRaw);
   if (deposit !== null && (isNaN(deposit) || deposit < 0 || deposit > 100)) {
@@ -9283,8 +9304,8 @@ async function saveProfileHandler() {
     business_address: get('profileBusinessAddress') || null,
     license_number: get('profileLicenseNumber') || null,
     default_deposit_percent: deposit,
-    default_warranty_en: get('profileDefaultWarrantyEn') || null,
-    default_warranty_es: get('profileDefaultWarrantyEs') || null,
+    default_warranty_en: profileWarrantyDraft.en || null,
+    default_warranty_es: profileWarrantyDraft.es || null,
   };
   btn.disabled = true;
   try {
