@@ -3664,6 +3664,9 @@
           <button id="profileUpgradeBtn" type="button" class="btn-primary hidden" style="margin-top: 12px;">
             ⭐ <span data-i18n="profile.usage.upgrade">Upgrade to Pro</span>
           </button>
+          <button id="profileManageSubBtn" type="button" class="btn-secondary hidden" style="margin-top: 12px;">
+            <span data-i18n="upgrade.manage">Manage subscription</span>
+          </button>
         </div>
 
         <div class="card">
@@ -3719,6 +3722,24 @@
   </div>
 </div>
 
+<div id="upgradeModalBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="upgradeModalTitle">
+  <div class="modal-card">
+    <div class="modal-title" id="upgradeModalTitle" data-i18n="upgrade.title">Upgrade to Pro</div>
+    <div class="modal-body">
+      <p style="margin-bottom:16px;" data-i18n="upgrade.sub">Unlimited quotes and follow-ups.</p>
+      <div class="pricing-toggle" id="upgradeIntervalToggle" role="group" aria-label="Billing interval" style="margin-bottom:16px; display:flex;">
+        <button data-interval="monthly" class="active" type="button" style="flex:1;" data-i18n="upgrade.monthly">Monthly</button>
+        <button data-interval="annual" type="button" style="flex:1;" data-i18n="upgrade.annual">Annual</button>
+      </div>
+      <div id="upgradePriceDisplay" style="font-family: var(--display); font-size: 18px; font-weight: 600; color: var(--ink);"></div>
+    </div>
+    <div class="modal-actions">
+      <button id="upgradeCancelBtn" type="button" class="modal-btn modal-btn-cancel" data-i18n="modal.cancel">Cancel</button>
+      <button id="upgradeContinueBtn" type="button" class="modal-btn modal-btn-primary" data-i18n="upgrade.continue">Continue to payment</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = "https://cqmctdhxticryelvhhze.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_YOWddbCqAPdFrg-9otLSzw_akBdoAPh";
@@ -3747,6 +3768,21 @@ const I18N = {
     'sidebar.upgrade': 'Upgrade to Pro',
     'sidebar.upgradeSub': '$49/month · unlimited',
     'sidebar.upgradeAlert': 'Stripe checkout coming soon. For now, this is a placeholder.',
+    'upgrade.title': 'Upgrade to Pro',
+    'upgrade.sub': 'Unlimited quotes and follow-ups.',
+    'upgrade.monthly': 'Monthly',
+    'upgrade.annual': 'Annual',
+    'upgrade.priceMonthly': '$49 / month',
+    'upgrade.priceAnnual': '$490 / year — save $98 (2 months free)',
+    'upgrade.continue': 'Continue to payment',
+    'upgrade.continuing': 'Redirecting…',
+    'upgrade.manage': 'Manage subscription',
+    'upgrade.alreadyPro': "You're already on Pro.",
+    'upgrade.checkoutSuccess': '🎉 Welcome to Pro! Your subscription is active.',
+    'upgrade.checkoutCanceled': 'Checkout canceled — no charge was made.',
+    'upgrade.checkoutError': 'Could not start checkout. Please try again.',
+    'upgrade.portalError': 'Could not open the billing portal.',
+    'sidebar.unlimited': 'Unlimited',
     // Topbar
     'topbar.newQuoteHtml': 'New <em>quote</em>',
     'topbar.newFollowupHtml': 'New <em>follow-up</em>',
@@ -4399,6 +4435,21 @@ const I18N = {
     'sidebar.upgrade': 'Mejorar a Pro',
     'sidebar.upgradeSub': '$49/mes · ilimitado',
     'sidebar.upgradeAlert': 'Próximamente checkout con Stripe. Por ahora es un marcador.',
+    'upgrade.title': 'Mejora a Pro',
+    'upgrade.sub': 'Cotizaciones y seguimientos ilimitados.',
+    'upgrade.monthly': 'Mensual',
+    'upgrade.annual': 'Anual',
+    'upgrade.priceMonthly': '$49 / mes',
+    'upgrade.priceAnnual': '$490 / año — ahorra $98 (2 meses gratis)',
+    'upgrade.continue': 'Continuar al pago',
+    'upgrade.continuing': 'Redirigiendo…',
+    'upgrade.manage': 'Administrar suscripción',
+    'upgrade.alreadyPro': 'Ya tienes el plan Pro.',
+    'upgrade.checkoutSuccess': '🎉 ¡Bienvenido a Pro! Tu suscripción está activa.',
+    'upgrade.checkoutCanceled': 'Pago cancelado — no se realizó ningún cargo.',
+    'upgrade.checkoutError': 'No se pudo iniciar el pago. Inténtalo de nuevo.',
+    'upgrade.portalError': 'No se pudo abrir el portal de facturación.',
+    'sidebar.unlimited': 'Ilimitado',
     // Topbar
     'topbar.newQuoteHtml': 'Nueva <em>cotización</em>',
     'topbar.newFollowupHtml': 'Nuevo <em>seguimiento</em>',
@@ -6389,16 +6440,27 @@ function init() {
   renderPaymentsView();
   updateUsageDisplay();
   bindBilingualEditableSync();
-  // Upgrade button (was inline onclick previously — moved out so we can localize the alert)
+  // Upgrade buttons open the Stripe upgrade modal (sidebar + profile card).
   const upgradeBtn = document.getElementById('upgradeBtn');
-  if (upgradeBtn) upgradeBtn.onclick = () => alert(t('sidebar.upgradeAlert'));
-  // Profile save button + the Profile card's Upgrade button (reuse sidebar
-  // upgrade behavior until the Stripe sprint replaces it)
+  if (upgradeBtn) upgradeBtn.onclick = openUpgradeModal;
   const profileSaveBtn = document.getElementById('profileSaveBtn');
   if (profileSaveBtn) profileSaveBtn.onclick = saveProfileHandler;
   bindProfileBrandControls();
   const profileUpgradeBtn = document.getElementById('profileUpgradeBtn');
-  if (profileUpgradeBtn) profileUpgradeBtn.onclick = () => alert(t('sidebar.upgradeAlert'));
+  if (profileUpgradeBtn) profileUpgradeBtn.onclick = openUpgradeModal;
+  const mgBtn = document.getElementById('profileManageSubBtn');
+  if (mgBtn) mgBtn.onclick = openBillingPortal;
+  // Upgrade modal wiring: interval toggle, cancel, continue, backdrop dismiss.
+  document.querySelectorAll('#upgradeIntervalToggle button').forEach(b => {
+    b.onclick = () => {
+      upgradeInterval = b.dataset.interval;
+      document.querySelectorAll('#upgradeIntervalToggle button').forEach(x => x.classList.toggle('active', x === b));
+      renderUpgradePrice();
+    };
+  });
+  const upCancel = document.getElementById('upgradeCancelBtn'); if (upCancel) upCancel.onclick = closeUpgradeModal;
+  const upContinue = document.getElementById('upgradeContinueBtn'); if (upContinue) upContinue.onclick = startCheckout;
+  const upBd = document.getElementById('upgradeModalBackdrop'); if (upBd) upBd.onclick = (e) => { if (e.target === upBd) closeUpgradeModal(); };
   // Populate the profile cache on boot (fire-and-forget; powers the
   // new-quote deposit pre-fill + contractor info on rendered quotes)
   loadProfileCache().catch(e => console.warn('initial profile load:', e));
@@ -6575,6 +6637,9 @@ function init() {
 
   // Default landing state for Quotes view
   switchQuotesSubView('list');
+
+  // Handle Stripe checkout/portal redirect params (?checkout=success|cancel, ?portal=return)
+  handleCheckoutReturn();
 }
 
 function renderTrades() {
@@ -7450,6 +7515,12 @@ function updateRoofingSubtotal() {
 }
 
 function updateUsageDisplay() {
+  // Pro (and other non-free plans) are unlimited — show that and stop.
+  if (profileCache && profileCache.plan && profileCache.plan !== 'free') {
+    document.getElementById('quoteUsed').textContent = t('sidebar.unlimited');
+    document.getElementById('usageBar').style.width = '100%';
+    return;
+  }
   document.getElementById('quoteUsed').textContent = quoteUsed;
   const pct = Math.min(100, (quoteUsed / 5) * 100);
   document.getElementById('usageBar').style.width = pct + '%';
@@ -8655,6 +8726,91 @@ function confirmModal({ title, body, confirmLabel, cancelLabel, variant } = {}) 
   });
 }
 
+// ============================================================================
+// Stripe — upgrade modal, checkout, billing portal, post-redirect handling
+// ============================================================================
+let upgradeInterval = 'monthly';
+
+function renderUpgradePrice() {
+  const el = document.getElementById('upgradePriceDisplay');
+  if (el) el.textContent = upgradeInterval === 'annual' ? t('upgrade.priceAnnual') : t('upgrade.priceMonthly');
+}
+
+function openUpgradeModal() {
+  upgradeInterval = 'monthly';
+  document.querySelectorAll('#upgradeIntervalToggle button').forEach(b => b.classList.toggle('active', b.dataset.interval === 'monthly'));
+  renderUpgradePrice();
+  const bd = document.getElementById('upgradeModalBackdrop');
+  bd.classList.remove('hidden');
+  requestAnimationFrame(() => bd.classList.add('visible'));
+}
+
+function closeUpgradeModal() {
+  const bd = document.getElementById('upgradeModalBackdrop');
+  bd.classList.remove('visible');
+  setTimeout(() => bd.classList.add('hidden'), 130);
+}
+
+async function startCheckout() {
+  const btn = document.getElementById('upgradeContinueBtn');
+  btn.disabled = true; btn.textContent = t('upgrade.continuing');
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session || !session.access_token) { showToast(t('upgrade.checkoutError'), true); return; }
+    const resp = await fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+      body: JSON.stringify({ interval: upgradeInterval, returnUrl: window.location.origin }),
+    });
+    const data = await resp.json();
+    if (data.alreadyPro) { showToast(t('upgrade.alreadyPro'), false); closeUpgradeModal(); return; }
+    if (!resp.ok || !data.url) { showToast(t('upgrade.checkoutError'), true); return; }
+    window.location.href = data.url;
+  } catch (e) {
+    console.warn('startCheckout:', e);
+    showToast(t('upgrade.checkoutError'), true);
+  } finally {
+    btn.disabled = false; btn.textContent = t('upgrade.continue');
+  }
+}
+
+async function openBillingPortal() {
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session || !session.access_token) return;
+    const resp = await fetch('/api/create-portal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+      body: JSON.stringify({ returnUrl: window.location.origin }),
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.url) { showToast(t('upgrade.portalError'), true); return; }
+    window.location.href = data.url;
+  } catch (e) {
+    console.warn('openBillingPortal:', e);
+    showToast(t('upgrade.portalError'), true);
+  }
+}
+
+function handleCheckoutReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const checkout = params.get('checkout');
+  const portal = params.get('portal');
+  if (checkout === 'success') {
+    showToast(t('upgrade.checkoutSuccess'), false);
+    loadProfileCache().then(() => {
+      if (typeof updateUsageDisplay === 'function') updateUsageDisplay();
+      if (typeof currentView !== 'undefined' && currentView === 'profile') loadProfileData();
+    }).catch(() => {});
+    if (typeof refreshQuoteUsedFromServer === 'function') refreshQuoteUsedFromServer();
+  } else if (checkout === 'cancel') {
+    showToast(t('upgrade.checkoutCanceled'), false);
+  }
+  if (checkout || portal) {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+}
+
 function showProgress(id) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -9600,23 +9756,26 @@ async function loadProfileData(opts) {
   // Logo preview
   renderProfileLogoPreview();
 
-  // Plan + quota. The RPC returns { quotes_used }. There is no Pro plan
-  // yet (Stripe is a later sprint), so isPro stays false and the limit
-  // is the same hardcoded 5 the sidebar uses.
+  // Plan + quota. Pro state comes from the profile row (set by the Stripe
+  // webhook). The get_quote_status RPC is still used for the used/limit
+  // numbers shown on the Free plan.
   try {
-    const { data: status } = await sb.rpc('get_quote_status');
-    const isPro = !!(status && (status.unlimited || status.plan === 'pro' || status.plan === 'Pro'));
+    const isPro = !!(profileCache && profileCache.plan && profileCache.plan !== 'free');
     if (planBadge) {
       planBadge.textContent = isPro ? t('profile.plan.pro') : t('profile.plan.free');
       planBadge.classList.toggle('pro', isPro);
     }
     if (planName) planName.textContent = isPro ? t('profile.plan.proName') : t('profile.plan.freeName');
-    const used = (status && typeof status.quotes_used === 'number') ? status.quotes_used : 0;
-    const limit = (status && typeof status.limit === 'number') ? status.limit : 5;
     if (isPro) {
-      if (progressFill) progressFill.style.width = '100%';
+      if (progressFill) {
+        progressFill.style.width = '100%';
+        progressFill.classList.remove('warning', 'full');
+      }
       if (progressText) progressText.textContent = t('profile.usage.unlimited');
     } else {
+      const { data: status } = await sb.rpc('get_quote_status');
+      const used = (status && typeof status.quotes_used === 'number') ? status.quotes_used : 0;
+      const limit = (status && typeof status.limit === 'number') ? status.limit : 5;
       const pct = Math.min(100, Math.round((used / limit) * 100));
       if (progressFill) {
         progressFill.style.width = pct + '%';
@@ -9629,7 +9788,10 @@ async function loadProfileData(opts) {
           .replace('{limit}', limit);
       }
     }
+    // Toggle Upgrade vs Manage-subscription buttons by plan.
+    const manageBtn = document.getElementById('profileManageSubBtn');
     if (upgradeBtn) upgradeBtn.classList.toggle('hidden', isPro);
+    if (manageBtn) manageBtn.classList.toggle('hidden', !isPro);
   } catch (e) { console.warn('profile plan:', e); }
 
   // Activity counts (non-archived)
