@@ -1448,6 +1448,11 @@
   #quotesListTable th:nth-child(6) { width: 140px; } /* Date */
   #quotesListTable th:nth-child(7) { width: 50px; }  /* Delete */
 
+  #invoicesListTable { width: 100%; table-layout: fixed; min-width: 0; }
+  #invoicesListTable th:nth-child(3) { width: 110px; } /* Total */
+  #invoicesListTable th:nth-child(4) { width: 120px; } /* Status */
+  #invoicesListTable th:nth-child(5) { width: 130px; } /* Date */
+
   #followupsListTable th:nth-child(4) { width: 90px; }  /* Channel */
   #followupsListTable th:nth-child(5) { width: 140px; } /* Date */
   #followupsListTable th:nth-child(6) { width: 50px; }  /* Delete */
@@ -1802,6 +1807,12 @@
       white-space: nowrap;
     }
 
+    /* Invoices list: fit to viewport, hide the Date column */
+    #invoicesView .card { padding: 8px; }
+    #invoicesListTable { width:100% !important; table-layout:fixed !important; min-width:0 !important; max-width:100% !important; }
+    #invoicesListTable th:nth-child(5), #invoicesListTable td:nth-child(5) { display:none; } /* hide Date */
+    #invoicesListTable th, #invoicesListTable td { padding:6px 4px; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
     /* Status dropdowns on every list + cross-reference card: compact
        padding for narrow viewports */
     #jobsListTable .status-select,
@@ -1947,7 +1958,7 @@
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 13h6M9 17h6"/></svg>
       <span data-i18n="nav.quotes">Quotes</span>
     </div>
-    <div id="navInvoices" class="nav-item hidden">
+    <div id="navInvoices" class="nav-item">
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 13h2M9 17h6M13 13h2"/></svg>
       <span data-i18n="nav.invoices">Invoices</span>
     </div>
@@ -3720,8 +3731,36 @@
           <div class="view-header-spacer"></div>
         </div>
 
-        <!-- List sub-view: placeholder, built in INV-B -->
-        <div id="invoicesListSub" class="hidden"></div>
+        <!-- List sub-view -->
+        <div id="invoicesListSub" class="hidden">
+          <div class="card">
+            <div class="card-title" data-i18n="invoices.title">Invoices</div>
+            <div class="card-sub" data-i18n="invoices.sub">Every invoice created from your quotes. Click a row to open it.</div>
+            <input type="search" class="input" id="invoicesSearchInput"
+                   data-i18n-placeholder="invoices.searchPlaceholder"
+                   placeholder="Search by client or invoice #..."
+                   style="max-width: 360px; margin-bottom: 16px;" />
+            <div id="invoicesListEmpty" class="hidden" style="text-align:center; padding:40px 20px; color:var(--ink-3);">
+              <div style="font-size:48px; margin-bottom:12px;">🧾</div>
+              <p data-i18n="invoices.empty">No invoices yet. Convert an accepted quote to create one.</p>
+            </div>
+            <div id="invoicesListLoading" class="hidden" style="text-align:center; padding:40px 20px; color:var(--ink-3);">
+              <span data-i18n="invoices.loading">Loading...</span>
+            </div>
+            <table class="line-table" id="invoicesListTable">
+              <thead>
+                <tr>
+                  <th data-i18n="invoices.col.number">Invoice #</th>
+                  <th data-i18n="invoices.col.client">Client</th>
+                  <th class="amt-col" data-i18n="invoices.col.total">Total</th>
+                  <th data-i18n="invoices.col.status">Status</th>
+                  <th data-i18n="invoices.col.date">Date</th>
+                </tr>
+              </thead>
+              <tbody id="invoicesListBody"></tbody>
+            </table>
+          </div>
+        </div>
 
         <!-- Document sub-view -->
         <div id="invoicesDocSub" class="hidden">
@@ -4123,6 +4162,17 @@ const I18N = {
     'quote.convertInvoice': '→ Convert to invoice',
     'quote.viewInvoice': '→ View invoice',
     'nav.invoices': 'Invoices',
+    'invoices.viewTitleHtml': '<em>Invoices</em>',
+    'invoices.title': 'Invoices',
+    'invoices.sub': 'Every invoice created from your quotes. Click a row to open it.',
+    'invoices.searchPlaceholder': 'Search by client or invoice #...',
+    'invoices.empty': 'No invoices yet. Convert an accepted quote to create one.',
+    'invoices.loading': 'Loading...',
+    'invoices.col.number': 'Invoice #',
+    'invoices.col.client': 'Client',
+    'invoices.col.total': 'Total',
+    'invoices.col.status': 'Status',
+    'invoices.col.date': 'Date',
     'invoice.viewTitleHtml': '<em>Invoice</em>',
     'invoice.label': 'Invoice',
     'invoice.back': 'Back',
@@ -4816,6 +4866,17 @@ const I18N = {
     'quote.convertInvoice': '→ Convertir a factura',
     'quote.viewInvoice': '→ Ver factura',
     'nav.invoices': 'Facturas',
+    'invoices.viewTitleHtml': '<em>Facturas</em>',
+    'invoices.title': 'Facturas',
+    'invoices.sub': 'Todas las facturas creadas desde tus cotizaciones. Haz clic en una fila para abrir.',
+    'invoices.searchPlaceholder': 'Buscar por cliente o # de factura...',
+    'invoices.empty': 'No hay facturas todavía. Convierte una cotización aceptada para crear una.',
+    'invoices.loading': 'Cargando...',
+    'invoices.col.number': 'Factura #',
+    'invoices.col.client': 'Cliente',
+    'invoices.col.total': 'Total',
+    'invoices.col.status': 'Estado',
+    'invoices.col.date': 'Fecha',
     'invoice.viewTitleHtml': '<em>Factura</em>',
     'invoice.label': 'Factura',
     'invoice.back': 'Volver',
@@ -5351,6 +5412,8 @@ let currentQuote = null;
 let currentFollowup = null;
 let currentInvoice = null;
 let invoicesSubView = 'doc';
+let savedInvoicesCache = [];
+let invoiceReturnTo = 'quote';   // 'quote' | 'list'
 
 function applyQuoteContentLang() {
   const wrap = document.getElementById('quoteWrap');
@@ -5475,6 +5538,12 @@ function applyLanguage() {
       && Array.isArray(savedQuotesCache)
       && savedQuotesCache.length > 0) {
     renderQuotesList();
+  }
+  if (typeof renderInvoicesList === 'function'
+      && typeof currentView !== 'undefined' && currentView === 'invoices'
+      && invoicesSubView === 'list'
+      && Array.isArray(savedInvoicesCache) && savedInvoicesCache.length > 0) {
+    renderInvoicesList();
   }
   // Re-render the followups list — same reason as the quotes list.
   if (typeof renderFollowupsList === 'function'
@@ -6688,6 +6757,8 @@ function init() {
   // Search input (unchanged from 2-C)
   const quotesSearch = document.getElementById('quotesSearchInput');
   if (quotesSearch) quotesSearch.addEventListener('input', renderQuotesList);
+  const invSearch = document.getElementById('invoicesSearchInput');
+  if (invSearch) invSearch.addEventListener('input', renderInvoicesList);
   // Clients header bindings
   const clientsNewBtn = document.getElementById('clientsNewBtn');
   if (clientsNewBtn) clientsNewBtn.onclick = enterNewClientMode;
@@ -6853,6 +6924,10 @@ function init() {
   bindInvoicePaymentControls();
   const invBackBtn = document.getElementById('invoicesBackBtn');
   if (invBackBtn) invBackBtn.onclick = () => {
+    if (invoiceReturnTo === 'list') {
+      switchInvoicesSubView('list');
+      return;
+    }
     switchView('quotes');
     if (currentInvoice && currentInvoice.quote_id) openSavedQuote(currentInvoice.quote_id);
     else switchQuotesSubView('list');
@@ -7183,6 +7258,7 @@ function bindRoofingInputs() {
 
 function bindNav() {
   document.getElementById('navQuotes').onclick = () => { switchView('quotes'); closeDrawer(); };
+  document.getElementById('navInvoices').onclick = () => { switchView('invoices'); closeDrawer(); };
   document.getElementById('navFollowups').onclick = () => { switchView('followups'); closeDrawer(); };
   document.getElementById('navClients').onclick = () => { switchView('clients'); closeDrawer(); };
   document.getElementById('navJobs').onclick = () => { switchView('jobs'); closeDrawer(); };
@@ -7234,7 +7310,7 @@ const VIEW_TOPBAR = {
   jobs:      { titleHtml: 'topbar.jobs',            meta: 'topbar.previewOnly' },
   payments:  { titleHtml: 'topbar.payments',        meta: 'topbar.previewOnly' },
   profile:   { titleHtml: 'profile.title',          meta: '' },
-  invoices:  { titleHtml: 'invoice.viewTitleHtml',  meta: '' },
+  invoices:  { titleHtml: 'invoices.viewTitleHtml', meta: '' },
 };
 
 function refreshTopbarForCurrentView() {
@@ -7268,6 +7344,9 @@ function switchView(view) {
 
   if (view === 'quotes') {
     switchQuotesSubView('list');
+  }
+  if (view === 'invoices') {
+    switchInvoicesSubView('list');
   }
   if (view === 'clients') {
     switchClientsSubView('list');
@@ -8909,7 +8988,7 @@ async function convertToInvoice() {
     refreshQuoteConvertInvoiceButton();
 
     showToast(t('toast.invoiceCreated'));
-    enterInvoiceView(inv);
+    enterInvoiceView(inv, 'quote');
   } catch (e) {
     console.warn('convertToInvoice threw:', e);
     showToast(t('toast.invoiceCreateFailed'), true);
@@ -8923,7 +9002,7 @@ async function openInvoiceForQuote(quoteId) {
     const { data, error } = await sb.from('invoices').select('*')
       .eq('quote_id', quoteId).order('created_at', { ascending: true }).limit(1).maybeSingle();
     if (error || !data) { showToast(t('toast.invoiceLoadFailed'), true); return; }
-    enterInvoiceView(data);
+    enterInvoiceView(data, 'quote');
   } catch (e) { console.warn('openInvoiceForQuote threw:', e); showToast(t('toast.invoiceLoadFailed'), true); }
 }
 
@@ -8931,11 +9010,12 @@ async function openInvoice(invoiceId) {
   try {
     const { data, error } = await sb.from('invoices').select('*').eq('id', invoiceId).single();
     if (error || !data) { showToast(t('toast.invoiceLoadFailed'), true); return; }
-    enterInvoiceView(data);
+    enterInvoiceView(data, 'list');
   } catch (e) { console.warn('openInvoice threw:', e); showToast(t('toast.invoiceLoadFailed'), true); }
 }
 
-function enterInvoiceView(invoice) {
+function enterInvoiceView(invoice, returnTo) {
+  invoiceReturnTo = (returnTo === 'list') ? 'list' : 'quote';
   currentInvoice = invoice;
   switchView('invoices');
   switchInvoicesSubView('doc');
@@ -8951,6 +9031,90 @@ function switchInvoicesSubView(view) {
   const doc = document.getElementById('invoicesDocSub');
   if (list) list.classList.toggle('hidden', invoicesSubView !== 'list');
   if (doc) doc.classList.toggle('hidden', invoicesSubView !== 'doc');
+  // Back button: hidden on the list, visible on a single-invoice doc
+  const back = document.getElementById('invoicesBackBtn');
+  if (back) back.classList.toggle('hidden', invoicesSubView === 'list');
+  if (invoicesSubView === 'list') loadInvoices();
+}
+
+async function loadInvoices() {
+  const empty = document.getElementById('invoicesListEmpty');
+  const loading = document.getElementById('invoicesListLoading');
+  const table = document.getElementById('invoicesListTable');
+
+  loading.classList.remove('hidden');
+  table.classList.add('hidden');
+  empty.classList.add('hidden');
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.access_token) {
+    savedInvoicesCache = [];
+    loading.classList.add('hidden');
+    empty.classList.remove('hidden');
+    return;
+  }
+
+  try {
+    const { data, error } = await sb.from('invoices')
+      .select('id, invoice_number, client_name, total, amount_paid, status, due_date, created_at')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    savedInvoicesCache = data || [];
+  } catch (e) {
+    console.warn('loadInvoices failed:', e);
+    savedInvoicesCache = [];
+  }
+
+  loading.classList.add('hidden');
+  renderInvoicesList();
+}
+
+function renderInvoicesList() {
+  const tbody = document.getElementById('invoicesListBody');
+  const table = document.getElementById('invoicesListTable');
+  const empty = document.getElementById('invoicesListEmpty');
+  const searchEl = document.getElementById('invoicesSearchInput');
+  const q = (searchEl ? searchEl.value : '').trim().toLowerCase();
+
+  const filtered = savedInvoicesCache.filter(inv => {
+    if (!q) return true;
+    const name = (inv.client_name || '').toLowerCase();
+    const num = ('inv-' + (inv.invoice_number != null ? inv.invoice_number : '')).toLowerCase();
+    return name.includes(q) || num.includes(q);
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    table.classList.add('hidden');
+    empty.classList.remove('hidden');
+    const p = empty.querySelector('p');
+    if (p) { p.setAttribute('data-i18n', 'invoices.empty'); p.textContent = t('invoices.empty'); }
+    return;
+  }
+  table.classList.remove('hidden');
+  empty.classList.add('hidden');
+
+  tbody.innerHTML = filtered.map(inv => {
+    const number = '#INV-' + (inv.invoice_number != null ? inv.invoice_number : '----');
+    const client = escapeHtml(inv.client_name || '—');
+    const totalDisp = fmt(parseFloat(inv.total) || 0);
+    const eff = invoiceEffectiveStatus(inv);
+    const pill = `<span class="status-pill status-${eff}">${escapeHtml(invoiceStatusLabel(eff))}</span>`;
+    const date = formatRelativeDate(inv.created_at);
+    return `
+      <tr class="invoices-list-row" data-invoice-id="${inv.id}" style="cursor:pointer;">
+        <td><strong>${escapeHtml(number)}</strong></td>
+        <td>${client}</td>
+        <td class="amt-col">${totalDisp}</td>
+        <td>${pill}</td>
+        <td>${escapeHtml(date)}</td>
+      </tr>`;
+  }).join('');
+
+  tbody.querySelectorAll('.invoices-list-row').forEach(row => {
+    row.onclick = () => openInvoice(row.dataset.invoiceId);
+  });
 }
 
 function invoiceEffectiveStatus(inv) {
