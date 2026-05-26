@@ -260,6 +260,8 @@
   .status-paid { background: rgba(47, 122, 77, 0.12); color: #2F7A4D; }
   .status-pending { background: rgba(255, 182, 45, 0.16); color: #B8731F; }
   .status-overdue { background: rgba(179, 58, 42, 0.14); color: #B33A2A; }
+  .status-unpaid { background: rgba(255, 182, 45, 0.16); color: #B8731F; }
+  .status-partial { background: rgba(16, 103, 229, 0.12); color: #1067E5; }
   .status-draft { background: rgba(138, 143, 156, 0.14); color: #5A6070; }
   .status-sent { background: rgba(16, 103, 229, 0.12); color: #1067E5; }
   .status-accepted { background: rgba(47, 122, 77, 0.12); color: #2F7A4D; }
@@ -1945,6 +1947,10 @@
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 13h6M9 17h6"/></svg>
       <span data-i18n="nav.quotes">Quotes</span>
     </div>
+    <div id="navInvoices" class="nav-item hidden">
+      <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 13h2M9 17h6M13 13h2"/></svg>
+      <span data-i18n="nav.invoices">Invoices</span>
+    </div>
     <div id="navFollowups" class="nav-item">
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       <span data-i18n="nav.followups">Follow-ups</span>
@@ -2760,7 +2766,9 @@
             <button class="action-btn" id="quoteArchiveBtn" onclick="toggleArchiveCurrentQuote()">
               📦 <span id="quoteArchiveBtnLabel" data-i18n="archive.button.archive">Archive</span>
             </button>
-            <button class="action-btn primary" onclick="convertToInvoice()" data-i18n="quote.convertInvoice">→ Convert to invoice</button>
+            <button class="action-btn primary" id="quoteConvertInvoiceBtn" onclick="convertToInvoice()">
+              <span id="quoteConvertInvoiceBtnText" data-i18n="quote.convertInvoice">→ Convert to invoice</span>
+            </button>
           </div>
         </div>
 
@@ -3704,6 +3712,145 @@
         </div>
       </div>
 
+      <div id="invoicesView" class="hidden">
+        <div class="view-header" id="invoicesHeader">
+          <button id="invoicesBackBtn" type="button" class="btn-ghost">
+            ← <span data-i18n="invoice.back">Back</span>
+          </button>
+          <div class="view-header-spacer"></div>
+        </div>
+
+        <!-- List sub-view: placeholder, built in INV-B -->
+        <div id="invoicesListSub" class="hidden"></div>
+
+        <!-- Document sub-view -->
+        <div id="invoicesDocSub" class="hidden">
+          <div class="quote-wrap" id="invoiceWrap">
+            <div class="quote-actions-bar">
+              <div class="left">
+                <div class="status-chip" id="invoiceStatusChip">—</div>
+                <span class="topbar-meta" id="invoiceMetaLine"></span>
+              </div>
+              <div class="right">
+                <button class="action-btn" onclick="downloadInvoicePdf()" data-i18n="invoice.downloadPdf">⬇ Download PDF</button>
+                <button class="action-btn" onclick="sendInvoiceEmail()" data-i18n="invoice.email">✉ Email</button>
+                <button class="action-btn" onclick="sendInvoiceText()" data-i18n="invoice.text">💬 Text</button>
+              </div>
+            </div>
+
+            <!-- Payment controls — intentionally OUTSIDE #invoiceDoc so they
+                 never appear in the generated PDF -->
+            <div class="card" id="invoicePaymentPanel" style="margin-bottom: 16px;">
+              <div class="field-row cols-3">
+                <div>
+                  <label class="label" data-i18n="invoice.paymentStatus">Payment status</label>
+                  <select class="select" id="invoiceStatusSelect">
+                    <option value="unpaid" data-i18n="invoice.status.unpaid">Unpaid</option>
+                    <option value="partial" data-i18n="invoice.status.partial">Partially paid</option>
+                    <option value="paid" data-i18n="invoice.status.paid">Paid</option>
+                  </select>
+                </div>
+                <div id="invoiceAmountPaidField">
+                  <label class="label" data-i18n="invoice.amountPaid">Amount paid ($)</label>
+                  <input type="number" class="input" id="invoiceAmountPaid" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="invoice.dueDate">Due date</label>
+                  <input type="date" class="input" id="invoiceDueDate" />
+                </div>
+              </div>
+            </div>
+
+            <div class="quote" id="invoiceDoc">
+              <div class="quote-header">
+                <div>
+                  <div class="quote-logo-box hidden" id="invoiceLogoBox">
+                    <img class="quote-logo" id="invoiceLogo" alt="" crossorigin="anonymous" />
+                  </div>
+                  <div class="quote-company-name" id="invoiceCompanyName">Your Company Name</div>
+                  <div class="quote-company-tag" id="invoiceCompanyTag"></div>
+                </div>
+                <div class="quote-meta">
+                  <div class="quote-meta-label" data-i18n="invoice.label">Invoice</div>
+                  <div class="quote-id" id="invoiceNumber">#INV-1001</div>
+                  <div class="quote-meta-label" data-i18n="invoice.issueDate">Issue date</div>
+                  <div class="quote-date" id="invoiceIssueDate">—</div>
+                  <div class="quote-meta-label" data-i18n="invoice.dueDateLabel">Due date</div>
+                  <div class="quote-date" id="invoiceDueDateDisp">—</div>
+                  <div style="margin-top: 10px;"><span class="status-pill" id="invoiceStatusPill">—</span></div>
+                </div>
+              </div>
+
+              <div class="quote-grid">
+                <div>
+                  <div class="quote-block-label" data-i18n="invoice.billTo">Bill to</div>
+                  <div class="quote-block-value">
+                    <strong id="invoiceClientName">—</strong><br/>
+                    <span id="invoiceClientAddr"></span>
+                  </div>
+                </div>
+                <div>
+                  <div class="quote-block-label" data-i18n="quote.tradeTimeline">Trade · Timeline</div>
+                  <div class="quote-block-value" id="invoiceTradeMeta">—</div>
+                </div>
+              </div>
+
+              <div class="quote-section" id="invoiceScopeSection">
+                <div class="quote-section-title" data-i18n="quote.scope">Scope of work</div>
+                <div class="quote-scope" id="invoiceScope">—</div>
+              </div>
+
+              <div class="quote-section">
+                <div class="quote-section-title" data-i18n="quote.lineItems">Line items</div>
+                <table class="line-table" id="invoiceLineTable">
+                  <thead>
+                    <tr>
+                      <th style="width: 70%" data-i18n="quote.colDescription">Description</th>
+                      <th class="amt-col" data-i18n="quote.colAmount">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody id="invoiceLineBody"></tbody>
+                </table>
+
+                <div class="totals-block">
+                  <div class="totals-row">
+                    <span class="lbl" data-i18n="quote.subtotal">Subtotal</span>
+                    <span class="val" id="invoiceSubtotalDisp">$0.00</span>
+                  </div>
+                  <div class="totals-row" id="invoiceTaxRow">
+                    <span class="lbl" id="invoiceTaxLbl" data-i18n="quote.tax">Tax</span>
+                    <span class="val" id="invoiceTaxDisp">$0.00</span>
+                  </div>
+                  <div class="totals-row grand">
+                    <span class="lbl" data-i18n="quote.total">Total</span>
+                    <span class="val" id="invoiceTotalDisp">$0.00</span>
+                  </div>
+                  <div class="totals-row" id="invoiceAmountPaidRow">
+                    <span class="lbl" data-i18n="invoice.amountPaidLabel">Amount paid</span>
+                    <span class="val" id="invoiceAmountPaidDisp">$0.00</span>
+                  </div>
+                  <div class="totals-row grand" id="invoiceBalanceRow">
+                    <span class="lbl" data-i18n="invoice.balanceDue">Balance due</span>
+                    <span class="val" id="invoiceBalanceDisp">$0.00</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="quote-footer-grid">
+                <div>
+                  <div class="quote-section-title" data-i18n="quote.terms">Payment terms</div>
+                  <div class="quote-footer-text" id="invoiceTerms">—</div>
+                </div>
+                <div>
+                  <div class="quote-section-title" data-i18n="quote.warranty">Warranty</div>
+                  <div class="quote-footer-text" id="invoiceWarranty">—</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </main>
 </div>
@@ -3974,6 +4121,32 @@ const I18N = {
     'quote.text': '💬 Text',
     'quote.downloadPdf': '⬇ Download PDF',
     'quote.convertInvoice': '→ Convert to invoice',
+    'quote.viewInvoice': '→ View invoice',
+    'nav.invoices': 'Invoices',
+    'invoice.viewTitleHtml': '<em>Invoice</em>',
+    'invoice.label': 'Invoice',
+    'invoice.back': 'Back',
+    'invoice.billTo': 'Bill to',
+    'invoice.issueDate': 'Issue date',
+    'invoice.dueDateLabel': 'Due date',
+    'invoice.dueDate': 'Due date',
+    'invoice.paymentStatus': 'Payment status',
+    'invoice.amountPaid': 'Amount paid ($)',
+    'invoice.amountPaidLabel': 'Amount paid',
+    'invoice.balanceDue': 'Balance due',
+    'invoice.status.unpaid': 'Unpaid',
+    'invoice.status.partial': 'Partially paid',
+    'invoice.status.paid': 'Paid',
+    'invoice.status.overdue': 'Overdue',
+    'invoice.downloadPdf': '⬇ Download PDF',
+    'invoice.email': '✉ Email',
+    'invoice.text': '💬 Text',
+    'invoice.termsTemplate': 'Payment due by {due}. Balance due: {balance}. Accepted: check, ACH, or major credit cards.',
+    'toast.invoiceCreated': 'Invoice created ✓',
+    'toast.invoiceCreateFailed': 'Could not create invoice',
+    'toast.invoiceLoadFailed': 'Could not load invoice',
+    'toast.invoiceSaved': 'Invoice updated',
+    'toast.invoiceSaveFailed': 'Could not save invoice',
     'quote.companyName': 'Your Company Name',
     'quote.companyTag': 'Licensed · Insured · Family-owned since 2009',
     'quote.label': 'Quote',
@@ -4641,6 +4814,32 @@ const I18N = {
     'quote.text': '💬 SMS',
     'quote.downloadPdf': '⬇ Descargar PDF',
     'quote.convertInvoice': '→ Convertir a factura',
+    'quote.viewInvoice': '→ Ver factura',
+    'nav.invoices': 'Facturas',
+    'invoice.viewTitleHtml': '<em>Factura</em>',
+    'invoice.label': 'Factura',
+    'invoice.back': 'Volver',
+    'invoice.billTo': 'Facturar a',
+    'invoice.issueDate': 'Fecha de emisión',
+    'invoice.dueDateLabel': 'Fecha de vencimiento',
+    'invoice.dueDate': 'Vencimiento',
+    'invoice.paymentStatus': 'Estado de pago',
+    'invoice.amountPaid': 'Monto pagado ($)',
+    'invoice.amountPaidLabel': 'Monto pagado',
+    'invoice.balanceDue': 'Saldo pendiente',
+    'invoice.status.unpaid': 'Sin pagar',
+    'invoice.status.partial': 'Pago parcial',
+    'invoice.status.paid': 'Pagado',
+    'invoice.status.overdue': 'Vencido',
+    'invoice.downloadPdf': '⬇ Descargar PDF',
+    'invoice.email': '✉ Correo',
+    'invoice.text': '💬 SMS',
+    'invoice.termsTemplate': 'Pago a más tardar el {due}. Saldo pendiente: {balance}. Se acepta: cheque, ACH o tarjetas de crédito principales.',
+    'toast.invoiceCreated': 'Factura creada ✓',
+    'toast.invoiceCreateFailed': 'No se pudo crear la factura',
+    'toast.invoiceLoadFailed': 'No se pudo cargar la factura',
+    'toast.invoiceSaved': 'Factura actualizada',
+    'toast.invoiceSaveFailed': 'No se pudo guardar la factura',
     'quote.companyName': 'Nombre de tu empresa',
     'quote.companyTag': 'Con licencia · Asegurado · Empresa familiar desde 2009',
     'quote.label': 'Cotización',
@@ -5150,6 +5349,8 @@ function quoteContentLang() {
 // back only to the currently-displayed language slot.
 let currentQuote = null;
 let currentFollowup = null;
+let currentInvoice = null;
+let invoicesSubView = 'doc';
 
 function applyQuoteContentLang() {
   const wrap = document.getElementById('quoteWrap');
@@ -5259,6 +5460,11 @@ function applyLanguage() {
   // Bilingual AI content: re-render in the new language if a quote/followup is on screen
   if (typeof rerenderQuoteForLanguage === 'function') rerenderQuoteForLanguage();
   if (typeof rerenderFollowupForLanguage === 'function') rerenderFollowupForLanguage();
+  if (typeof refreshQuoteConvertInvoiceButton === 'function') refreshQuoteConvertInvoiceButton();
+  if (typeof renderInvoice === 'function' && typeof currentView !== 'undefined'
+      && currentView === 'invoices' && currentInvoice) {
+    renderInvoice(currentInvoice);
+  }
   // Re-render dynamic content inside the My Quotes list — the rows
   // are built with t() at template time and don't pick up data-i18n
   // attribute sweeps. Only re-render when we're actually showing
@@ -5962,6 +6168,14 @@ function refreshQuoteCreateJobButton() {
   btn.classList.toggle('hidden', hide);
 }
 
+function refreshQuoteConvertInvoiceButton() {
+  const lbl = document.getElementById('quoteConvertInvoiceBtnText');
+  if (!lbl) return;
+  const invoiced = !!(currentQuote && currentQuote.status === 'invoiced');
+  lbl.setAttribute('data-i18n', invoiced ? 'quote.viewInvoice' : 'quote.convertInvoice');
+  lbl.textContent = t(invoiced ? 'quote.viewInvoice' : 'quote.convertInvoice');
+}
+
 async function enterNewJobMode(seed) {
   seed = seed || {};
   clearTimeout(jobsSaveTimer);
@@ -6635,6 +6849,15 @@ function init() {
     }
   };
 
+  // Invoice payment controls + back-to-quote navigation
+  bindInvoicePaymentControls();
+  const invBackBtn = document.getElementById('invoicesBackBtn');
+  if (invBackBtn) invBackBtn.onclick = () => {
+    switchView('quotes');
+    if (currentInvoice && currentInvoice.quote_id) openSavedQuote(currentInvoice.quote_id);
+    else switchQuotesSubView('list');
+  };
+
   // Default landing state for Quotes view
   switchQuotesSubView('list');
 
@@ -7011,6 +7234,7 @@ const VIEW_TOPBAR = {
   jobs:      { titleHtml: 'topbar.jobs',            meta: 'topbar.previewOnly' },
   payments:  { titleHtml: 'topbar.payments',        meta: 'topbar.previewOnly' },
   profile:   { titleHtml: 'profile.title',          meta: '' },
+  invoices:  { titleHtml: 'invoice.viewTitleHtml',  meta: '' },
 };
 
 function refreshTopbarForCurrentView() {
@@ -7033,9 +7257,11 @@ function switchView(view) {
   document.getElementById('jobsView').classList.toggle('hidden', view !== 'jobs');
   document.getElementById('paymentsView').classList.toggle('hidden', view !== 'payments');
   document.getElementById('profileView').classList.toggle('hidden', view !== 'profile');
+  document.getElementById('invoicesView').classList.toggle('hidden', view !== 'invoices');
 
-  ['navQuotes', 'navFollowups', 'navClients', 'navJobs', 'navPayments', 'navProfile'].forEach(id => {
-    document.getElementById(id).classList.toggle('active', id === `nav${view.charAt(0).toUpperCase()}${view.slice(1)}`);
+  ['navQuotes', 'navFollowups', 'navClients', 'navJobs', 'navPayments', 'navProfile', 'navInvoices'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', id === `nav${view.charAt(0).toUpperCase()}${view.slice(1)}`);
   });
 
   refreshTopbarForCurrentView();
@@ -8072,6 +8298,7 @@ function renderQuote(data) {
   recalcTotals();
   refreshQuoteLangNotice();
   refreshQuoteCreateJobButton();
+  refreshQuoteConvertInvoiceButton();
   refreshQuoteArchiveButton();
 }
 
@@ -8639,8 +8866,364 @@ async function sendQuoteText() {
   }, 800);
 }
 
-function convertToInvoice() {
-  showToast(t('toast.invoicePlaceholder'));
+async function convertToInvoice() {
+  if (!currentQuote || !currentQuote.id) { showToast(t('toast.invoiceCreateFailed'), true); return; }
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.access_token) { showToast(t('toast.invoiceCreateFailed'), true); return; }
+
+  // Already invoiced → just open the existing invoice (button reads "View invoice")
+  if (currentQuote.status === 'invoiced') { openInvoiceForQuote(currentQuote.id); return; }
+
+  const btn = document.getElementById('quoteConvertInvoiceBtn');
+  if (btn) btn.disabled = true;
+  try {
+    // Flush pending quote edits so the server-side snapshot is current
+    clearTimeout(quotesSaveTimer);
+    await saveCurrentQuoteEdits().catch(e => console.warn('flush before invoice:', e));
+
+    // Capture the rendered (form-state-dependent) tax/subtotal/total from the quote doc
+    const subtotal = parseAmount(document.getElementById('subtotalDisp').textContent);
+    const taxAmt = parseAmount(document.getElementById('taxDisp').textContent);
+    const total = parseAmount(document.getElementById('totalDisp').textContent);
+    const taxVisible = document.getElementById('taxRow').style.display !== 'none';
+    const taxLbl = taxVisible ? document.getElementById('taxRowLbl').textContent : '';
+
+    const { data: inv, error } = await sb.rpc('create_invoice_from_quote', { p_quote_id: currentQuote.id });
+    if (error || !inv) { console.warn('create_invoice_from_quote:', error); showToast(t('toast.invoiceCreateFailed'), true); return; }
+
+    // Bake the tax snapshot onto the new invoice so it renders self-contained,
+    // independent of the quote form's later state. Only enrich a freshly
+    // created invoice (subtotal still 0); never clobber a pre-existing one.
+    const payload = inv.payload || {};
+    payload._invoiceTaxLabel = taxLbl || '';
+    if ((Number(inv.subtotal) || 0) === 0 && subtotal > 0) {
+      const { data: updated, error: uErr } = await sb.from('invoices')
+        .update({ subtotal: subtotal, tax: taxAmt, total: total, payload: payload, updated_at: new Date().toISOString() })
+        .eq('id', inv.id).select('*').single();
+      if (!uErr && updated) Object.assign(inv, updated);
+      else { inv.subtotal = subtotal; inv.tax = taxAmt; inv.total = total; inv.payload = payload; }
+    }
+
+    // Reflect the quote→invoiced flip in memory + on its button
+    currentQuote.status = 'invoiced';
+    refreshQuoteConvertInvoiceButton();
+
+    showToast(t('toast.invoiceCreated'));
+    enterInvoiceView(inv);
+  } catch (e) {
+    console.warn('convertToInvoice threw:', e);
+    showToast(t('toast.invoiceCreateFailed'), true);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function openInvoiceForQuote(quoteId) {
+  try {
+    const { data, error } = await sb.from('invoices').select('*')
+      .eq('quote_id', quoteId).order('created_at', { ascending: true }).limit(1).maybeSingle();
+    if (error || !data) { showToast(t('toast.invoiceLoadFailed'), true); return; }
+    enterInvoiceView(data);
+  } catch (e) { console.warn('openInvoiceForQuote threw:', e); showToast(t('toast.invoiceLoadFailed'), true); }
+}
+
+async function openInvoice(invoiceId) {
+  try {
+    const { data, error } = await sb.from('invoices').select('*').eq('id', invoiceId).single();
+    if (error || !data) { showToast(t('toast.invoiceLoadFailed'), true); return; }
+    enterInvoiceView(data);
+  } catch (e) { console.warn('openInvoice threw:', e); showToast(t('toast.invoiceLoadFailed'), true); }
+}
+
+function enterInvoiceView(invoice) {
+  currentInvoice = invoice;
+  switchView('invoices');
+  switchInvoicesSubView('doc');
+  renderInvoice(invoice);
+  const wrap = document.getElementById('invoiceWrap');
+  if (wrap) { wrap.classList.add('visible'); wrap.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+}
+
+function switchInvoicesSubView(view) {
+  const valid = ['list', 'doc'];
+  invoicesSubView = valid.includes(view) ? view : 'doc';
+  const list = document.getElementById('invoicesListSub');
+  const doc = document.getElementById('invoicesDocSub');
+  if (list) list.classList.toggle('hidden', invoicesSubView !== 'list');
+  if (doc) doc.classList.toggle('hidden', invoicesSubView !== 'doc');
+}
+
+function invoiceEffectiveStatus(inv) {
+  if (!inv) return 'unpaid';
+  if (inv.status === 'paid') return 'paid';
+  if (inv.due_date) {
+    const due = new Date(inv.due_date + 'T23:59:59');
+    if (due.getTime() < Date.now()) return 'overdue';
+  }
+  return inv.status || 'unpaid';
+}
+
+function invoiceStatusLabel(eff) {
+  const key = { unpaid: 'invoice.status.unpaid', partial: 'invoice.status.partial', paid: 'invoice.status.paid', overdue: 'invoice.status.overdue' }[eff] || 'invoice.status.unpaid';
+  return t(key);
+}
+
+function renderInvoiceLineItems(payload, tradeList) {
+  const tbody = document.getElementById('invoiceLineBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  const items = Array.isArray(payload.lineItems) ? payload.lineItems : [];
+  const order = (tradeList && tradeList.length) ? tradeList.slice() : [];
+  items.forEach(li => { const tn = li.trade || ''; if (tn && !order.includes(tn)) order.push(tn); });
+  const groups = {};
+  items.forEach(li => { const tn = li.trade || '—'; (groups[tn] = groups[tn] || []).push(li); });
+  const renderGroup = (tn, arr) => {
+    const sub = arr.reduce((s, li) => s + (parseFloat(li.amount) || 0), 0);
+    const tr = TRADES.find(td => td.name === tn);
+    const emoji = tr ? tr.emoji : '';
+    const h = document.createElement('tr');
+    h.className = 'line-trade-header';
+    h.innerHTML = '<td>' + (emoji ? emoji + ' ' : '') + escapeHtml(tradeDisplay(tn)) + '</td>'
+      + '<td class="amt-col">' + fmt(sub) + '</td>';
+    tbody.appendChild(h);
+    arr.forEach(li => {
+      const row = document.createElement('tr');
+      row.innerHTML = '<td><div class="line-name">' + escapeHtml(pickLang(li.name)) + '</div>'
+        + '<div class="line-desc">' + escapeHtml(pickLang(li.desc)) + '</div></td>'
+        + '<td class="amt-col"><span class="amt-cell">' + fmt(parseFloat(li.amount) || 0) + '</span></td>';
+      tbody.appendChild(row);
+    });
+  };
+  order.forEach(tn => { if (groups[tn] && groups[tn].length) { renderGroup(tn, groups[tn]); delete groups[tn]; } });
+  Object.keys(groups).forEach(tn => { if (groups[tn].length) renderGroup(tn, groups[tn]); });
+}
+
+function renderInvoice(inv) {
+  if (!inv) return;
+  const p = inv.payload || {};
+  const prof = profileCache || {};
+
+  // Company identity (reuse the profile)
+  const nameEl = document.getElementById('invoiceCompanyName');
+  const tagEl = document.getElementById('invoiceCompanyTag');
+  if (nameEl) nameEl.textContent = prof.company_name || t('quote.companyName');
+  if (tagEl) {
+    const bits = [];
+    if (prof.business_address) bits.push(prof.business_address);
+    if (prof.license_number) {
+      const lbl = t('profile.business.license').replace(/\s*\((optional|opcional)\)/i, '');
+      bits.push(lbl + ': ' + prof.license_number);
+    }
+    tagEl.textContent = bits.join(' · ');
+  }
+  const logoBox = document.getElementById('invoiceLogoBox');
+  const logoImg = document.getElementById('invoiceLogo');
+  if (logoBox && logoImg) {
+    if (prof.logo_url) { logoImg.src = prof.logo_url; logoBox.classList.remove('hidden'); }
+    else { logoImg.removeAttribute('src'); logoBox.classList.add('hidden'); }
+  }
+  const doc = document.getElementById('invoiceDoc');
+  if (doc) {
+    if (prof.brand_color) { doc.style.setProperty('--quote-brand', prof.brand_color); doc.style.setProperty('--quote-brand-end', prof.brand_color); }
+    else { doc.style.removeProperty('--quote-brand'); doc.style.removeProperty('--quote-brand-end'); }
+  }
+
+  const fmtDate = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString(localeForDate(), { year: 'numeric', month: 'short', day: 'numeric' }) : '—';
+  document.getElementById('invoiceNumber').textContent = '#INV-' + (inv.invoice_number != null ? inv.invoice_number : '----');
+  document.getElementById('invoiceIssueDate').textContent = fmtDate(inv.issue_date);
+  document.getElementById('invoiceDueDateDisp').textContent = fmtDate(inv.due_date);
+
+  const eff = invoiceEffectiveStatus(inv);
+  const pill = document.getElementById('invoiceStatusPill');
+  if (pill) { pill.className = 'status-pill status-' + eff; pill.textContent = invoiceStatusLabel(eff); }
+  const chip = document.getElementById('invoiceStatusChip');
+  if (chip) chip.textContent = invoiceStatusLabel(eff);
+
+  document.getElementById('invoiceClientName').textContent = inv.client_name || '—';
+  document.getElementById('invoiceClientAddr').textContent = inv.client_addr || '';
+
+  const trades = (inv.trades || []).map(n => { const tr = TRADES.find(td => td.name === n); return tr ? (tr.emoji + ' ' + tradeDisplay(n)) : tradeDisplay(n); }).join(' + ');
+  document.getElementById('invoiceTradeMeta').innerHTML = '<strong>' + escapeHtml(trades || '—') + '</strong>';
+  document.getElementById('invoiceMetaLine').textContent = (trades || '') + (inv.client_name ? ' · ' + inv.client_name : '');
+
+  const scopeSection = document.getElementById('invoiceScopeSection');
+  const scopeText = pickLang(p.scope);
+  document.getElementById('invoiceScope').textContent = scopeText || '';
+  if (scopeSection) scopeSection.classList.toggle('hidden', !scopeText);
+  document.getElementById('invoiceWarranty').textContent = pickLang(p.warranty) || '—';
+
+  renderInvoiceLineItems(p, inv.trades || []);
+
+  const subtotal = Number(inv.subtotal) || 0;
+  const tax = Number(inv.tax) || 0;
+  const total = (inv.total != null) ? Number(inv.total) : (subtotal + tax);
+  const paid = Number(inv.amount_paid) || 0;
+  const balance = Math.max(0, total - paid);
+  document.getElementById('invoiceSubtotalDisp').textContent = fmt(subtotal);
+  const taxRow = document.getElementById('invoiceTaxRow');
+  const taxLbl = document.getElementById('invoiceTaxLbl');
+  if (tax > 0) {
+    taxRow.style.display = 'flex';
+    taxLbl.removeAttribute('data-i18n');
+    taxLbl.textContent = (p._invoiceTaxLabel || t('quote.tax'));
+  } else {
+    taxRow.style.display = 'none';
+  }
+  document.getElementById('invoiceTaxDisp').textContent = fmt(tax);
+  document.getElementById('invoiceTotalDisp').textContent = fmt(total);
+  document.getElementById('invoiceAmountPaidDisp').textContent = fmt(paid);
+  document.getElementById('invoiceBalanceDisp').textContent = fmt(balance);
+  const paidRow = document.getElementById('invoiceAmountPaidRow');
+  if (paidRow) paidRow.style.display = paid > 0 ? 'flex' : 'none';
+
+  const termsEl = document.getElementById('invoiceTerms');
+  if (termsEl) termsEl.textContent = t('invoice.termsTemplate', { due: fmtDate(inv.due_date), balance: fmt(balance) });
+
+  // Sync the editable controls
+  const statusSel = document.getElementById('invoiceStatusSelect');
+  if (statusSel) statusSel.value = inv.status || 'unpaid';
+  const paidInput = document.getElementById('invoiceAmountPaid');
+  if (paidInput) paidInput.value = paid ? String(paid) : '';
+  const dueInput = document.getElementById('invoiceDueDate');
+  if (dueInput) dueInput.value = inv.due_date || '';
+  const paidField = document.getElementById('invoiceAmountPaidField');
+  if (paidField) paidField.style.display = (inv.status === 'partial') ? '' : 'none';
+
+  refreshQuoteConvertInvoiceButton();
+}
+
+function bindInvoicePaymentControls() {
+  const statusSel = document.getElementById('invoiceStatusSelect');
+  if (statusSel) statusSel.onchange = () => onInvoiceStatusChange(statusSel.value);
+  const paidInput = document.getElementById('invoiceAmountPaid');
+  if (paidInput) paidInput.addEventListener('change', onInvoiceAmountPaidChange);
+  const dueInput = document.getElementById('invoiceDueDate');
+  if (dueInput) dueInput.addEventListener('change', onInvoiceDueDateChange);
+}
+
+async function persistInvoiceFields(fields) {
+  if (!currentInvoice || !currentInvoice.id) return false;
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.access_token) return false;
+  try {
+    const { data, error } = await sb.from('invoices')
+      .update(Object.assign({}, fields, { updated_at: new Date().toISOString() }))
+      .eq('id', currentInvoice.id).select('*').single();
+    if (error || !data) { console.warn('persistInvoiceFields:', error); showToast(t('toast.invoiceSaveFailed'), true); return false; }
+    Object.assign(currentInvoice, data);
+    return true;
+  } catch (e) { console.warn('persistInvoiceFields threw:', e); showToast(t('toast.invoiceSaveFailed'), true); return false; }
+}
+
+async function onInvoiceStatusChange(status) {
+  const total = Number(currentInvoice.total) || 0;
+  let amount_paid = Number(currentInvoice.amount_paid) || 0;
+  if (status === 'paid') amount_paid = total;
+  else if (status === 'unpaid') amount_paid = 0;
+  const ok = await persistInvoiceFields({ status, amount_paid });
+  if (ok) { renderInvoice(currentInvoice); showToast(t('toast.invoiceSaved')); }
+}
+
+async function onInvoiceAmountPaidChange() {
+  const val = parseFloat(document.getElementById('invoiceAmountPaid').value) || 0;
+  const total = Number(currentInvoice.total) || 0;
+  const clamped = Math.max(0, Math.min(val, total));
+  let status;
+  if (clamped <= 0) status = 'unpaid';
+  else if (clamped >= total) status = 'paid';
+  else status = 'partial';
+  const ok = await persistInvoiceFields({ amount_paid: clamped, status });
+  if (ok) { renderInvoice(currentInvoice); showToast(t('toast.invoiceSaved')); }
+}
+
+async function onInvoiceDueDateChange() {
+  const v = document.getElementById('invoiceDueDate').value || null;
+  const ok = await persistInvoiceFields({ due_date: v });
+  if (ok) renderInvoice(currentInvoice);
+}
+
+async function generateInvoicePdfBlob() {
+  const el = document.getElementById('invoiceDoc');
+  if (!el) return null;
+  if (typeof html2pdf === 'undefined') { showToast(t('toast.pdfLibraryMissing'), true); return null; }
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch (e) {}
+  const logo = el.querySelector('.quote-logo');
+  if (logo && logo.getAttribute('src')) { try { if (!logo.complete) await logo.decode(); } catch (e) {} }
+  const savedScroll = window.scrollY;
+  window.scrollTo(0, 0);
+  const opts = {
+    margin: 0.5,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#FFFFFF' },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+    pagebreak: { mode: ['css', 'legacy'] },
+  };
+  try { return await html2pdf().set(opts).from(el).output('blob'); }
+  catch (e) { console.error('invoice PDF failed:', e); return null; }
+  finally { window.scrollTo(0, savedScroll); }
+}
+
+function buildInvoicePdfFilename() {
+  const num = (currentInvoice && currentInvoice.invoice_number != null) ? ('INV-' + currentInvoice.invoice_number) : 'Invoice';
+  const rawClient = (currentInvoice && currentInvoice.client_name) || 'Client';
+  const safeClient = rawClient.replace(/[^A-Za-z0-9]+/g, '_') || 'Client';
+  return num + '-' + safeClient + '.pdf';
+}
+
+async function downloadInvoicePdf() {
+  showToast(t('toast.pdfGenerating'));
+  const blob = await generateInvoicePdfBlob();
+  if (!blob) { showToast(t('toast.pdfFailed'), true); return; }
+  triggerBlobDownload(blob, buildInvoicePdfFilename());
+  showToast(t('toast.pdfReady'));
+}
+
+async function sendInvoiceEmail() {
+  showToast(t('toast.pdfGenerating'));
+  const blob = await generateInvoicePdfBlob();
+  if (!blob) { showToast(t('toast.pdfFailed'), true); return; }
+  const filename = buildInvoicePdfFilename();
+  const num = 'INV-' + (currentInvoice.invoice_number != null ? currentInvoice.invoice_number : '');
+  const company = document.getElementById('invoiceCompanyName').textContent.trim();
+  const subject = tdLang === 'es' ? ('Factura ' + num + ' de ' + company) : ('Invoice ' + num + ' from ' + company);
+  const message = tdLang === 'es'
+    ? ('Hola, te adjunto la factura ' + num + '. Cualquier pregunta, avísame.')
+    : ('Hi, please find invoice ' + num + ' attached. Let me know if you have any questions.');
+  const file = new File([blob], filename, { type: 'application/pdf' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: subject, text: message }); return; }
+    catch (e) { if (e.name === 'AbortError') return; console.warn('Web Share failed:', e); }
+  }
+  triggerBlobDownload(blob, filename);
+  showToast(t('toast.pdfDownloadedAttach'));
+  const body = tdLang === 'es'
+    ? (message + '\n\n[Adjunta el PDF descargado a este correo antes de enviarlo.]')
+    : (message + '\n\n[Attach the downloaded PDF to this email before sending.]');
+  setTimeout(() => { window.location.href = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body); }, 800);
+}
+
+async function sendInvoiceText() {
+  showToast(t('toast.pdfGenerating'));
+  const blob = await generateInvoicePdfBlob();
+  if (!blob) { showToast(t('toast.pdfFailed'), true); return; }
+  const filename = buildInvoicePdfFilename();
+  const num = 'INV-' + (currentInvoice.invoice_number != null ? currentInvoice.invoice_number : '');
+  const company = document.getElementById('invoiceCompanyName').textContent.trim();
+  const balance = document.getElementById('invoiceBalanceDisp').textContent.trim();
+  const clientName = (currentInvoice.client_name || '').trim();
+  const firstName = (clientName.split(/\s+/)[0] || '').trim();
+  const shortMsg = tdLang === 'es'
+    ? ('Hola ' + firstName + ', soy de ' + company + '. Te adjunto la factura ' + num + ' (saldo ' + balance + ').')
+    : ('Hi ' + firstName + ', this is ' + company + '. Invoice ' + num + ' is attached (balance ' + balance + ').');
+  const file = new File([blob], filename, { type: 'application/pdf' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: num, text: shortMsg }); return; }
+    catch (e) { if (e.name === 'AbortError') return; console.warn('Web Share failed:', e); }
+  }
+  triggerBlobDownload(blob, filename);
+  showToast(t('toast.pdfDownloadedShare'));
+  setTimeout(() => { window.location.href = 'sms:?body=' + encodeURIComponent(shortMsg); }, 800);
 }
 
 // ============================================================================
@@ -10708,6 +11291,7 @@ async function openSavedQuote(quoteId) {
 
     currentQuote = data.payload || {};
     currentQuote.id = data.id;
+    currentQuote.status = data.status || null;
     currentQuote.job_id = data.job_id || null;
     currentQuote.archived_at = data.archived_at || null;
 
