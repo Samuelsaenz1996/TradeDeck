@@ -1,18 +1,20 @@
 # MyTradeDeck — Project Status
 
-Last updated: May 19, 2026 (post Sprint 2-E.2)
+Last updated: May 26, 2026 (post Sprint INV-A)
 
 Save this. Paste into any future Claude conversation to continue.
+
+> Reconstructed from the current `index.html` on May 26 after the doc had drifted ~1 week behind the code. Sprint labels/dates for recently shipped work (archive, Stripe, password auth, invoices) were inferred from the code — sanity-check the exact labels and fill in the tester names.
 
 ---
 
 ## What This Is
 
-MyTradeDeck is an AI-powered admin tool for contractors and tradespeople. Drafts professional bilingual (English + Spanish) quotes and customer follow-up messages in seconds, with a working CRM layer where jobs are the central work-tracking entity — clients, quotes, and follow-ups can hang off a job, or hang directly off a client without a job.
+MyTradeDeck is an AI-powered admin tool for contractors and tradespeople. Drafts professional bilingual (English + Spanish) quotes and customer follow-up messages in seconds, with a working CRM layer where jobs are the central work-tracking entity — clients, quotes, follow-ups, and now invoices can hang off a job, or hang directly off a client without a job.
 
 - Pricing plan: Free (5 quotes/month, server-enforced) · Pro $49/month · Team $99/month
 - Target: $10,000–$15,000/month from a small base of paying contractors, or more if possible
-- Stage: Live at https://mytradedeck.com. Server-enforced quota, custom-domain magic-link email, full flat-rate / per-unit pricing flexibility, persisted quotes + follow-ups + clients + first-class jobs with bidirectional CRM workflow. 1 confirmed paying tester ($49/mo), 1 actively testing.
+- Stage: Live at https://mytradedeck.com. Server-enforced quota, custom-domain email auth (password + magic link), full flat-rate / per-unit pricing flexibility, persisted quotes + follow-ups + clients + first-class jobs + invoices, archive system across all entities, Stripe checkout + billing portal, full profile/branding screen. 1 confirmed paying tester ($49/mo), 1 actively testing.
 - Goal type: Side project that generates a lot of income, not full-time business.
 - Long-term: Wrap in Capacitor for App Store + Google Play distribution.
 
@@ -21,10 +23,12 @@ MyTradeDeck is an AI-powered admin tool for contractors and tradespeople. Drafts
 - Frontend: Single index.html file — vanilla JS, no framework, no build step
 - AI: Anthropic API via server-side Edge function proxy at /api/generate.js. Model claude-sonnet-4-6. SSE streaming preserved.
 - API key: ANTHROPIC_API_KEY env var in Vercel — never in the browser
-- Auth: Supabase magic-link email auth; session persisted in localStorage
+- Auth: Supabase email auth — password-primary (sign up / sign in / forgot / recovery) with magic-link fallback. Session persisted in localStorage. Dev bypass button (localhost only, hidden + inert in production).
 - Email delivery: Resend SMTP via verified subdomain mail.mytradedeck.com. 30/hr rate limit.
-- Quota enforcement: Postgres profiles table + RLS + two SECURITY DEFINER RPCs. Free tier 5/month cap atomic and server-enforced.
-- Persistence: clients, quotes, jobs, followups tables in Postgres. Standard RLS pattern (4 policies per table scoped to auth.uid()). Cross-entity FKs all use ON DELETE SET NULL.
+- Quota enforcement: Postgres profiles table + RLS + SECURITY DEFINER RPCs (get_quote_status, consume_quote_credit). Free tier 5/month cap atomic and server-enforced. Pro = unlimited (gated by profiles.plan).
+- Billing: Stripe Checkout (monthly $49 / annual $490) + billing portal, via /api/create-checkout and /api/create-portal. Webhook updates profiles.plan. Post-redirect handled by handleCheckoutReturn (?checkout=success|cancel, ?portal=return).
+- Persistence: clients, quotes, jobs, followups, invoices tables in Postgres. Standard RLS pattern (4 policies per table scoped to auth.uid()). Cross-entity FKs all use ON DELETE SET NULL.
+- File storage: Supabase Storage 'logos' bucket — per-user company logo at {user_id}/logo, public URL stored on profiles.logo_url.
 - Supabase project: https://cqmctdhxticryelvhhze.supabase.co
 - Publishable key: sb_publishable_YOWddbCqAPdFrg-9otLSzw_akBdoAPh (RLS gates data)
 - Domain: mytradedeck.com at GoDaddy, A record 216.198.79.1 + CNAME www. Subdomain mail.mytradedeck.com for Resend.
@@ -39,13 +43,16 @@ clients (top-level: people and companies)
   - jobs (optional work container; created on demand, not auto)
       - quotes (a job can have multiple quotes — re-quotes, change orders)
       - followups (messages about the work)
+      - invoices (billed work, created from a quote)
   - quotes (can stand alone, no job needed — speculative quotes)
   - followups (can stand alone — relationship messages, no job needed)
+  - invoices (created from a quote via RPC; carries quote_id)
 
 - A quote is a proposal. Can be standalone (tied to client only) OR linked to a job via quote.job_id.
-- A job is a container for tracked work. Optional. User explicitly promotes a quote to a job via the "Create job" button on the quote view, or creates one manually (future sprint).
+- A job is a container for tracked work. Optional. User explicitly promotes a quote to a job via "Create job" on the quote view (explicit-Save flow), or creates one manually via the "+ New Job" launchers.
 - A follow-up can be tied to a client, a quote, a job, or any combination.
-- Jobs are NOT auto-created when a quote is generated — that auto-create behavior was removed in Sprint 2-E.2.
+- An invoice is created from a quote via the create_invoice_from_quote RPC (idempotent). Carries quote_id; flips the source quote's status to 'invoiced'. Payment tracking lives on the invoice row.
+- Jobs are NOT auto-created when a quote is generated.
 
 ## What's Built (Functional)
 
@@ -56,257 +63,268 @@ clients (top-level: people and companies)
 - Custom SMTP via Resend with mail.mytradedeck.com
 - Rebrand to MyTradeDeck (Sprint 1D-0)
 - Custom domain at mytradedeck.com (Sprint 1E) via DNS records at GoDaddy
-- Sign out in sidebar Account section
-- Open Graph + Twitter meta tags (Sprint 1G — shipped, doc previously had it as parked)
+- Open Graph + Twitter meta tags (Sprint 1G)
+
+### Auth (expanded beyond magic-link)
+- Email + password: sign up (with confirm + email-verify), sign in, forgot password, password recovery flow (PASSWORD_RECOVERY → set new password → USER_UPDATED).
+- Magic-link fallback ("Email me a link instead").
+- Auth tabs (Sign in / Sign up), status messaging, full EN/ES.
+- Sign out in sidebar Account section.
+- Dev bypass button — localhost only, hidden + inert in production.
 
 ### Quote generator
 - 10 trades with emojis
 - Multi-trade quotes with per-trade input state via tradePricingState
 - 7 pricing modes with auto-switching panels
-
-#### Pricing input behavior (Sprint 1.5-A)
-- All pricing inputs default to 0. No pre-filled assumptions.
-- Optional pricing components left at $0 don't appear in the quote.
-- Defensive zero-filter on AI output.
-
-#### Phase-based line items (Sprint 1.5-A.1)
-- AI generates 3–5 line items per trade reflecting phases of the work, not 1:1 mapping of pricing components.
-
-#### Flat-rate sub-mode (Sprint 1.5-B)
-- Each specialty panel has [ Per-unit | Flat rate ] sub-toggle
-- Trade-specific unit dropdowns with "Custom..." escape hatch
-- pricingStructure: 'per-unit' | 'flat-rate' per trade
-
-#### Self-balancing flat-rate math (Sprint 1.5-C)
-- currentQuote.tradePricingTargets[tradeName] captures target = flat + material at generation
-- Editing/deleting/adding line items proportionally redistributes
-- Clamp at $0; overflow toast in EN/ES
-- Zero-amount filter lives in renderQuote (preserves user-added $0 lines)
-
-#### Other quote generator features
+- Pricing inputs default to 0; optional $0 components don't appear; defensive zero-filter on AI output (Sprint 1.5-A)
+- Phase-based line items: 3–5 per trade reflecting phases, not 1:1 pricing components (Sprint 1.5-A.1)
+- Flat-rate sub-mode per specialty panel with trade-specific unit dropdowns + "Custom..." (Sprint 1.5-B)
+- Self-balancing flat-rate math: tradePricingTargets captures target; edits/deletes/adds proportionally redistribute; clamp at $0; overflow toast EN/ES (Sprint 1.5-C)
 - Trade-specific placeholders, tax, timeline, configurable deposit %
 - Inline editable everything; live recalculation
 - Trade-aware AI prompts via TRADE_GUIDANCE
+- Contractor identity pulled onto the rendered quote from the profile (company name, address, license, logo, brand-color accent bar) via applyProfileToQuoteHeader
 
 ### Quotes persistence + list view (Sprints 2-A, 2-B, 2-C)
+- quotes table: denormalized columns (client_name, client_addr, total, trades, status) + full payload jsonb. job_id FK (nullable, ON DELETE SET NULL).
+- Auto-persist on generation via persistGeneratedQuote() (captured client_id first, then .ilike find-or-create fallback). Does NOT auto-create a job.
+- Three-mode navigation (list | compose | view) with header bar
+- My Quotes list — search by client name, click row to open, inline edits autosave (1.5s debounce), row delete with confirm, inline status dropdown
+- Form auto-clears on + New Quote (silent)
+- Full EN/ES translation of list + status pills
+- "Create job from this quote" button — explicit-Save flow (opens job detail in new mode pre-filled; Save commits INSERT + quote.job_id link). Hidden when quote already has a job_id.
+- "Convert to invoice" button — see Invoices below.
 
-- quotes table with denormalized columns (client_name, client_addr, total, trades, status) + full payload jsonb for bilingual content. job_id FK added in 2-E.2 (nullable, ON DELETE SET NULL).
-- Auto-persist on quote generation via persistGeneratedQuote() (uses captured client_id from autocomplete first, then .ilike find-or-create fallback). No longer auto-creates a job (removed in 2-E.2).
-- Three-mode navigation (list | compose | view) with header bar (back button + "+ New Quote")
-- My Quotes list — search by client name, click row to open in view mode, inline edit autosaves with 1.5s debounce, Delete button with confirm
-- Form auto-clears on + New Quote (silent — Sprint 2-D.5.1)
-- Full EN/ES translation of list + status pills (Sprint 2-C.4)
-- "Create job from this quote" button on actions bar (Sprint 2-E.2) — visible when quote has no job_id, hidden when linked. Click inserts a job tied to the quote's client + total, sets quote.job_id, navigates to job detail.
-
-### Clients view + detail screen + manual creation (Sprints 2-D.1 → 2-D.7.1)
-
-- clients table with type (person/company), contact_name, contact_title, notes, status, contact info, addr, timestamps. RLS standard 4-policy pattern.
-- Auto-create from quotes — generating a quote with a new client name auto-creates a clients row (status='lead', type='person' default). Case-insensitive matching via .ilike prevents duplicates from casing differences.
-- Real Clients list view (Sprint 2-D.2) — replaced MOCK_CLIENTS entirely. Renders person/company icon, smart contact column, real job count, real revenue (sum of paid+complete jobs), last-activity timestamp. Search by name/contact/email/phone.
-- Client detail screen (Sprint 2-D.3) — editable form with person/company segmented toggle, contact fields conditionally visible, status dropdown, notes. Debounce autosave. Related quotes + jobs cards (click row → opens source quote in Quotes view).
-- "Follow-ups for this client" card (Sprint 2-D.4)
-- Client autocomplete via <datalist> (Sprint 2-D.5) — shared lookup powers both the quote form's client name AND the follow-up form's customer name. Auto-fills address on quote form.
-- Launcher buttons in detail cards (Sprint 2-D.6) — "+ New Quote / + New Follow-up / + New Job for this client". New Job is still a placeholder toast pending Sprint 2-E.4.
-- Manual "+ New Client" form (Sprint 2-D.7) — opens detail screen in "new mode" with blank form via isCreatingNewClient flag. First non-trivial edit triggers INSERT.
-- Explicit Save button on client form (Sprint 2-D.7.1) — 💾 Save button at bottom. Autosave remains as silent safety net.
+### Clients view + detail + manual creation (Sprints 2-D.1 → 2-D.7.1)
+- clients table with type (person/company), contact_name, contact_title, notes, status, contact info, addr, timestamps.
+- Auto-create from quotes (status='lead', type='person'); .ilike dedupe.
+- Real Clients list — person/company icon, smart contact column, real job count, real revenue (paid+complete jobs), last-activity. Search by name/contact/email/phone. Inline status dropdown.
+- Client detail screen — editable form, person/company segmented toggle, conditional contact fields, status, notes. Debounce autosave + explicit Save. Related quotes + jobs + follow-ups cards (click row → opens source).
+- Client autocomplete via <datalist> (shared by quote + follow-up forms; auto-fills address on quote form).
+- Launcher buttons (+ New Quote / Follow-up / Job for this client) — all functional.
+- Manual "+ New Client" via detail screen "new mode" (isCreatingNewClient).
+- Explicit Save button; autosave as silent safety net.
 
 ### Follow-ups persistence + list + client tie (Sprint 2-D.4)
-
-- followups table with client_id FK, quote_id FK, denormalized customer_name, channel, scenario, full payload jsonb. job_id FK added in 2-E.2 (nullable, ON DELETE SET NULL).
+- followups table: client_id, quote_id, job_id FKs, denormalized customer_name, channel, scenario, payload jsonb.
 - Auto-persist on generation via persistGeneratedFollowup(). (Does NOT yet auto-link to a job even when the quote has one — deferred polish.)
-- Three-mode navigation like Quotes
-- My Follow-ups list — search by customer name, click row, inline edits autosave, delete with confirm.
-- Form auto-clears on + New Follow-up (Sprint 2-D.5.1)
-- Full EN/ES translation
+- Three-mode navigation; My Follow-ups list with search, click, autosave, row delete, archive.
+- Full EN/ES translation.
 
-### Jobs as first-class entities (Sprints 2-E.1, 2-E.2)
+### Jobs as first-class entities (Sprints 2-E.1 → 2-E.4)
+- jobs table: client_id, quote_id FKs, description, trade, amount, status, notes, timestamps.
+- Real Jobs list — four live stat cards (Open quotes, In progress, Awaiting payment, Completed this month). Five filter tabs (client-side). Two empty states.
+- Job detail screen (list | detail) — editable form (description, trade, amount, status, notes), debounce autosave + explicit Save. Related cards: linked client, quotes (by job_id), follow-ups (by job_id). Cross-view nav flushes pending autosave.
+- Jobs are explicitly created — never auto-created on quote generation.
+- "Create job from this quote" uses explicit-Save flow (detail opens in new mode pre-filled; Save commits INSERT + quote.job_id link). Button hidden when quote has a job_id.
+- Manual "+ New Job" launchers (Jobs header button + client-detail launcher) functional via enterNewJobMode.
+- Click job row → job detail.
 
-- jobs table updated in 2-E.2 with a notes column. Existing schema preserved (id, user_id, client_id, quote_id, description, trade, amount, status, timestamps).
-- Real Jobs list view (Sprint 2-E.1) — replaced MOCK_JOBS entirely. Four stat cards compute from real data (Open quotes, In progress, Awaiting payment, Completed this month — the last filtered by updated_at >= start of current month). Five filter tabs (All / Quoted / In Progress / Complete / Paid) work client-side without re-fetching. Empty states: one for "no jobs yet," one for "no jobs match this filter."
-- Job detail screen (Sprint 2-E.2) — three-mode pattern (list | detail) with view-header bar. Editable form (description, trade, amount, status, notes) with debounce autosave + explicit Save button. Three related-records cards underneath: linked client (click → client detail), quotes attached to this job (filtered by quote.job_id, click → quote view), follow-ups attached to this job (filtered by followup.job_id, click → follow-up view). All cross-view navigation flushes any pending autosave first.
-- No more auto-create jobs on quote generation (Sprint 2-E.2) — the auto-job-creation block in persistGeneratedQuote was deleted. Jobs are explicitly created via the new "Create job from this quote" button on the quote view, or (future) the manual "+ New Job" launcher.
-- "Create job from this quote" flow (Sprint 2-E.2) — current behavior is auto-commit on button click (INSERT happens, job opens in detail screen). Sprint 2-E.3 will switch this to explicit-Save-required: detail opens in new mode with pre-filled fields, Save commits the INSERT + the quote.job_id link. Button hidden when quote has a job_id.
-- Click job row → opens job detail (replaced 2-E.1's click-to-source-quote behavior). Source quote is one click deeper, on the job detail's quotes card.
+### Invoices (Sprint INV-A)
+- invoices table: invoice_number (sequential per user), issue_date, due_date, status check('unpaid','partial','paid') default 'unpaid', amount_paid, subtotal, tax, total, payload jsonb, client_name, client_addr, trades, quote_id FK, user_id, timestamps.
+- create_invoice_from_quote RPC — SECURITY DEFINER, idempotent (re-converting the same quote returns the same invoice), mints sequential invoice_number, copies quote content, flips quote.status → 'invoiced'.
+- convertToInvoice() — converts (or, if already invoiced, opens the existing invoice). Bakes a tax snapshot (_invoiceTaxLabel + subtotal/tax/total) onto a freshly created invoice so it renders self-contained.
+- Invoice document view — reuses profile identity/logo/brand color; Bill-to block; line items grouped by trade; totals with Amount paid + Balance due; Issue/Due dates; status pill.
+- Payment tracking panel (deliberately OUTSIDE #invoiceDoc so it's excluded from the PDF): status select (Unpaid / Partial / Paid), amount-paid field (revealed on partial, clamped to [0, total]), due-date picker. Auto status logic. Persists to DB.
+- Derived "overdue" — invoiceEffectiveStatus renders OVERDUE (red) when past due_date and unpaid; stored status stays unpaid.
+- PDF / Email / Text send (generateInvoicePdfBlob, buildInvoicePdfFilename "INV-####-Client.pdf", downloadInvoicePdf, sendInvoiceEmail, sendInvoiceText) mirroring the quote machinery (Web Share → download + mailto/sms fallback).
+- Quote "Convert to invoice" button relabels to "View invoice" once invoiced (refreshQuoteConvertInvoiceButton). openSavedQuote copies data.status so a reopened invoiced quote reads correctly.
+- Invoices nav item added but kept HIDDEN; invoicesView has a list sub (placeholder for INV-B) + doc sub.
+- Bilingual (26 invoice i18n keys × EN/ES).
+
+### Archive system (all four entities)
+- archived_at TIMESTAMP NULL on clients, quotes, jobs, followups. Default queries filter archived_at IS NULL.
+- Active / Archived segmented tabs on all four list views.
+- Archive / Unarchive buttons on detail screens + quote/follow-up action bars.
+- setArchivedState helper; per-entity archive/unarchive functions; toggleArchiveCurrentQuote/Followup; refreshQuote/FollowupArchiveButton.
+
+### Bulk selection (all four lists)
+- Generic system driven by the BULK config object (one entry per entity). Row checkboxes + select-all header checkbox + bulk action bar (count, Archive/Unarchive, Delete). refreshBulkBar, refreshSelectAll, reapplyBulkSelection, clearBulkSelection, bulkArchive, bulkUnarchive, bulkDelete.
+
+### Delete + status + confirm modal
+- Row + detail delete buttons everywhere (deleteSavedQuote/Followup/Client/Job), all gated by confirmModal.
+- Inline status <select> dropdowns on lists (statusSelectHtml + persistEntityStatus + per-surface update fns). (Implemented as dropdowns, not the originally-planned pill cycling.)
+- confirmModal — generic promise-based modal with focus trap + ESC/Enter/Tab handling. Used for all destructive actions + clear-form.
+
+### Profile + branding (full screen)
+- Identity card (avatar, email, plan badge). Personal info (first/last name, phone). Business (company name, address, license number, logo upload to Storage, custom brand color). Workflow defaults (default deposit %, default warranty per-language EN/ES). Plan & Usage (reads get_quote_status; Pro = unlimited). Activity stats (clients/jobs/quotes/followups counts). Account (email, member since).
+- loadProfileData, loadProfileCache, saveProfileHandler, handleLogoUpload, handleLogoRemove, renderProfileLogoPreview, bindProfileBrandControls, renderWarrantyBox, captureWarrantyDraft.
+- Profile feeds new-quote deposit pre-fill + contractor identity on rendered quotes + invoices.
+
+### Stripe billing (Sprint 3)
+- Upgrade modal (monthly/annual toggle, price display). startCheckout → /api/create-checkout. openBillingPortal → /api/create-portal. handleCheckoutReturn for redirect params. Pro detection from profiles.plan. Manage-subscription button on profile when Pro.
 
 ### Bilingual EN / ES support
-- UI language toggle (full I18N dictionary with data-i18n attributes)
+- UI language toggle (full I18N dictionary, data-i18n attributes)
 - Quote output language toggle (English / Spanish / Both)
-- AI generates bilingual {en, es} slot pairs
-- Per-language blur capture so neither overwrites the other
-- Quote document labels lock to content language
+- AI generates bilingual {en, es} slot pairs; per-language blur capture
+- Quote/invoice document labels lock to content language
 - Banner when UI lang doesn't have content
 - Spanish vocab tuned for US/Mexican contractor usage
-- Job detail screen + all 23 new job-related i18n keys (2-E.2)
 
 ### PDF export
-- generateQuotePdfBlob() — single source, html2canvas opts deliberately minimal
-- CSS uses page-break-inside: avoid
-- Filename built from quote ID + client name
+- generateQuotePdfBlob() / generateInvoicePdfBlob() — single source each, html2canvas opts deliberately minimal
+- CSS page-break-inside: avoid; filenames built from ID + client name
 
 ### Streaming responses
-- SSE streaming via /api/generate
-- streamCompletion() parses content_block_delta events
-- Progress bar capped at 90% until completion
+- SSE via /api/generate; streamCompletion() parses content_block_delta; progress bar capped at 90% until completion
 
 ### Mobile navigation
 - Hamburger menu, slide-in drawer, backdrop tap / ESC close, body scroll lock, ARIA, iOS auto-zoom prevented
 
 ### CRM mockups (REMAINING — Payments only)
-- Clients: replaced with real data (Sprint 2-D.2) ✅
-- Jobs: replaced with real data (Sprint 2-E.1, 2-E.2) ✅
-- Payments: 12 fake invoices + 8 weeks of fake cash receipts — future sprint
-
-### UI / UX
-- Sidebar nav grouped into Workspace and Account
-- Free plan usage indicator reads from server profile
-- Brand mark "M" + wordmark My<em>TradeDeck</em>
-- Sticky topbar, toast notifications
-- Custom design system: Fraunces + IBM Plex Sans + JetBrains Mono
-- "Preview" badges remain only on Payments nav (removed from Jobs and Clients in 2-E.1)
+- Clients: real (2-D.2) ✅ · Jobs: real (2-E.1/2) ✅ · Invoices: real (INV-A) ✅
+- Payments: STILL MOCK — MOCK_PAYMENTS (12 fake invoices) + MOCK_PAYMENT_WEEKS (8 weeks fake cash). "Preview" badge remains on Payments nav only.
 
 ## What's NOT Built (Roadmap)
 
 | Feature | Priority | Notes |
 |---|---|---|
-| Delete buttons (jobs + clients, list + detail) | High (next) | Sprint 2-E.3 — bundles old 2-D.8 Delete Client polish. All FKs already ON DELETE SET NULL, so deletes don't orphan dependents. |
-| Explicit-Save fix for Create-job-from-quote | High (next) | Sprint 2-E.3 — currently auto-commits on click. Switch to detail-opens-in-new-mode, Save commits INSERT + quote.job_id link. |
-| Manual "+ New Job" launchers | High | Sprint 2-E.4 — header button + the client detail "+ New Job for this client" placeholder become functional. Detail-in-new-mode pattern, requires client selection. |
-| Inline status pill cycling on jobs list | Medium | Sprint 2-E.5 — click pill on row cycles forward (quoted → in_progress → complete → paid), DB update + re-render stats. |
-| Archive system (clients, quotes, jobs, follow-ups) | Medium-High | Sprint 2-F — archived_at TIMESTAMP NULL column on all four tables. Default queries filter archived_at IS NULL. Toggle on each list view shows archived. Archive/Unarchive button on each detail screen. |
-| Auto-link follow-up to job when quote has one | Low-Medium | Polish — derive followup.job_id from quote.job_id at insert time in persistGeneratedFollowup. |
-| Real Payments view | Medium | Future sprint — replace MOCK_PAYMENTS |
-| Retire dev bypass button | Low | Sprint 1F — drafted and parked. Samuel keeping for now. |
-| Stripe billing | High | Sprint 3 — Checkout + webhook to update profiles.plan. Plan gating already wired in consume_quote_credit. |
-| Custom-branded Supabase email templates | Medium | Polish item |
-| Capacitor wrap (iOS + Android) | Medium | Sprint 4+ — reader-app pattern |
-| Convert-to-invoice | Medium | Placeholder button |
-| Switch to Haiku option | Low | Faster/cheaper alternative |
+| Invoices LIST view + reveal nav (INV-B) | High (next) | Build #invoicesListSub (currently a placeholder div) and un-hide #navInvoices. Today an invoice is only reachable from its originating quote. Heavy overlap with the Payments view — decide whether to merge. |
+| Real Payments view | High (next) | Replace MOCK_PAYMENTS / MOCK_PAYMENT_WEEKS with real invoices data. Stat cards map to Σtotal / Σamount_paid / Σ(total−amount_paid). NOTE: "Avg days to pay" needs a paid_at timestamp the invoices table doesn't have yet — add it (set on flip to paid) or drop the stat. |
+| Auto-link follow-up to job when quote has one | Low-Medium | Polish — derive followup.job_id from quote.job_id at insert in persistGeneratedFollowup (~2 lines). |
+| Retire dev bypass button | Low | Sprint 1F — drafted/parked. Currently localhost-gated, so inert in prod. Samuel keeping for now. |
+| Custom-branded Supabase email templates | Medium | Polish item. |
+| Capacitor wrap (iOS + Android) | Medium | Sprint 4+ — reader-app pattern. |
+| Switch to Haiku option | Low | Faster/cheaper alternative model. |
+| Team plan ($99) features / seats | TBD | Plan tier named in pricing but no multi-seat logic yet. |
 
 ## Key Decisions Made
 
 ### Sprint 2 foundations
-- Single JSON payload column on quotes/followups over normalized tables — faster to ship, bilingual content survives schema migrations, edits queryable via denormalized columns.
-- Denormalized columns for list views (client_name, total, status on quotes; customer_name, channel, scenario on followups) — fast list rendering without JOINs, works even if a client is deleted (FKs use set null).
-- Client_id captured at form-fill time, not save time — selectedClientIdForQuote / selectedClientIdForFollowup set when user picks from datalist. Falls back to .ilike lookup for free-text names.
-- Three-mode UI pattern (list | compose | view) for Quotes and Follow-ups; (list | detail) for Clients and Jobs. Consistent navigation pattern with view-header bar that swaps Back for "+ New".
-- Form auto-clear on "+ New X" (Sprint 2-D.5.1) — entering compose mode silently clears form + resets selectedClientId*.
-- Person/Company segmented toggle for client type — swaps which fields show. Smart name format on launchers: companies render as Company (Attn: Person) in the launched quote/follow-up's customer-facing string.
-- Manual + New Client form reuses detail screen (Sprint 2-D.7) — isCreatingNewClient flag flips behavior of saveClientEdits from UPDATE to INSERT.
-- Explicit Save button + autosave coexist (Sprint 2-D.7.1) — autosave for users who forget, Save button for confirmation. Update path toasts via Save button only; insert path toasts via either.
+- Single JSON payload column on quotes/followups/invoices over normalized tables — faster to ship, bilingual content survives schema changes, edits queryable via denormalized columns.
+- Denormalized columns for list views — fast rendering without JOINs, survives client deletion (FKs set null).
+- client_id captured at form-fill time, not save time (selectedClientIdForQuote/Followup), with .ilike fallback for free-text names.
+- Three-mode UI pattern (list | compose | view) for Quotes/Follow-ups; (list | detail) for Clients/Jobs; (list | doc) for Invoices. Consistent view-header bar.
+- Form auto-clear on "+ New X".
+- Person/Company toggle swaps visible fields; launchers render companies as "Company (Attn: Person)".
+- Manual + New X reuses the detail screen via an isCreatingNew* flag (UPDATE↔INSERT).
+- Explicit Save + autosave coexist.
 
-### Sprint 2-E architectural pivot (jobs as first-class)
-- Jobs are the central work-tracking entity, optional — created on demand, not auto. A quote can exist without a job; a job can have multiple quotes (re-quotes, change orders) and multiple follow-ups; a follow-up can attach to a client/quote/job.
-- Schema additions (2-E.2 migration): quotes.job_id, followups.job_id, jobs.notes. All FKs ON DELETE SET NULL. Backfill: every existing job's quote_id was used to populate quotes.job_id retroactively, and follow-ups inherited job_id through the quote chain.
-- Auto-create dropped from quote generation — the auto-job-insert block in persistGeneratedQuote was deleted. Quotes are speculative by default now.
-- "Create job from this quote" is the manual promotion path. Default behavior to be changed in Sprint 2-E.3: instead of auto-commit on click, open detail in new mode with pre-filled values from the quote, require explicit Save to commit the INSERT and the quote.job_id link.
-- Hide-not-relabel pattern for the Create Job button — when a quote already has a job_id, the button is hidden entirely (not switched to "View job"). Users find the linked job via Jobs list or via the quotes card on the job detail.
-- Job amount stored independently — defaults from the originating quote's total at create time, but editable. Job amount ≠ latest quote amount, because money on a job is the agreed price, not the draft price.
-- Archive will be timestamp-based (planned for 2-F, not status-based) — archived_at TIMESTAMP NULL is orthogonal to business status. A "paid" job can also be "archived" without enum conflicts.
+### Jobs as first-class
+- Jobs are the central work-tracking entity, optional, created on demand. A quote can exist without a job; a job can have many quotes + follow-ups + invoices.
+- All cross-entity FKs ON DELETE SET NULL (deletes never orphan dependents).
+- "Create job from this quote" uses explicit-Save (no auto-commit). Hide-not-relabel for the button when a job_id exists.
+- Job amount stored independently (agreed price ≠ draft quote price).
+
+### Invoices (INV-A)
+- Conversion is a SECURITY DEFINER RPC, idempotent — re-convert returns the same invoice, never a duplicate. RPC flips quote.status → 'invoiced'.
+- Tax snapshot baked onto the freshly created invoice (subtotal/tax/total + _invoiceTaxLabel in payload) so the invoice renders self-contained, independent of the quote form's later state.
+- "Overdue" is DERIVED at render (invoiceEffectiveStatus), never stored — keeps stored status orthogonal, like archive.
+- Payment panel kept OUTSIDE #invoiceDoc so it never lands in the PDF.
+- INV-B (list view) deliberately deferred; nav item shipped hidden.
+
+### Archive
+- Timestamp-based (archived_at), orthogonal to business status — a "paid" job can also be "archived" with no enum conflict.
 
 ## Active Testers
 
 - [Tester 1 name] — confirmed $49/month commitment ✓
-- [Tester 2 name] — actively testing flat-rate flow as of May 18
+- [Tester 2 name] — actively testing flat-rate flow
 
 ## Open Issues / Known Quirks
 
-- Create-job-from-quote auto-commits on button click without explicit Save — Sprint 2-E.3 fix.
-- New follow-ups don't auto-link to job_id even when the quote has one. Deferred polish — easy fix is two lines in persistGeneratedFollowup.
-- Dev bypass button still on the login screen — Sprint 1F prompt drafted and parked.
-- Supabase email templates are still defaults, not custom-branded.
-- Status pill CSS classes for accepted/declined/invoiced not defined — render plain. Polish item.
-- Scenario column in followups stores English string ("No reply yet"); Spanish UI shows it verbatim in list. Polish item.
-- Datalist UX on iOS Safari requires typing 1+ char (other browsers show on focus). Could swap for custom dropdown.
-- No Delete buttons yet anywhere — junk rows can't be removed via UI. Sprint 2-E.3 fix (jobs + clients in one sweep).
-- Address auto-fill on client pick replaces unconditionally if matched client has addr (intentional, but can overwrite custom job-site addresses).
-- quotesHistoryCount dead reference in loadSavedQuotes (looks up an element that doesn't exist; harmless behind a guard). Cleanup candidate.
-- Corporate networks (SEMA Zscaler) intercept link previews on mytradedeck.com — not fixable from our side.
+- INV-B not built — an invoice is only reachable from its source quote; no standalone Invoices list, nav item hidden.
+- invoices table has no paid_at — "Avg days to pay" on a real Payments view can't be computed until it's added (set when status flips to paid).
+- toast.invoicePlaceholder is now an orphaned i18n key (the stub it served was replaced in INV-A). Harmless; can be swept.
+- New follow-ups don't auto-link to job_id even when the quote has one. ~2-line fix in persistGeneratedFollowup.
+- Dev bypass button still present on login (localhost-gated). Sprint 1F retire still parked.
+- Supabase email templates still default, not custom-branded.
+- Scenario column in followups stores English string; Spanish UI shows it verbatim in list. Polish.
+- Datalist UX on iOS Safari requires typing 1+ char. Could swap for custom dropdown.
+- Address auto-fill on client pick replaces unconditionally if matched client has addr (can overwrite custom job-site addresses).
+- quotesHistoryCount dead reference in loadSavedQuotes (harmless behind a guard). Cleanup candidate.
+- Corporate networks (SEMA Zscaler) intercept link previews on mytradedeck.com — not fixable our side.
 - Quote generation ~30–60s on Sonnet 4.6.
-- Convert-to-invoice button still a placeholder.
 
 ## Architectural Path Forward
 
-- ✅ Sprints 1A → 1.5-C (DONE): backend, auth, quota, rebrand, custom domain, pricing flexibility, self-balancing flat-rate math
-- ✅ Sprint 1G (DONE): Open Graph + Twitter meta tags
-- ✅ Sprint 2-A (DONE): Schema migration for clients, quotes, jobs tables with RLS
-- ✅ Sprint 2-B (DONE): Auto-persist quotes on generation with client_id linkage
-- ✅ Sprint 2-C series (DONE): My Quotes list view with click/edit/delete, three-mode navigation, full EN/ES
-- ✅ Sprint 2-D.1 (DONE): Schema migration for client type/contact/notes
-- ✅ Sprint 2-D.2 (DONE): Real Clients list view
-- ✅ Sprint 2-D.3 (DONE): Client detail screen
-- ✅ Sprint 2-D.4 (DONE): Follow-ups table + persistence + My Follow-ups list + client detail card
-- ✅ Sprint 2-D.5 (DONE): Client autocomplete via datalist
-- ✅ Sprint 2-D.5.1 (DONE): Form auto-clears on "+ New X"
-- ✅ Sprint 2-D.6 (DONE): Launcher buttons on client detail
-- ✅ Sprint 2-D.7 (DONE): Manual + New Client form via detail screen "new mode"
-- ✅ Sprint 2-D.7.1 (DONE): Explicit Save button on client form
-- ✅ Sprint 2-E.1 (DONE): Real Jobs list (read-only) — MOCK_JOBS removed, stat cards live, filter tabs functional
-- ✅ Sprint 2-E.2 (DONE): Job detail screen + first-class jobs — schema migration (quotes.job_id, followups.job_id, jobs.notes), stop auto-creating jobs, "Create job from this quote" action
-- ⏳ Sprint 2-E.3 (next): Delete buttons (jobs list + jobs detail + clients list + clients detail) + explicit-Save fix for Create-job-from-quote. Rolls in old Sprint 2-D.8.
-- ⏳ Sprint 2-E.4: Manual "+ New Job" launchers (header button + client detail launcher)
-- ⏳ Sprint 2-E.5: Inline status pill cycling on jobs list
-- ⏳ Sprint 2-F: Archive system across clients/quotes/jobs/follow-ups
-- ⏳ Sprint 1F (parked): Retire dev bypass
-- ⏳ Sprint 3: Stripe Checkout + webhook
+- ✅ Sprints 1A → 1.5-C: backend, auth, quota, rebrand, custom domain, pricing flexibility, self-balancing flat-rate math
+- ✅ Sprint 1G: Open Graph + Twitter meta tags
+- ✅ Sprint 2-A → 2-C: quotes schema, auto-persist, My Quotes list, three-mode nav, full EN/ES
+- ✅ Sprint 2-D.1 → 2-D.7.1: clients schema, list, detail, follow-ups table + list, autocomplete, auto-clear, launchers, manual New Client, explicit Save
+- ✅ Sprint 2-E.1 → 2-E.2: real Jobs list, job detail, first-class jobs schema, stop auto-creating jobs, create-job-from-quote
+- ✅ Sprint 2-E.3: delete buttons (jobs + clients, list + detail) + explicit-Save fix for create-job-from-quote
+- ✅ Sprint 2-E.4: manual "+ New Job" launchers
+- ✅ Sprint 2-E.5: inline status editing on lists (shipped as dropdowns rather than pill cycling)
+- ✅ Sprint 2-F: archive system across clients/quotes/jobs/follow-ups + bulk selection
+- ✅ Sprint 3: Stripe Checkout + billing portal + webhook (profiles.plan)
+- ✅ Auth expansion: email+password (sign up/in/forgot/recovery) + magic-link fallback
+- ✅ Profile + branding screen (logo upload, brand color, warranty/deposit defaults)
+- ✅ Sprint INV-A: convert-to-invoice + invoice document + payment tracking + PDF/email/text (LIST view deferred to INV-B)
+- ⏳ Sprint INV-B (next): Invoices LIST view + reveal #navInvoices — decide merge vs. keep-separate with the Payments view
+- ⏳ Real Payments view (next): replace MOCK_PAYMENTS with real invoice data; add paid_at if keeping "avg days to pay"
+- ⏳ Polish: auto-link follow-up→job; sweep orphaned i18n key; custom email templates
+- ⏳ Sprint 1F (parked): retire dev bypass
 - ⏳ Sprint 4+: Capacitor wrap
 
 ## Code Conventions / Notes
 
 ### Globals
 - sb = window.supabase.createClient(...)
-- pricingMode, taxMode, tdLang, quoteLanguages — established
+- pricingMode, taxMode, tdLang, quoteLanguages
 - selectedTrades, activeTradeIndex, tradePricingState — multi-trade state
-- currentQuote / currentFollowup — bilingual in-memory payload
+- currentQuote / currentFollowup / currentInvoice — in-memory payloads
 - currentQuote.tradePricingTargets — per-trade flat-rate target map
-- currentQuote.job_id — captured on open from DB row; null on fresh quote (Sprint 2-E.2)
-- depositPercent, quoteUsed (bypass-only)
+- currentQuote.job_id / currentQuote.status — captured on open from the DB row
+- profileCache, profileWarrantyDraft {en, es}
+- depositPercent, quoteUsed (bypass-only), upgradeInterval
 
-### Sub-view state (Sprint 2)
+### Sub-view state
 - quotesSubView ('list'|'compose'|'view'), savedQuotesCache, quotesSaveTimer
-- clientsSubView ('list'|'detail'), clientsCache, activeClientId, activeClientData
-- clientDetailQuotesCache, clientDetailJobsCache, clientDetailFollowupsCache
-- clientsSaveTimer, isCreatingNewClient
-- clientsLookupCache, selectedClientIdForQuote, selectedClientIdForFollowup
+- clientsSubView ('list'|'detail'), clientsCache, activeClientId, activeClientData, clientDetail*Cache, clientsSaveTimer, isCreatingNewClient
+- clientsLookupCache, selectedClientIdForQuote/Followup/Job
 - followupsSubView ('list'|'compose'|'view'), savedFollowupsCache, followupsSaveTimer
-- jobsSubView ('list'|'detail'), jobsCache, jobsFilter, activeJobId, activeJobData (Sprints 2-E.1, 2-E.2)
-- jobDetailQuotesCache, jobDetailFollowupsCache, jobsSaveTimer (Sprint 2-E.2)
+- jobsSubView ('list'|'detail'), jobsCache, jobsFilter, activeJobId, activeJobData, jobDetail*Cache, jobsSaveTimer, isCreatingNewJob
+- invoicesSubView ('list'|'doc'), currentInvoice
+- BULK — config object driving bulk selection for all four list entities
+- viewingArchived{Clients,Jobs,Quotes,Followups}
 
 ### Helpers (current)
-- Quote persistence: persistGeneratedQuote (no longer auto-creates jobs), loadSavedQuotes, renderQuotesList, openSavedQuote (captures data.job_id), deleteSavedQuote, scheduleQuoteSave, saveCurrentQuoteEdits, switchQuotesSubView, enterComposeMode
-- Followup persistence: persistGeneratedFollowup, loadSavedFollowups, renderFollowupsList, openSavedFollowup, deleteSavedFollowup, scheduleFollowupSave, saveCurrentFollowupEdits, switchFollowupsSubView, enterFollowupComposeMode
-- Client management: loadClients, renderClientsList, switchClientsSubView, openClientDetail, renderClientDetail, applyClientType, scheduleClientSave, saveClientEdits (returns saved row | null), clickClientDetailSave, enterNewClientMode, renderClientDetailQuotes, renderClientDetailJobs, renderClientDetailFollowups, jobStatusLabel
-- Client lookup: refreshClientsLookupCache, renderClientsDatalist, findClientByName, bindClientLookupForQuote, bindClientLookupForFollowup
-- Launchers: clientDisplayNameForForm, launchNewQuoteForActiveClient, launchNewFollowupForActiveClient, launchNewJobForActiveClient (still placeholder, becomes functional in 2-E.4)
-- Jobs (Sprints 2-E.1, 2-E.2): loadJobs, renderJobsView, renderJobsStats, renderJobsList, bindJobsFilterPills, switchJobsSubView, openJobDetail, renderJobDetailTradeOptions, renderJobDetail, renderJobDetailClient, renderJobDetailQuotes, renderJobDetailFollowups, scheduleJobSave, saveJobEdits, clickJobDetailSave, refreshQuoteCreateJobButton, createJobFromCurrentQuote
-- Generic helpers: capitalizeFirst, escapeHtml, formatRelativeDate
+- Quotes: persistGeneratedQuote, loadSavedQuotes, renderQuotesList, openSavedQuote, deleteSavedQuote, scheduleQuoteSave, saveCurrentQuoteEdits, switchQuotesSubView, enterComposeMode
+- Follow-ups: persistGeneratedFollowup, loadSavedFollowups, renderFollowupsList, openSavedFollowup, deleteSavedFollowup, scheduleFollowupSave, saveCurrentFollowupEdits, switchFollowupsSubView, enterFollowupComposeMode
+- Clients: loadClients, renderClientsList, switchClientsSubView, openClientDetail, renderClientDetail, applyClientType, scheduleClientSave, saveClientEdits, clickClientDetailSave, enterNewClientMode, renderClientDetail{Quotes,Jobs,Followups}, jobStatusLabel
+- Client lookup: refreshClientsLookupCache, renderClientsDatalist, findClientByName, bindClientLookupForQuote/Followup/Job
+- Launchers: clientDisplayNameForForm, launchNewQuoteForActiveClient, launchNewFollowupForActiveClient, launchNewJobForActiveClient
+- Jobs: loadJobs, renderJobsView, renderJobsStats, renderJobsList, bindJobsFilterPills, switchJobsSubView, openJobDetail, renderJobDetailTradeOptions, renderJobDetail, renderJobDetail{Client,Quotes,Followups}, scheduleJobSave, saveJobEdits, clickJobDetailSave, enterNewJobMode, refreshQuoteCreateJobButton, createJobFromCurrentQuote
+- Invoices: convertToInvoice, openInvoiceForQuote, openInvoice, enterInvoiceView, switchInvoicesSubView, invoiceEffectiveStatus, invoiceStatusLabel, renderInvoiceLineItems, renderInvoice, bindInvoicePaymentControls, persistInvoiceFields, onInvoiceStatusChange, onInvoiceAmountPaidChange, onInvoiceDueDateChange, generateInvoicePdfBlob, buildInvoicePdfFilename, downloadInvoicePdf, sendInvoiceEmail, sendInvoiceText, refreshQuoteConvertInvoiceButton
+- Status/archive/bulk: statusSelectHtml, persistEntityStatus, update*Status (per surface), setArchivedState, archive/unarchive{Client,Job,Quote,Followup}, toggleArchiveCurrent{Quote,Followup}, refresh{Quote,Followup}ArchiveButton, refreshBulkBar, refreshSelectAll, reapplyBulkSelection, clearBulkSelection, bulkArchive, bulkUnarchive, bulkDelete
+- Profile/billing: loadProfileCache, loadProfileData, saveProfileHandler, handleLogoUpload, handleLogoRemove, renderProfileLogoPreview, bindProfileBrandControls, renderWarrantyBox, captureWarrantyDraft, applyProfileToQuoteHeader, openUpgradeModal, closeUpgradeModal, renderUpgradePrice, startCheckout, openBillingPortal, handleCheckoutReturn
+- Auth: initAuth, updateAuthUI, setAuthMode, handleSignUp, handleSignInPassword, handleForgotPassword, handleMagicLink, handleRecovery, handleSignOut
+- Generic: capitalizeFirst, escapeHtml, formatRelativeDate, fmt, parseAmount, confirmModal, showToast
 - clearForm(silent) — silent param skips confirm popup
 
 ### Tables (current schemas)
 
-clients — id, user_id (FK cascade), name, addr, email, phone, status check('lead','active','past') default 'lead', type check('person','company') default 'person', contact_name, contact_title, notes, timestamps. Indexes on user_id, (user_id, created_at desc). RLS standard 4 policies.
+clients — id, user_id (FK cascade), name, addr, email, phone, status check('lead','active','past') default 'lead', type check('person','company') default 'person', contact_name, contact_title, notes, archived_at, timestamps. RLS 4 policies.
 
-quotes — id, user_id (FK cascade), client_id (FK set null), job_id (FK set null — Sprint 2-E.2), client_name, client_addr, total numeric(12,2), trades text[], status check('draft','sent','accepted','declined','invoiced') default 'draft', payload jsonb, timestamps. Indexes on user_id, (user_id, created_at desc), client_id, job_id. RLS 4 policies.
+quotes — id, user_id (FK cascade), client_id (FK set null), job_id (FK set null), client_name, client_addr, total numeric(12,2), trades text[], status check('draft','sent','accepted','declined','invoiced') default 'draft', payload jsonb, archived_at, timestamps. RLS 4 policies.
 
-jobs — id, user_id (FK cascade), client_id (FK set null), quote_id (FK set null), description, trade, amount numeric(12,2), status check('quoted','in_progress','complete','paid') default 'quoted', notes text (Sprint 2-E.2), timestamps. Indexes on user_id, (user_id, created_at desc), client_id, quote_id, (user_id, status). RLS 4 policies.
+jobs — id, user_id (FK cascade), client_id (FK set null), quote_id (FK set null), description, trade, amount numeric(12,2), status check('quoted','in_progress','complete','paid') default 'quoted', notes, archived_at, timestamps. RLS 4 policies.
 
-followups — id, user_id (FK cascade), client_id (FK set null), quote_id (FK set null), job_id (FK set null — Sprint 2-E.2), customer_name, channel check('email','text') default 'email', scenario, payload jsonb, timestamps. Indexes on user_id, (user_id, created_at desc), client_id, quote_id, job_id. RLS 4 policies. Uses shared set_updated_at trigger.
+followups — id, user_id (FK cascade), client_id (FK set null), quote_id (FK set null), job_id (FK set null), customer_name, channel check('email','text') default 'email', scenario, payload jsonb, archived_at, timestamps. RLS 4 policies. Shared set_updated_at trigger.
 
-profiles (Sprint 1C) — RPC-only, RLS no policies, get_quote_status + consume_quote_credit SECURITY DEFINER.
+invoices — id, user_id (FK cascade), quote_id (FK set null), invoice_number (sequential per user), issue_date, due_date, status check('unpaid','partial','paid') default 'unpaid', amount_paid numeric(12,2) default 0, subtotal numeric(12,2), tax numeric(12,2), total numeric(12,2), client_name, client_addr, trades text[], payload jsonb, timestamps. RLS 4 policies. create_invoice_from_quote RPC (SECURITY DEFINER, idempotent). NO paid_at yet (needed for "avg days to pay"). NO archived_at yet (archive not extended to invoices).
 
-### CSS additions (Sprint 2)
+profiles — RPC-gated quota (get_quote_status, consume_quote_credit SECURITY DEFINER) PLUS columns for: plan, first_name, last_name, phone, company_name, business_address, license_number, logo_url, brand_color, default_deposit_percent, default_warranty_en, default_warranty_es, Stripe customer/subscription fields. Updated by Stripe webhook + profile save.
+
+Storage — 'logos' bucket, per-user object at {user_id}/logo, public URL on profiles.logo_url.
+
+### CSS notes
 - .view-header, .view-header-spacer, .btn-ghost
-- .card-title.with-action, .card-title-action — for launcher buttons in card titles
-- .pricing-toggle (reused) for person/company segmented toggle
-- Jobs status pill classes use the status- prefix with _ → - conversion (e.g., status-in-progress for in_progress).
+- .card-title.with-action, .card-title-action
+- .pricing-toggle reused for segmented toggles
+- Status pill/select classes defined for: active/past/lead/quoted/in-progress/complete/paid/pending/overdue/unpaid/partial/draft/sent/accepted/declined/invoiced (_ → - conversion). (The old "accepted/declined/invoiced undefined" quirk is fixed.)
+- .bulk-bar / .bulk-cb-col / bulk action buttons; archive tabs reuse .pricing-toggle; .modal-backdrop / .modal-card for confirmModal + upgrade modal.
 
 ### PDF pipeline gotcha
-- generateQuotePdfBlob() single source. html2canvas opts: {scale: 2, useCORS: true, logging: false, backgroundColor: '#FFFFFF'}. Do NOT add windowWidth, x, y, scrollX, or scrollY.
+- generateQuotePdfBlob() / generateInvoicePdfBlob() single source each. html2canvas opts: {scale: 2, useCORS: true, logging: false, backgroundColor: '#FFFFFF'}. Do NOT add windowWidth, x, y, scrollX, or scrollY. Invoice payment panel is a sibling of #invoiceDoc so it stays out of the PDF.
 
-### Line-item filter location (Sprint 1.5-C)
+### Line-item filter location
 - Lives in renderQuote, not renderLineItemsTable. Preserves user-added "+ Add line item" rows at $0.
 
 ### Tooling note
-- Claude Code on Windows host has awk (Git Bash) but no node binary
+- Claude Code on Windows host has awk (Git Bash) but no node binary.
 
 ## Workflow Preferences
 
@@ -317,14 +335,15 @@ profiles (Sprint 1C) — RPC-only, RLS no policies, get_quote_status + consume_q
 - Explicit negative constraints ("do NOT do X")
 - Push to Vercel preview, verify visually, then merge to main
 - For multi-phase manual procedures: one phase at a time, wait for "phase N done"
-- When a sprint involves a Supabase schema migration, present it as a separate SQL block to paste into the Supabase SQL editor BEFORE pasting the code changes into Claude Code.
+- Schema migrations: present as a separate SQL block to paste into the Supabase SQL editor BEFORE the code changes
 - Windows host (c:\ST\GitHub\TradeDeck\TradeDeck\index.html)
 
 ## Open Questions for Next Session
 
-- Sprint 2-E.3 scope confirmation — delete buttons (jobs + clients, list + detail) + explicit-Save fix for Create-job-from-quote in one sprint. Manual + New Job launchers move to 2-E.4. Confirm or split further?
-- Sprint 2-F archive rollout — do all four entities (clients/quotes/jobs/follow-ups) in one cross-cutting sprint, or phase per entity? Single sprint is cleaner architecturally; phased is safer to test.
-- Auto-link follow-up to job — fold the 2-line fix into 2-E.3, or save as separate polish?
-- Sprint 3 Stripe — confirm hosted Stripe Checkout over custom-built
-- Capacitor timing — wait until Sprint 3 is done, or start in parallel?
-- Custom Supabase email templates — polish them now, or later?
+- INV-B vs Payments — merge them (Payments view becomes the real invoices list + financial rollup) or keep Invoices as a per-row list and Payments as a separate dashboard? Leaning merge to avoid two invoice surfaces.
+- If keeping "Avg days to pay" on Payments — add invoices.paid_at now (set on flip to paid) as part of the same migration.
+- Extend archive to invoices? (invoices currently has no archived_at.)
+- Auto-link follow-up to job — fold the 2-line fix into the next sprint or keep as standalone polish?
+- Team plan ($99) — when do seats/multi-user actually get built vs. just being a price on the page?
+- Capacitor timing — start in parallel or after Payments?
+- Custom Supabase email templates — now or later?
