@@ -3654,6 +3654,15 @@
         </div>
 
         <div class="card">
+          <div class="card-title" data-i18n="connect.cardTitle">Get paid</div>
+          <div class="card-sub" data-i18n="connect.cardSub">Connect Stripe so clients can pay your invoices online.</div>
+          <div id="connectStatusLine" style="margin-bottom:12px;">—</div>
+          <button id="connectBtn" type="button" class="btn-primary"></button>
+          <a id="connectManageLink" class="auth-link hidden" href="https://dashboard.stripe.com"
+             target="_blank" rel="noopener" data-i18n="connect.manage">Manage on Stripe</a>
+        </div>
+
+        <div class="card">
           <div class="card-title" data-i18n="profile.defaults.title">Workflow defaults</div>
           <div class="card-sub" data-i18n="profile.defaults.sub">Pre-filled when you create a new quote. You can still change them per quote.</div>
           <div class="field">
@@ -4619,6 +4628,17 @@ const I18N = {
     'profile.business.brandColor': 'Brand color',
     'profile.brand.enable': 'Use a custom brand color',
     'profile.brand.help': 'Applied to the accent bar at the top of your quotes. Leave off to use the default.',
+    'connect.cardTitle': 'Get paid',
+    'connect.cardSub': 'Connect Stripe so clients can pay your invoices online.',
+    'connect.statusNotConnected': 'Not connected yet.',
+    'connect.statusIncomplete': 'Setup started — finish onboarding to accept payments.',
+    'connect.statusConnected': '✓ Connected — you can accept online payments.',
+    'connect.btnConnect': 'Connect Stripe',
+    'connect.btnFinish': 'Finish setup',
+    'connect.manage': 'Manage on Stripe',
+    'connect.redirecting': 'Redirecting…',
+    'connect.refreshed': 'Connection status updated',
+    'toast.connectError': 'Could not start Stripe onboarding. Please try again.',
     'profile.defaults.title': 'Workflow defaults',
     'profile.defaults.sub': 'Pre-filled when you create a new quote. You can still change them per quote.',
     'profile.defaults.deposit': 'Default deposit (%)',
@@ -5323,6 +5343,17 @@ const I18N = {
     'profile.business.brandColor': 'Color de marca',
     'profile.brand.enable': 'Usar un color de marca personalizado',
     'profile.brand.help': 'Se aplica a la barra superior de tus cotizaciones. Déjalo desactivado para usar el predeterminado.',
+    'connect.cardTitle': 'Cobra en línea',
+    'connect.cardSub': 'Conecta Stripe para que tus clientes paguen tus facturas en línea.',
+    'connect.statusNotConnected': 'Aún no conectado.',
+    'connect.statusIncomplete': 'Configuración iniciada — termina el registro para aceptar pagos.',
+    'connect.statusConnected': '✓ Conectado — puedes aceptar pagos en línea.',
+    'connect.btnConnect': 'Conectar Stripe',
+    'connect.btnFinish': 'Terminar configuración',
+    'connect.manage': 'Administrar en Stripe',
+    'connect.redirecting': 'Redirigiendo…',
+    'connect.refreshed': 'Estado de conexión actualizado',
+    'toast.connectError': 'No se pudo iniciar el registro de Stripe. Inténtalo de nuevo.',
     'profile.defaults.title': 'Valores predeterminados',
     'profile.defaults.sub': 'Se completan automáticamente al crear una cotización. Puedes cambiarlos en cada cotización.',
     'profile.defaults.deposit': 'Depósito predeterminado (%)',
@@ -6733,6 +6764,8 @@ function init() {
   if (profileUpgradeBtn) profileUpgradeBtn.onclick = openUpgradeModal;
   const mgBtn = document.getElementById('profileManageSubBtn');
   if (mgBtn) mgBtn.onclick = openBillingPortal;
+  const connectBtn = document.getElementById('connectBtn');
+  if (connectBtn) connectBtn.onclick = startConnectOnboarding;
   // Upgrade modal wiring: interval toggle, cancel, continue, backdrop dismiss.
   document.querySelectorAll('#upgradeIntervalToggle button').forEach(b => {
     b.onclick = () => {
@@ -6938,6 +6971,8 @@ function init() {
 
   // Handle Stripe checkout/portal redirect params (?checkout=success|cancel, ?portal=return)
   handleCheckoutReturn();
+  // Handle Stripe Connect onboarding redirect params (?connect=return|refresh)
+  handleConnectReturn();
 }
 
 function renderTrades() {
@@ -9558,6 +9593,91 @@ function handleCheckoutReturn() {
   }
 }
 
+// ============================================================================
+// Stripe Connect — onboarding + status (no money moves; UI-cache booleans only)
+// ============================================================================
+async function startConnectOnboarding() {
+  const btn = document.getElementById('connectBtn');
+  if (btn) { btn.disabled = true; btn.textContent = t('connect.redirecting'); }
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session || !session.access_token) { showToast(t('toast.connectError'), true); return; }
+    const resp = await fetch('/api/connect/create-account-link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.url) { showToast(t('toast.connectError'), true); return; }
+    window.location.href = data.url;
+  } catch (e) {
+    console.warn('startConnectOnboarding:', e);
+    showToast(t('toast.connectError'), true);
+  } finally {
+    if (btn) { btn.disabled = false; renderConnectCard(); }
+  }
+}
+
+async function refreshConnectStatus() {
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session || !session.access_token) return;
+    const resp = await fetch('/api/connect/account-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+    });
+    const data = await resp.json();
+    if (!resp.ok) return;
+    if (!profileCache) profileCache = {};
+    if (data.connected) {
+      profileCache.stripe_charges_enabled = !!data.charges_enabled;
+      profileCache.stripe_details_submitted = !!data.details_submitted;
+      profileCache.stripe_payouts_enabled = !!data.payouts_enabled;
+    }
+    renderConnectCard();
+  } catch (e) {
+    console.warn('refreshConnectStatus:', e);
+  }
+}
+
+function renderConnectCard() {
+  const line = document.getElementById('connectStatusLine');
+  const btn = document.getElementById('connectBtn');
+  const manage = document.getElementById('connectManageLink');
+  if (!line || !btn) return;
+  const p = profileCache || {};
+  if (!p.stripe_account_id) {
+    // (a) Not connected
+    line.textContent = t('connect.statusNotConnected');
+    line.style.color = '';
+    btn.textContent = t('connect.btnConnect');
+    btn.classList.remove('hidden');
+    if (manage) manage.classList.add('hidden');
+  } else if (!p.stripe_charges_enabled || !p.stripe_details_submitted) {
+    // (b) Started but not finished
+    line.textContent = t('connect.statusIncomplete');
+    line.style.color = '';
+    btn.textContent = t('connect.btnFinish');
+    btn.classList.remove('hidden');
+    if (manage) manage.classList.add('hidden');
+  } else {
+    // (c) Fully connected — charges enabled
+    line.textContent = t('connect.statusConnected');
+    line.style.color = 'var(--good)';
+    btn.classList.add('hidden');
+    if (manage) manage.classList.remove('hidden');
+  }
+}
+
+function handleConnectReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const connect = params.get('connect');
+  if (connect === 'return' || connect === 'refresh') {
+    refreshConnectStatus();
+    if (connect === 'return') showToast(t('connect.refreshed'), false);
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+}
+
 function showProgress(id) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -10472,6 +10592,10 @@ async function loadProfileData(opts) {
   // Refresh the profile cache then populate the form
   await loadProfileCache();
   const p = profileCache || {};
+  // Get-paid (Stripe Connect) card. Re-verify status live if onboarding looks
+  // unfinished, without blocking the rest of the profile load.
+  renderConnectCard();
+  if (p.stripe_account_id && !p.stripe_charges_enabled) refreshConnectStatus();
   const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = (val == null ? '' : val); };
   setVal('profileFirstName', p.first_name);
   setVal('profileLastName', p.last_name);
