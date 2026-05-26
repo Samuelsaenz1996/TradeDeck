@@ -1,6 +1,10 @@
 # MyTradeDeck — Project Status
 
+<<<<<<< Updated upstream
 Last updated: May 26, 2026 (post Sprint INV-A)
+=======
+Last updated: May 26, 2026 (post Sprint PAY-C)
+>>>>>>> Stashed changes
 
 Save this. Paste into any future Claude conversation to continue.
 
@@ -13,13 +17,20 @@ Save this. Paste into any future Claude conversation to continue.
 MyTradeDeck is an AI-powered admin tool for contractors and tradespeople. Drafts professional bilingual (English + Spanish) quotes and customer follow-up messages in seconds, with a working CRM layer where jobs are the central work-tracking entity — clients, quotes, follow-ups, and now invoices can hang off a job, or hang directly off a client without a job.
 
 - Pricing plan: Free (5 quotes/month, server-enforced) · Pro $49/month · Team $99/month
+<<<<<<< Updated upstream
 - Target: $10,000–$15,000/month from a small base of paying contractors, or more if possible
 - Stage: Live at https://mytradedeck.com. Server-enforced quota, custom-domain email auth (password + magic link), full flat-rate / per-unit pricing flexibility, persisted quotes + follow-ups + clients + first-class jobs + invoices, archive system across all entities, Stripe checkout + billing portal, full profile/branding screen. 1 confirmed paying tester ($49/mo), 1 actively testing.
+=======
+- Online payments fee: contractor's client pays the invoice; the contractor's Stripe nets it minus Stripe's processing fee + a **1% MyTradeDeck platform fee capped at $25/invoice**.
+- Target: $10,000–$15,000/month, primarily from $49/mo subscriptions; payment fees are a secondary, stickiness-driven stream.
+- Stage: Live at https://mytradedeck.com. Quotes, full CRM (clients/jobs/quotes/follow-ups/invoices), archive + bulk across entities, Stripe subscriptions, password auth, profile/branding, invoice list view, and **Stripe Connect payment collection with the full pay → webhook → auto-mark-paid loop wired up in test mode (built, on a preview branch, not yet launched to real users)**.
+>>>>>>> Stashed changes
 - Goal type: Side project that generates a lot of income, not full-time business.
 - Long-term: Wrap in Capacitor for App Store + Google Play distribution.
 
 ## Tech Stack (Current)
 
+<<<<<<< Updated upstream
 - Frontend: Single index.html file — vanilla JS, no framework, no build step
 - AI: Anthropic API via server-side Edge function proxy at /api/generate.js. Model claude-sonnet-4-6. SSE streaming preserved.
 - API key: ANTHROPIC_API_KEY env var in Vercel — never in the browser
@@ -36,6 +47,30 @@ MyTradeDeck is an AI-powered admin tool for contractors and tradespeople. Drafts
 - Hosting: Vercel (auto-deploys from GitHub main)
 - Live URLs: https://mytradedeck.com (primary), https://www.mytradedeck.com (307 → apex), https://trade-deck-ten.vercel.app (fallback)
 - API safety: $20/month Anthropic Console cap
+=======
+- Frontend: Single index.html — vanilla JS, no framework, no build step.
+- AI: Anthropic API via /api/generate.js (Edge proxy). Model claude-sonnet-4-6. SSE streaming.
+- Auth: Supabase email auth — password (sign up/in/forgot/recovery) + magic-link fallback. Dev bypass localhost-only.
+- Billing (subscriptions): Stripe Checkout + portal via /api/create-checkout, /api/create-portal; webhook → profiles.plan. STRIPE_WEBHOOK_SECRET set.
+- **Payments (NEW — Stripe Connect):** STANDARD connected accounts, DIRECT charges on the connected account, platform `application_fee_amount` (1% capped at $25), Stripe-HOSTED Checkout. Contractor is merchant of record (owns disputes/refunds/Stripe fees). Standard ⇒ no extra Connect fees to the platform.
+- Persistence: clients, quotes, jobs, followups, invoices, profiles in Supabase Postgres. Standard RLS (4 policies/table on auth.uid()). Cross-entity FKs ON DELETE SET NULL.
+- File storage: Supabase Storage 'logos' bucket; public URL on profiles.logo_url.
+- Email/text delivery: Resend SMTP via mail.mytradedeck.com; invoice/quote send via Web Share → mailto/sms fallback.
+- Supabase project: https://cqmctdhxticryelvhhze.supabase.co · Publishable key sb_publishable_YOWddbCqAPdFrg-9otLSzw_akBdoAPh.
+- Domain: mytradedeck.com (GoDaddy, A 216.198.79.1 + CNAME www; subdomain mail. for Resend).
+- PDF: html2pdf.js (cdnjs).
+- Hosting: Vercel, auto-deploys from GitHub main. Serverless functions under /api (nested + dynamic routes supported, e.g. /api/connect/*, /api/pay/[token]).
+- API safety: $20/month Anthropic Console cap.
+
+### Vercel environment variables (current)
+- STRIPE_SECRET_KEY — **SPLIT by environment**: Production = LIVE key, Preview = TEST key (sk_test). This is how Preview tests Stripe safely without touching live.
+- SUPABASE_SERVICE_ROLE_KEY — used by subscription webhook AND all the Connect/pay endpoints to write status/tokens bypassing RLS.
+- PLATFORM_FEE_PERCENT — the platform fee %, currently 1. Defaults to 0 in code if unset (fail-open to no fee). **Must be set on Production before going live or you earn $0 on payments.**
+- PLATFORM_FEE_CAP_CENTS — optional override; defaults to 2500 ($25) in code.
+- APP_URL, STRIPE_WEBHOOK_SECRET, SUPABASE_URL, STRIPE_PRICE_ID_ANNUAL, STRIPE_PRICE_ID_MONTHLY, ANTHROPIC_API_KEY.
+- **STRIPE_CONNECT_WEBHOOK_SECRET (NEW — PAY-C)** — the signing secret for the *Connect* webhook endpoint (connected-account events), separate from STRIPE_WEBHOOK_SECRET (which is the subscription/platform webhook). Currently set on **Preview** for testing; **must be set on Production with the live Connect endpoint's secret before go-live.**
+- Note: pay/connect endpoints derive their return/base URL from the request origin (APP_URL fallback), so Preview-initiated flows return to Preview.
+>>>>>>> Stashed changes
 
 ## Data Model (Current)
 
@@ -95,6 +130,7 @@ clients (top-level: people and companies)
 - "Create job from this quote" button — explicit-Save flow (opens job detail in new mode pre-filled; Save commits INSERT + quote.job_id link). Hidden when quote already has a job_id.
 - "Convert to invoice" button — see Invoices below.
 
+<<<<<<< Updated upstream
 ### Clients view + detail + manual creation (Sprints 2-D.1 → 2-D.7.1)
 - clients table with type (person/company), contact_name, contact_title, notes, status, contact info, addr, timestamps.
 - Auto-create from quotes (status='lead', type='person'); .ilike dedupe.
@@ -175,11 +211,22 @@ clients (top-level: people and companies)
 ### CRM mockups (REMAINING — Payments only)
 - Clients: real (2-D.2) ✅ · Jobs: real (2-E.1/2) ✅ · Invoices: real (INV-A) ✅
 - Payments: STILL MOCK — MOCK_PAYMENTS (12 fake invoices) + MOCK_PAYMENT_WEEKS (8 weeks fake cash). "Preview" badge remains on Payments nav only.
+=======
+### Payments collection — PAY-A + PAY-B + PAY-C (built, exercised in TEST mode)
+- **PAY-A — Connect onboarding (Standard).** Profile "Get paid" card with 3 states (not-connected / incomplete / connected-green). Endpoints: /api/connect/create-account-link (creates a Standard account if none, returns hosted onboarding link; origin derived from request) and /api/connect/account-status (retrieves account, persists charges/details/payouts booleans). Status booleans are a UI cache only — the authoritative gate re-checks live. Proven end-to-end in the sandbox (onboard → return → green "Connected").
+- **PAY-B — collect payments (hosted Checkout, direct charges).** Contractor clicks "Create payment link" on an invoice (gated on cached charges_enabled) → /api/invoice/create-pay-link (authed; mints a random pay_token, returns origin-based payUrl). The emailed/texted link points to /api/pay/[token] (PUBLIC) which: looks up the invoice by token (service role), does a LIVE accounts.retrieve charges_enabled check, computes balance due, creates a Checkout Session ON THE CONNECTED ACCOUNT ({ stripeAccount }) with application_fee_amount (1% capped $25) + metadata.invoice_id on session + payment_intent, and 302-redirects to Stripe. /api/pay-result is a minimal public thank-you/canceled page. Send functions append "Pay online: {payUrl}" only when connected + unpaid.
+  - **Proven in test mode:** $87,500 test invoice → charge landed on the connected account, application fee = $25 (cap correctly clamped 1%=$875 down to $25), Stripe ~$2,537.80, contractor netted $84,937.20.
+- **PAY-C — webhook → auto-mark-paid.** New PUBLIC endpoint /api/webhooks/stripe-connect.js — a SECOND, Connect-type webhook distinct from the subscription webhook (direct-charge events fire on the *connected* account, so they need their own endpoint + STRIPE_CONNECT_WEBHOOK_SECRET). Hardened: (1) verifies the signature against the RAW request body (buffer + bodyParser:false) using the Connect secret, 400 only on signature failure; (2) loads the invoice owner's profile and confirms profile.stripe_account_id === event.account before any write (mismatch → log + 200 no-op); (3) idempotent on payment_intent (already-recorded PI → 200 no-op). On checkout.session.completed it reconciles in cents (status 'paid' when paid ≥ total, else 'partial'; stamps paid_at when fully paid; persists payment_intent + checkout_session ids). Front-end shows "Paid on {date}" (i18n pay.paidOn) once paid_at is present — no manual marking. Built + committed to the pay-b-preview branch (b383741), Connect webhook endpoint created in the sandbox, STRIPE_CONNECT_WEBHOOK_SECRET set on Preview, branch redeployed. **Known limitation (deferred):** idempotency keys on the LAST stored PI only — fine for the full-payment case, but multiple online PARTIAL payments + a late retry of an earlier event could double-count; revisit if/when multiple online partials are enabled.
+
+### Payments dashboard view — STILL MOCK
+MOCK_PAYMENTS / MOCK_PAYMENT_WEEKS. "Preview" badge still on the Payments nav. This is the last mock surface; the real data source (invoices + paid_at, now populated by the PAY-C webhook) is in place — this is the next real build.
+>>>>>>> Stashed changes
 
 ## What's NOT Built (Roadmap)
 
 | Feature | Priority | Notes |
 |---|---|---|
+<<<<<<< Updated upstream
 | Invoices LIST view + reveal nav (INV-B) | High (next) | Build #invoicesListSub (currently a placeholder div) and un-hide #navInvoices. Today an invoice is only reachable from its originating quote. Heavy overlap with the Payments view — decide whether to merge. |
 | Real Payments view | High (next) | Replace MOCK_PAYMENTS / MOCK_PAYMENT_WEEKS with real invoices data. Stat cards map to Σtotal / Σamount_paid / Σ(total−amount_paid). NOTE: "Avg days to pay" needs a paid_at timestamp the invoices table doesn't have yet — add it (set on flip to paid) or drop the stat. |
 | Auto-link follow-up to job when quote has one | Low-Medium | Polish — derive followup.job_id from quote.job_id at insert in persistGeneratedFollowup (~2 lines). |
@@ -188,6 +235,16 @@ clients (top-level: people and companies)
 | Capacitor wrap (iOS + Android) | Medium | Sprint 4+ — reader-app pattern. |
 | Switch to Haiku option | Low | Faster/cheaper alternative model. |
 | Team plan ($99) features / seats | TBD | Plan tier named in pricing but no multi-seat logic yet. |
+=======
+| Go-live for payments | **High (next)** | Production currently has the PAY-A/PAY-B code but: merge pay-b-preview (PAY-C) cleanly to main; set PLATFORM_FEE_PERCENT on Production; enable Connect + branding + capabilities on LIVE (not just sandbox); create the LIVE Connect webhook endpoint + set STRIPE_CONNECT_WEBHOOK_SECRET on Production; re-onboard on the live key (sandbox acct_… don't carry to live). |
+| Real Payments dashboard | Med-High | Replace MOCK_PAYMENTS with real invoice data (Σtotal / Σamount_paid / Σbalance). "Avg days to pay" now computable once paid_at is populated by PAY-C. Decide INV-B-vs-Payments merge (lean: Payments becomes the rollup over the same invoice list). |
+| Auto-link follow-up to job | Low-Med | ~2-line fix in persistGeneratedFollowup. |
+| Sweep orphan i18n keys | Low | toast.invoicePlaceholder (INV-A) and invoice.viewTitleHtml (orphaned by INV-B's plural topbar). |
+| Retire dev bypass | Low | localhost-gated; parked. |
+| Custom Supabase email templates | Med | Polish. |
+| Capacitor wrap | Med | Sprint 4+. |
+| Team plan ($99) seats | TBD | Priced but no multi-seat logic. |
+>>>>>>> Stashed changes
 
 ## Key Decisions Made
 
@@ -223,6 +280,7 @@ clients (top-level: people and companies)
 - [Tester 2 name] — actively testing flat-rate flow
 
 ## Open Issues / Known Quirks
+<<<<<<< Updated upstream
 
 - INV-B not built — an invoice is only reachable from its source quote; no standalone Invoices list, nav item hidden.
 - invoices table has no paid_at — "Avg days to pay" on a real Payments view can't be computed until it's added (set when status flips to paid).
@@ -255,6 +313,28 @@ clients (top-level: people and companies)
 - ⏳ Sprint INV-B (next): Invoices LIST view + reveal #navInvoices — decide merge vs. keep-separate with the Payments view
 - ⏳ Real Payments view (next): replace MOCK_PAYMENTS with real invoice data; add paid_at if keeping "avg days to pay"
 - ⏳ Polish: auto-link follow-up→job; sweep orphaned i18n key; custom email templates
+=======
+- **PAY-B is on `main` (Production); PAY-C is on the `pay-b-preview` branch only — neither is launched.** Money can't actually move yet: the only connected account is a sandbox/test acct the live key can't use, so the live gate fails closed. Do NOT point real testers at payments until go-live steps are done. Go-live includes a clean merge of pay-b-preview (PAY-C) → main.
+- **Webhook idempotency edge (PAY-C):** mark-paid keys on the last stored payment_intent — solid for full payments, but multiple online partial payments + a replayed earlier event could double-count. Deferred until multiple online partials are actually enabled.
+- **Test data in prod profiles:** sandbox PAY-A onboarding wrote a TEST stripe_account_id + charges_enabled=true to the real profiles row (single Supabase project). On the live site the Get-paid card may show "Connected," but any live pay attempt correctly refuses. Going live = re-onboard on the live key (overwrites it).
+- Single-invoice doc view shows "Invoices" (plural) in the topbar (VIEW_TOPBAR is view-keyed). Cosmetic.
+- Orphan i18n keys: toast.invoicePlaceholder, invoice.viewTitleHtml.
+- Browser autofill can drop a real card into Stripe test checkout (real cards decline in test mode) — type 4242 4242 4242 4242 by hand when testing.
+- New follow-ups don't auto-link to job_id. Datalist UX on iOS needs 1 char. Address auto-fill overwrites on client pick. quotesHistoryCount dead ref (guarded). SEMA Zscaler intercepts link previews. Quote gen ~30–60s on Sonnet.
+
+## Architectural Path Forward
+- ✅ 1x–2x foundation, quotes, full CRM (clients/jobs/quotes/follow-ups)
+- ✅ Auth expansion (password), Stripe subscriptions (Sprint 3), Profile/branding
+- ✅ Archive + bulk + delete + confirmModal
+- ✅ INV-A: convert-to-invoice + doc + payment tracking + PDF/email/text
+- ✅ INV-B: Invoices list view + revealed nav
+- ✅ PAY-A: Stripe Connect onboarding (Standard) — proven in test mode
+- ✅ PAY-B: hosted-Checkout payment collection (direct charges + 1%/$25 fee) — proven in test mode, on main, not launched
+- ✅ PAY-C: Connect webhook → auto-mark invoice paid (status/paid_at/payment_intent + reconcile) — built, wired in test mode, on the pay-b-preview branch
+- ⏳ Payments go-live (next): merge PAY-C to main, Connect on live key, Production fee var, live Connect webhook + secret, re-onboard
+- ⏳ Real Payments dashboard (replace MOCK_PAYMENTS); decide INV-B/Payments merge
+- ⏳ Polish: orphan-key sweep, follow-up→job auto-link, email templates
+>>>>>>> Stashed changes
 - ⏳ Sprint 1F (parked): retire dev bypass
 - ⏳ Sprint 4+: Capacitor wrap
 
@@ -280,6 +360,7 @@ clients (top-level: people and companies)
 - BULK — config object driving bulk selection for all four list entities
 - viewingArchived{Clients,Jobs,Quotes,Followups}
 
+<<<<<<< Updated upstream
 ### Helpers (current)
 - Quotes: persistGeneratedQuote, loadSavedQuotes, renderQuotesList, openSavedQuote, deleteSavedQuote, scheduleQuoteSave, saveCurrentQuoteEdits, switchQuotesSubView, enterComposeMode
 - Follow-ups: persistGeneratedFollowup, loadSavedFollowups, renderFollowupsList, openSavedFollowup, deleteSavedFollowup, scheduleFollowupSave, saveCurrentFollowupEdits, switchFollowupsSubView, enterFollowupComposeMode
@@ -297,6 +378,22 @@ clients (top-level: people and companies)
 ### Tables (current schemas)
 
 clients — id, user_id (FK cascade), name, addr, email, phone, status check('lead','active','past') default 'lead', type check('person','company') default 'person', contact_name, contact_title, notes, archived_at, timestamps. RLS 4 policies.
+=======
+### Helpers (added in INV-B / PAY-A / PAY-B)
+- Invoices list: loadInvoices, renderInvoicesList, switchInvoicesSubView (toggles back-btn + loads on list), enterInvoiceView(invoice, returnTo), openInvoice.
+- Connect: startConnectOnboarding, refreshConnectStatus, renderConnectCard, handleConnectReturn (?connect=return|refresh).
+- Pay: ensureInvoicePayLink, renderInvoicePayBlock (pre-fills link on reload if pay_token exists), invoicePayLineForSend (returns '' when not eligible); send funcs append the pay line. PAY-C adds a "Paid on {date}" display (i18n pay.paidOn) shown when paid_at is set.
+- (Plus all prior quote/followup/client/job/invoice/archive/bulk/profile/billing helpers.)
+
+### Backend endpoints (/api)
+generate; create-checkout; create-portal; subscription webhook; **connect/create-account-link**; **connect/account-status**; **invoice/create-pay-link**; **pay/[token]** (public, dynamic); **pay-result** (public); **webhooks/stripe-connect** (public — PAY-C; raw-body sig verify against STRIPE_CONNECT_WEBHOOK_SECRET, account-match guard, PI idempotency). All Connect/pay endpoints: Node/ESM, JWT-verify pattern from create-checkout, service-role Supabase client, stripe apiVersion '2024-06-20'.
+
+### Tables (current)
+- clients / quotes / jobs / followups — as before, all with archived_at; standard 4-policy RLS; FKs ON DELETE SET NULL.
+- invoices — invoice_number, issue_date, due_date, status('unpaid','partial','paid'), amount_paid, subtotal, tax, total, client_name, client_addr, trades, quote_id, payload, **pay_token (unique, indexed)**, **stripe_checkout_session_id**, **stripe_payment_intent_id (set by the PAY-C webhook)**, **paid_at (stamped by the PAY-C webhook on full payment)**. create_invoice_from_quote RPC (SECURITY DEFINER, idempotent). No archived_at yet.
+- profiles — quota RPCs + plan + personal/business fields + logo_url + brand_color + deposit/warranty defaults + Stripe subscription fields + **stripe_account_id, stripe_charges_enabled, stripe_details_submitted, stripe_payouts_enabled, stripe_connect_updated_at**. Read/written directly by the app (own-row RLS) and by server endpoints (service role).
+- Storage 'logos' bucket.
+>>>>>>> Stashed changes
 
 quotes — id, user_id (FK cascade), client_id (FK set null), job_id (FK set null), client_name, client_addr, total numeric(12,2), trades text[], status check('draft','sent','accepted','declined','invoiced') default 'draft', payload jsonb, archived_at, timestamps. RLS 4 policies.
 
@@ -327,6 +424,7 @@ Storage — 'logos' bucket, per-user object at {user_id}/logo, public URL on pro
 - Claude Code on Windows host has awk (Git Bash) but no node binary.
 
 ## Workflow Preferences
+<<<<<<< Updated upstream
 
 - Small incremental steps over big-bang changes
 - Prompts wrapped in fenced code blocks for Claude Code in VS Code
@@ -347,3 +445,14 @@ Storage — 'logos' bucket, per-user object at {user_id}/logo, public URL on pro
 - Team plan ($99) — when do seats/multi-user actually get built vs. just being a price on the page?
 - Capacitor timing — start in parallel or after Payments?
 - Custom Supabase email templates — now or later?
+=======
+- Small incremental sprints. Prompts in fenced blocks for Claude Code in VS Code. 4-section format (Manual setup → Changes → Self-tests → Test plan). "X/X passed" before deploy. Explicit negative constraints. **Push to a branch → Vercel Preview → verify → merge to main** (PAY-B deviated: it went straight to main, tested via a pay-b-preview branch; PAY-C (b383741) currently lives on that pay-b-preview branch and still needs a clean merge to main at go-live). Migrations as a separate SQL block BEFORE code. Multi-phase manual procedures one step at a time. Windows host c:\ST\GitHub\TradeDeck\TradeDeck\index.html.
+
+## Open Questions for Next Session
+- **Confirm the PAY-C loop went green** (30-sec check if not already eyeballed): in the sandbox the checkout.session.completed delivery to the Connect endpoint shows **200**, and the test invoice flipped to **paid** with "Paid on …" in-app.
+- Payments go-live checklist: merge pay-b-preview (PAY-C) → main, Connect on live, Production fee var, live Connect webhook + secret, re-onboard, then announce to testers.
+- Real Payments dashboard: merge with the Invoices list, or keep separate? (lean: Payments becomes the rollup over the same invoice list.)
+- Confirm PLATFORM_FEE_PERCENT is set on Production.
+- Revisit the PAY-C partial-payment idempotency edge if/when multiple online partials are enabled.
+- Sweep the two orphan keys + the plural-topbar cosmetic in one polish pass.
+>>>>>>> Stashed changes
