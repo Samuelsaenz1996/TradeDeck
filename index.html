@@ -3807,6 +3807,22 @@
                   <input type="date" class="input" id="invoiceDueDate" />
                 </div>
               </div>
+
+              <div id="invoicePayOnline" style="margin-top:14px; border-top:1px solid var(--line); padding-top:14px;">
+                <div class="label" style="margin-bottom:8px;" data-i18n="pay.sectionTitle">Get paid online</div>
+                <div id="invoicePayConnectPrompt" class="hidden" style="color:var(--ink-3); font-size:13px;" data-i18n="pay.connectPrompt">Connect Stripe in your Profile to accept online payments.</div>
+                <div id="invoicePayPaid" class="hidden" style="color:var(--good); font-size:13px;" data-i18n="pay.alreadyPaid">This invoice is paid.</div>
+                <div id="invoicePayActive" class="hidden">
+                  <button id="invoicePayLinkBtn" type="button" class="btn-secondary" data-i18n="pay.createLink">Create payment link</button>
+                  <div id="invoicePayLinkWrap" class="hidden" style="margin-top:10px;">
+                    <div style="display:flex; gap:8px; align-items:center;">
+                      <input type="text" class="input" id="invoicePayLinkField" readonly style="flex:1;" />
+                      <button id="invoicePayLinkCopy" type="button" class="btn-secondary" data-i18n="pay.copy">Copy</button>
+                    </div>
+                    <small style="color:var(--ink-3); font-size:11px; display:block; margin-top:6px;" data-i18n="pay.linkHelp">Included automatically when you email or text this invoice.</small>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="quote" id="invoiceDoc">
@@ -4639,6 +4655,15 @@ const I18N = {
     'connect.redirecting': 'Redirecting…',
     'connect.refreshed': 'Connection status updated',
     'toast.connectError': 'Could not start Stripe onboarding. Please try again.',
+    'pay.sectionTitle': 'Get paid online',
+    'pay.connectPrompt': 'Connect Stripe in your Profile to accept online payments.',
+    'pay.createLink': 'Create payment link',
+    'pay.linkHelp': 'Included automatically when you email or text this invoice.',
+    'pay.copy': 'Copy',
+    'pay.copied': 'Payment link copied',
+    'pay.alreadyPaid': 'This invoice is paid.',
+    'pay.payOnlineLabel': 'Pay online',
+    'toast.payLinkError': 'Could not create payment link. Please try again.',
     'profile.defaults.title': 'Workflow defaults',
     'profile.defaults.sub': 'Pre-filled when you create a new quote. You can still change them per quote.',
     'profile.defaults.deposit': 'Default deposit (%)',
@@ -5354,6 +5379,15 @@ const I18N = {
     'connect.redirecting': 'Redirigiendo…',
     'connect.refreshed': 'Estado de conexión actualizado',
     'toast.connectError': 'No se pudo iniciar el registro de Stripe. Inténtalo de nuevo.',
+    'pay.sectionTitle': 'Cobra en línea',
+    'pay.connectPrompt': 'Conecta Stripe en tu Perfil para aceptar pagos en línea.',
+    'pay.createLink': 'Crear enlace de pago',
+    'pay.linkHelp': 'Se incluye automáticamente cuando envías esta factura por correo o SMS.',
+    'pay.copy': 'Copiar',
+    'pay.copied': 'Enlace de pago copiado',
+    'pay.alreadyPaid': 'Esta factura está pagada.',
+    'pay.payOnlineLabel': 'Pagar en línea',
+    'toast.payLinkError': 'No se pudo crear el enlace de pago. Inténtalo de nuevo.',
     'profile.defaults.title': 'Valores predeterminados',
     'profile.defaults.sub': 'Se completan automáticamente al crear una cotización. Puedes cambiarlos en cada cotización.',
     'profile.defaults.deposit': 'Depósito predeterminado (%)',
@@ -9288,6 +9322,7 @@ function renderInvoice(inv) {
   const paidField = document.getElementById('invoiceAmountPaidField');
   if (paidField) paidField.style.display = (inv.status === 'partial') ? '' : 'none';
 
+  renderInvoicePayBlock();
   refreshQuoteConvertInvoiceButton();
 }
 
@@ -9298,6 +9333,91 @@ function bindInvoicePaymentControls() {
   if (paidInput) paidInput.addEventListener('change', onInvoiceAmountPaidChange);
   const dueInput = document.getElementById('invoiceDueDate');
   if (dueInput) dueInput.addEventListener('change', onInvoiceDueDateChange);
+  const payBtn = document.getElementById('invoicePayLinkBtn');
+  if (payBtn) payBtn.onclick = () => { ensureInvoicePayLink(); };
+  const payCopy = document.getElementById('invoicePayLinkCopy');
+  if (payCopy) payCopy.onclick = async () => {
+    const f = document.getElementById('invoicePayLinkField');
+    if (!f || !f.value) return;
+    try { await navigator.clipboard.writeText(f.value); showToast(t('pay.copied')); }
+    catch (e) { f.select(); document.execCommand && document.execCommand('copy'); showToast(t('pay.copied')); }
+  };
+}
+
+// Three states, gated on the cached charges_enabled flag (UI only):
+// not-connected → prompt; connected+unpaid → create-link UI; paid → "already paid".
+function renderInvoicePayBlock() {
+  const wrap = document.getElementById('invoicePayOnline');
+  if (!wrap) return;
+  const prompt = document.getElementById('invoicePayConnectPrompt');
+  const paidMsg = document.getElementById('invoicePayPaid');
+  const active = document.getElementById('invoicePayActive');
+  const linkWrap = document.getElementById('invoicePayLinkWrap');
+  const field = document.getElementById('invoicePayLinkField');
+  const inv = currentInvoice || {};
+  const p = profileCache || {};
+  const total = Number(inv.total) || 0;
+  const paid = Number(inv.amount_paid) || 0;
+  const isPaid = inv.status === 'paid' || (total - paid) <= 0;
+
+  prompt.classList.add('hidden');
+  paidMsg.classList.add('hidden');
+  active.classList.add('hidden');
+
+  if (isPaid) { paidMsg.classList.remove('hidden'); return; }
+  if (!p.stripe_charges_enabled) { prompt.classList.remove('hidden'); return; }
+
+  active.classList.remove('hidden');
+  // Show the link field if we already have one (cached this session, or
+  // reconstructable from a previously-minted pay_token on the row).
+  const existing = inv.payUrl || (inv.pay_token ? (window.location.origin + '/api/pay/' + inv.pay_token) : '');
+  if (existing) {
+    if (field) field.value = existing;
+    if (linkWrap) linkWrap.classList.remove('hidden');
+  } else if (linkWrap) {
+    linkWrap.classList.add('hidden');
+  }
+}
+
+// Mint (or reuse) the public pay link for the current invoice. Idempotent:
+// the server reuses the existing pay_token. Returns the URL or null.
+async function ensureInvoicePayLink() {
+  if (!currentInvoice || !currentInvoice.id) return null;
+  if (currentInvoice.payUrl) { renderInvoicePayBlock(); return currentInvoice.payUrl; }
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session || !session.access_token) { showToast(t('toast.payLinkError'), true); return null; }
+    const resp = await fetch('/api/invoice/create-pay-link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+      body: JSON.stringify({ invoice_id: currentInvoice.id }),
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.payUrl) { showToast(t('toast.payLinkError'), true); return null; }
+    currentInvoice.payUrl = data.payUrl;
+    renderInvoicePayBlock();
+    return data.payUrl;
+  } catch (e) {
+    console.warn('ensureInvoicePayLink:', e);
+    showToast(t('toast.payLinkError'), true);
+    return null;
+  }
+}
+
+// Returns a localized "Pay online: <url>" line to append to a sent message,
+// but only when the owner can take payment AND the invoice is unpaid.
+async function invoicePayLineForSend() {
+  try {
+    const p = profileCache || {};
+    const inv = currentInvoice || {};
+    if (!p.stripe_charges_enabled) return '';
+    const total = Number(inv.total) || 0;
+    const paid = Number(inv.amount_paid) || 0;
+    if (inv.status === 'paid' || (total - paid) <= 0) return '';
+    const url = await ensureInvoicePayLink();
+    if (!url) return '';
+    return '\n\n' + t('pay.payOnlineLabel') + ': ' + url;
+  } catch (e) { return ''; }
 }
 
 async function persistInvoiceFields(fields) {
@@ -9386,9 +9506,10 @@ async function sendInvoiceEmail() {
   const num = 'INV-' + (currentInvoice.invoice_number != null ? currentInvoice.invoice_number : '');
   const company = document.getElementById('invoiceCompanyName').textContent.trim();
   const subject = tdLang === 'es' ? ('Factura ' + num + ' de ' + company) : ('Invoice ' + num + ' from ' + company);
-  const message = tdLang === 'es'
+  let message = tdLang === 'es'
     ? ('Hola, te adjunto la factura ' + num + '. Cualquier pregunta, avísame.')
     : ('Hi, please find invoice ' + num + ' attached. Let me know if you have any questions.');
+  message += await invoicePayLineForSend();
   const file = new File([blob], filename, { type: 'application/pdf' });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try { await navigator.share({ files: [file], title: subject, text: message }); return; }
@@ -9412,9 +9533,10 @@ async function sendInvoiceText() {
   const balance = document.getElementById('invoiceBalanceDisp').textContent.trim();
   const clientName = (currentInvoice.client_name || '').trim();
   const firstName = (clientName.split(/\s+/)[0] || '').trim();
-  const shortMsg = tdLang === 'es'
+  let shortMsg = tdLang === 'es'
     ? ('Hola ' + firstName + ', soy de ' + company + '. Te adjunto la factura ' + num + ' (saldo ' + balance + ').')
     : ('Hi ' + firstName + ', this is ' + company + '. Invoice ' + num + ' is attached (balance ' + balance + ').');
+  shortMsg += await invoicePayLineForSend();
   const file = new File([blob], filename, { type: 'application/pdf' });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try { await navigator.share({ files: [file], title: num, text: shortMsg }); return; }
