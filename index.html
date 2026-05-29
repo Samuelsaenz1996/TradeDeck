@@ -3789,6 +3789,7 @@
             <!-- Payment controls — intentionally OUTSIDE #invoiceDoc so they
                  never appear in the generated PDF -->
             <div class="card" id="invoicePaymentPanel" style="margin-bottom: 16px;">
+              <div id="invoicePaidOnLine" class="hidden" style="color: var(--good); font-size: 13px; font-weight: 600; margin-bottom: 12px;"></div>
               <div class="field-row cols-3">
                 <div>
                   <label class="label" data-i18n="invoice.paymentStatus">Payment status</label>
@@ -4664,6 +4665,8 @@ const I18N = {
     'pay.alreadyPaid': 'This invoice is paid.',
     'pay.payOnlineLabel': 'Pay online',
     'toast.payLinkError': 'Could not create payment link. Please try again.',
+    'pay.paidOn': 'Paid on {date}',
+    'pay.paidOnline': 'Paid online',
     'profile.defaults.title': 'Workflow defaults',
     'profile.defaults.sub': 'Pre-filled when you create a new quote. You can still change them per quote.',
     'profile.defaults.deposit': 'Default deposit (%)',
@@ -5388,6 +5391,8 @@ const I18N = {
     'pay.alreadyPaid': 'Esta factura está pagada.',
     'pay.payOnlineLabel': 'Pagar en línea',
     'toast.payLinkError': 'No se pudo crear el enlace de pago. Inténtalo de nuevo.',
+    'pay.paidOn': 'Pagado el {date}',
+    'pay.paidOnline': 'Pagado en línea',
     'profile.defaults.title': 'Valores predeterminados',
     'profile.defaults.sub': 'Se completan automáticamente al crear una cotización. Puedes cambiarlos en cada cotización.',
     'profile.defaults.deposit': 'Depósito predeterminado (%)',
@@ -9322,6 +9327,19 @@ function renderInvoice(inv) {
   const paidField = document.getElementById('invoiceAmountPaidField');
   if (paidField) paidField.style.display = (inv.status === 'partial') ? '' : 'none';
 
+  // "Paid on <date>" — paid_at is a full ISO timestamp (set by the Connect
+  // webhook), so format it directly rather than via the date-only fmtDate.
+  const paidOnLine = document.getElementById('invoicePaidOnLine');
+  if (paidOnLine) {
+    if (inv.status === 'paid' && inv.paid_at) {
+      const dateStr = new Date(inv.paid_at).toLocaleDateString(localeForDate(), { year: 'numeric', month: 'short', day: 'numeric' });
+      paidOnLine.textContent = t('pay.paidOn', { date: dateStr });
+      paidOnLine.classList.remove('hidden');
+    } else {
+      paidOnLine.classList.add('hidden');
+    }
+  }
+
   renderInvoicePayBlock();
   refreshQuoteConvertInvoiceButton();
 }
@@ -12575,6 +12593,7 @@ async function handleSignOut() {
   await sb.auth.signOut();
   // updateAuthUI fires automatically via onAuthStateChange
 }
+
 
 init();
 initAuth();
