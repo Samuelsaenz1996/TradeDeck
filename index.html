@@ -2972,60 +2972,39 @@
             <span class="card-title-num">1</span>
             <span data-i18n="followup.title">Follow-up details</span>
           </div>
-          <div class="card-sub" data-i18n="followup.sub">Draft a customer follow-up message based on the quote status and communication channel.</div>
+          <div class="card-sub" data-i18n="followup.sub2">Pick what it's about, then we'll draft the message.</div>
 
           <div class="field">
-            <label class="label" data-i18n="form.trade">Trade</label>
-            <div class="trades-grid" id="followupTradesGrid"></div>
+            <label class="label" data-i18n="followup.source">What's this about?</label>
+            <div class="timeline-pills" id="followupSourcePills">
+              <button data-source="quote" data-i18n="followup.source.quote">From a quote</button>
+              <button data-source="invoice" data-i18n="followup.source.invoice">From an invoice</button>
+              <button data-source="manual" class="active" data-i18n="followup.source.manual">Write my own</button>
+            </div>
           </div>
 
-          <div class="field-row cols-2">
-            <div>
+          <div class="field hidden" id="followupPickerField">
+            <input type="text" class="input" id="followupPickerSearch" autocomplete="off"
+                   data-i18n-placeholder="followup.pickerSearch"
+                   placeholder="Search by client name…" style="margin-bottom:8px;" />
+            <div id="followupPickerList" style="border:1px solid var(--line); border-radius:var(--radius-sm); max-height:260px; overflow-y:auto;"></div>
+            <div id="followupPickerChosen" class="hidden" style="margin-top:10px; padding:10px 12px; background:var(--surface-2); border-radius:var(--radius-sm); font-size:13px; color:var(--ink-2);"></div>
+          </div>
+
+          <div id="followupManualFields">
+            <div class="field">
               <label class="label" data-i18n="followup.customer">Customer name</label>
               <input type="text" class="input" id="followupCustomerName" list="clientsDatalist" autocomplete="off" data-i18n-placeholder="who.clientNamePlaceholder" placeholder="Sarah Chen" />
             </div>
-            <div>
-              <label class="label" data-i18n="followup.amount">Quote amount ($)</label>
-              <input type="number" class="input" id="followupQuoteAmount" value="2400" min="0" step="0.01" />
+            <div class="field">
+              <label class="label" data-i18n="followup.describe">What's it about?</label>
+              <textarea class="textarea" id="followupJobDesc" data-i18n-placeholder="followup.describePlaceholder" placeholder="e.g. The quote I sent for the kitchen drain line work"></textarea>
             </div>
           </div>
 
           <div class="field">
-            <label class="label" data-i18n="followup.originalJob">Original job reference</label>
-            <input type="text" class="input" id="followupJobDesc" data-i18n-placeholder="followup.originalJobPlaceholder" placeholder="Kitchen sink replacement + drywall repair" maxlength="80" />
-          </div>
-
-          <div class="field">
-            <label class="label" data-i18n="followup.yourDetails">Your details</label>
-            <div class="signature-panel">
-              <div class="signature-summary" id="followupSignatureSummary">
-                <div class="signature-summary-text" id="followupSigPreview">No signature saved yet</div>
-                <button class="action-btn small" id="followupSigEditBtn" data-i18n="followup.edit">Edit</button>
-              </div>
-              <div class="field-row cols-3 hidden" id="followupSignatureFields">
-                <div>
-                  <label class="label" data-i18n="followup.name">Name</label>
-                  <input type="text" class="input" id="followupSigName" data-i18n-placeholder="followup.namePlaceholder" placeholder="Jordan Lee" />
-                </div>
-                <div>
-                  <label class="label" data-i18n="followup.business">Business</label>
-                  <input type="text" class="input" id="followupSigBusiness" data-i18n-placeholder="followup.businessPlaceholder" placeholder="MyTradeDeck Services" />
-                </div>
-                <div>
-                  <label class="label" data-i18n="followup.contact">Contact</label>
-                  <input type="text" class="input" id="followupSigContact" data-i18n-placeholder="followup.contactPlaceholder" placeholder="(555) 123-4567" />
-                </div>
-              </div>
-              <div class="actions-row hidden" id="followupSignatureActions">
-                <button class="btn-secondary" id="followupSigSaveBtn" data-i18n="followup.save">Save</button>
-                <button class="btn-secondary" id="followupSigCancelBtn" data-i18n="followup.cancel">Cancel</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="field">
-            <label class="label" data-i18n="followup.scenario">Scenario</label>
-            <div class="timeline-pills" id="followupScenarioPills">
+            <label class="label" data-i18n="followup.scenario">What's the situation?</label>
+            <div class="timeline-pills" id="followupScenarioPills" style="flex-wrap:wrap;">
               <button data-scenario="No reply yet" class="active" data-i18n="followup.scenarios.noReply">No reply yet</button>
               <button data-scenario="Still thinking it over" data-i18n="followup.scenarios.thinking">Still thinking it over</button>
               <button data-scenario="Said yes, no deposit yet" data-i18n="followup.scenarios.yes">Said yes, no deposit yet</button>
@@ -3035,30 +3014,24 @@
             </div>
           </div>
 
-          <div class="field-row cols-3">
-            <div>
-              <label class="label" data-i18n="followup.age">Quote age</label>
-              <div class="timeline-pills" id="followupDaysAgoPills">
-                <button data-days="1" data-label="1 day ago" data-i18n="followup.age.1">1 day</button>
-                <button data-days="3" data-label="3 days ago" class="active" data-i18n="followup.age.3">3 days</button>
-                <button data-days="5" data-label="5 days ago" data-i18n="followup.age.5">5 days</button>
-                <button data-days="7" data-label="about a week ago" data-i18n="followup.age.7">1 week</button>
-              </div>
+          <div class="field">
+            <label class="label" data-i18n="followup.age">How long has it been?</label>
+            <div class="timeline-pills" id="followupDaysAgoPills" style="flex-wrap:wrap;">
+              <button data-days="1" data-label="1 day ago" data-i18n="followup.age.1">1 day</button>
+              <button data-days="3" data-label="3 days ago" class="active" data-i18n="followup.age.3">3 days</button>
+              <button data-days="5" data-label="5 days ago" data-i18n="followup.age.5">5 days</button>
+              <button data-days="7" data-label="about a week ago" data-i18n="followup.age.7">1 week</button>
+              <button data-days="14" data-label="about two weeks ago" data-i18n="followup.age.14">2 weeks</button>
+              <button data-days="custom" data-i18n="followup.age.custom">Custom…</button>
             </div>
-            <div>
-              <label class="label" data-i18n="followup.tone">Tone</label>
-              <div class="timeline-pills" id="followupTonePills">
-                <button data-tone="Friendly" class="active" data-i18n="followup.tones.friendly">Friendly</button>
-                <button data-tone="Professional" data-i18n="followup.tones.professional">Professional</button>
-                <button data-tone="Direct" data-i18n="followup.tones.direct">Direct</button>
-              </div>
-            </div>
-            <div>
-              <label class="label" data-i18n="followup.channel">Channel</label>
-              <div class="timeline-pills" id="followupChannelPills">
-                <button data-channel="Email" class="active" data-i18n="followup.channels.email">Email</button>
-                <button data-channel="Text" data-i18n="followup.channels.text">Text</button>
-              </div>
+            <input type="text" class="input hidden" id="followupAgeCustom" style="margin-top:8px; max-width:280px;" data-i18n-placeholder="followup.ageCustomPlaceholder" placeholder="e.g. about a month ago" />
+          </div>
+
+          <div class="field">
+            <label class="label" data-i18n="followup.channel">Send by</label>
+            <div class="timeline-pills" id="followupChannelPills">
+              <button data-channel="Email" class="active" data-i18n="followup.channels.email">Email</button>
+              <button data-channel="Text" data-i18n="followup.channels.text">Text</button>
             </div>
           </div>
 
@@ -4294,6 +4267,21 @@ const I18N = {
     // Followups
     'followup.title': 'Follow-up details',
     'followup.sub': 'Draft a customer follow-up message based on the quote status and communication channel.',
+    'followup.sub2': "Pick what it's about, then we'll draft the message.",
+    'followup.source': "What's this about?",
+    'followup.source.quote': 'From a quote',
+    'followup.source.invoice': 'From an invoice',
+    'followup.source.manual': 'Write my own',
+    'followup.pickerComingSoon': 'Quote & invoice picker coming next. For now, use "Write my own."',
+    'followup.describe': "What's it about?",
+    'followup.describePlaceholder': 'e.g. The quote I sent for the kitchen drain line work',
+    'followup.age.14': '2 weeks',
+    'followup.age.custom': 'Custom…',
+    'followup.ageCustomPlaceholder': 'e.g. about a month ago',
+    'followup.pickerSearch': 'Search by client name…',
+    'followup.pickerEmpty': 'Nothing to show yet. Create a quote or invoice first.',
+    'followup.pickerChosen': 'Using',
+    'followup.pickFirst': 'Pick a quote or invoice first.',
     'followup.customer': 'Customer name',
     'followup.amount': 'Quote amount ($)',
     'followup.originalJob': 'Original job reference',
@@ -5046,6 +5034,21 @@ const I18N = {
     // Followups
     'followup.title': 'Detalles del seguimiento',
     'followup.sub': 'Redacta un mensaje de seguimiento al cliente según el estado de la cotización y el canal de comunicación.',
+    'followup.sub2': 'Elige de qué se trata y redactamos el mensaje.',
+    'followup.source': '¿De qué se trata?',
+    'followup.source.quote': 'De una cotización',
+    'followup.source.invoice': 'De una factura',
+    'followup.source.manual': 'Escribir el mío',
+    'followup.pickerComingSoon': 'El selector de cotización y factura viene pronto. Por ahora usa "Escribir el mío".',
+    'followup.describe': '¿De qué se trata?',
+    'followup.describePlaceholder': 'p.ej. La cotización que envié para el drenaje de la cocina',
+    'followup.age.14': '2 semanas',
+    'followup.age.custom': 'Personalizado…',
+    'followup.ageCustomPlaceholder': 'p.ej. hace como un mes',
+    'followup.pickerSearch': 'Buscar por nombre del cliente…',
+    'followup.pickerEmpty': 'Nada que mostrar todavía. Crea una cotización o factura primero.',
+    'followup.pickerChosen': 'Usando',
+    'followup.pickFirst': 'Elige una cotización o factura primero.',
     'followup.customer': 'Nombre del cliente',
     'followup.amount': 'Monto de la cotización ($)',
     'followup.originalJob': 'Referencia del trabajo original',
@@ -5663,7 +5666,6 @@ function applyLanguage() {
   // Re-render dynamic surfaces
   if (typeof renderTrades === 'function') renderTrades();
   if (typeof renderTradeTabs === 'function') renderTradeTabs();
-  if (typeof renderFollowupTrades === 'function') renderFollowupTrades();
   if (typeof renderJobsView === 'function') renderJobsView();
   if (typeof renderPaymentsView === 'function'
       && typeof currentView !== 'undefined' && currentView === 'payments') {
@@ -5685,7 +5687,6 @@ function applyLanguage() {
   // Tax row label inside the quote totals block
   if (typeof recalcTotals === 'function') recalcTotals();
   // Followup signature summary preview text
-  if (typeof updateFollowupSignatureSummary === 'function') updateFollowupSignatureSummary();
   // Quote meta line (uses translated timeline)
   if (typeof refreshQuoteMetaLine === 'function') refreshQuoteMetaLine();
   // Followup meta line
@@ -6710,6 +6711,9 @@ let timeline = 'Standard';
 let followupScenario = 'No reply yet';
 let followupTone = 'Friendly';
 let followupChannel = 'Email';
+let followupSource = 'manual';   // 'quote' | 'invoice' | 'manual'
+let followupPickerItems = [];      // [{id, kind, clientName, total, date, clientId}]
+let followupPickedRecord = null;   // { kind, id, clientName, total, jobText, clientId }
 let followupQuoteAgePhrase = '3 days ago';
 let followupSigName = localStorage.getItem('tdSigName') || '';
 let followupSigBusiness = localStorage.getItem('tdSigBusiness') || '';
@@ -6986,12 +6990,10 @@ function init() {
     bindFlatRateInputs(trade);
     updateFlatSubtotal(trade);
   });
-  renderFollowupTrades();
+  bindFollowupSourcePills();
   bindFollowupScenarioPills();
-  bindFollowupTonePills();
   bindFollowupChannelToggle();
   bindFollowupDaysAgoPills();
-  bindFollowupSignature();
   bindFollowupInputs();
   bindNav();
   const rangeSel = document.getElementById('paymentsRangeSelect');
@@ -7761,14 +7763,134 @@ function bindFollowupChannelToggle() {
   });
 }
 
+function bindFollowupSourcePills() {
+  document.querySelectorAll('#followupSourcePills button').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('#followupSourcePills button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      followupSource = btn.dataset.source;
+      const isManual = followupSource === 'manual';
+      document.getElementById('followupManualFields').classList.toggle('hidden', !isManual);
+      document.getElementById('followupPickerField').classList.toggle('hidden', isManual);
+      followupPickedRecord = null;
+      const chosen = document.getElementById('followupPickerChosen');
+      if (chosen) chosen.classList.add('hidden');
+      if (!isManual) loadFollowupPicker(followupSource);
+    };
+  });
+  const search = document.getElementById('followupPickerSearch');
+  if (search) search.addEventListener('input', renderFollowupPickerList);
+}
+
+async function loadFollowupPicker(kind) {
+  const listEl = document.getElementById('followupPickerList');
+  if (listEl) listEl.innerHTML = '<div style="padding:16px; color:var(--ink-3); font-size:13px;">'
+    + escapeHtml(t('followups.history.loading')) + '</div>';
+  try {
+    if (kind === 'quote') {
+      if (!savedQuotesCache || !savedQuotesCache.length) await loadSavedQuotes();
+      followupPickerItems = (savedQuotesCache || [])
+        .filter(q => !q.archived_at)
+        .map(q => ({ id: q.id, kind: 'quote', clientName: q.client_name || '—',
+                     total: parseFloat(q.total) || 0, date: q.created_at, clientId: q.client_id || null }));
+    } else {
+      if (!savedInvoicesCache || !savedInvoicesCache.length) await loadInvoices({ forceActive: true });
+      followupPickerItems = (savedInvoicesCache || [])
+        .filter(inv => !inv.archived_at)
+        .map(inv => ({ id: inv.id, kind: 'invoice',
+                       clientName: inv.client_name || '—', total: parseFloat(inv.total) || 0,
+                       date: inv.created_at, number: inv.invoice_number, clientId: inv.client_id || null }));
+    }
+  } catch (e) {
+    console.warn('loadFollowupPicker failed:', e);
+    followupPickerItems = [];
+  }
+  renderFollowupPickerList();
+}
+
+function renderFollowupPickerList() {
+  const listEl = document.getElementById('followupPickerList');
+  if (!listEl) return;
+  const search = document.getElementById('followupPickerSearch');
+  const q = (search ? search.value : '').trim().toLowerCase();
+  const items = followupPickerItems.filter(it =>
+    !q || (it.clientName || '').toLowerCase().includes(q));
+  if (!items.length) {
+    listEl.innerHTML = '<div style="padding:16px; color:var(--ink-3); font-size:13px;">'
+      + escapeHtml(t('followup.pickerEmpty')) + '</div>';
+    return;
+  }
+  listEl.innerHTML = items.map(it => {
+    const label = it.kind === 'invoice'
+      ? '#INV-' + (it.number != null ? it.number : '----')
+      : t('quote.label');
+    return '<div class="followup-picker-row" data-id="' + it.id + '" data-kind="' + it.kind + '"'
+      + ' style="padding:10px 12px; border-bottom:1px solid var(--line-2); cursor:pointer; display:flex; justify-content:space-between; gap:10px;">'
+      + '<span><strong>' + escapeHtml(it.clientName) + '</strong> · ' + escapeHtml(label) + '</span>'
+      + '<span style="color:var(--ink-2);">' + fmt(it.total) + ' · ' + escapeHtml(formatRelativeDate(it.date)) + '</span>'
+      + '</div>';
+  }).join('');
+  listEl.querySelectorAll('.followup-picker-row').forEach(row => {
+    row.onclick = () => pickFollowupRecord(row.dataset.kind, row.dataset.id);
+  });
+}
+
+async function pickFollowupRecord(kind, id) {
+  try {
+    const table = kind === 'invoice' ? 'invoices' : 'quotes';
+    const { data, error } = await sb.from(table).select('*').eq('id', id).single();
+    if (error || !data) { showToast(t('toast.followupLoadFailed'), true); return; }
+    const payload = data.payload || {};
+    const jobText = (pickLang(payload.scope) || '').trim().slice(0, 240);
+    followupPickedRecord = {
+      kind, id,
+      clientName: data.client_name || '',
+      total: parseFloat(data.total) || 0,
+      jobText: jobText || (data.client_name ? (t('quote.label') + ' — ' + data.client_name) : ''),
+      clientId: data.client_id || null,
+    };
+    selectedClientIdForFollowup = data.client_id || null;
+    const nameEl = document.getElementById('followupCustomerName');
+    if (nameEl) nameEl.value = data.client_name || '';
+    const chosen = document.getElementById('followupPickerChosen');
+    if (chosen) {
+      chosen.classList.remove('hidden');
+      const label = kind === 'invoice'
+        ? '#INV-' + (data.invoice_number != null ? data.invoice_number : '----')
+        : t('quote.label');
+      chosen.innerHTML = '<strong>' + escapeHtml(t('followup.pickerChosen')) + ':</strong> '
+        + escapeHtml(data.client_name || '—') + ' · ' + escapeHtml(label)
+        + ' · ' + fmt(followupPickedRecord.total);
+    }
+  } catch (e) {
+    console.warn('pickFollowupRecord threw:', e);
+    showToast(t('toast.followupLoadFailed'), true);
+  }
+}
+
 function bindFollowupDaysAgoPills() {
+  const customInput = document.getElementById('followupAgeCustom');
   document.querySelectorAll('#followupDaysAgoPills button').forEach(btn => {
     btn.onclick = () => {
       document.querySelectorAll('#followupDaysAgoPills button').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      followupQuoteAgePhrase = btn.dataset.label;
+      if (btn.dataset.days === 'custom') {
+        if (customInput) {
+          customInput.classList.remove('hidden');
+          customInput.focus();
+          followupQuoteAgePhrase = customInput.value.trim() || 'recently';
+        }
+      } else {
+        if (customInput) customInput.classList.add('hidden');
+        followupQuoteAgePhrase = btn.dataset.label;
+      }
     };
   });
+  if (customInput) {
+    customInput.addEventListener('input', () => {
+      followupQuoteAgePhrase = customInput.value.trim() || 'recently';
+    });
+  }
 }
 
 function bindFollowupSignature() {
@@ -7825,18 +7947,30 @@ function bindFollowupInputs() {
 }
 
 async function generateFollowup() {
-  const customerName = document.getElementById('followupCustomerName').value.trim();
-  const jobDesc = document.getElementById('followupJobDesc').value.trim();
-  const quoteAmount = parseFloat(document.getElementById('followupQuoteAmount').value) || 0;
-  if (!customerName) {
-    showToast(t('toast.addCustomerFirst'), true);
-    document.getElementById('followupCustomerName').focus();
-    return;
-  }
-  if (!jobDesc) {
-    showToast(t('toast.addJobRefFirst'), true);
-    document.getElementById('followupJobDesc').focus();
-    return;
+  let customerName, jobDesc, quoteAmount;
+  if (followupSource === 'manual') {
+    customerName = document.getElementById('followupCustomerName').value.trim();
+    jobDesc = document.getElementById('followupJobDesc').value.trim();
+    quoteAmount = 0;
+    if (!customerName) {
+      showToast(t('toast.addCustomerFirst'), true);
+      document.getElementById('followupCustomerName').focus();
+      return;
+    }
+    if (!jobDesc) {
+      showToast(t('toast.addJobDescFirst'), true);
+      document.getElementById('followupJobDesc').focus();
+      return;
+    }
+  } else {
+    if (!followupPickedRecord) {
+      showToast(t('followup.pickFirst'), true);
+      return;
+    }
+    customerName = followupPickedRecord.clientName || '';
+    jobDesc = followupPickedRecord.jobText || '';
+    quoteAmount = followupPickedRecord.total || 0;
+    if (!customerName) { showToast(t('toast.addCustomerFirst'), true); return; }
   }
 
   // Consume a credit. Real users → server-enforced RPC. Bypass → localStorage.
@@ -7851,19 +7985,19 @@ async function generateFollowup() {
 
   try {
     const signature = {
-      name: document.getElementById('followupSigName').value.trim(),
-      business: document.getElementById('followupSigBusiness').value.trim(),
-      contact: document.getElementById('followupSigContact').value.trim(),
+      name: followupSigName,
+      business: followupSigBusiness,
+      contact: followupSigContact,
     };
 
     const prompt = buildFollowupPrompt({
-      trade: selectedFollowupTrade,
+      trade: '',
       customerName,
       jobDesc,
       quoteAmount,
       scenario: followupScenario,
       quoteAge: followupQuoteAgePhrase,
-      tone: followupTone,
+      tone: 'Friendly',
       channel: followupChannel,
       signature,
     });
@@ -8135,6 +8269,38 @@ window.__testFollowupSend = function () {
   return passed === results.length;
 };
 
+window.__testFollowupPicker = function () {
+  const results = [];
+  const assert = (name, cond) => results.push({ name, pass: !!cond });
+
+  const p1 = buildFollowupPrompt({
+    trade: '', customerName: 'Sarah', jobDesc: 'kitchen drain quote',
+    quoteAmount: 2500, scenario: 'No reply yet', quoteAge: 'about a month ago',
+    tone: 'Friendly', channel: 'Email', signature: { name: '', business: '', contact: '' },
+  });
+  assert('prompt builds, omits TRADE', p1.indexOf('TRADE:') === -1);
+  assert('picked amount flows into prompt', p1.indexOf('2500') !== -1);
+  assert('custom age flows in', p1.indexOf('about a month ago') !== -1);
+
+  const savedPicked = followupPickedRecord;
+  const savedSource = followupSource;
+  followupSource = 'quote';
+  followupPickedRecord = { kind: 'quote', id: 'q1', clientName: 'Mike', total: 1800, jobText: 'panel upgrade', clientId: 'c1' };
+  assert('picked record carries client + amount', followupPickedRecord.clientName === 'Mike' && followupPickedRecord.total === 1800);
+  assert('picked record carries job text', followupPickedRecord.jobText === 'panel upgrade');
+
+  assert('picker search input exists', !!document.getElementById('followupPickerSearch'));
+  assert('picker list container exists', !!document.getElementById('followupPickerList'));
+
+  followupPickedRecord = savedPicked;
+  followupSource = savedSource;
+
+  const passed = results.filter(r => r.pass).length;
+  results.forEach(r => console.log((r.pass ? 'PASS' : 'FAIL') + ' — ' + r.name));
+  console.log('__testFollowupPicker: ' + passed + '/' + results.length + ' passed');
+  return passed === results.length;
+};
+
 function buildFollowupPrompt({ trade, customerName, jobDesc, quoteAmount, scenario, quoteAge, tone, channel, signature }) {
   const rawTrade = trade.replace(/^[^A-Za-z0-9]+/, '').trim();
   const tradeGuidance = TRADE_GUIDANCE[rawTrade] || '';
@@ -8159,7 +8325,7 @@ function buildFollowupPrompt({ trade, customerName, jobDesc, quoteAmount, scenar
   const signatureInstruction = signatureParts.length
     ? `If possible, close the message with the saved signature: ${signatureParts.join(', ')}.`
     : 'If no signature is provided, close with a simple professional sign-off.';
-  return `You are drafting a contractor follow-up message for a customer. Use first-person voice (I, not we). Never use corporate filler like "circle back," "just touching base," or "hope this finds you well."\n\nTRADE: ${trade}\nCUSTOMER: ${customerName}\nORIGINAL JOB REFERENCE: ${jobDesc}\nQUOTE AMOUNT: ${amountText}\nQUOTE AGE: ${quoteAge}\nTONE: ${tone}\nCHANNEL: ${channel}${guidanceSection}\n${scenarioInstructions}\n${toneInstruction}\n${channelInstruction}\n${signatureInstruction}\n\nBILINGUAL OUTPUT: Return both an English ("en") and a natural construction-trade Spanish ("es") version of the subject and body. The Spanish must use real US/Mexican contractor vocabulary (anticipo, mano de obra, etc.), not formal Castilian. Both versions carry the same message; JSON keys stay in English.\n\nReturn strict JSON only with this exact shape (no preamble, no code fences):\n{\n  "subject": { "en": "...", "es": "..." },\n  "body":    { "en": "...", "es": "..." }\n}`;
+  return `You are drafting a contractor follow-up message for a customer. Use first-person voice (I, not we). Never use corporate filler like "circle back," "just touching base," or "hope this finds you well."\n\n${trade ? 'TRADE: ' + trade + '\n' : ''}CUSTOMER: ${customerName}\nABOUT: ${jobDesc}\nQUOTE AMOUNT: ${amountText}\nQUOTE AGE: ${quoteAge}\nTONE: ${tone}\nCHANNEL: ${channel}${guidanceSection}\n${scenarioInstructions}\n${toneInstruction}\n${channelInstruction}\n${signatureInstruction}\n\nBILINGUAL OUTPUT: Return both an English ("en") and a natural construction-trade Spanish ("es") version of the subject and body. The Spanish must use real US/Mexican contractor vocabulary (anticipo, mano de obra, etc.), not formal Castilian. Both versions carry the same message; JSON keys stay in English.\n\nReturn strict JSON only with this exact shape (no preamble, no code fences):\n{\n  "subject": { "en": "...", "es": "..." },\n  "body":    { "en": "...", "es": "..." }\n}`;
 }
 
 function updateTextCharCount() {
@@ -10595,7 +10761,7 @@ async function persistGeneratedFollowup() {
       .insert({
         user_id: userId,
         client_id: clientId,
-        quote_id: null,
+        quote_id: (followupSource === 'quote' && followupPickedRecord) ? followupPickedRecord.id : null,
         customer_name: customerName || null,
         channel: followupChannel === 'Text' ? 'text' : 'email',
         scenario: followupScenario || null,
@@ -10643,17 +10809,29 @@ function enterFollowupComposeMode() {
   currentFollowup = null;
   const wrap = document.getElementById('followupWrap');
   if (wrap) wrap.classList.remove('visible');
-  // Clear the follow-up form's text inputs so + New Follow-up
-  // always starts with empty customer + amount + job ref
   const fieldsToClear = [
     ['followupCustomerName', ''],
     ['followupJobDesc', ''],
-    ['followupQuoteAmount', '0'],
   ];
   fieldsToClear.forEach(([id, val]) => {
     const el = document.getElementById(id);
     if (el) el.value = val;
   });
+  followupSource = 'manual';
+  document.querySelectorAll('#followupSourcePills button').forEach(b =>
+    b.classList.toggle('active', b.dataset.source === 'manual'));
+  const mf = document.getElementById('followupManualFields');
+  if (mf) mf.classList.remove('hidden');
+  const pf = document.getElementById('followupPickerField');
+  if (pf) pf.classList.add('hidden');
+  followupPickedRecord = null;
+  followupPickerItems = [];
+  const pickerSearch = document.getElementById('followupPickerSearch');
+  if (pickerSearch) pickerSearch.value = '';
+  const pickerList = document.getElementById('followupPickerList');
+  if (pickerList) pickerList.innerHTML = '';
+  const pickerChosen = document.getElementById('followupPickerChosen');
+  if (pickerChosen) pickerChosen.classList.add('hidden');
   selectedClientIdForFollowup = null;
   switchFollowupsSubView('compose');
 }
