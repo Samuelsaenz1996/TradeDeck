@@ -6564,8 +6564,21 @@ function renderPaymentChart(buckets) {
   if (!svg) return;
   const data = Array.isArray(buckets) ? buckets : [];
   svg.removeAttribute('preserveAspectRatio');
-  const width = 720, height = 220, padTop = 20, padBottom = 34, padX = 24;
-  const plotW = width - padX * 2;
+
+  const money = (n) => {
+    n = Number(n) || 0;
+    if (n === 0) return '$0';
+    if (n < 1000) return '$' + Math.round(n);
+    if (n < 1000000) {
+      const k = n / 1000;
+      return '$' + (k >= 10 ? Math.round(k) : k.toFixed(1).replace(/\.0$/, '')) + 'k';
+    }
+    const m = n / 1000000;
+    return '$' + (m >= 10 ? Math.round(m) : m.toFixed(1).replace(/\.0$/, '')) + 'M';
+  };
+
+  const width = 720, height = 230, padTop = 20, padBottom = 34, padLeft = 52, padRight = 18;
+  const plotW = width - padLeft - padRight;
   const plotH = height - padTop - padBottom;
   const n = Math.max(1, data.length);
   const slot = plotW / n;
@@ -6575,18 +6588,25 @@ function renderPaymentChart(buckets) {
   let content = '';
   for (let i = 0; i < 4; i += 1) {
     const y = padTop + (plotH / 3) * i;
-    content += '<line x1="' + padX + '" y1="' + y + '" x2="' + (width - padX) + '" y2="' + y + '" class="chart-grid" />';
+    content += '<line x1="' + padLeft + '" y1="' + y + '" x2="' + (width - padRight) + '" y2="' + y + '" class="chart-grid" />';
+    const val = max * (1 - i / 3);
+    content += '<text x="' + (padLeft - 8) + '" y="' + (y + 3) + '" fill="var(--ink-3)" font-size="9" text-anchor="end">' + money(val) + '</text>';
   }
+
   data.forEach((b, i) => {
-    const cx = padX + slot * i + slot / 2;
+    const cx = padLeft + slot * i + slot / 2;
     const barH = (b.amount / max) * plotH;
     const x = cx - barW / 2;
     const y = padTop + plotH - barH;
     content += '<rect x="' + x + '" y="' + y + '" width="' + barW + '" height="' + barH + '" class="chart-bar" rx="6" />';
+    if (n <= 8 && b.amount > 0) {
+      content += '<text x="' + cx + '" y="' + (y - 5) + '" fill="var(--ink-2)" font-size="10" font-weight="600" text-anchor="middle">' + money(b.amount) + '</text>';
+    }
     if (n <= 8 || i % 2 === 0) {
       content += '<text x="' + cx + '" y="' + (height - 12) + '" fill="var(--ink-2)" font-size="10" text-anchor="middle">' + b.label + '</text>';
     }
   });
+
   svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
   svg.innerHTML = content;
 }
