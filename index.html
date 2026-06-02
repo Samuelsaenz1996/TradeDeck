@@ -1813,6 +1813,12 @@
     #invoicesListTable th:nth-child(5), #invoicesListTable td:nth-child(5) { display:none; } /* hide Date */
     #invoicesListTable th, #invoicesListTable td { padding:6px 4px; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
+    /* Payments table: same treatment — fit to viewport, hide the Date column */
+    #paymentsView .card { padding: 8px; }
+    #paymentsTable { width:100% !important; table-layout:fixed !important; min-width:0 !important; max-width:100% !important; }
+    #paymentsTable th:nth-child(5), #paymentsTable td:nth-child(5) { display:none; } /* hide Date */
+    #paymentsTable th, #paymentsTable td { padding:6px 4px; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
     /* Status dropdowns on every list + cross-reference card: compact
        padding for narrow viewports */
     #jobsListTable .status-select,
@@ -3581,7 +3587,7 @@
           </div>
         </div>
         <div class="card">
-          <table class="line-table">
+          <table class="line-table" id="paymentsTable">
             <thead>
               <tr>
                 <th data-i18n="payments.col.invoice">Invoice #</th>
