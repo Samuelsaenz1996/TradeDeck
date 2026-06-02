@@ -3004,14 +3004,7 @@
 
           <div class="field">
             <label class="label" data-i18n="followup.scenario">What's the situation?</label>
-            <div class="timeline-pills" id="followupScenarioPills" style="flex-wrap:wrap;">
-              <button data-scenario="No reply yet" class="active" data-i18n="followup.scenarios.noReply">No reply yet</button>
-              <button data-scenario="Still thinking it over" data-i18n="followup.scenarios.thinking">Still thinking it over</button>
-              <button data-scenario="Said yes, no deposit yet" data-i18n="followup.scenarios.yes">Said yes, no deposit yet</button>
-              <button data-scenario="Declined the quote" data-i18n="followup.scenarios.declined">Declined the quote</button>
-              <button data-scenario="Job complete, asking for review" data-i18n="followup.scenarios.review">Job complete, asking for review</button>
-              <button data-scenario="Past customer check-in" data-i18n="followup.scenarios.checkIn">Past customer check-in</button>
-            </div>
+            <div class="timeline-pills" id="followupScenarioPills" style="flex-wrap:wrap;"></div>
           </div>
 
           <div class="field">
@@ -4304,6 +4297,10 @@ const I18N = {
     'followup.scenarios.declined': 'Declined the quote',
     'followup.scenarios.review': 'Job complete, asking for review',
     'followup.scenarios.checkIn': 'Past customer check-in',
+    'followup.scenarios.dueSoon': 'Payment due soon',
+    'followup.scenarios.overdue': 'Payment overdue',
+    'followup.scenarios.partial': 'Partial payment received',
+    'followup.scenarios.thanksPaid': 'Thank you (paid)',
     'followup.age': 'Quote age',
     'followup.age.1': '1 day',
     'followup.age.3': '3 days',
@@ -5071,6 +5068,10 @@ const I18N = {
     'followup.scenarios.declined': 'Rechazó la cotización',
     'followup.scenarios.review': 'Trabajo terminado, pidiendo reseña',
     'followup.scenarios.checkIn': 'Saludo a cliente anterior',
+    'followup.scenarios.dueSoon': 'Pago próximo a vencer',
+    'followup.scenarios.overdue': 'Pago vencido',
+    'followup.scenarios.partial': 'Pago parcial recibido',
+    'followup.scenarios.thanksPaid': 'Gracias (pagado)',
     'followup.age': 'Antigüedad de la cotización',
     'followup.age.1': '1 día',
     'followup.age.3': '3 días',
@@ -6714,6 +6715,43 @@ let followupChannel = 'Email';
 let followupSource = 'manual';   // 'quote' | 'invoice' | 'manual'
 let followupPickerItems = [];      // [{id, kind, clientName, total, date, clientId}]
 let followupPickedRecord = null;   // { kind, id, clientName, total, jobText, clientId }
+
+const FOLLOWUP_SCENARIOS = {
+  quote: [
+    { value: 'No reply yet',                    key: 'followup.scenarios.noReply',   default: true },
+    { value: 'Still thinking it over',          key: 'followup.scenarios.thinking' },
+    { value: 'Said yes, no deposit yet',        key: 'followup.scenarios.yes' },
+    { value: 'Declined the quote',              key: 'followup.scenarios.declined' },
+    { value: 'Job complete, asking for review', key: 'followup.scenarios.review' },
+    { value: 'Past customer check-in',          key: 'followup.scenarios.checkIn' },
+  ],
+  invoice: [
+    { value: 'Payment due soon',         key: 'followup.scenarios.dueSoon', default: true },
+    { value: 'Payment overdue',          key: 'followup.scenarios.overdue' },
+    { value: 'Partial payment received', key: 'followup.scenarios.partial' },
+    { value: 'Thank you, paid in full',  key: 'followup.scenarios.thanksPaid' },
+  ],
+};
+
+function renderFollowupScenarios(setName) {
+  const wrap = document.getElementById('followupScenarioPills');
+  if (!wrap) return;
+  const set = FOLLOWUP_SCENARIOS[setName] || FOLLOWUP_SCENARIOS.quote;
+  wrap.innerHTML = set.map(s =>
+    '<button data-scenario="' + escapeHtml(s.value) + '"'
+    + (s.default ? ' class="active"' : '')
+    + ' data-i18n="' + s.key + '">' + escapeHtml(t(s.key)) + '</button>'
+  ).join('');
+  const def = set.find(s => s.default) || set[0];
+  followupScenario = def ? def.value : '';
+  wrap.querySelectorAll('button').forEach(btn => {
+    btn.onclick = () => {
+      wrap.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      followupScenario = btn.dataset.scenario;
+    };
+  });
+}
 let followupQuoteAgePhrase = '3 days ago';
 let followupSigName = localStorage.getItem('tdSigName') || '';
 let followupSigBusiness = localStorage.getItem('tdSigBusiness') || '';
@@ -6991,7 +7029,7 @@ function init() {
     updateFlatSubtotal(trade);
   });
   bindFollowupSourcePills();
-  bindFollowupScenarioPills();
+  renderFollowupScenarios('quote');
   bindFollowupChannelToggle();
   bindFollowupDaysAgoPills();
   bindFollowupInputs();
@@ -7775,6 +7813,8 @@ function bindFollowupSourcePills() {
       followupPickedRecord = null;
       const chosen = document.getElementById('followupPickerChosen');
       if (chosen) chosen.classList.add('hidden');
+      const scenarioSet = (followupSource === 'invoice') ? 'invoice' : 'quote';
+      renderFollowupScenarios(scenarioSet);
       if (!isManual) loadFollowupPicker(followupSource);
     };
   });
@@ -7992,6 +8032,7 @@ async function generateFollowup() {
 
     const prompt = buildFollowupPrompt({
       trade: '',
+      sourceKind: followupSource,
       customerName,
       jobDesc,
       quoteAmount,
@@ -8292,6 +8333,23 @@ window.__testFollowupPicker = function () {
   assert('picker search input exists', !!document.getElementById('followupPickerSearch'));
   assert('picker list container exists', !!document.getElementById('followupPickerList'));
 
+  const pInv = buildFollowupPrompt({
+    trade: '', sourceKind: 'invoice', customerName: 'DU University',
+    jobDesc: 'shingle replacement', quoteAmount: 87500, scenario: 'Payment overdue',
+    quoteAge: 'three days ago', tone: 'Friendly', channel: 'Email',
+    signature: { name: '', business: '', contact: '' },
+  });
+  assert('invoice prompt frames as invoice', pInv.indexOf('INVOICE') !== -1);
+  assert('invoice prompt says it is a payment follow-up', pInv.toLowerCase().indexOf('payment follow-up') !== -1);
+  assert('invoice scenario set has dueSoon default', (FOLLOWUP_SCENARIOS.invoice[0].value === 'Payment due soon'));
+
+  const pQuote = buildFollowupPrompt({
+    trade: '', sourceKind: 'quote', customerName: 'Mike', jobDesc: 'panel upgrade',
+    quoteAmount: 1800, scenario: 'No reply yet', quoteAge: '3 days ago',
+    tone: 'Friendly', channel: 'Email', signature: { name: '', business: '', contact: '' },
+  });
+  assert('quote prompt frames as quote', pQuote.indexOf('QUOTE follow-up') !== -1);
+
   followupPickedRecord = savedPicked;
   followupSource = savedSource;
 
@@ -8301,18 +8359,31 @@ window.__testFollowupPicker = function () {
   return passed === results.length;
 };
 
-function buildFollowupPrompt({ trade, customerName, jobDesc, quoteAmount, scenario, quoteAge, tone, channel, signature }) {
+function buildFollowupPrompt({ trade, sourceKind, customerName, jobDesc, quoteAmount, scenario, quoteAge, tone, channel, signature }) {
   const rawTrade = trade.replace(/^[^A-Za-z0-9]+/, '').trim();
   const tradeGuidance = TRADE_GUIDANCE[rawTrade] || '';
   const guidanceSection = tradeGuidance ? `\nTRADE-SPECIFIC GUIDANCE:\n${tradeGuidance}\n` : '';
   const amountText = isNaN(quoteAmount) ? '' : `$${quoteAmount.toFixed(2)}`;
-  const scenarioInstructions = scenario === 'Declined the quote'
-    ? 'For a declined follow-up, do not sound bitter or pushy. Thank them, ask briefly whether it was price, timing, or scope, and leave the door open for future work.'
+  const isInvoice = sourceKind === 'invoice';
+  const docFraming = isInvoice
+    ? 'This is an INVOICE payment follow-up. The work is done or the invoice has been sent; you are following up about PAYMENT, not about winning the job. Refer to it as an invoice (never a "quote"). Do not ask if they are "still deciding" or offer to adjust scope/pricing — the price is settled. Focus on payment status, due dates, and making it easy to pay.'
+    : 'This is a QUOTE follow-up. You are following up on a quote you sent, hoping to win the job. Refer to it as a quote (never an "invoice").';
+  const scenarioInstructions =
+    scenario === 'Declined the quote'
+      ? 'For a declined follow-up, do not sound bitter or pushy. Thank them, ask briefly whether it was price, timing, or scope, and leave the door open for future work.'
     : scenario === 'Job complete, asking for review'
       ? 'For a review request, be specific about the completed work and mention Google reviews in a brief, sincere way that highlights how much it means to a small business.'
-      : scenario === 'Past customer check-in'
-        ? 'For a past customer check-in, reference the original work clearly and avoid sounding salesy.'
-        : '';
+    : scenario === 'Past customer check-in'
+      ? 'For a past customer check-in, reference the original work clearly and avoid sounding salesy.'
+    : scenario === 'Payment due soon'
+      ? 'A friendly heads-up that payment is coming due. Be warm and low-pressure; state the amount and that you wanted to make sure the invoice was received.'
+    : scenario === 'Payment overdue'
+      ? 'Payment is past due. Be polite and direct, not aggressive. State the amount owed and the due date that passed, and make it easy to pay. Assume good faith — most late payments are oversights.'
+    : scenario === 'Partial payment received'
+      ? 'Acknowledge and thank them for the partial payment received, then note the remaining balance clearly and how to pay it.'
+    : scenario === 'Thank you, paid in full'
+      ? 'A sincere thank-you for paying in full. No ask — just gratitude and a note that you valued the work. Optionally invite them to reach out for future needs.'
+      : '';
   const toneInstruction = tone === 'Friendly'
     ? 'Write warm, conversational copy with contractions allowed.'
     : tone === 'Professional'
@@ -8325,7 +8396,7 @@ function buildFollowupPrompt({ trade, customerName, jobDesc, quoteAmount, scenar
   const signatureInstruction = signatureParts.length
     ? `If possible, close the message with the saved signature: ${signatureParts.join(', ')}.`
     : 'If no signature is provided, close with a simple professional sign-off.';
-  return `You are drafting a contractor follow-up message for a customer. Use first-person voice (I, not we). Never use corporate filler like "circle back," "just touching base," or "hope this finds you well."\n\n${trade ? 'TRADE: ' + trade + '\n' : ''}CUSTOMER: ${customerName}\nABOUT: ${jobDesc}\nQUOTE AMOUNT: ${amountText}\nQUOTE AGE: ${quoteAge}\nTONE: ${tone}\nCHANNEL: ${channel}${guidanceSection}\n${scenarioInstructions}\n${toneInstruction}\n${channelInstruction}\n${signatureInstruction}\n\nBILINGUAL OUTPUT: Return both an English ("en") and a natural construction-trade Spanish ("es") version of the subject and body. The Spanish must use real US/Mexican contractor vocabulary (anticipo, mano de obra, etc.), not formal Castilian. Both versions carry the same message; JSON keys stay in English.\n\nReturn strict JSON only with this exact shape (no preamble, no code fences):\n{\n  "subject": { "en": "...", "es": "..." },\n  "body":    { "en": "...", "es": "..." }\n}`;
+  return `You are drafting a contractor follow-up message for a customer. Use first-person voice (I, not we). Never use corporate filler like "circle back," "just touching base," or "hope this finds you well."\n\n${docFraming}\n\n${trade ? 'TRADE: ' + trade + '\n' : ''}CUSTOMER: ${customerName}\nABOUT: ${jobDesc}\n${isInvoice ? 'INVOICE AMOUNT' : 'QUOTE AMOUNT'}: ${amountText}\n${isInvoice ? 'INVOICE AGE' : 'QUOTE AGE'}: ${quoteAge}\nTONE: ${tone}\nCHANNEL: ${channel}${guidanceSection}\n${scenarioInstructions}\n${toneInstruction}\n${channelInstruction}\n${signatureInstruction}\n\nBILINGUAL OUTPUT: Return both an English ("en") and a natural construction-trade Spanish ("es") version of the subject and body. The Spanish must use real US/Mexican contractor vocabulary (anticipo, mano de obra, etc.), not formal Castilian. Both versions carry the same message; JSON keys stay in English.\n\nReturn strict JSON only with this exact shape (no preamble, no code fences):\n{\n  "subject": { "en": "...", "es": "..." },\n  "body":    { "en": "...", "es": "..." }\n}`;
 }
 
 function updateTextCharCount() {
@@ -10965,6 +11036,9 @@ async function openSavedFollowup(followupId) {
         .classList.toggle('hidden', followupChannel === 'Text');
       refreshFollowupSendButton();
     }
+    const savedScenario = data.scenario || '';
+    const inInvoiceSet = (FOLLOWUP_SCENARIOS.invoice || []).some(s => s.value === savedScenario);
+    renderFollowupScenarios(inInvoiceSet ? 'invoice' : 'quote');
     if (data.scenario) {
       followupScenario = data.scenario;
       document.querySelectorAll('#followupScenarioPills button').forEach(b => {
