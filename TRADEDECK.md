@@ -1,6 +1,6 @@
 # MyTradeDeck — Project Status
 
-Last updated: June 2, 2026 (**payments + subscriptions LIVE on Saenztech LLC**; platform migrated; one sidebar bug fix in progress)
+Last updated: June 2, 2026 (**payments + subscriptions LIVE**; Payments dashboard now real data; invoice archive/delete + mobile polish; follow-up compose form rebuilt with source picker + AI-agnostic sign-off)
 
 Save this. Paste into any future Claude conversation to continue.
 
@@ -52,7 +52,46 @@ WHERE user_id = (SELECT id FROM auth.users WHERE email = 'samuelsaenz1996@gmail.
 
 ---
 
-## 🔧 In progress: sidebar plan-card bug fix (spec written, NOT yet run in Claude Code)
+## 🆕 This session: Payments dashboard real-data, invoice archive/delete, mobile polish, follow-up compose rebuild
+
+Several user-visible features shipped end-to-end (Preview → main):
+
+### Payments view → live data
+- Killed `MOCK_PAYMENTS` / `MOCK_PAYMENT_WEEKS`. Cards, split-bar, chart, and chase-list now derive from real invoices (cents-based reconciliation).
+- Date-range dropdown (this month / last month / last 3 months / YTD). Cards 1&2 are period-scoped (collected + outstanding/overdue in window); cards 3&4 are all-time (lifetime totals + avg days-to-pay computed off `paid_at`).
+- Split-bar shows collected / outstanding / overdue proportions for the period.
+- Chase list = unpaid + overdue invoices, sortable, balance-aware.
+- `paid_at` is now stamped when an invoice is marked paid manually (previously only PAY-C stamped it).
+- Mobile: `#paymentsTable` mirrors `#invoicesListTable` (compact padding, ellipsis, nowrap). Removed "Preview" badge from nav-Payments.
+
+### Invoices: archive + delete
+- Active/Archived segmented control on the invoices list; `viewingArchivedInvoices` state; Payments view always force-loads active via `loadInvoices({forceActive: true})`.
+- Archive + Delete buttons on the invoice detail page (`archiveInvoice` / `unarchiveInvoice` / `toggleArchiveCurrentInvoice` / `refreshInvoiceArchiveButton` / `deleteCurrentInvoice`).
+- Delete on a paid/partial invoice gets a stern confirmation showing the $ amount + PI id — by request.
+- Mobile: invoice-list table now fits the viewport, status pill pinned to 108px and tighter padding so "Partially paid" doesn't clip.
+
+### Migration ran in Supabase (user ran it)
+```sql
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS archived_at timestamptz NULL;
+CREATE INDEX IF NOT EXISTS invoices_archived_at_idx ON invoices (archived_at);
+```
+
+### Follow-up compose form — rebuilt (Stages 2a/2b/2c + sign-off refactor)
+- **Source picker**: From a quote · From an invoice · Manual. Replaces the old trade-list flow.
+- **Search + list picker** for quotes and invoices (real data, searchable). Manual mode keeps the original free-text trade.
+- **Dynamic scenarios** via `FOLLOWUP_SCENARIOS` config — separate scenario sets for quotes vs invoices (overdue / partial / thank-you-paid for invoices; nudge / objection / etc. for quotes). Pills render dynamically via `renderFollowupScenarios(setName)`.
+- **`buildFollowupPrompt({trade, sourceKind, ...})`** now frames the prompt with `isInvoice` / `docFraming` so the AI gets the right context.
+- **Sign-off externalized to code.** AI is now instructed to write NO closing at all. `appendFollowupSignoff(parsed)` (above `generateFollowup`) appends `\n\nBest,\n{first last}\n{company}` from `profileCache`, skipping empty slots — no more "[Your Name]" placeholders.
+- **CSS fix**: `#followupBody { white-space: pre-wrap; }` so the appended `\n` line breaks render as three lines on screen (the data was already correct; the div was collapsing newlines). `copyFollowupMessage` reads `.textContent` which preserves them natively.
+- **Polish**: age label now uses `followup.ageNeutral` ("How long has it been?" / "¿Cuánto tiempo ha pasado?") so it reads naturally for invoices too — old `followup.age` ("Quote age") key kept, harmless.
+- **Harness**: `__testFollowupPicker` now prints **13/13 passed** (7 picker/framing + 6 sign-off-related). Use it as the regression gate on the follow-up area going forward.
+
+### Defensive fix flagged (not in spec, but necessary)
+- After Stage 2a removed the trade-list and signature-summary DOM, `applyLanguage()` was still calling `renderFollowupTrades()` / `updateFollowupSignatureSummary()` unconditionally and null-deref'd on language switch. Both calls removed from `applyLanguage`.
+
+---
+
+## 🔧 Still open: sidebar plan-card bug fix (spec written, NOT yet run in Claude Code)
 
 **Symptom:** sidebar shows "FREE PLAN", "Unlimited / 5 quotes" (contradiction), and the "Upgrade to Pro" button even though the account is pro.
 
@@ -99,24 +138,26 @@ MyTradeDeck is an AI-powered admin tool for contractors and tradespeople. Drafts
 ## What's Built (functional)
 - Foundation, quotes, full CRM (clients/jobs/quotes/follow-ups), 10 trades / 7 pricing modes, full EN/ES, mobile drawer.
 - Auth (password + magic-link + recovery), Stripe subscriptions + portal, Profile/branding.
-- Archive + bulk + delete + confirmModal across all four core tables.
-- Invoices: INV-A (convert-to-invoice RPC, doc view, payment tracking, PDF/email/text) + INV-B (invoices list view + nav).
-- Payments collection: PAY-A (Connect onboarding) + PAY-B (hosted-Checkout direct charges + 1%/$25 fee) + PAY-C (Connect webhook → auto-mark paid). **All live and verified on Saenztech LLC.**
+- Archive + bulk + delete + confirmModal across all four core tables **+ invoices** (archive toggle, archive/delete on invoice detail, stern confirm for paid/partial).
+- Invoices: INV-A (convert-to-invoice RPC, doc view, payment tracking, PDF/email/text) + INV-B (invoices list view + nav) + active/archived view toggle.
+- Payments collection: PAY-A (Connect onboarding) + PAY-B (hosted-Checkout direct charges + 1%/$25 fee) + PAY-C (Connect webhook → auto-mark paid, `paid_at` stamped — and now also stamped on manual mark-paid). **All live and verified on Saenztech LLC.**
+- **Payments dashboard (real data)**: period-scoped collected/outstanding/overdue cards + all-time lifetime + avg-days-to-pay; date-range dropdown; split-bar; sortable chase list. No more mocks.
+- **Follow-up compose v2**: source picker (quote / invoice / manual) → searchable picker → dynamic scenario set → AI prompt is source-aware → sign-off appended in code from `profileCache`. `__testFollowupPicker` harness gates regressions (13/13).
 
 ## What's NOT built / roadmap
 | Feature | Priority | Notes |
 |---|---|---|
-| Sidebar plan-card fix | **High (in progress)** | Spec written + self-test harness; not yet run in Claude Code. |
+| Sidebar plan-card fix | **High (still open)** | Spec written + `__testSidebar()` harness; not yet run in Claude Code. |
 | Embedded card entry on our page | Med | User wants clients to enter card on-site instead of redirect. Deferred post-go-live. Path: Stripe **Embedded Checkout** (keeps token flow + PCI posture, smallest change) over full Elements. A real, separate sprint. |
-| Real Payments dashboard | Med-High | Replace MOCK_PAYMENTS/MOCK_PAYMENT_WEEKS with real invoice data (Σtotal/Σpaid/Σbalance; avg-days-to-pay now computable from `paid_at`). Last mock surface. Decide INV-B-vs-Payments merge (lean: Payments = rollup over the invoice list). |
 | Test the ANNUAL checkout path | Med | Monthly proven live via coupon; annual env var confirmed but never run end-to-end. Shares the monthly code path (low risk). |
-| Orphan i18n key sweep | Low | `toast.invoicePlaceholder`, `invoice.viewTitleHtml`. Deliberately deferred out of the sidebar PR to keep it focused. |
+| Orphan i18n key sweep | Low | `toast.invoicePlaceholder`, `invoice.viewTitleHtml`, dead `followup.age` ("Quote age" — now replaced by `followup.ageNeutral`). One polish pass when convenient. |
 | Single-invoice topbar shows "Invoices" (plural) | Low | Cosmetic (VIEW_TOPBAR is view-keyed). |
-| Auto-link follow-up to job | Low-Med | ~2-line fix in persistGeneratedFollowup. |
+| Auto-link follow-up to job | Low-Med | ~2-line fix in `persistGeneratedFollowup`. With the new source picker we now know quote/invoice id at compose time — wiring is even smaller now. |
 | PAY-C partial-payment idempotency | Low (deferred) | Keys on last stored PI; multiple online partials + replayed earlier event could double-count. Revisit if multiple online partials are enabled. |
-| Extend archive to invoices | Low-Med | `invoices` has no `archived_at`. |
 | Retire dev bypass | Low | localhost-gated; parked. |
 | Capacitor wrap | Med | Sprint 4+. |
+| ~~Real Payments dashboard~~ | ✅ done | Replaced mocks, period vs all-time split, avg-days-to-pay live. |
+| ~~Extend archive to invoices~~ | ✅ done | `archived_at` migration ran; archive/unarchive/delete + active/archived toggle shipped. |
 
 ## Stripe cleanup state (this session)
 - Promo code **`MyTradeDeckFree`** (100% off forever) — **deactivated** after the test.
@@ -124,7 +165,7 @@ MyTradeDeck is an AI-powered admin tool for contractors and tradespeople. Drafts
 - `pay-b-preview` branch — was a rollback reference pre-go-live; safe to delete now that go-live is verified.
 
 ## Data Model (current)
-clients → jobs → (quotes, followups, invoices); quotes/followups/invoices can also hang directly off a client. Invoices created from a quote via idempotent `create_invoice_from_quote` RPC. `invoices` has `pay_token` (unique), `stripe_checkout_session_id`, `stripe_payment_intent_id`, `paid_at` (stamped by PAY-C webhook). `profiles` (PK = `user_id`) has quota RPCs, plan, business/branding fields, Stripe subscription fields, and Connect fields (`stripe_account_id`, `stripe_charges_enabled`, `stripe_details_submitted`, `stripe_payouts_enabled`, `stripe_connect_updated_at`). No `archived_at` on `invoices` yet.
+clients → jobs → (quotes, followups, invoices); quotes/followups/invoices can also hang directly off a client. Invoices created from a quote via idempotent `create_invoice_from_quote` RPC. `invoices` has `pay_token` (unique), `stripe_checkout_session_id`, `stripe_payment_intent_id`, `paid_at` (stamped by PAY-C webhook **and** manual mark-paid), `archived_at` (nullable, indexed). `profiles` (PK = `user_id`) has quota RPCs, plan, business/branding fields, Stripe subscription fields, and Connect fields (`stripe_account_id`, `stripe_charges_enabled`, `stripe_details_submitted`, `stripe_payouts_enabled`, `stripe_connect_updated_at`).
 
 ## Workflow preferences
 Small incremental sprints. Prompts in fenced blocks for Claude Code in VS Code, 4-section format (Manual setup → Changes → Self-tests → Test plan), explicit negative constraints, "X/X passed" before deploy, functions referenced by name. Migrations as a separate SQL block BEFORE code. Multi-phase manual procedures ONE step at a time. Push to a branch → Vercel Preview → verify → merge to main.
@@ -132,7 +173,8 @@ Small incremental sprints. Prompts in fenced blocks for Claude Code in VS Code, 
 ## Open questions for next session
 - Run the sidebar fix in Claude Code; verify `__testSidebar()` 10/10 + eyeball pro sidebar; merge.
 - Embedded on-page card entry: schedule as its own sprint (Embedded Checkout).
-- Real Payments dashboard: merge with the Invoices list or keep separate?
 - Test the annual subscription path end-to-end.
-- Sweep the two orphan i18n keys + the plural-topbar cosmetic in one polish pass.
+- Polish pass: orphan i18n keys (`toast.invoicePlaceholder`, `invoice.viewTitleHtml`, dead `followup.age`) + plural-topbar cosmetic.
+- Auto-link follow-up to job — even smaller now that the source picker exposes the quote/invoice id at compose time.
 - Delete `pay-b-preview`.
+- Working tree currently carries a large uncommitted stack (Payments dashboard real-data, invoice archive/delete + mobile, follow-up rebuild, sign-off-in-code, white-space + neutral-age polish). Decide whether to ship as one PR or split.
