@@ -3536,21 +3536,14 @@
           <span data-i18n="preview.banner">👀 Preview — this section is a mockup with sample data. Fully working version coming soon.</span>
           <button onclick="this.closest('.info-banner').style.display='none'">×</button>
         </div>
-        <div class="card">
-          <div class="field-row cols-2">
-            <div>
-              <div class="card-title" data-i18n="payments.title">Payments</div>
-            </div>
-            <div style="display:flex; justify-content:flex-end; align-items:flex-end;">
-              <select class="status-select" id="paymentsRangeSelect" style="font-weight:600;">
-                <option value="7d"  data-i18n="payments.range.7d">Last 7 days</option>
-                <option value="30d" data-i18n="payments.range.30d">Last 30 days</option>
-                <option value="90d" data-i18n="payments.range.90d">Last 90 days</option>
-                <option value="12m" data-i18n="payments.range.12m">Last 12 months</option>
-                <option value="all" data-i18n="payments.range.all" selected>All time</option>
-              </select>
-            </div>
-          </div>
+        <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
+          <select class="status-select" id="paymentsRangeSelect" style="font-weight:600;">
+            <option value="7d"  data-i18n="payments.range.7d">Last 7 days</option>
+            <option value="30d" data-i18n="payments.range.30d">Last 30 days</option>
+            <option value="90d" data-i18n="payments.range.90d">Last 90 days</option>
+            <option value="12m" data-i18n="payments.range.12m">Last 12 months</option>
+            <option value="all" data-i18n="payments.range.all" selected>All time</option>
+          </select>
         </div>
         <div class="field-row cols-4">
           <div class="stat-card">
