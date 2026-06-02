@@ -6818,7 +6818,7 @@ function init() {
   const upBd = document.getElementById('upgradeModalBackdrop'); if (upBd) upBd.onclick = (e) => { if (e.target === upBd) closeUpgradeModal(); };
   // Populate the profile cache on boot (fire-and-forget; powers the
   // new-quote deposit pre-fill + contractor info on rendered quotes)
-  loadProfileCache().catch(e => console.warn('initial profile load:', e));
+  loadProfileCache().then(() => updateUsageDisplay()).catch(e => console.warn('initial profile load:', e));
   // Bind quotes header buttons
   const quotesNewBtn = document.getElementById('quotesNewBtn');
   if (quotesNewBtn) quotesNewBtn.onclick = enterComposeMode;
@@ -7894,16 +7894,82 @@ function updateRoofingSubtotal() {
 }
 
 function updateUsageDisplay() {
-  // Pro (and other non-free plans) are unlimited — show that and stop.
-  if (profileCache && profileCache.plan && profileCache.plan !== 'free') {
+  const labelEl = document.querySelector('.usage-label');
+  const suffixEl = document.querySelector('#quoteUsed + span');
+  const upgradeBtn = document.getElementById('upgradeBtn');
+  const isPro = !!(profileCache && profileCache.plan && profileCache.plan !== 'free');
+
+  if (isPro) {
+    if (labelEl) { labelEl.removeAttribute('data-i18n'); labelEl.textContent = t('profile.plan.proName'); }
     document.getElementById('quoteUsed').textContent = t('sidebar.unlimited');
+    if (suffixEl) { suffixEl.removeAttribute('data-i18n'); suffixEl.textContent = ''; }
     document.getElementById('usageBar').style.width = '100%';
+    if (upgradeBtn) upgradeBtn.classList.add('hidden');
     return;
   }
+
+  if (labelEl) { labelEl.setAttribute('data-i18n', 'sidebar.freePlan'); labelEl.textContent = t('sidebar.freePlan'); }
+  if (suffixEl) { suffixEl.setAttribute('data-i18n', 'sidebar.quotesSuffix'); suffixEl.textContent = t('sidebar.quotesSuffix'); }
+  if (upgradeBtn) upgradeBtn.classList.remove('hidden');
   document.getElementById('quoteUsed').textContent = quoteUsed;
   const pct = Math.min(100, (quoteUsed / 5) * 100);
   document.getElementById('usageBar').style.width = pct + '%';
 }
+
+// Browser-console self-test harness. NOT run on load. Call window.__testSidebar()
+// from devtools on a deployed Preview to verify the Pro/Free sidebar transitions.
+// Saves and restores real state so it's safe to run live.
+window.__testSidebar = function () {
+  const results = [];
+  const assert = (name, cond) => results.push({ name, pass: !!cond });
+
+  const savedPlan = profileCache ? profileCache.plan : undefined;
+  const savedProfileCache = profileCache;
+  const savedQuoteUsed = quoteUsed;
+  const savedLang = tdLang;
+
+  const labelEl = document.querySelector('.usage-label');
+  const suffixEl = document.querySelector('#quoteUsed + span');
+  const usedEl = document.getElementById('quoteUsed');
+  const upgradeBtn = document.getElementById('upgradeBtn');
+
+  // PRO state (English)
+  tdLang = 'en';
+  profileCache = { plan: 'pro' };
+  updateUsageDisplay();
+  assert('pro: quoteUsed shows Unlimited', usedEl.textContent === t('sidebar.unlimited'));
+  assert('pro: suffix is empty (no "/ 5 quotes")', suffixEl && suffixEl.textContent === '');
+  assert('pro: label reads Pro plan', labelEl && labelEl.textContent === t('profile.plan.proName'));
+  assert('pro: upgrade button hidden', upgradeBtn && upgradeBtn.classList.contains('hidden'));
+
+  // PRO state (Spanish) — language toggle must not reintroduce "/5"
+  tdLang = 'es';
+  updateUsageDisplay();
+  assert('pro/es: quoteUsed shows Ilimitado', usedEl.textContent === t('sidebar.unlimited'));
+  assert('pro/es: suffix still empty', suffixEl && suffixEl.textContent === '');
+
+  // FREE state
+  tdLang = 'en';
+  profileCache = { plan: 'free' };
+  quoteUsed = 3;
+  updateUsageDisplay();
+  assert('free: quoteUsed shows the number', usedEl.textContent === '3');
+  assert('free: suffix restored', suffixEl && suffixEl.textContent === t('sidebar.quotesSuffix'));
+  assert('free: label reads Free Plan', labelEl && labelEl.textContent === t('sidebar.freePlan'));
+  assert('free: upgrade button visible', upgradeBtn && !upgradeBtn.classList.contains('hidden'));
+
+  // Restore real state and re-render
+  profileCache = savedProfileCache;
+  if (profileCache && savedPlan !== undefined) profileCache.plan = savedPlan;
+  quoteUsed = savedQuoteUsed;
+  tdLang = savedLang;
+  updateUsageDisplay();
+
+  const passed = results.filter(r => r.pass).length;
+  results.forEach(r => console.log((r.pass ? 'PASS' : 'FAIL') + ' — ' + r.name));
+  console.log(`__testSidebar: ${passed}/${results.length} passed`);
+  return passed === results.length;
+};
 
 // ============================================================================
 // Generate Quote (Anthropic API call)
@@ -12580,7 +12646,7 @@ function updateAuthUI(session) {
       refreshQuoteUsedFromServer();
       refreshClientsLookupCache();
       loadJobs();
-      loadProfileCache().catch(e => console.warn('profile load on auth:', e));
+      loadProfileCache().then(() => updateUsageDisplay()).catch(e => console.warn('profile load on auth:', e));
     }
   } else {
     authScreen.classList.remove('hidden');
