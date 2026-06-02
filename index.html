@@ -7985,6 +7985,29 @@ function bindFollowupInputs() {
   updateTextCharCount();
 }
 
+function buildFollowupSignoffText() {
+  const sigFirst = (profileCache && profileCache.first_name) ? profileCache.first_name.trim() : '';
+  const sigLast  = (profileCache && profileCache.last_name)  ? profileCache.last_name.trim()  : '';
+  const sigName  = (sigFirst + ' ' + sigLast).trim();
+  const sigCompany = (profileCache && profileCache.company_name) ? profileCache.company_name.trim() : '';
+  let out = '\n\nBest,';
+  if (sigName)    out += '\n' + sigName;
+  if (sigCompany) out += '\n' + sigCompany;
+  return out;
+}
+
+function appendFollowupSignoff(parsed) {
+  if (!parsed) return;
+  const signoff = buildFollowupSignoffText();
+  if (typeof parsed.body !== 'object' || parsed.body === null) {
+    parsed.body = { en: '', es: '' };
+  }
+  ['en', 'es'].forEach(lang => {
+    const existing = (parsed.body[lang] || '').trimEnd();
+    if (existing) parsed.body[lang] = existing + signoff;
+  });
+}
+
 async function generateFollowup() {
   let customerName, jobDesc, quoteAmount;
   if (followupSource === 'manual') {
@@ -8057,6 +8080,7 @@ async function generateFollowup() {
     });
 
     const parsed = parseModelOutput(text);
+    appendFollowupSignoff(parsed);
     renderFollowupMessage(parsed);
 
     document.getElementById('followupWrap').classList.add('visible');
@@ -8356,20 +8380,24 @@ window.__testFollowupPicker = function () {
   const pSig = buildFollowupPrompt({
     trade: '', sourceKind: 'quote', customerName: 'Mike', jobDesc: 'panel upgrade',
     quoteAmount: 1800, scenario: 'No reply yet', quoteAge: '3 days ago',
-    tone: 'Friendly', channel: 'Email',
-    signature: { name: 'Samuel Saenz', business: 'Saenztech LLC', contact: '' },
+    tone: 'Friendly', channel: 'Email', signature: { name: '', business: '', contact: '' },
   });
-  assert('signature name in prompt', pSig.indexOf('Samuel Saenz') !== -1);
-  assert('signature company in prompt', pSig.indexOf('Saenztech LLC') !== -1);
-  assert('prompt forbids placeholder when sig present', pSig.indexOf('[Your Name]') !== -1 && pSig.toLowerCase().indexOf('never output a placeholder') !== -1);
+  assert('prompt forbids AI sign-off', pSig.toLowerCase().indexOf('do not write any closing') !== -1);
+  assert('prompt forbids placeholder', pSig.indexOf('[Your Name]') !== -1);
 
-  const pNoSig = buildFollowupPrompt({
-    trade: '', sourceKind: 'quote', customerName: 'Mike', jobDesc: 'panel upgrade',
-    quoteAmount: 1800, scenario: 'No reply yet', quoteAge: '3 days ago',
-    tone: 'Friendly', channel: 'Email',
-    signature: { name: '', business: '', contact: '' },
-  });
-  assert('empty-sig prompt forbids placeholder', pNoSig.toLowerCase().indexOf('do not add a name') !== -1 || pNoSig.toLowerCase().indexOf('placeholder') !== -1);
+  const savedProfile = profileCache;
+  profileCache = { first_name: 'Samuel', last_name: 'Saenz', company_name: 'Saenztech LLC' };
+  const parsedFake = { subject: { en: 'Hi', es: 'Hola' }, body: { en: 'Body line.', es: 'Cuerpo.' } };
+  appendFollowupSignoff(parsedFake);
+  assert('signoff appended to en body', parsedFake.body.en.indexOf('Samuel Saenz') !== -1);
+  assert('signoff has name and company on separate lines', parsedFake.body.en.indexOf('Samuel Saenz\nSaenztech LLC') !== -1);
+  assert('signoff starts with Best on its own line', parsedFake.body.en.indexOf('\n\nBest,\nSamuel Saenz') !== -1);
+  assert('empty es slot stays empty', (function(){
+    const p2 = { body: { en: 'Hi.', es: '' } };
+    appendFollowupSignoff(p2);
+    return p2.body.es === '';
+  })());
+  profileCache = savedProfile;
 
   followupPickedRecord = savedPicked;
   followupSource = savedSource;
@@ -8413,25 +8441,11 @@ function buildFollowupPrompt({ trade, sourceKind, customerName, jobDesc, quoteAm
   const channelInstruction = channel === 'Text'
     ? 'Return subject as an empty string and body as a single short SMS-friendly message under 160 characters.'
     : 'Return a subject line and body with 2-3 short paragraphs.';
-  let signatureInstruction;
-  const sigHasName = signature && signature.name;
-  const sigHasBiz  = signature && signature.business;
-  if (sigHasName || sigHasBiz) {
-    const lines = [];
-    if (sigHasName) lines.push(signature.name);
-    if (sigHasBiz)  lines.push(signature.business);
-    signatureInstruction =
-      'Close the message with a brief, warm sign-off (e.g. "Best," or "Thanks,") '
-      + 'followed by this signature EXACTLY as written, on separate lines:\n'
-      + lines.join('\n')
-      + '\nDo not invent or add a company, title, phone, or email that is not in this signature. '
-      + 'Never output a placeholder like "[Your Name]".';
-  } else {
-    signatureInstruction =
-      'End with a brief, warm sign-off (e.g. "Best," or "Thanks,") on its own line. '
-      + 'Do NOT add a name, company, or any placeholder such as "[Your Name]" — '
-      + 'just the closing word, since no signature is on file.';
-  }
+  const signatureInstruction =
+    'Do NOT write any closing or sign-off line. End the message after the last '
+    + 'sentence of the actual content. Do not add "Best,", "Thanks,", a name, a '
+    + 'company, or any placeholder like "[Your Name]". A sign-off is added '
+    + 'separately by the system.';
   return `You are drafting a contractor follow-up message for a customer. Use first-person voice (I, not we). Never use corporate filler like "circle back," "just touching base," or "hope this finds you well."\n\n${docFraming}\n\n${trade ? 'TRADE: ' + trade + '\n' : ''}CUSTOMER: ${customerName}\nABOUT: ${jobDesc}\n${isInvoice ? 'INVOICE AMOUNT' : 'QUOTE AMOUNT'}: ${amountText}\n${isInvoice ? 'INVOICE AGE' : 'QUOTE AGE'}: ${quoteAge}\nTONE: ${tone}\nCHANNEL: ${channel}${guidanceSection}\n${scenarioInstructions}\n${toneInstruction}\n${channelInstruction}\n${signatureInstruction}\n\nBILINGUAL OUTPUT: Return both an English ("en") and a natural construction-trade Spanish ("es") version of the subject and body. The Spanish must use real US/Mexican contractor vocabulary (anticipo, mano de obra, etc.), not formal Castilian. Both versions carry the same message; JSON keys stay in English.\n\nReturn strict JSON only with this exact shape (no preamble, no code fences):\n{\n  "subject": { "en": "...", "es": "..." },\n  "body":    { "en": "...", "es": "..." }\n}`;
 }
 
