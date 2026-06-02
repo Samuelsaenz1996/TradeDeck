@@ -3549,19 +3549,19 @@
         <div class="field-row cols-4">
           <div class="stat-card">
             <div class="stat-card-title" data-i18n="payments.totalInvoiced">Total invoiced</div>
-            <div class="stat-card-value">$42,300</div>
+            <div class="stat-card-value">$0.00</div>
           </div>
           <div class="stat-card">
             <div class="stat-card-title" data-i18n="payments.totalReceived">Total received</div>
-            <div class="stat-card-value">$32,500</div>
+            <div class="stat-card-value">$0.00</div>
           </div>
           <div class="stat-card">
             <div class="stat-card-title" data-i18n="payments.outstanding">Outstanding</div>
-            <div class="stat-card-value">$9,800</div>
+            <div class="stat-card-value">$0.00</div>
           </div>
           <div class="stat-card">
             <div class="stat-card-title" data-i18n="payments.avgDays">Avg days to pay</div>
-            <div class="stat-card-value">18</div>
+            <div class="stat-card-value">—</div>
           </div>
         </div>
         <div class="card">
@@ -3574,7 +3574,6 @@
               <tr>
                 <th data-i18n="payments.col.invoice">Invoice #</th>
                 <th data-i18n="payments.col.client">Client</th>
-                <th data-i18n="payments.col.job">Job</th>
                 <th data-i18n="payments.col.amount">Amount</th>
                 <th data-i18n="payments.col.status">Status</th>
                 <th data-i18n="payments.col.date">Date</th>
@@ -4446,6 +4445,7 @@ const I18N = {
     'payments.totalReceived': 'Total received',
     'payments.outstanding': 'Outstanding',
     'payments.avgDays': 'Avg days to pay',
+    'payments.empty': 'No invoices yet. Convert a quote to an invoice to see payments here.',
     'payments.cashReceived': 'Cash received',
     'payments.weekShort': 'Wk',
     'payments.col.invoice': 'Invoice #',
@@ -5172,6 +5172,7 @@ const I18N = {
     'payments.totalReceived': 'Total recibido',
     'payments.outstanding': 'Pendiente',
     'payments.avgDays': 'Días promedio para cobrar',
+    'payments.empty': 'No hay facturas todavía. Convierte una cotización en factura para ver los pagos aquí.',
     'payments.cashReceived': 'Efectivo recibido',
     'payments.weekShort': 'Sem',
     'payments.col.invoice': 'Factura #',
@@ -5568,7 +5569,10 @@ function applyLanguage() {
   if (typeof renderTradeTabs === 'function') renderTradeTabs();
   if (typeof renderFollowupTrades === 'function') renderFollowupTrades();
   if (typeof renderJobsView === 'function') renderJobsView();
-  if (typeof renderPaymentsView === 'function') renderPaymentsView();
+  if (typeof renderPaymentsView === 'function'
+      && typeof currentView !== 'undefined' && currentView === 'payments') {
+    renderPaymentsView();
+  }
   // Re-render the Profile screen's dynamic text (plan name, quota line,
   // member-since) in the new language — only when it's the active view.
   if (typeof loadProfileData === 'function' && typeof currentView !== 'undefined' && currentView === 'profile') {
@@ -5720,32 +5724,6 @@ const TRADE_DESC_EXAMPLES = {
   'Hauling & Trucking': 'e.g. Load and haul 12 cubic yards of construction debris to the dump, provide roll-off service, and handle site cleanup and disposal tickets.',
   Logistics: 'e.g. Rework freight pallets, stage shipments for cross-docking, coordinate last-mile delivery logistics, and manage accessorial handling.',
 };
-
-const MOCK_PAYMENTS = [
-  { id: 'INV-1042', jobId: 'J003', clientId: 'C004', clientName: 'Riverside Hauling Co', job: 'Haul 10yd of debris + site cleanup', amount: 8200, status: 'Paid', date: '3 days ago' },
-  { id: 'INV-1043', jobId: 'J006', clientId: 'C006', clientName: 'Lakeview Interiors', job: 'Install engineered hardwood in living room', amount: 5900, status: 'Paid', date: '5 days ago' },
-  { id: 'INV-1044', jobId: 'J013', clientId: 'C002', clientName: 'Mike Rodriguez', job: 'Upgrade panel + install new breakers', amount: 9100, status: 'Paid', date: '1 week ago' },
-  { id: 'INV-1045', jobId: 'J014', clientId: 'C001', clientName: 'Sarah Chen', job: 'Install irrigation risers + mulch beds', amount: 5400, status: 'Paid', date: '2 weeks ago' },
-  { id: 'INV-1046', jobId: 'J012', clientId: 'C003', clientName: 'Patel Construction LLC', job: 'Repair flashing and replace ridge cap', amount: 6300, status: 'Paid', date: '9 days ago' },
-  { id: 'INV-1047', jobId: 'J015', clientId: 'C006', clientName: 'Lakeview Interiors', job: 'Service furnace + replace air filter', amount: 3800, status: 'Paid', date: '4 weeks ago' },
-  { id: 'INV-1048', jobId: 'J009', clientId: 'C011', clientName: 'Summit Painting', job: 'Complete hallway repaint + door trim', amount: 3100, status: 'Paid', date: '3 weeks ago' },
-  { id: 'INV-1049', jobId: 'J010', clientId: 'C012', clientName: 'Cedar Flooring', job: 'Install vinyl plank on first floor', amount: 1700, status: 'Paid', date: '5 weeks ago' },
-  { id: 'INV-1050', jobId: 'J001', clientId: 'C001', clientName: 'Sarah Chen', job: 'Replace 50ft drain line + repair drywall', amount: 2500, status: 'Pending', date: '11 days ago' },
-  { id: 'INV-1051', jobId: 'J002', clientId: 'C002', clientName: 'Mike Rodriguez', job: 'Install outdoor lighting package + new outlets', amount: 2100, status: 'Pending', date: '9 days ago' },
-  { id: 'INV-1052', jobId: 'J004', clientId: 'C005', clientName: 'Eastside Remodelers', job: 'Prime and paint kitchen + trim', amount: 1600, status: 'Pending', date: '6 days ago' },
-  { id: 'INV-1053', jobId: 'J008', clientId: 'C010', clientName: 'Westport Plumbing', job: 'Replace bathroom pipe routing + trap', amount: 2600, status: 'Overdue', date: '35 days ago' },
-];
-
-const MOCK_PAYMENT_WEEKS = [
-  { label: 'Wk 1', amount: 3200 },
-  { label: 'Wk 2', amount: 4100 },
-  { label: 'Wk 3', amount: 2700 },
-  { label: 'Wk 4', amount: 5600 },
-  { label: 'Wk 5', amount: 4900 },
-  { label: 'Wk 6', amount: 3300 },
-  { label: 'Wk 7', amount: 4700 },
-  { label: 'Wk 8', amount: 4300 },
-];
 
 function getClientInitials(name) {
   return name.split(' ').map(part => part[0]).slice(0, 2).join('').toUpperCase();
@@ -6414,43 +6392,152 @@ async function createJobFromCurrentQuote() {
   }
 }
 
-function renderPaymentsView() {
-  const body = document.getElementById('paymentsTableBody');
-  body.innerHTML = MOCK_PAYMENTS.map(payment => `
-    <tr class="payment-table-row ${payment.status === 'Overdue' ? 'overdue-row' : ''}">
-      <td>${payment.id}</td>
-      <td>${payment.clientName}</td>
-      <td>${payment.job.length > 40 ? payment.job.slice(0, 37) + '...' : payment.job}</td>
-      <td>${fmt(payment.amount)}</td>
-      <td><span class="status-pill status-${payment.status.toLowerCase()}">${statusDisplay(payment.status)}</span></td>
-      <td>${payment.date}</td>
-    </tr>
-  `).join('');
-  renderPaymentChart();
+function derivePaymentsData(invoices) {
+  const rows = Array.isArray(invoices) ? invoices : [];
+  let totalInvoiced = 0, totalReceived = 0, outstanding = 0;
+  let daysSum = 0, daysCount = 0;
+
+  rows.forEach(inv => {
+    const total = parseFloat(inv.total) || 0;
+    const paid = parseFloat(inv.amount_paid) || 0;
+    totalInvoiced += total;
+    totalReceived += paid;
+    outstanding += Math.max(0, total - paid);
+    if (inv.status === 'paid' && inv.paid_at && inv.created_at) {
+      const ms = new Date(inv.paid_at).getTime() - new Date(inv.created_at).getTime();
+      if (isFinite(ms) && ms >= 0) { daysSum += ms / 86400000; daysCount += 1; }
+    }
+  });
+
+  const avgDays = daysCount > 0 ? Math.round(daysSum / daysCount) : null;
+
+  const now = new Date();
+  const weeks = [];
+  for (let i = 7; i >= 0; i--) {
+    const end = new Date(now.getTime() - i * 7 * 86400000);
+    const start = new Date(end.getTime() - 7 * 86400000);
+    weeks.push({ start: start.getTime(), end: end.getTime(), amount: 0 });
+  }
+  rows.forEach(inv => {
+    if (inv.status !== 'paid' || !inv.paid_at) return;
+    const paid = parseFloat(inv.amount_paid) || (parseFloat(inv.total) || 0);
+    const ts = new Date(inv.paid_at).getTime();
+    for (const w of weeks) {
+      if (ts > w.start && ts <= w.end) { w.amount += paid; break; }
+    }
+  });
+
+  return { totalInvoiced, totalReceived, outstanding, avgDays, weeks, rows };
 }
 
-function renderPaymentChart() {
+function renderPaymentsView() {
+  const data = derivePaymentsData(savedInvoicesCache);
+
+  const banner = document.getElementById('paymentsPreviewBanner');
+  if (banner) banner.style.display = 'none';
+
+  const setCard = (i18nKey, value) => {
+    const titleEl = document.querySelector('#paymentsView .stat-card-title[data-i18n="' + i18nKey + '"]');
+    if (!titleEl) return;
+    const valEl = titleEl.parentElement.querySelector('.stat-card-value');
+    if (valEl) valEl.textContent = value;
+  };
+  setCard('payments.totalInvoiced', fmt(data.totalInvoiced));
+  setCard('payments.totalReceived', fmt(data.totalReceived));
+  setCard('payments.outstanding', fmt(data.outstanding));
+  setCard('payments.avgDays', data.avgDays == null ? '—' : String(data.avgDays));
+
+  const body = document.getElementById('paymentsTableBody');
+  if (body) {
+    if (!data.rows.length) {
+      body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:32px; color:var(--ink-3);">'
+        + escapeHtml(t('payments.empty')) + '</td></tr>';
+    } else {
+      body.innerHTML = data.rows.map(inv => {
+        const eff = invoiceEffectiveStatus(inv);
+        const number = '#INV-' + (inv.invoice_number != null ? inv.invoice_number : '----');
+        const client = escapeHtml(inv.client_name || '—');
+        const amt = fmt(parseFloat(inv.total) || 0);
+        const pill = '<span class="status-pill status-' + eff + '">' + escapeHtml(invoiceStatusLabel(eff)) + '</span>';
+        const date = escapeHtml(formatRelativeDate(inv.created_at));
+        return '<tr class="payment-table-row ' + (eff === 'overdue' ? 'overdue-row' : '') + '" data-invoice-id="' + inv.id + '" style="cursor:pointer;">'
+          + '<td><strong>' + escapeHtml(number) + '</strong></td>'
+          + '<td>' + client + '</td>'
+          + '<td class="amt-col">' + amt + '</td>'
+          + '<td>' + pill + '</td>'
+          + '<td>' + date + '</td>'
+          + '</tr>';
+      }).join('');
+      body.querySelectorAll('.payment-table-row').forEach(row => {
+        row.onclick = () => { if (row.dataset.invoiceId) openInvoice(row.dataset.invoiceId); };
+      });
+    }
+  }
+
+  renderPaymentChart(data.weeks);
+}
+
+function renderPaymentChart(weeks) {
   const svg = document.getElementById('paymentChartSvg');
-  const width = 560;
-  const height = 210;
-  const padding = 38;
-  const max = Math.max(...MOCK_PAYMENT_WEEKS.map(w => w.amount));
-  const stepX = (width - padding * 2) / (MOCK_PAYMENT_WEEKS.length - 1);
+  if (!svg) return;
+  const data = Array.isArray(weeks) ? weeks : [];
+  const width = 560, height = 210, padding = 38;
+  const max = Math.max(1, ...data.map(w => w.amount));
+  const stepX = data.length > 1 ? (width - padding * 2) / (data.length - 1) : 0;
   let content = '';
   for (let i = 0; i < 4; i += 1) {
     const y = padding + ((height - padding * 2) / 3) * i;
-    content += `<line x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}" class="chart-grid" />`;
+    content += '<line x1="' + padding + '" y1="' + y + '" x2="' + (width - padding) + '" y2="' + y + '" class="chart-grid" />';
   }
-  MOCK_PAYMENT_WEEKS.forEach((week, index) => {
-    const barHeight = ((week.amount / max) * (height - padding * 2));
+  data.forEach((week, index) => {
+    const barHeight = (week.amount / max) * (height - padding * 2);
     const x = padding + index * stepX;
     const y = height - padding - barHeight;
-    const label = `${t('payments.weekShort')} ${index + 1}`;
-    content += `<rect x="${x - 16}" y="${y}" width="32" height="${barHeight}" class="chart-bar" rx="8" />`;
-    content += `<text x="${x}" y="${height - 12}" fill="${'var(--ink-2)'}" font-size="10" text-anchor="middle">${label}</text>`;
+    const label = t('payments.weekShort') + ' ' + (index + 1);
+    content += '<rect x="' + (x - 16) + '" y="' + y + '" width="32" height="' + barHeight + '" class="chart-bar" rx="8" />';
+    content += '<text x="' + x + '" y="' + (height - 12) + '" fill="var(--ink-2)" font-size="10" text-anchor="middle">' + label + '</text>';
   });
   svg.innerHTML = content;
 }
+
+window.__testPayments = function () {
+  const results = [];
+  const assert = (name, cond) => results.push({ name, pass: !!cond });
+  const approx = (a, b) => Math.abs(a - b) < 0.01;
+
+  const DAY = 86400000;
+  const now = Date.now();
+  const iso = (ms) => new Date(ms).toISOString();
+
+  const fake = [
+    { invoice_number: 1, client_name: 'A', total: 1000, amount_paid: 1000, status: 'paid',
+      created_at: iso(now - 12 * DAY), paid_at: iso(now - 2 * DAY) },
+    { invoice_number: 2, client_name: 'B', total: 2000, amount_paid: 500, status: 'partial',
+      created_at: iso(now - 5 * DAY), paid_at: null },
+    { invoice_number: 3, client_name: 'C', total: 300, amount_paid: 0, status: 'unpaid',
+      created_at: iso(now - 1 * DAY), paid_at: null },
+  ];
+
+  const d = derivePaymentsData(fake);
+  assert('totalInvoiced = 3300', approx(d.totalInvoiced, 3300));
+  assert('totalReceived = 1500', approx(d.totalReceived, 1500));
+  assert('outstanding = 1800', approx(d.outstanding, 1800));
+  assert('avgDays = 10 (only the one paid invoice)', d.avgDays === 10);
+  assert('weeks has 8 buckets', Array.isArray(d.weeks) && d.weeks.length === 8);
+  assert('newest week bucket = 1000', approx(d.weeks[7].amount, 1000));
+  const weeksTotal = d.weeks.reduce((s, w) => s + w.amount, 0);
+  assert('weeks sum = 1000 (only paid invoices counted)', approx(weeksTotal, 1000));
+
+  const e = derivePaymentsData([]);
+  assert('empty: totalInvoiced 0', e.totalInvoiced === 0);
+  assert('empty: avgDays null', e.avgDays === null);
+  assert('empty: 8 week buckets', e.weeks.length === 8);
+
+  const passed = results.filter(r => r.pass).length;
+  results.forEach(r => console.log((r.pass ? 'PASS' : 'FAIL') + ' — ' + r.name));
+  console.log('__testPayments: ' + passed + '/' + results.length + ' passed');
+  return passed === results.length;
+};
 
 let selectedTrades = [];
 let activeTradeIndex = -1;
@@ -6790,7 +6877,6 @@ function init() {
     if (el) el.addEventListener('change', scheduleJobSave);
   });
   renderJobDetailTradeOptions();
-  renderPaymentsView();
   updateUsageDisplay();
   bindBilingualEditableSync();
   // Upgrade buttons open the Stripe upgrade modal (sidebar + profile card).
@@ -7433,6 +7519,9 @@ function switchView(view) {
   }
   if (view === 'profile') {
     loadProfileData();
+  }
+  if (view === 'payments') {
+    loadInvoices().then(() => renderPaymentsView());
   }
 }
 
@@ -9196,7 +9285,7 @@ async function loadInvoices() {
 
   try {
     const { data, error } = await sb.from('invoices')
-      .select('id, invoice_number, client_name, total, amount_paid, status, due_date, created_at')
+      .select('id, invoice_number, client_name, total, amount_paid, status, due_date, created_at, paid_at')
       .order('created_at', { ascending: false })
       .limit(50);
     if (error) throw error;
