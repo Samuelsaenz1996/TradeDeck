@@ -3537,7 +3537,20 @@
           <button onclick="this.closest('.info-banner').style.display='none'">×</button>
         </div>
         <div class="card">
-          <div class="card-title" data-i18n="payments.title">Payments</div>
+          <div class="field-row cols-2">
+            <div>
+              <div class="card-title" data-i18n="payments.title">Payments</div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; align-items:flex-end;">
+              <select class="status-select" id="paymentsRangeSelect" style="font-weight:600;">
+                <option value="7d"  data-i18n="payments.range.7d">Last 7 days</option>
+                <option value="30d" data-i18n="payments.range.30d">Last 30 days</option>
+                <option value="90d" data-i18n="payments.range.90d">Last 90 days</option>
+                <option value="12m" data-i18n="payments.range.12m">Last 12 months</option>
+                <option value="all" data-i18n="payments.range.all" selected>All time</option>
+              </select>
+            </div>
+          </div>
         </div>
         <div class="field-row cols-4">
           <div class="stat-card">
@@ -3557,6 +3570,7 @@
             <div class="stat-card-value">$0.00</div>
           </div>
         </div>
+        <div id="paymentsPeriodNote" class="hidden" style="font-size:12px; color:var(--ink-3); margin:-8px 0 12px;"></div>
         <div class="card">
           <div class="stat-card-title" style="margin-bottom: 14px;" data-i18n="payments.splitTitle">Collected vs outstanding</div>
           <div id="paymentsSplitEmpty" class="hidden" style="color: var(--ink-3); font-size: 13px; padding: 8px 0;" data-i18n="payments.splitEmpty">No invoices yet. Convert a quote to an invoice to track payments here.</div>
@@ -4462,6 +4476,7 @@ const I18N = {
     'payments.legendCollected': 'Collected',
     'payments.legendOutstanding': 'Outstanding',
     'payments.legendOverdue': 'Overdue',
+    'payments.periodNote': 'Invoiced and received are for the selected period. Outstanding, overdue, and the list below are all-time.',
     'payments.cashReceived': 'Cash received',
     'payments.weekShort': 'Wk',
     'payments.col.invoice': 'Invoice #',
@@ -5200,6 +5215,7 @@ const I18N = {
     'payments.legendCollected': 'Cobrado',
     'payments.legendOutstanding': 'Pendiente',
     'payments.legendOverdue': 'Vencido',
+    'payments.periodNote': 'Facturado y recibido corresponden al período seleccionado. Pendiente, vencido y la lista de abajo son de todo el tiempo.',
     'payments.cashReceived': 'Efectivo recibido',
     'payments.weekShort': 'Sem',
     'payments.col.invoice': 'Factura #',
@@ -6419,9 +6435,28 @@ async function createJobFromCurrentQuote() {
   }
 }
 
-function derivePaymentsData(invoices) {
+let paymentsRange = 'all';   // '7d' | '30d' | '90d' | '12m' | 'all'
+
+function paymentsRangeStartMs(range) {
+  const DAY = 86400000;
+  const now = Date.now();
+  if (range === '7d')  return now - 7 * DAY;
+  if (range === '30d') return now - 30 * DAY;
+  if (range === '90d') return now - 90 * DAY;
+  if (range === '12m') {
+    const d = new Date();
+    d.setMonth(d.getMonth() - 12);
+    return d.getTime();
+  }
+  return null;
+}
+
+function derivePaymentsData(invoices, range) {
   const rows = Array.isArray(invoices) ? invoices : [];
+  const startMs = paymentsRangeStartMs(range || paymentsRange);
+
   let totalInvoiced = 0, collected = 0, outstanding = 0, overdue = 0;
+  let periodInvoiced = 0, periodCollected = 0;
 
   rows.forEach(inv => {
     const total = parseFloat(inv.total) || 0;
@@ -6431,6 +6466,15 @@ function derivePaymentsData(invoices) {
     collected += paid;
     outstanding += bal;
     if (invoiceEffectiveStatus(inv) === 'overdue') overdue += bal;
+
+    const createdMs = inv.created_at ? new Date(inv.created_at).getTime() : null;
+    if (startMs === null || (createdMs != null && createdMs >= startMs)) {
+      periodInvoiced += total;
+    }
+    if (inv.paid_at) {
+      const paidMs = new Date(inv.paid_at).getTime();
+      if (startMs === null || paidMs >= startMs) periodCollected += paid;
+    }
   });
 
   const outstandingNotOverdue = Math.max(0, outstanding - overdue);
@@ -6445,25 +6489,48 @@ function derivePaymentsData(invoices) {
     return tb - ta;
   });
 
-  return { totalInvoiced, collected, outstanding, overdue, outstandingNotOverdue, rows: sorted };
+  return {
+    totalInvoiced, collected, outstanding, overdue, outstandingNotOverdue,
+    periodInvoiced, periodCollected,
+    isAllTime: startMs === null,
+    rows: sorted,
+  };
 }
 
 function renderPaymentsView() {
-  const data = derivePaymentsData(savedInvoicesCache);
+  const data = derivePaymentsData(savedInvoicesCache, paymentsRange);
 
   const banner = document.getElementById('paymentsPreviewBanner');
   if (banner) banner.style.display = 'none';
 
-  const setCard = (i18nKey, value) => {
+  // Period-scoped cards (1 & 2). When a range is active, suffix the label.
+  const rangeShort = { '7d':'7d', '30d':'30d', '90d':'90d', '12m':'12m', 'all':'' }[paymentsRange] || '';
+  const suffix = data.isAllTime ? '' : ' (' + rangeShort + ')';
+  const card1Title = document.querySelector('#paymentsView .stat-card-title[data-i18n="payments.totalInvoiced"]');
+  const card2Title = document.querySelector('#paymentsView .stat-card-title[data-i18n="payments.totalReceived"]');
+  if (card1Title) card1Title.textContent = t('payments.totalInvoiced') + suffix;
+  if (card2Title) card2Title.textContent = t('payments.totalReceived') + suffix;
+
+  const setCardValue = (i18nKey, value) => {
     const titleEl = document.querySelector('#paymentsView .stat-card-title[data-i18n="' + i18nKey + '"]');
     if (!titleEl) return;
     const valEl = titleEl.parentElement.querySelector('.stat-card-value');
     if (valEl) valEl.textContent = value;
   };
-  setCard('payments.totalInvoiced', fmt(data.totalInvoiced));
-  setCard('payments.totalReceived', fmt(data.collected));
-  setCard('payments.outstanding', fmt(data.outstanding));
-  setCard('payments.overdue', fmt(data.overdue));
+  setCardValue('payments.totalInvoiced', fmt(data.periodInvoiced));
+  setCardValue('payments.totalReceived', fmt(data.periodCollected));
+  setCardValue('payments.outstanding', fmt(data.outstanding));
+  setCardValue('payments.overdue', fmt(data.overdue));
+
+  const noteEl = document.getElementById('paymentsPeriodNote');
+  if (noteEl) {
+    if (data.isAllTime) {
+      noteEl.classList.add('hidden');
+    } else {
+      noteEl.classList.remove('hidden');
+      noteEl.textContent = t('payments.periodNote');
+    }
+  }
 
   renderPaymentsSplit(data);
 
@@ -6532,31 +6599,41 @@ window.__testPayments = function () {
   const DAY = 86400000;
   const now = Date.now();
   const iso = (ms) => new Date(ms).toISOString();
-  const dueStr = (offsetDays) => new Date(now + offsetDays * DAY).toISOString().slice(0, 10);
+  const dueStr = (off) => new Date(now + off * DAY).toISOString().slice(0, 10);
 
   const fake = [
     { id: 'a', invoice_number: 1, client_name: 'A', total: 1000, amount_paid: 1000, status: 'paid',
       created_at: iso(now - 3 * DAY), paid_at: iso(now - 1 * DAY), due_date: dueStr(-1) },
     { id: 'b', invoice_number: 2, client_name: 'B', total: 2000, amount_paid: 500, status: 'partial',
-      created_at: iso(now - 5 * DAY), paid_at: null, due_date: dueStr(10) },
+      created_at: iso(now - 20 * DAY), paid_at: null, due_date: dueStr(10) },
     { id: 'c', invoice_number: 3, client_name: 'C', total: 300, amount_paid: 0, status: 'unpaid',
       created_at: iso(now - 40 * DAY), paid_at: null, due_date: dueStr(-10) },
   ];
 
-  const d = derivePaymentsData(fake);
-  assert('totalInvoiced 3300', approx(d.totalInvoiced, 3300));
-  assert('collected 1500', approx(d.collected, 1500));
-  assert('outstanding 1800', approx(d.outstanding, 1800));
-  assert('overdue 300 (the past-due unpaid one)', approx(d.overdue, 300));
-  assert('outstandingNotOverdue 1500', approx(d.outstandingNotOverdue, 1500));
-  assert('segments sum to total', approx(d.collected + d.outstandingNotOverdue + d.overdue, d.totalInvoiced));
-  assert('first row is overdue invoice c', d.rows[0].id === 'c');
-  assert('last row is paid invoice a', d.rows[d.rows.length - 1].id === 'a');
+  const all = derivePaymentsData(fake, 'all');
+  assert('all: totalInvoiced 3300', approx(all.totalInvoiced, 3300));
+  assert('all: collected 1500', approx(all.collected, 1500));
+  assert('all: outstanding 1800', approx(all.outstanding, 1800));
+  assert('all: overdue 300', approx(all.overdue, 300));
+  assert('all: segments sum to total', approx(all.collected + all.outstandingNotOverdue + all.overdue, all.totalInvoiced));
+  assert('all: first row overdue (c)', all.rows[0].id === 'c');
+  assert('all: last row paid (a)', all.rows[all.rows.length - 1].id === 'a');
 
-  const e = derivePaymentsData([]);
-  assert('empty totalInvoiced 0', e.totalInvoiced === 0);
-  assert('empty overdue 0', e.overdue === 0);
-  assert('empty rows []', Array.isArray(e.rows) && e.rows.length === 0);
+  const d7 = derivePaymentsData(fake, '7d');
+  assert('7d: periodInvoiced 1000', approx(d7.periodInvoiced, 1000));
+  assert('7d: periodCollected 1000', approx(d7.periodCollected, 1000));
+  assert('7d: outstanding still all-time 1800', approx(d7.outstanding, 1800));
+  assert('7d: overdue still all-time 300', approx(d7.overdue, 300));
+  assert('7d: table still all 3 rows', d7.rows.length === 3);
+  assert('7d: overdue invoice c still present', d7.rows.some(r => r.id === 'c'));
+
+  const d30 = derivePaymentsData(fake, '30d');
+  assert('30d: periodInvoiced 3000', approx(d30.periodInvoiced, 3000));
+  assert('30d: periodCollected 1000', approx(d30.periodCollected, 1000));
+
+  const e = derivePaymentsData([], '7d');
+  assert('empty: periodInvoiced 0', e.periodInvoiced === 0);
+  assert('empty: rows []', e.rows.length === 0);
 
   const passed = results.filter(r => r.pass).length;
   results.forEach(r => console.log((r.pass ? 'PASS' : 'FAIL') + ' — ' + r.name));
@@ -6863,6 +6940,11 @@ function init() {
   bindFollowupSignature();
   bindFollowupInputs();
   bindNav();
+  const rangeSel = document.getElementById('paymentsRangeSelect');
+  if (rangeSel) rangeSel.onchange = () => {
+    paymentsRange = rangeSel.value;
+    if (typeof currentView !== 'undefined' && currentView === 'payments') renderPaymentsView();
+  };
   bindJobsFilterPills();
   const jobsNewBtn = document.getElementById('jobsNewBtn');
   if (jobsNewBtn) jobsNewBtn.onclick = () => enterNewJobMode({});
