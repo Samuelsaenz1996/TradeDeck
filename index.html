@@ -1811,13 +1811,24 @@
     #invoicesView .card { padding: 8px; }
     #invoicesListTable { width:100% !important; table-layout:fixed !important; min-width:0 !important; max-width:100% !important; }
     #invoicesListTable th:nth-child(5), #invoicesListTable td:nth-child(5) { display:none; } /* hide Date */
+    #invoicesListTable th:nth-child(4), #invoicesListTable td:nth-child(4) { width: 108px !important; } /* Status: room for "PARTIALLY PAID" */
     #invoicesListTable th, #invoicesListTable td { padding:6px 4px; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
     /* Payments table: same treatment — fit to viewport, hide the Date column */
     #paymentsView .card { padding: 8px; }
     #paymentsTable { width:100% !important; table-layout:fixed !important; min-width:0 !important; max-width:100% !important; }
     #paymentsTable th:nth-child(5), #paymentsTable td:nth-child(5) { display:none; } /* hide Date */
+    #paymentsTable th:nth-child(4), #paymentsTable td:nth-child(4) { width: 108px !important; } /* Status: room for "PARTIALLY PAID" */
     #paymentsTable th, #paymentsTable td { padding:6px 4px; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+    /* Tighten the status pill padding on the Invoices + Payments lists so
+       "PARTIALLY PAID" / "PAGO PARCIAL" fit the column without clipping. */
+    #invoicesListTable .status-pill,
+    #paymentsTable .status-pill {
+      padding: 3px 8px;
+      font-size: 11px;
+      letter-spacing: 0.01em;
+    }
 
     /* Status dropdowns on every list + cross-reference card: compact
        padding for narrow viewports */
@@ -3762,6 +3773,16 @@
           <div class="card">
             <div class="card-title" data-i18n="invoices.title">Invoices</div>
             <div class="card-sub" data-i18n="invoices.sub">Every invoice created from your quotes. Click a row to open it.</div>
+            <div style="margin-bottom: 16px;">
+              <div class="pricing-toggle" id="archiveTabsInvoices" role="group" aria-label="Archive filter">
+                <button data-arch="active" class="active" type="button">
+                  <span data-i18n="archive.tab.active">Active</span>
+                </button>
+                <button data-arch="archived" type="button">
+                  <span data-i18n="archive.tab.archived">Archived</span>
+                </button>
+              </div>
+            </div>
             <input type="search" class="input" id="invoicesSearchInput"
                    data-i18n-placeholder="invoices.searchPlaceholder"
                    placeholder="Search by client or invoice #..."
@@ -3800,6 +3821,10 @@
                 <button class="action-btn" onclick="downloadInvoicePdf()" data-i18n="invoice.downloadPdf">⬇ Download PDF</button>
                 <button class="action-btn" onclick="sendInvoiceEmail()" data-i18n="invoice.email">✉ Email</button>
                 <button class="action-btn" onclick="sendInvoiceText()" data-i18n="invoice.text">💬 Text</button>
+                <button class="action-btn" id="invoiceArchiveBtn" onclick="toggleArchiveCurrentInvoice()">
+                  📦 <span id="invoiceArchiveBtnLabel" data-i18n="archive.button.archive">Archive</span>
+                </button>
+                <button class="action-btn" onclick="deleteCurrentInvoice()" data-i18n="invoice.delete">🗑 Delete</button>
               </div>
             </div>
 
@@ -4210,6 +4235,7 @@ const I18N = {
     'invoices.sub': 'Every invoice created from your quotes. Click a row to open it.',
     'invoices.searchPlaceholder': 'Search by client or invoice #...',
     'invoices.empty': 'No invoices yet. Convert an accepted quote to create one.',
+    'invoices.emptyArchived': 'No archived invoices.',
     'invoices.loading': 'Loading...',
     'invoices.col.number': 'Invoice #',
     'invoices.col.client': 'Client',
@@ -4623,11 +4649,19 @@ const I18N = {
     'archive.confirm.job.title': 'Archive this job?',
     'archive.confirm.quote.title': 'Archive this quote?',
     'archive.confirm.followup.title': 'Archive this follow-up?',
+    'archive.confirm.invoice.title': 'Archive this invoice?',
     'delete.confirm.body': 'This cannot be undone.',
     'delete.confirm.client.title': 'Delete this client?',
     'delete.confirm.job.title': 'Delete this job?',
     'delete.confirm.quote.title': 'Delete this quote?',
     'delete.confirm.followup.title': 'Delete this follow-up?',
+    'invoice.delete': '🗑 Delete',
+    'invoice.delete.confirm.title': 'Delete this invoice?',
+    'invoice.delete.confirm.body': 'Permanently delete invoice {number}? This cannot be undone.',
+    'invoice.delete.confirm.body.paid': 'Invoice {number} has {amount} recorded as paid (Stripe payment {pi}). Permanently deleting it will remove that payment record. This cannot be undone.',
+    'invoice.delete.noPi': 'manual',
+    'toast.invoiceDeleted': 'Invoice deleted',
+    'toast.invoiceDeleteFailed': 'Couldn’t delete invoice',
     // Bulk selection
     'bulk.selected': '{count} selected',
     'archive.bulk.title.client': 'Archive {count} clients?',
@@ -4949,6 +4983,7 @@ const I18N = {
     'invoices.sub': 'Todas las facturas creadas desde tus cotizaciones. Haz clic en una fila para abrir.',
     'invoices.searchPlaceholder': 'Buscar por cliente o # de factura...',
     'invoices.empty': 'No hay facturas todavía. Convierte una cotización aceptada para crear una.',
+    'invoices.emptyArchived': 'No hay facturas archivadas.',
     'invoices.loading': 'Cargando...',
     'invoices.col.number': 'Factura #',
     'invoices.col.client': 'Cliente',
@@ -5362,11 +5397,19 @@ const I18N = {
     'archive.confirm.job.title': '¿Archivar este trabajo?',
     'archive.confirm.quote.title': '¿Archivar esta cotización?',
     'archive.confirm.followup.title': '¿Archivar este seguimiento?',
+    'archive.confirm.invoice.title': '¿Archivar esta factura?',
     'delete.confirm.body': 'Esto no se puede deshacer.',
     'delete.confirm.client.title': '¿Eliminar este cliente?',
     'delete.confirm.job.title': '¿Eliminar este trabajo?',
     'delete.confirm.quote.title': '¿Eliminar esta cotización?',
     'delete.confirm.followup.title': '¿Eliminar este seguimiento?',
+    'invoice.delete': '🗑 Eliminar',
+    'invoice.delete.confirm.title': '¿Eliminar esta factura?',
+    'invoice.delete.confirm.body': '¿Eliminar permanentemente la factura {number}? Esto no se puede deshacer.',
+    'invoice.delete.confirm.body.paid': 'La factura {number} tiene {amount} registrados como pagados (pago de Stripe {pi}). Eliminarla permanentemente borrará ese registro de pago. Esto no se puede deshacer.',
+    'invoice.delete.noPi': 'manual',
+    'toast.invoiceDeleted': 'Factura eliminada',
+    'toast.invoiceDeleteFailed': 'No se pudo eliminar la factura',
     // Bulk selection
     'bulk.selected': '{count} seleccionados',
     'archive.bulk.title.client': '¿Archivar {count} clientes?',
@@ -6696,6 +6739,7 @@ let viewingArchivedClients = false;
 let viewingArchivedJobs = false;
 let viewingArchivedQuotes = false;
 let viewingArchivedFollowups = false;
+let viewingArchivedInvoices = false;
 let profileCache = null;
 let profileWarrantyDraft = { en: '', es: '' };
 
@@ -7115,6 +7159,10 @@ function init() {
     viewingArchivedFollowups = archived;
     clearBulkSelection('followups');
     loadSavedFollowups();
+  });
+  bindArchiveTabs('archiveTabsInvoices', (archived) => {
+    viewingArchivedInvoices = archived;
+    loadInvoices();
   });
 
   // Wire bulk-selection UI for all four list entities
@@ -7627,7 +7675,7 @@ function switchView(view) {
     loadProfileData();
   }
   if (view === 'payments') {
-    loadInvoices().then(() => renderPaymentsView());
+    loadInvoices({ forceActive: true }).then(() => renderPaymentsView());
   }
 }
 
@@ -9372,7 +9420,8 @@ function switchInvoicesSubView(view) {
   if (invoicesSubView === 'list') loadInvoices();
 }
 
-async function loadInvoices() {
+async function loadInvoices(opts) {
+  const forceActive = !!(opts && opts.forceActive);
   const empty = document.getElementById('invoicesListEmpty');
   const loading = document.getElementById('invoicesListLoading');
   const table = document.getElementById('invoicesListTable');
@@ -9390,10 +9439,14 @@ async function loadInvoices() {
   }
 
   try {
-    const { data, error } = await sb.from('invoices')
-      .select('id, invoice_number, client_name, total, amount_paid, status, due_date, created_at, paid_at')
+    let q = sb.from('invoices')
+      .select('id, invoice_number, client_name, total, amount_paid, status, due_date, created_at, paid_at, archived_at')
       .order('created_at', { ascending: false })
       .limit(50);
+    q = (forceActive || !viewingArchivedInvoices)
+      ? q.is('archived_at', null)
+      : q.not('archived_at', 'is', null);
+    const { data, error } = await q;
     if (error) throw error;
     savedInvoicesCache = data || [];
   } catch (e) {
@@ -9424,7 +9477,8 @@ function renderInvoicesList() {
     table.classList.add('hidden');
     empty.classList.remove('hidden');
     const p = empty.querySelector('p');
-    if (p) { p.setAttribute('data-i18n', 'invoices.empty'); p.textContent = t('invoices.empty'); }
+    const key = viewingArchivedInvoices ? 'invoices.emptyArchived' : 'invoices.empty';
+    if (p) { p.setAttribute('data-i18n', key); p.textContent = t(key); }
     return;
   }
   table.classList.remove('hidden');
@@ -9603,6 +9657,7 @@ function renderInvoice(inv) {
 
   renderInvoicePayBlock();
   refreshQuoteConvertInvoiceButton();
+  refreshInvoiceArchiveButton();
 }
 
 function bindInvoicePaymentControls() {
@@ -12497,6 +12552,91 @@ function refreshFollowupArchiveButton() {
   const isArchived = !!currentFollowup.archived_at;
   lbl.setAttribute('data-i18n', isArchived ? 'archive.button.unarchive' : 'archive.button.archive');
   lbl.textContent = t(isArchived ? 'archive.button.unarchive' : 'archive.button.archive');
+}
+
+async function archiveInvoice(id) {
+  const ok = await confirmModal({
+    title: t('archive.confirm.invoice.title'),
+    body: t('archive.confirm.body'),
+    confirmLabel: t('archive.button.archive'),
+    cancelLabel: t('modal.cancel'),
+    variant: 'primary',
+  });
+  if (!ok) return;
+  const res = await setArchivedState('invoices', id, true);
+  if (!res.ok) { showToast(t('toast.archiveFailed'), true); return; }
+  if (currentInvoice && currentInvoice.id === id) {
+    currentInvoice = null;
+    switchInvoicesSubView('list');
+  }
+  showToast(t('toast.archived'));
+  loadInvoices();
+}
+async function unarchiveInvoice(id) {
+  const res = await setArchivedState('invoices', id, false);
+  if (!res.ok) { showToast(t('toast.unarchiveFailed'), true); return; }
+  if (currentInvoice && currentInvoice.id === id) {
+    currentInvoice.archived_at = null;
+    refreshInvoiceArchiveButton();
+  }
+  showToast(t('toast.unarchived'));
+  loadInvoices();
+}
+function toggleArchiveCurrentInvoice() {
+  if (!currentInvoice || !currentInvoice.id) return;
+  if (currentInvoice.archived_at) {
+    unarchiveInvoice(currentInvoice.id);
+  } else {
+    archiveInvoice(currentInvoice.id);
+  }
+}
+function refreshInvoiceArchiveButton() {
+  const lbl = document.getElementById('invoiceArchiveBtnLabel');
+  if (!lbl || !currentInvoice) return;
+  const isArchived = !!currentInvoice.archived_at;
+  lbl.setAttribute('data-i18n', isArchived ? 'archive.button.unarchive' : 'archive.button.archive');
+  lbl.textContent = t(isArchived ? 'archive.button.unarchive' : 'archive.button.archive');
+}
+
+async function deleteCurrentInvoice() {
+  if (!currentInvoice || !currentInvoice.id) return;
+  const inv = currentInvoice;
+  const paid = Number(inv.amount_paid) || 0;
+  const hasPayment = paid > 0 || !!inv.paid_at;
+  const number = '#INV-' + (inv.invoice_number != null ? inv.invoice_number : '----');
+  let body;
+  if (hasPayment) {
+    body = t('invoice.delete.confirm.body.paid', {
+      number,
+      amount: fmt(paid),
+      pi: inv.stripe_payment_intent_id || t('invoice.delete.noPi'),
+    });
+  } else {
+    body = t('invoice.delete.confirm.body', { number });
+  }
+  const ok = await confirmModal({
+    title: t('invoice.delete.confirm.title'),
+    body,
+    confirmLabel: t('modal.delete'),
+    cancelLabel: t('modal.cancel'),
+    variant: 'danger',
+  });
+  if (!ok) return;
+  try {
+    const { error } = await sb.from('invoices').delete().eq('id', inv.id);
+    if (error) {
+      console.warn('deleteCurrentInvoice failed:', error);
+      showToast(t('toast.invoiceDeleteFailed'), true);
+      return;
+    }
+    currentInvoice = null;
+    switchInvoicesSubView('list');
+    showToast(t('toast.invoiceDeleted'));
+    loadInvoices();
+  } catch (e) {
+    console.warn('deleteCurrentInvoice threw:', e);
+    showToast(t('toast.invoiceDeleteFailed'), true);
+  }
 }
 
 async function deleteSavedClient(clientId) {
