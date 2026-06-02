@@ -3542,7 +3542,13 @@
               <div class="card-title" data-i18n="payments.title">Payments</div>
             </div>
             <div style="display:flex; justify-content:flex-end; align-items:flex-end;">
-              <div class="timeline-pills" style="width:auto;"><button class="active" disabled data-i18n="payments.range">Last 30 days ▼</button></div>
+              <select class="status-select" id="paymentsRangeSelect" style="font-weight:600;">
+                <option value="7d"  data-i18n="payments.range.7d">Last 7 days</option>
+                <option value="30d" data-i18n="payments.range.30d" selected>Last 30 days</option>
+                <option value="90d" data-i18n="payments.range.90d">Last 90 days</option>
+                <option value="12m" data-i18n="payments.range.12m">Last 12 months</option>
+                <option value="all" data-i18n="payments.range.all">All time</option>
+              </select>
             </div>
           </div>
         </div>
@@ -3566,7 +3572,7 @@
         </div>
         <div class="card">
           <div class="stat-card-title" style="margin-bottom: 14px;" data-i18n="payments.cashReceived">Cash received</div>
-          <svg class="payment-chart" viewBox="0 0 560 210" preserveAspectRatio="none" id="paymentChartSvg"></svg>
+          <svg class="payment-chart" viewBox="0 0 560 210" id="paymentChartSvg"></svg>
         </div>
         <div class="card">
           <table class="line-table">
@@ -4446,6 +4452,11 @@ const I18N = {
     'payments.outstanding': 'Outstanding',
     'payments.avgDays': 'Avg days to pay',
     'payments.empty': 'No invoices yet. Convert a quote to an invoice to see payments here.',
+    'payments.range.7d': 'Last 7 days',
+    'payments.range.30d': 'Last 30 days',
+    'payments.range.90d': 'Last 90 days',
+    'payments.range.12m': 'Last 12 months',
+    'payments.range.all': 'All time',
     'payments.cashReceived': 'Cash received',
     'payments.weekShort': 'Wk',
     'payments.col.invoice': 'Invoice #',
@@ -5173,6 +5184,11 @@ const I18N = {
     'payments.outstanding': 'Pendiente',
     'payments.avgDays': 'Días promedio para cobrar',
     'payments.empty': 'No hay facturas todavía. Convierte una cotización en factura para ver los pagos aquí.',
+    'payments.range.7d': 'Últimos 7 días',
+    'payments.range.30d': 'Últimos 30 días',
+    'payments.range.90d': 'Últimos 90 días',
+    'payments.range.12m': 'Últimos 12 meses',
+    'payments.range.all': 'Todo el tiempo',
     'payments.cashReceived': 'Efectivo recibido',
     'payments.weekShort': 'Sem',
     'payments.col.invoice': 'Factura #',
@@ -6392,12 +6408,85 @@ async function createJobFromCurrentQuote() {
   }
 }
 
-function derivePaymentsData(invoices) {
+let paymentsRange = '30d';   // '7d' | '30d' | '90d' | '12m' | 'all'
+
+function resolvePaymentsWindow(range, earliestInvoiceMs) {
+  const DAY = 86400000;
+  const now = new Date();
+  const nowMs = now.getTime();
+  const buckets = [];
+  const push = (start, end, label) => buckets.push({ start, end, label, amount: 0 });
+
+  const dayLabel = (d) => (d.getMonth() + 1) + '/' + d.getDate();
+  const monthLabel = (d) => d.toLocaleDateString(localeForDate(), { month: 'short' });
+
+  if (range === '7d') {
+    for (let i = 6; i >= 0; i--) {
+      const end = new Date(nowMs - i * DAY);
+      const start = new Date(end.getTime() - DAY);
+      push(start.getTime(), end.getTime(), dayLabel(end));
+    }
+    return { startMs: nowMs - 7 * DAY, buckets };
+  }
+  if (range === '30d') {
+    for (let i = 3; i >= 0; i--) {
+      const end = new Date(nowMs - i * 7 * DAY);
+      const start = new Date(end.getTime() - 7 * DAY);
+      push(start.getTime(), end.getTime(), t('payments.weekShort') + ' ' + (4 - i));
+    }
+    return { startMs: nowMs - 28 * DAY, buckets };
+  }
+  if (range === '90d') {
+    for (let i = 12; i >= 0; i--) {
+      const end = new Date(nowMs - i * 7 * DAY);
+      const start = new Date(end.getTime() - 7 * DAY);
+      push(start.getTime(), end.getTime(), t('payments.weekShort') + ' ' + (13 - i));
+    }
+    return { startMs: nowMs - 91 * DAY, buckets };
+  }
+  if (range === '12m') {
+    for (let i = 11; i >= 0; i--) {
+      const start = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const end = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+      push(start.getTime(), end.getTime(), monthLabel(start));
+    }
+    return { startMs: new Date(now.getFullYear(), now.getMonth() - 11, 1).getTime(), buckets };
+  }
+  // 'all' — monthly buckets from the earliest invoice to now, capped at 24.
+  const firstMs = (earliestInvoiceMs && isFinite(earliestInvoiceMs)) ? earliestInvoiceMs : nowMs;
+  const first = new Date(firstMs);
+  let monthsSpan = (now.getFullYear() - first.getFullYear()) * 12 + (now.getMonth() - first.getMonth()) + 1;
+  if (monthsSpan < 1) monthsSpan = 1;
+  if (monthsSpan > 24) monthsSpan = 24;
+  for (let i = monthsSpan - 1; i >= 0; i--) {
+    const start = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const end = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+    push(start.getTime(), end.getTime(), monthLabel(start));
+  }
+  return { startMs: buckets.length ? buckets[0].start : nowMs, buckets };
+}
+
+function derivePaymentsData(invoices, range) {
   const rows = Array.isArray(invoices) ? invoices : [];
+  const r = range || paymentsRange;
+
+  let earliest = null;
+  rows.forEach(inv => {
+    const c = inv.created_at ? new Date(inv.created_at).getTime() : null;
+    if (c && (earliest === null || c < earliest)) earliest = c;
+  });
+
+  const { startMs, buckets } = resolvePaymentsWindow(r, earliest);
+  const inWindow = (ms) => r === 'all' ? true : (ms != null && ms >= startMs);
+
   let totalInvoiced = 0, totalReceived = 0, outstanding = 0;
   let daysSum = 0, daysCount = 0;
+  const tableRows = [];
 
   rows.forEach(inv => {
+    const createdMs = inv.created_at ? new Date(inv.created_at).getTime() : null;
+    if (!inWindow(createdMs)) return;
+    tableRows.push(inv);
     const total = parseFloat(inv.total) || 0;
     const paid = parseFloat(inv.amount_paid) || 0;
     totalInvoiced += total;
@@ -6411,27 +6500,20 @@ function derivePaymentsData(invoices) {
 
   const avgDays = daysCount > 0 ? Math.round(daysSum / daysCount) : null;
 
-  const now = new Date();
-  const weeks = [];
-  for (let i = 7; i >= 0; i--) {
-    const end = new Date(now.getTime() - i * 7 * 86400000);
-    const start = new Date(end.getTime() - 7 * 86400000);
-    weeks.push({ start: start.getTime(), end: end.getTime(), amount: 0 });
-  }
   rows.forEach(inv => {
     if (inv.status !== 'paid' || !inv.paid_at) return;
     const paid = parseFloat(inv.amount_paid) || (parseFloat(inv.total) || 0);
     const ts = new Date(inv.paid_at).getTime();
-    for (const w of weeks) {
-      if (ts > w.start && ts <= w.end) { w.amount += paid; break; }
+    for (const b of buckets) {
+      if (ts > b.start && ts <= b.end) { b.amount += paid; break; }
     }
   });
 
-  return { totalInvoiced, totalReceived, outstanding, avgDays, weeks, rows };
+  return { totalInvoiced, totalReceived, outstanding, avgDays, buckets, rows: tableRows };
 }
 
 function renderPaymentsView() {
-  const data = derivePaymentsData(savedInvoicesCache);
+  const data = derivePaymentsData(savedInvoicesCache, paymentsRange);
 
   const banner = document.getElementById('paymentsPreviewBanner');
   if (banner) banner.style.display = 'none';
@@ -6474,29 +6556,38 @@ function renderPaymentsView() {
     }
   }
 
-  renderPaymentChart(data.weeks);
+  renderPaymentChart(data.buckets);
 }
 
-function renderPaymentChart(weeks) {
+function renderPaymentChart(buckets) {
   const svg = document.getElementById('paymentChartSvg');
   if (!svg) return;
-  const data = Array.isArray(weeks) ? weeks : [];
-  const width = 560, height = 210, padding = 38;
-  const max = Math.max(1, ...data.map(w => w.amount));
-  const stepX = data.length > 1 ? (width - padding * 2) / (data.length - 1) : 0;
+  const data = Array.isArray(buckets) ? buckets : [];
+  svg.removeAttribute('preserveAspectRatio');
+  const width = 720, height = 220, padTop = 20, padBottom = 34, padX = 24;
+  const plotW = width - padX * 2;
+  const plotH = height - padTop - padBottom;
+  const n = Math.max(1, data.length);
+  const slot = plotW / n;
+  const barW = Math.min(40, slot * 0.6);
+  const max = Math.max(1, ...data.map(b => b.amount));
+
   let content = '';
   for (let i = 0; i < 4; i += 1) {
-    const y = padding + ((height - padding * 2) / 3) * i;
-    content += '<line x1="' + padding + '" y1="' + y + '" x2="' + (width - padding) + '" y2="' + y + '" class="chart-grid" />';
+    const y = padTop + (plotH / 3) * i;
+    content += '<line x1="' + padX + '" y1="' + y + '" x2="' + (width - padX) + '" y2="' + y + '" class="chart-grid" />';
   }
-  data.forEach((week, index) => {
-    const barHeight = (week.amount / max) * (height - padding * 2);
-    const x = padding + index * stepX;
-    const y = height - padding - barHeight;
-    const label = t('payments.weekShort') + ' ' + (index + 1);
-    content += '<rect x="' + (x - 16) + '" y="' + y + '" width="32" height="' + barHeight + '" class="chart-bar" rx="8" />';
-    content += '<text x="' + x + '" y="' + (height - 12) + '" fill="var(--ink-2)" font-size="10" text-anchor="middle">' + label + '</text>';
+  data.forEach((b, i) => {
+    const cx = padX + slot * i + slot / 2;
+    const barH = (b.amount / max) * plotH;
+    const x = cx - barW / 2;
+    const y = padTop + plotH - barH;
+    content += '<rect x="' + x + '" y="' + y + '" width="' + barW + '" height="' + barH + '" class="chart-bar" rx="6" />';
+    if (n <= 8 || i % 2 === 0) {
+      content += '<text x="' + cx + '" y="' + (height - 12) + '" fill="var(--ink-2)" font-size="10" text-anchor="middle">' + b.label + '</text>';
+    }
   });
+  svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
   svg.innerHTML = content;
 }
 
@@ -6504,34 +6595,44 @@ window.__testPayments = function () {
   const results = [];
   const assert = (name, cond) => results.push({ name, pass: !!cond });
   const approx = (a, b) => Math.abs(a - b) < 0.01;
-
   const DAY = 86400000;
   const now = Date.now();
   const iso = (ms) => new Date(ms).toISOString();
 
   const fake = [
     { invoice_number: 1, client_name: 'A', total: 1000, amount_paid: 1000, status: 'paid',
-      created_at: iso(now - 12 * DAY), paid_at: iso(now - 2 * DAY) },
+      created_at: iso(now - 3 * DAY), paid_at: iso(now - 1 * DAY) },
     { invoice_number: 2, client_name: 'B', total: 2000, amount_paid: 500, status: 'partial',
-      created_at: iso(now - 5 * DAY), paid_at: null },
+      created_at: iso(now - 20 * DAY), paid_at: null },
     { invoice_number: 3, client_name: 'C', total: 300, amount_paid: 0, status: 'unpaid',
-      created_at: iso(now - 1 * DAY), paid_at: null },
+      created_at: iso(now - 200 * DAY), paid_at: null },
   ];
 
-  const d = derivePaymentsData(fake);
-  assert('totalInvoiced = 3300', approx(d.totalInvoiced, 3300));
-  assert('totalReceived = 1500', approx(d.totalReceived, 1500));
-  assert('outstanding = 1800', approx(d.outstanding, 1800));
-  assert('avgDays = 10 (only the one paid invoice)', d.avgDays === 10);
-  assert('weeks has 8 buckets', Array.isArray(d.weeks) && d.weeks.length === 8);
-  assert('newest week bucket = 1000', approx(d.weeks[7].amount, 1000));
-  const weeksTotal = d.weeks.reduce((s, w) => s + w.amount, 0);
-  assert('weeks sum = 1000 (only paid invoices counted)', approx(weeksTotal, 1000));
+  const d7 = derivePaymentsData(fake, '7d');
+  assert('7d: totalInvoiced 1000', approx(d7.totalInvoiced, 1000));
+  assert('7d: only 1 table row', d7.rows.length === 1);
+  assert('7d: 7 buckets', d7.buckets.length === 7);
+  assert('7d: avgDays 2', d7.avgDays === 2);
 
-  const e = derivePaymentsData([]);
+  const d30 = derivePaymentsData(fake, '30d');
+  assert('30d: totalInvoiced 3000', approx(d30.totalInvoiced, 3000));
+  assert('30d: received 1500', approx(d30.totalReceived, 1500));
+  assert('30d: outstanding 1500', approx(d30.outstanding, 1500));
+  assert('30d: 4 weekly buckets', d30.buckets.length === 4);
+
+  const d12 = derivePaymentsData(fake, '12m');
+  assert('12m: totalInvoiced 3300', approx(d12.totalInvoiced, 3300));
+  assert('12m: 12 monthly buckets', d12.buckets.length === 12);
+
+  const dall = derivePaymentsData(fake, 'all');
+  assert('all: 3 table rows', dall.rows.length === 3);
+  const bsum = dall.buckets.reduce((s, b) => s + b.amount, 0);
+  assert('all: bucketed cash = 1000', approx(bsum, 1000));
+
+  const e = derivePaymentsData([], '30d');
   assert('empty: totalInvoiced 0', e.totalInvoiced === 0);
   assert('empty: avgDays null', e.avgDays === null);
-  assert('empty: 8 week buckets', e.weeks.length === 8);
+  assert('empty: 4 buckets', e.buckets.length === 4);
 
   const passed = results.filter(r => r.pass).length;
   results.forEach(r => console.log((r.pass ? 'PASS' : 'FAIL') + ' — ' + r.name));
@@ -6838,6 +6939,11 @@ function init() {
   bindFollowupSignature();
   bindFollowupInputs();
   bindNav();
+  const rangeSel = document.getElementById('paymentsRangeSelect');
+  if (rangeSel) rangeSel.onchange = () => {
+    paymentsRange = rangeSel.value;
+    if (typeof currentView !== 'undefined' && currentView === 'payments') renderPaymentsView();
+  };
   bindJobsFilterPills();
   const jobsNewBtn = document.getElementById('jobsNewBtn');
   if (jobsNewBtn) jobsNewBtn.onclick = () => enterNewJobMode({});
@@ -9612,7 +9718,13 @@ async function onInvoiceStatusChange(status) {
   let amount_paid = Number(currentInvoice.amount_paid) || 0;
   if (status === 'paid') amount_paid = total;
   else if (status === 'unpaid') amount_paid = 0;
-  const ok = await persistInvoiceFields({ status, amount_paid });
+  const fields = { status, amount_paid };
+  if (status === 'paid') {
+    fields.paid_at = currentInvoice.paid_at || new Date().toISOString();
+  } else {
+    fields.paid_at = null;
+  }
+  const ok = await persistInvoiceFields(fields);
   if (ok) { renderInvoice(currentInvoice); showToast(t('toast.invoiceSaved')); }
 }
 
@@ -9624,7 +9736,13 @@ async function onInvoiceAmountPaidChange() {
   if (clamped <= 0) status = 'unpaid';
   else if (clamped >= total) status = 'paid';
   else status = 'partial';
-  const ok = await persistInvoiceFields({ amount_paid: clamped, status });
+  const fields = { amount_paid: clamped, status };
+  if (status === 'paid') {
+    fields.paid_at = currentInvoice.paid_at || new Date().toISOString();
+  } else {
+    fields.paid_at = null;
+  }
+  const ok = await persistInvoiceFields(fields);
   if (ok) { renderInvoice(currentInvoice); showToast(t('toast.invoiceSaved')); }
 }
 
