@@ -1994,7 +1994,6 @@
     <div id="navPayments" class="nav-item">
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       <span data-i18n="nav.payments">Payments</span>
-      <span class="nav-preview-badge" data-i18n="nav.preview">Preview</span>
     </div>
 
     <div class="nav-section" data-i18n="nav.account">Account</div>
@@ -8024,10 +8023,14 @@ async function generateFollowup() {
   txt.innerHTML = t('actions.drafting');
 
   try {
+    const sigFirst = (profileCache && profileCache.first_name) ? profileCache.first_name.trim() : '';
+    const sigLast  = (profileCache && profileCache.last_name)  ? profileCache.last_name.trim()  : '';
+    const sigName  = (sigFirst + ' ' + sigLast).trim();
+    const sigCompany = (profileCache && profileCache.company_name) ? profileCache.company_name.trim() : '';
     const signature = {
-      name: followupSigName,
-      business: followupSigBusiness,
-      contact: followupSigContact,
+      name: sigName,
+      business: sigCompany,
+      contact: '',
     };
 
     const prompt = buildFollowupPrompt({
@@ -8350,6 +8353,24 @@ window.__testFollowupPicker = function () {
   });
   assert('quote prompt frames as quote', pQuote.indexOf('QUOTE follow-up') !== -1);
 
+  const pSig = buildFollowupPrompt({
+    trade: '', sourceKind: 'quote', customerName: 'Mike', jobDesc: 'panel upgrade',
+    quoteAmount: 1800, scenario: 'No reply yet', quoteAge: '3 days ago',
+    tone: 'Friendly', channel: 'Email',
+    signature: { name: 'Samuel Saenz', business: 'Saenztech LLC', contact: '' },
+  });
+  assert('signature name in prompt', pSig.indexOf('Samuel Saenz') !== -1);
+  assert('signature company in prompt', pSig.indexOf('Saenztech LLC') !== -1);
+  assert('prompt forbids placeholder when sig present', pSig.indexOf('[Your Name]') !== -1 && pSig.toLowerCase().indexOf('never output a placeholder') !== -1);
+
+  const pNoSig = buildFollowupPrompt({
+    trade: '', sourceKind: 'quote', customerName: 'Mike', jobDesc: 'panel upgrade',
+    quoteAmount: 1800, scenario: 'No reply yet', quoteAge: '3 days ago',
+    tone: 'Friendly', channel: 'Email',
+    signature: { name: '', business: '', contact: '' },
+  });
+  assert('empty-sig prompt forbids placeholder', pNoSig.toLowerCase().indexOf('do not add a name') !== -1 || pNoSig.toLowerCase().indexOf('placeholder') !== -1);
+
   followupPickedRecord = savedPicked;
   followupSource = savedSource;
 
@@ -8392,10 +8413,25 @@ function buildFollowupPrompt({ trade, sourceKind, customerName, jobDesc, quoteAm
   const channelInstruction = channel === 'Text'
     ? 'Return subject as an empty string and body as a single short SMS-friendly message under 160 characters.'
     : 'Return a subject line and body with 2-3 short paragraphs.';
-  const signatureParts = [signature.name, signature.business, signature.contact].filter(Boolean);
-  const signatureInstruction = signatureParts.length
-    ? `If possible, close the message with the saved signature: ${signatureParts.join(', ')}.`
-    : 'If no signature is provided, close with a simple professional sign-off.';
+  let signatureInstruction;
+  const sigHasName = signature && signature.name;
+  const sigHasBiz  = signature && signature.business;
+  if (sigHasName || sigHasBiz) {
+    const lines = [];
+    if (sigHasName) lines.push(signature.name);
+    if (sigHasBiz)  lines.push(signature.business);
+    signatureInstruction =
+      'Close the message with a brief, warm sign-off (e.g. "Best," or "Thanks,") '
+      + 'followed by this signature EXACTLY as written, on separate lines:\n'
+      + lines.join('\n')
+      + '\nDo not invent or add a company, title, phone, or email that is not in this signature. '
+      + 'Never output a placeholder like "[Your Name]".';
+  } else {
+    signatureInstruction =
+      'End with a brief, warm sign-off (e.g. "Best," or "Thanks,") on its own line. '
+      + 'Do NOT add a name, company, or any placeholder such as "[Your Name]" — '
+      + 'just the closing word, since no signature is on file.';
+  }
   return `You are drafting a contractor follow-up message for a customer. Use first-person voice (I, not we). Never use corporate filler like "circle back," "just touching base," or "hope this finds you well."\n\n${docFraming}\n\n${trade ? 'TRADE: ' + trade + '\n' : ''}CUSTOMER: ${customerName}\nABOUT: ${jobDesc}\n${isInvoice ? 'INVOICE AMOUNT' : 'QUOTE AMOUNT'}: ${amountText}\n${isInvoice ? 'INVOICE AGE' : 'QUOTE AGE'}: ${quoteAge}\nTONE: ${tone}\nCHANNEL: ${channel}${guidanceSection}\n${scenarioInstructions}\n${toneInstruction}\n${channelInstruction}\n${signatureInstruction}\n\nBILINGUAL OUTPUT: Return both an English ("en") and a natural construction-trade Spanish ("es") version of the subject and body. The Spanish must use real US/Mexican contractor vocabulary (anticipo, mano de obra, etc.), not formal Castilian. Both versions carry the same message; JSON keys stay in English.\n\nReturn strict JSON only with this exact shape (no preamble, no code fences):\n{\n  "subject": { "en": "...", "es": "..." },\n  "body":    { "en": "...", "es": "..." }\n}`;
 }
 
