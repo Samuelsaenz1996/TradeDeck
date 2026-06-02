@@ -3087,6 +3087,9 @@
               <span class="topbar-meta" id="followupMetaLine" data-i18n="followup.metaLine">Follow-up message</span>
             </div>
             <div class="right">
+              <button class="action-btn primary" id="followupSendBtn" onclick="sendFollowupMessage()">
+                <span id="followupSendBtnLabel" data-i18n="followup.sendEmail">✉ Send email</span>
+              </button>
               <button class="action-btn" onclick="copyFollowupMessage()" data-i18n="followup.copyMessage">📋 Copy message</button>
               <button class="action-btn" id="followupArchiveBtn" onclick="toggleArchiveCurrentFollowup()">
                 📦 <span id="followupArchiveBtnLabel" data-i18n="archive.button.archive">Archive</span>
@@ -4353,6 +4356,10 @@ const I18N = {
     'toast.followupEditSaveFailed': 'Could not save changes',
     'followup.copyMessage': '📋 Copy message',
     'followup.regenerate': '♻ Regenerate',
+    'followup.sendEmail': '✉ Send email',
+    'followup.sendText': '💬 Send text',
+    'followup.noEmailOnFile': 'No email on file for this client — add a recipient in your mail app.',
+    'followup.noPhoneOnFile': 'No phone on file for this client — add a recipient in your messaging app.',
     'followup.subject': 'Subject',
     'followup.message': 'Message',
     'followup.charCount': '{n} / 160 chars',
@@ -5101,6 +5108,10 @@ const I18N = {
     'toast.followupEditSaveFailed': 'No se pudieron guardar los cambios',
     'followup.copyMessage': '📋 Copiar mensaje',
     'followup.regenerate': '♻ Volver a generar',
+    'followup.sendEmail': '✉ Enviar correo',
+    'followup.sendText': '💬 Enviar SMS',
+    'followup.noEmailOnFile': 'Este cliente no tiene correo guardado — agrega el destinatario en tu app de correo.',
+    'followup.noPhoneOnFile': 'Este cliente no tiene teléfono guardado — agrega el destinatario en tu app de mensajes.',
     'followup.subject': 'Asunto',
     'followup.message': 'Mensaje',
     'followup.charCount': '{n} / 160 caracteres',
@@ -7745,6 +7756,7 @@ function bindFollowupChannelToggle() {
       followupChannel = btn.dataset.channel;
       document.getElementById('followupSubjectSection').classList.toggle('hidden', followupChannel === 'Text');
       updateTextCharCount();
+      refreshFollowupSendButton();
     };
   });
 }
@@ -8014,12 +8026,21 @@ function refreshFollowupMetaLine() {
   el.textContent = t('followup.metaPrefix', { channel: followupChannelLabel(followupChannel) });
 }
 
+function refreshFollowupSendButton() {
+  const lbl = document.getElementById('followupSendBtnLabel');
+  if (!lbl) return;
+  const key = followupChannel === 'Text' ? 'followup.sendText' : 'followup.sendEmail';
+  lbl.setAttribute('data-i18n', key);
+  lbl.textContent = t(key);
+}
+
 function renderFollowupMessage(data) {
   currentFollowup = data;
   document.getElementById('followupSubjectSection').classList.toggle('hidden', followupChannel === 'Text');
   document.getElementById('followupSubject').textContent = followupChannel === 'Text' ? '' : pickLang(data.subject).trim();
   document.getElementById('followupBody').textContent = pickLang(data.body).trim();
   refreshFollowupMetaLine();
+  refreshFollowupSendButton();
   updateTextCharCount();
   refreshFollowupArchiveButton();
 }
@@ -8037,6 +8058,82 @@ function copyFollowupMessage() {
     showToast(t('toast.copyFailed'), true);
   });
 }
+
+function followupClientContact() {
+  let client = null;
+  if (selectedClientIdForFollowup) {
+    client = (clientsLookupCache || []).find(c => c.id === selectedClientIdForFollowup) || null;
+  }
+  if (!client) {
+    const nameEl = document.getElementById('followupCustomerName');
+    const name = nameEl ? nameEl.value.trim() : '';
+    if (name) client = findClientByName(name);
+  }
+  return {
+    email: (client && client.email) ? client.email.trim() : '',
+    phone: (client && client.phone) ? client.phone.trim() : '',
+  };
+}
+
+function sendFollowupMessage() {
+  const subject = (document.getElementById('followupSubject').textContent || '').trim();
+  const body = (document.getElementById('followupBody').textContent || '').trim();
+  const contact = followupClientContact();
+
+  if (followupChannel === 'Text') {
+    const num = contact.phone ? encodeURIComponent(contact.phone) : '';
+    const href = 'sms:' + num + '?body=' + encodeURIComponent(body);
+    if (!contact.phone) showToast(t('followup.noPhoneOnFile'), false);
+    window.location.href = href;
+    return;
+  }
+  const to = contact.email ? encodeURIComponent(contact.email) : '';
+  const href = 'mailto:' + to
+    + '?subject=' + encodeURIComponent(subject)
+    + '&body=' + encodeURIComponent(body);
+  if (!contact.email) showToast(t('followup.noEmailOnFile'), false);
+  window.location.href = href;
+}
+
+window.__testFollowupSend = function () {
+  const results = [];
+  const assert = (name, cond) => results.push({ name, pass: !!cond });
+
+  const savedSel = selectedClientIdForFollowup;
+  const savedCache = clientsLookupCache;
+  const savedChannel = followupChannel;
+
+  clientsLookupCache = [{ id: 'cli1', name: 'Test Client', email: 'test@x.com', phone: '555-1212' }];
+  selectedClientIdForFollowup = 'cli1';
+
+  const c = followupClientContact();
+  assert('resolves email from linked client', c.email === 'test@x.com');
+  assert('resolves phone from linked client', c.phone === '555-1212');
+
+  selectedClientIdForFollowup = null;
+  const nameEl = document.getElementById('followupCustomerName');
+  const savedName = nameEl ? nameEl.value : '';
+  if (nameEl) nameEl.value = 'Nonexistent Person Zzz';
+  const c2 = followupClientContact();
+  assert('no match → empty email', c2.email === '');
+  assert('no match → empty phone', c2.phone === '');
+
+  followupChannel = 'Email';
+  assert('email channel → sendEmail key', t('followup.sendEmail').length > 0);
+  followupChannel = 'Text';
+  assert('text channel → sendText key', t('followup.sendText').length > 0);
+
+  if (nameEl) nameEl.value = savedName;
+  selectedClientIdForFollowup = savedSel;
+  clientsLookupCache = savedCache;
+  followupChannel = savedChannel;
+  if (typeof refreshFollowupSendButton === 'function') refreshFollowupSendButton();
+
+  const passed = results.filter(r => r.pass).length;
+  results.forEach(r => console.log((r.pass ? 'PASS' : 'FAIL') + ' — ' + r.name));
+  console.log('__testFollowupSend: ' + passed + '/' + results.length + ' passed');
+  return passed === results.length;
+};
 
 function buildFollowupPrompt({ trade, customerName, jobDesc, quoteAmount, scenario, quoteAge, tone, channel, signature }) {
   const rawTrade = trade.replace(/^[^A-Za-z0-9]+/, '').trim();
@@ -10688,6 +10785,7 @@ async function openSavedFollowup(followupId) {
       });
       document.getElementById('followupSubjectSection')
         .classList.toggle('hidden', followupChannel === 'Text');
+      refreshFollowupSendButton();
     }
     if (data.scenario) {
       followupScenario = data.scenario;
