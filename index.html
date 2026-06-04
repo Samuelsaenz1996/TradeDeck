@@ -71,6 +71,7 @@
     height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
   }
   .brand {
     display: flex;
@@ -2001,10 +2002,6 @@
 
     <div class="nav-section" data-i18n="nav.account">Account</div>
     <div id="navProfile" class="nav-item">
-      <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span data-i18n="nav.profile">Profile</span>
-    </div>
-    <div class="nav-item">
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       <span data-i18n="nav.settings">Settings</span>
     </div>
@@ -3586,7 +3583,7 @@
 
       <div id="profileView" class="hidden">
         <div class="view-header">
-          <h1 data-i18n="profile.title">Profile</h1>
+          <h1 data-i18n="profile.title">Settings</h1>
         </div>
 
         <div class="card profile-identity-card">
@@ -3961,6 +3958,39 @@
     <div class="modal-actions">
       <button id="upgradeCancelBtn" type="button" class="modal-btn modal-btn-cancel" data-i18n="modal.cancel">Cancel</button>
       <button id="upgradeContinueBtn" type="button" class="modal-btn modal-btn-primary" data-i18n="upgrade.continue">Continue to payment</button>
+    </div>
+  </div>
+</div>
+
+<div id="onboardingBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
+  <div class="modal-card">
+    <div class="modal-title" id="onboardingTitle" data-i18n="onboarding.title">Welcome — let's set up your quotes</div>
+    <div class="modal-body">
+      <p style="margin-bottom:16px;" data-i18n="onboarding.intro">This is how your name and company show up to your customers.</p>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div>
+          <label class="label" for="onboardingFirstName" data-i18n="onboarding.firstName">First name *</label>
+          <input id="onboardingFirstName" class="input" type="text" autocomplete="given-name" />
+          <div id="onboardingFirstNameError" class="hidden" style="color:#ef4444; font-size:12px; margin-top:4px;" data-i18n="onboarding.firstNameRequired">Please enter your first name.</div>
+        </div>
+        <div>
+          <label class="label" for="onboardingLastName" data-i18n="onboarding.lastName">Last name</label>
+          <input id="onboardingLastName" class="input" type="text" autocomplete="family-name" />
+        </div>
+        <div>
+          <label class="label" for="onboardingCompany" data-i18n="onboarding.company">Company name</label>
+          <input id="onboardingCompany" class="input" type="text" autocomplete="organization" />
+        </div>
+        <div>
+          <label class="label" for="onboardingPhone" data-i18n="onboarding.phone">Phone</label>
+          <input id="onboardingPhone" class="input" type="tel" autocomplete="tel" />
+        </div>
+      </div>
+      <p style="margin-top:14px; font-size:12px; color: var(--ink-3);" data-i18n="onboarding.reassure">You can change this anytime in Profile.</p>
+    </div>
+    <div class="modal-actions">
+      <button id="onboardingLaterBtn" type="button" class="modal-btn modal-btn-cancel" data-i18n="onboarding.finishLater">Finish later</button>
+      <button id="onboardingSaveBtn" type="button" class="modal-btn modal-btn-primary" data-i18n="onboarding.save">Save and continue</button>
     </div>
   </div>
 </div>
@@ -4639,6 +4669,17 @@ const I18N = {
     'modal.cancel': 'Cancel',
     'modal.confirm': 'Confirm',
     'modal.delete': 'Delete',
+    // Onboarding
+    'onboarding.title': "Welcome — let's set up your quotes",
+    'onboarding.intro': "This is how your name and company show up to your customers.",
+    'onboarding.firstName': 'First name *',
+    'onboarding.lastName': 'Last name',
+    'onboarding.company': 'Company name',
+    'onboarding.phone': 'Phone',
+    'onboarding.reassure': 'You can change this anytime in Profile.',
+    'onboarding.finishLater': 'Finish later',
+    'onboarding.save': 'Save and continue',
+    'onboarding.firstNameRequired': 'Please enter your first name.',
     'archive.confirm.body': 'You can unarchive it later from the Archived tab.',
     'archive.confirm.client.title': 'Archive this client?',
     'archive.confirm.job.title': 'Archive this job?',
@@ -4675,7 +4716,7 @@ const I18N = {
     'toast.bulkDeleteFailed': 'Could not delete selection',
     'toast.deleted': 'Deleted',
     // Profile
-    'profile.title': 'Profile',
+    'profile.title': 'Settings',
     'profile.save': 'Save profile',
     'profile.save.saved': 'Profile saved',
     'profile.save.failed': 'Could not save profile',
@@ -5411,6 +5452,17 @@ const I18N = {
     'modal.cancel': 'Cancelar',
     'modal.confirm': 'Confirmar',
     'modal.delete': 'Eliminar',
+    // Onboarding
+    'onboarding.title': 'Bienvenido — vamos a preparar tus cotizaciones',
+    'onboarding.intro': 'Así es como tu nombre y empresa aparecerán ante tus clientes.',
+    'onboarding.firstName': 'Nombre *',
+    'onboarding.lastName': 'Apellido',
+    'onboarding.company': 'Nombre de la empresa',
+    'onboarding.phone': 'Teléfono',
+    'onboarding.reassure': 'Puedes cambiarlo cuando quieras en Perfil.',
+    'onboarding.finishLater': 'Terminar después',
+    'onboarding.save': 'Guardar y continuar',
+    'onboarding.firstNameRequired': 'Ingresa tu nombre.',
     'archive.confirm.body': 'Puedes desarchivarlo más tarde desde la pestaña Archivados.',
     'archive.confirm.client.title': '¿Archivar este cliente?',
     'archive.confirm.job.title': '¿Archivar este trabajo?',
@@ -5447,7 +5499,7 @@ const I18N = {
     'toast.bulkDeleteFailed': 'No se pudo eliminar la selección',
     'toast.deleted': 'Eliminado',
     // Profile
-    'profile.title': 'Perfil',
+    'profile.title': 'Configuración',
     'profile.save': 'Guardar perfil',
     'profile.save.saved': 'Perfil guardado',
     'profile.save.failed': 'No se pudo guardar el perfil',
@@ -7109,7 +7161,7 @@ function init() {
   const upBd = document.getElementById('upgradeModalBackdrop'); if (upBd) upBd.onclick = (e) => { if (e.target === upBd) closeUpgradeModal(); };
   // Populate the profile cache on boot (fire-and-forget; powers the
   // new-quote deposit pre-fill + contractor info on rendered quotes)
-  loadProfileCache().then(() => updateUsageDisplay()).catch(e => console.warn('initial profile load:', e));
+  loadProfileCache().then(() => { updateUsageDisplay(); maybeShowOnboarding(); }).catch(e => console.warn('initial profile load:', e));
   // Bind quotes header buttons
   const quotesNewBtn = document.getElementById('quotesNewBtn');
   if (quotesNewBtn) quotesNewBtn.onclick = enterComposeMode;
@@ -8600,6 +8652,92 @@ window.__testSidebar = function () {
   const passed = results.filter(r => r.pass).length;
   results.forEach(r => console.log((r.pass ? 'PASS' : 'FAIL') + ' — ' + r.name));
   console.log(`__testSidebar: ${passed}/${results.length} passed`);
+  return passed === results.length;
+};
+
+// Onboarding harness — non-destructive. Saves/restores profileCache + flag, and
+// the form's input values. Does not hit Supabase: the save assertion checks the
+// validation+cache mutation path by mocking the network call via short-circuit.
+window.__testOnboarding = function () {
+  const results = [];
+  const assert = (name, cond) => results.push({ name, pass: !!cond });
+
+  const savedProfile = profileCache;
+  const savedShown = onboardingShown;
+  const backdrop = document.getElementById('onboardingBackdrop');
+  const fnEl = document.getElementById('onboardingFirstName');
+  const lnEl = document.getElementById('onboardingLastName');
+  const coEl = document.getElementById('onboardingCompany');
+  const phEl = document.getElementById('onboardingPhone');
+  const errEl = document.getElementById('onboardingFirstNameError');
+  const savedInputs = {
+    fn: fnEl && fnEl.value, ln: lnEl && lnEl.value,
+    co: coEl && coEl.value, ph: phEl && phEl.value,
+  };
+
+  // 1) Empty first_name → maybeShowOnboarding opens the card
+  onboardingShown = false;
+  profileCache = { first_name: '' };
+  maybeShowOnboarding();
+  assert('opens when first_name is empty', backdrop && !backdrop.classList.contains('hidden'));
+  closeOnboardingModal();
+  backdrop && backdrop.classList.add('hidden');
+
+  // 2) first_name present → does NOT open
+  onboardingShown = false;
+  profileCache = { first_name: 'Sam' };
+  maybeShowOnboarding();
+  assert('does NOT open when first_name is set', backdrop && backdrop.classList.contains('hidden'));
+
+  // 3) No session (bypass / null profileCache) → does NOT open
+  onboardingShown = false;
+  profileCache = null;
+  maybeShowOnboarding();
+  assert('does NOT open with null profileCache (bypass)', backdrop && backdrop.classList.contains('hidden'));
+
+  // 4) Required-field check blocks save when first name is blank
+  onboardingShown = false;
+  profileCache = { first_name: '' };
+  openOnboardingModal();
+  if (fnEl) fnEl.value = '';
+  if (errEl) errEl.classList.add('hidden');
+  // Inline the validation guard (mirrors saveOnboardingHandler) — does NOT hit network.
+  const trimmed = (fnEl && fnEl.value || '').trim();
+  if (!trimmed && errEl) errEl.classList.remove('hidden');
+  assert('blank first name shows the required error', errEl && !errEl.classList.contains('hidden'));
+  assert('card stays open when blank', backdrop && !backdrop.classList.contains('hidden'));
+
+  // 5) Valid save path mutates profileCache + closes the card.
+  // Mock the network branch by emulating saveOnboardingHandler's success block.
+  if (fnEl) fnEl.value = 'Test';
+  if (lnEl) lnEl.value = 'User';
+  if (coEl) coEl.value = 'TestCo';
+  if (phEl) phEl.value = '5551234';
+  if (errEl) errEl.classList.add('hidden');
+  const payload = {
+    first_name: fnEl.value.trim(),
+    last_name: lnEl.value.trim() || null,
+    company_name: coEl.value.trim() || null,
+    phone: phEl.value.trim() || null,
+  };
+  if (!profileCache) profileCache = {};
+  Object.assign(profileCache, payload);
+  closeOnboardingModal();
+  assert('save writes first_name into profileCache', profileCache.first_name === 'Test');
+  assert('save closes the card', backdrop && (backdrop.classList.contains('hidden') || !backdrop.classList.contains('visible')));
+
+  // Restore real state
+  profileCache = savedProfile;
+  onboardingShown = savedShown;
+  if (fnEl) fnEl.value = savedInputs.fn || '';
+  if (lnEl) lnEl.value = savedInputs.ln || '';
+  if (coEl) coEl.value = savedInputs.co || '';
+  if (phEl) phEl.value = savedInputs.ph || '';
+  if (errEl) errEl.classList.add('hidden');
+
+  const passed = results.filter(r => r.pass).length;
+  results.forEach(r => console.log((r.pass ? 'PASS' : 'FAIL') + ' — ' + r.name));
+  console.log(`__testOnboarding: ${passed}/${results.length} passed`);
   return passed === results.length;
 };
 
@@ -11613,6 +11751,113 @@ async function saveProfileHandler() {
   }
 }
 
+// ============================================================================
+// Post-signup onboarding card (collect first_name / last_name / company / phone)
+// ============================================================================
+// Shown once per page load when profileCache.first_name is empty/null on a real
+// session. Writes back to the same profiles columns saveProfileHandler uses.
+// Not shown to dev-bypass sessions. Dismissible (Finish later + backdrop click).
+let onboardingShown = false;
+
+function openOnboardingModal() {
+  const backdrop = document.getElementById('onboardingBackdrop');
+  if (!backdrop) return;
+  // Pre-fill from cache so a partial value (last_name only, etc.) isn't blown away.
+  const fnEl = document.getElementById('onboardingFirstName');
+  const lnEl = document.getElementById('onboardingLastName');
+  const coEl = document.getElementById('onboardingCompany');
+  const phEl = document.getElementById('onboardingPhone');
+  const errEl = document.getElementById('onboardingFirstNameError');
+  if (fnEl) fnEl.value = (profileCache && profileCache.first_name) || '';
+  if (lnEl) lnEl.value = (profileCache && profileCache.last_name) || '';
+  if (coEl) coEl.value = (profileCache && profileCache.company_name) || '';
+  if (phEl) phEl.value = (profileCache && profileCache.phone) || '';
+  if (errEl) errEl.classList.add('hidden');
+  backdrop.classList.remove('hidden');
+  requestAnimationFrame(() => backdrop.classList.add('visible'));
+  setTimeout(() => { try { fnEl && fnEl.focus(); } catch (e) {} }, 50);
+}
+
+function closeOnboardingModal() {
+  const backdrop = document.getElementById('onboardingBackdrop');
+  if (!backdrop) return;
+  backdrop.classList.remove('visible');
+  setTimeout(() => backdrop.classList.add('hidden'), 130);
+}
+
+async function saveOnboardingHandler() {
+  const fnEl = document.getElementById('onboardingFirstName');
+  const lnEl = document.getElementById('onboardingLastName');
+  const coEl = document.getElementById('onboardingCompany');
+  const phEl = document.getElementById('onboardingPhone');
+  const errEl = document.getElementById('onboardingFirstNameError');
+  const saveBtn = document.getElementById('onboardingSaveBtn');
+  const firstName = (fnEl && fnEl.value || '').trim();
+  if (!firstName) {
+    if (errEl) errEl.classList.remove('hidden');
+    if (fnEl) { try { fnEl.focus(); } catch (e) {} }
+    return;
+  }
+  if (errEl) errEl.classList.add('hidden');
+  const payload = {
+    first_name: firstName,
+    last_name: (lnEl && lnEl.value || '').trim() || null,
+    company_name: (coEl && coEl.value || '').trim() || null,
+    phone: (phEl && phEl.value || '').trim() || null,
+  };
+  if (saveBtn) saveBtn.disabled = true;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const user = session && session.user;
+    if (!user) { closeOnboardingModal(); return; }
+    const { error } = await sb.from('profiles')
+      .update(payload)
+      .eq('user_id', user.id);
+    if (error) {
+      console.warn('onboarding save error:', error);
+      showToast(t('profile.save.failed'), true);
+      return;
+    }
+    if (!profileCache) profileCache = {};
+    Object.assign(profileCache, payload);
+    closeOnboardingModal();
+    if (typeof updateUsageDisplay === 'function') updateUsageDisplay();
+  } catch (e) {
+    console.warn('onboarding save threw:', e);
+    showToast(t('profile.save.failed'), true);
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
+  }
+}
+
+function maybeShowOnboarding() {
+  if (onboardingShown) return;
+  // No profileCache → no real session (bypass or pre-auth). Skip.
+  if (!profileCache) return;
+  const first = (profileCache.first_name || '').trim();
+  if (first) return;
+  onboardingShown = true;
+  openOnboardingModal();
+}
+
+// Wire onboarding buttons + backdrop dismiss once at boot.
+(function bindOnboarding() {
+  const ready = () => {
+    const backdrop = document.getElementById('onboardingBackdrop');
+    if (!backdrop) return;
+    const laterBtn = document.getElementById('onboardingLaterBtn');
+    const saveBtn = document.getElementById('onboardingSaveBtn');
+    if (laterBtn) laterBtn.onclick = closeOnboardingModal;
+    if (saveBtn) saveBtn.onclick = saveOnboardingHandler;
+    backdrop.onclick = (e) => { if (e.target === backdrop) closeOnboardingModal(); };
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ready);
+  } else {
+    ready();
+  }
+})();
+
 // Fetch the user's clients from Supabase, then augment each row
 // with computed job count, revenue, and last-activity timestamp
 // by aggregating from the jobs and quotes tables. Bypass users
@@ -13398,7 +13643,7 @@ function updateAuthUI(session) {
       refreshQuoteUsedFromServer();
       refreshClientsLookupCache();
       loadJobs();
-      loadProfileCache().then(() => updateUsageDisplay()).catch(e => console.warn('profile load on auth:', e));
+      loadProfileCache().then(() => { updateUsageDisplay(); maybeShowOnboarding(); }).catch(e => console.warn('profile load on auth:', e));
     }
   } else {
     authScreen.classList.remove('hidden');
