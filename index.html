@@ -279,6 +279,9 @@
   .payment-table-row:hover,
   .clients-table-row:hover { background: var(--surface-2); }
 
+  /* Stop direct children from shrinking — otherwise flexbox squishes them to fit
+     and overflow-y:auto on .sidebar never sees a reason to scroll. */
+  .sidebar > * { flex-shrink: 0; }
   .sidebar-bottom { margin-top: auto; }
   .usage-card {
     background: var(--surface);
