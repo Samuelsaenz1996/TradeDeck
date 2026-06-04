@@ -1,108 +1,129 @@
 # MyTradeDeck — Project Status
 
-Last updated: June 2, 2026 (**payments + subscriptions LIVE**; Payments dashboard now real data; invoice archive/delete + mobile polish; follow-up compose form rebuilt with source picker + AI-agnostic sign-off)
+Last updated: June 4, 2026 (**email-verification export gate LIVE — all 5 stages shipped**; quota dropped 5→3; onboarding card; sidebar scroll fix; Profile→Settings rename. Next up: Pro upgrade popup + free-tier feature gates.)
 
 Save this. Paste into any future Claude conversation to continue.
 
-> Reconstructed from current code + the go-live and Stripe-account-migration session. Sanity-check tester names (placeholders) and exact IDs against your own Stripe/Supabase if you need precision. The contractor login used throughout was samuelsaenz1996@gmail.com.
+> Reconstructed from current code + recent sessions. Sanity-check tester names (placeholders) and exact IDs against your own Stripe/Supabase if you need precision. The contractor login used throughout was samuelsaenz1996@gmail.com.
 
 ---
 
-## 🟢 Go-live: COMPLETE — both flows verified with real money on Saenztech LLC
+## 🆕 This session (Jun 4): Email-verification export gate — LIVE, all 5 stages shipped
 
-The whole PAY epic and the subscription billing now run on the **Saenztech LLC** Stripe platform account (`acct_1Tdvgh2LuFwvqrU8`), in **live mode**. Both were proven end-to-end:
+**The feature:** Anti-farming. A user can sign up easily (email + password) and draft up to **3** free quotes/follow-ups, but **cannot download or send** anything until they confirm a real email. Fake-email farmers get useless drafts and nothing more. Paying (Pro) users are never gated.
 
-- **Payments (Connect):** real $1 invoice (#INV-1003) → hosted Checkout on the connected account → charge landed on the connected account → 1% application fee taken by the platform → Connect webhook delivered **200** → invoice auto-flipped to **paid** with "Paid on Jun 2, 2026" (`paid_at` stamped). Full PAY-A/B/C loop confirmed live.
-- **Subscriptions:** Upgrade to Pro → live Checkout against the new Saenztech LLC price IDs → 100%-off coupon applied ($0) → subscription webhook delivered → `profiles.plan = 'pro'`, `subscription_status = 'active'`, fresh `cus_…` + `sub_…` written. Confirmed in Supabase.
+**Why a custom system (not Supabase native):** Supabase gives a hard binary — "Confirm email" ON = unconfirmed users can't get a session at all; OFF (current) = every signup is auto-confirmed instantly (`email_confirmed_at` populated ~24-38ms after creation, no email sent). There is NO "unconfirmed-but-let-in" state. Verified by live console tests on fresh signups. So we built our own verification flag instead of gating on native `email_confirmed_at`.
 
-**You are clear to announce payments to testers (was Phase 7).** Nothing blocks real use.
+### Stage 1 — DB foundation (SQL, done & verified)
+Added to `public.profiles`:
+- `email_verified_by_us boolean NOT NULL DEFAULT false` — the field the gate checks
+- `verify_token text`, `verify_token_expires_at timestamptz`
+- Partial index `profiles_verify_token_idx` on `verify_token WHERE NOT NULL`
+- **Backfilled ALL existing users to `true`** (grandfathered — nobody/no tester/owner locked out). Only new signups start `false`. Verified: 4 existing rows all `true`, 0 `false`.
+
+### Stage 2 — Backend endpoints (done & proven live)
+- **`api/verify/send.js`** (POST `/api/verify/send`): Bearer auth, loads profile, if already verified returns `{alreadyVerified:true}` (no email); else `randomBytes(32).toString('hex')` token + 24h expiry stored on profiles, builds link `${APP_URL}/verify?token=...`, sends via **Resend HTTP API** (fetch to `https://api.resend.com/emails`, from `MyTradeDeck <noreply@mail.mytradedeck.com>`, to `user.email`, bilingual HTML). 502 on Resend failure, else `{sent:true}`.
+- **`api/verify/confirm.js`** (POST `/api/verify/confirm`): **NO Bearer** (token IS the credential — link may open logged-out). Reads `req.body.token`; missing/invalid/expired/already each return spec'd response; on success flips `email_verified_by_us=true` AND nulls token+expiry (single-use); `{verified:true}`.
+- Match existing endpoint pattern exactly (Node serverless, `res.json` style, `getUser(token)` Bearer, profiles keyed on `user_id`).
+- **Proven live:** real email sent → arrived in inbox → confirm with real token → flag flipped + token nulled. Single-use + idempotency confirmed.
+
+### Stage 3 — Export gate (front-end, done & proven)
+- `requireVerifiedEmail()` helper: allow if `(profileCache.plan && plan!=='free')` **OR** `email_verified_by_us===true`; **null profileCache → allow** (defensive, never block on transient load); else open verify modal + return false.
+- Guard `if(!requireVerifiedEmail())return;` at top of all **8 export functions**: `downloadPdf`, `sendQuoteEmail`, `sendQuoteText`, `downloadInvoicePdf`, `sendInvoiceEmail`, `sendInvoiceText`, `copyFollowupMessage`, `sendFollowupMessage`.
+- Verify modal: "Confirm your email to send & download" + "Send me the link" (calls `/api/verify/send`) + "I've confirmed — refresh" (re-pulls `loadProfileCache`, re-checks, closes if now verified) + cancel. All `verify.modal.*` i18n EN+ES.
+- **Pro/Team always bypass** the gate (paying customer obviously has a real email; never block them).
+- Harness `__testExportGate()` → 16/16. Proven end-to-end on Preview (blocked → modal → resend → verify → refresh → unblocked → export works).
+
+### Stage 4 — `/verify` landing page (done & proven LIVE on production)
+- Standalone **`verify.html`** at project root (NOT part of index.html, no Supabase session needed — token is the credential). Reads `?token=` from URL, calls `/api/verify/confirm`, shows bilingual result: success / expired / invalid-or-already / generic-error / no-token states. On-brand (same palette `#FAF7F2`/`#1A1F2E`/`#E6DFD2`, Fraunces+Inter). Language from `localStorage.tdLang` (defaults EN for fresh browsers).
+- **`vercel.json`** created at root (there was none before) with ONE narrowly-scoped rewrite: `/verify` → `/verify.html`. No catch-all, no `/api/*` rewrite — default static + serverless routing intact.
+- **Gotcha learned:** the email link points at production `www.mytradedeck.com/verify`, so `verify.html` + `vercel.json` had to be **merged to production** before the link worked — testing on Preview/branch isn't enough since the email always goes to prod.
+
+### Stage 5 — Polish (done)
+- Subtle **sidebar reminder** ("Confirm your email to send & download" + "Send link") shown ONLY when `profileCache && !verified && (free/no plan)`. Hidden for Pro/verified/null. Refresh hooked at TOP of `updateUsageDisplay()` so it runs regardless of free/Pro branch and disappears immediately after verify.
+- **Post-signup nudge** toast (`verify.signup.nudge`) on signup success — toast only, no auto-modal, no auto-send-email (keeps signup instant).
+- Single resend code path: `sendVerificationLink(btn)` used by BOTH modal and sidebar (one `fetch('/api/verify/send')` site).
+- Harness `__testVerifyPolish()` → 4/4.
+
+### Test account
+`samuelsaenz20+verifytest2@gmail.com` (Gmail +alias → lands in `samuelsaenz20@gmail.com` inbox). To re-test the UNVERIFIED path, flip it back to false:
+```sql
+update public.profiles set email_verified_by_us = false
+where user_id = (select id from auth.users where email = 'samuelsaenz20+verifytest2@gmail.com');
+```
 
 ---
 
-## ⚠️ The big change this session: platform moved to a NEW Stripe account
+## 🆕 Also this session (Jun 4): smaller shipped items
 
-Originally everything pointed at an older Stripe account (where the *test-mode* "$49 tester" subscription lived). For business/tax reasons the platform was migrated to a brand-new **Saenztech LLC** live account. This was a real migration, not a config tweak. What moved:
+- **Free quote cap dropped 5 → 3.** SQL: `CREATE OR REPLACE` on `consume_quote_credit` (`free_limit int := 3`) and `get_quote_status` (`limit_val = 3` for free). Front-end: `updateUsageDisplay` `quoteUsed/3`, `consumeQuotaOrShowError` bypass `>=3`, i18n `sidebar.quotesSuffix` "/3 quotes"+"/3 cotizaciones", `status.limit` fallback →3. Server-enforced (RPC keyed on `auth.uid()`). NOTE: existing free users who already made 3+ this month are over cap until monthly reset — no data harm, server just blocks next.
+- **Post-signup onboarding card.** Dismissible centered bilingual card; first name REQUIRED, last/company/phone optional; "Finish later" + "Save and continue"; writes to existing `profiles` columns (first_name, last_name, company_name, phone). Trigger = `profileCache.first_name` empty/null (self-resolving — reappears next login if skipped, never returns once saved). Harness `__testOnboarding()`.
+- **Sidebar scroll fix.** Base `.sidebar` got `overflow-y:auto` (was `height:100vh` no overflow → bottom content/Upgrade button clipped on short desktop screens). Mobile drawer rule untouched.
+- **Profile → Settings rename.** Cosmetic only. `navProfile` relabeled to `nav.settings` (gear icon), dead duplicate Settings nav item deleted, `profile.title` EN/ES = "Settings"/"Configuración". Internals unchanged (`switchView('profile')`, `#profileView`, view key `'profile'`, `loadProfileData` all kept).
 
-- **Connect** had to be **activated** on the live Saenztech LLC account (Connect, "Platform" business model — merchants collect directly). It is NOT on by default in live mode the way it is in sandbox.
-- **`STRIPE_SECRET_KEY` (Production)** → Saenztech LLC live `sk_live_…`. (It was found EMPTY on Production at the start — the original root cause of test-mode onboarding.)
-- **Subscription products recreated** on Saenztech LLC: "MyTradeDeck Pro" $49/mo and "MyTradeDeck Pro (Yearly)" $490/yr → **new** `price_…` IDs → set on `STRIPE_PRICE_ID_MONTHLY` (`price_1TdxD62LuFwvqrU89lp9r6GP`) and `STRIPE_PRICE_ID_ANNUAL` (the $490 yearly price).
-- **Both webhooks recreated** on Saenztech LLC with NEW signing secrets in Vercel Production:
-  - Connect webhook "whimsical-rhythm" → `https://www.mytradedeck.com/api/webhooks/stripe-connect`, events from **Connected accounts**, listening to `checkout.session.completed`, secret in `STRIPE_CONNECT_WEBHOOK_SECRET`.
-  - Subscription webhook "exquisite-radiance" → `https://www.mytradedeck.com/api/stripe-webhook`, events from **your account**, listening to `checkout.session.completed` + `customer.subscription.updated` + `customer.subscription.deleted`, secret in `STRIPE_WEBHOOK_SECRET`.
-- The old test-mode "$49 tester" subscription did **not** need migrating — it was test data, so there was nothing real to move.
+---
 
-### Gotchas hit during the migration (so they're not re-learned the hard way)
-- **Webhook URLs MUST use `www.`** — the apex `mytradedeck.com` 307-redirects to `www.`, and Stripe does NOT follow redirects on POST, so a non-www endpoint silently fails with **307 ERR** and invoices never flip to paid. Both endpoints are on `https://www.mytradedeck.com/...`.
-- **Connect webhook must listen on Connected accounts**, not just the platform account — direct-charge events fire on the connected account.
-- **Stale cross-account IDs on the prod `profiles` row** repeatedly blocked things:
-  - `create-account-link` only mints a NEW account when `stripe_account_id` is NULL; a leftover (test, or old-platform) `acct_…` causes "account not connected to your platform / does not exist." Fix = clear the Connect columns, then onboard fresh.
-  - `create-checkout` reused a stale `stripe_customer_id` from the old account → "No such customer." Fix = also null `stripe_customer_id` so a fresh customer is minted on the new account.
-  - **The `profiles` PK is `user_id`, NOT `id`.** Early SQL failed with `column "id" does not exist`. All profile SQL keys on `WHERE user_id = (SELECT id FROM auth.users WHERE email = '...')`.
-- **Live secret keys are shown only once** (at creation/roll). "No value when I edit the Vercel var" is just Vercel masking sensitive vars — not a failed save.
-- **Env var changes only apply to NEW builds** — redeploy Production after editing any env var.
+## 🔜 NEXT UP (decided Jun 4, not yet built): Pro upgrade popup + free-tier feature gates
 
-### Reset-to-free recipe (for re-testing the upgrade flow)
-The contractor account is currently **pro** (from the live coupon test — intentionally kept). To re-test free→pro later:
+### Pro upgrade popup (NOW — build next session)
+Replace the small bottom toast (shown when a free user hits the 3-quote cap and presses Generate again) with a **proper upgrade popup**. **Reuse the EXISTING sidebar upgrade popup** (the one with the $49/mo ÷ $490/yr monthly↔annual toggle + working Stripe checkout) — do NOT build a parallel popup. Extend it with:
+- A **Free-vs-Pro comparison table** (two columns — loss-aversion framing, shows what they're missing).
+- The 3-quote-cap "Generate again" trigger opens **that same popup** (not the toast).
+- Popup's upgrade button → **existing Stripe checkout** (toggle already picks monthly/annual). One payment path.
+- **Feature list still needs final confirmation** before building (which of invoicing / follow-ups / branding / bilingual are free vs Pro-only). Confirmed Pro benefits so far: unlimited quotes (free=3/mo), unlimited clients (free=1), Jobs/project tracking (free=none), Get-Paid online payments (free=none).
+
+### Free-tier feature gates (LATER — deliberate sprint, enforcement touches live code)
+These are the limits the popup will advertise; ENFORCEMENT is a separate future sprint (UI + ideally server-side):
+- **Free = max 1 client** (enforce in clients flow).
+- **Free = no Jobs section** (hide/block the jobs area).
+- **Free = no "Get Paid" / Stripe Connect access** (block Connect onboarding for free users — touches live payment code, treat carefully).
+
+### Also explored, no decision (Jun 4): "try before signup"
+Letting anonymous visitors try quote generation. Risk: exposes AI API to unauthenticated traffic (cost abuse, no quota since RPC needs `auth.uid()`, free Claude proxy). Options if revisited: (1) **canned/fake demo quote** — zero risk, zero AI cost, ~90% of the benefit, RECOMMENDED; (2) one real anon gen needing **both** Cloudflare Turnstile bot-check AND IP rate-limit; (3) skip — signup already near-frictionless. Parked, no decision.
+
+---
+
+## Carried-over open items (from prior sessions)
+
+| Feature | Priority | Notes |
+|---|---|---|
+| Sidebar plan-card fix | Check if still needed | Prior spec: `updateUsageDisplay()` ran before `loadProfileCache()` resolved → "FREE PLAN / Unlimited / 5 quotes" contradiction for pro. May already be resolved by this session's `updateUsageDisplay` changes — verify on the pro account. `__testSidebar()` harness exists. |
+| Account management (change pw / change email / delete account) | Med | Its OWN deliberate sprint. "Delete account" needs upfront decisions: cascade of clients/quotes/invoices rows + live Stripe Connect account + active subscription. NOT a casual bolt-on. |
+| "Draft" label top-right of app | Low | User wants it removed. Need to `Ctrl+Shift+F "draft"` first to confirm it's not a load-bearing quote/invoice status badge before deleting. |
+| Embedded card entry on our page | Med | Stripe Embedded Checkout (keeps token flow + PCI posture). Separate sprint. |
+| Test the ANNUAL checkout path | Med | Monthly proven live via coupon; annual env var confirmed but never run end-to-end. Shares monthly code path (low risk). |
+| Orphan i18n key sweep | Low | `toast.invoicePlaceholder`, `invoice.viewTitleHtml`, dead `followup.age`, plus now-unused `nav.profile` (harmless). |
+| Single-invoice topbar shows "Invoices" (plural) | Low | Cosmetic. |
+| Auto-link follow-up to job | Low-Med | ~2-line fix in `persistGeneratedFollowup`; source picker now exposes quote/invoice id at compose time. |
+| PAY-C partial-payment idempotency | Low (deferred) | Multiple online partials + replayed event could double-count. |
+| Account-level language preference | Low | Only if cross-device need surfaces; `tdLang` is localStorage/per-device today. |
+| Retire dev bypass | Low | localhost-gated; parked. |
+| Capacitor wrap | Med | Sprint 4+. |
+| Delete `pay-b-preview` branch | Low | Safe to delete post-go-live. |
+
+---
+
+## 🟢 Payments + subscriptions: LIVE on Saenztech LLC
+
+Platform account **Saenztech LLC** (`acct_1Tdvgh2LuFwvqrU8`), **live mode**. Both flows proven end-to-end with real money:
+- **Payments (Connect):** real $1 invoice → hosted Checkout on connected account → 1% platform fee → Connect webhook 200 → invoice auto-flipped to paid (`paid_at` stamped). Full PAY-A/B/C loop live.
+- **Subscriptions:** Upgrade → live Checkout against Saenztech LLC price IDs → webhook → `profiles.plan='pro'`, `subscription_status='active'`. Confirmed.
+
+### Migration gotchas (keep — hard-won)
+- **Webhook URLs MUST use `www.`** — apex 307-redirects, Stripe doesn't follow redirects on POST → silent 307 ERR. (Same gotcha bit the Stage 4 verify link — email points at prod www.)
+- **Connect webhook listens on Connected accounts**, not just platform.
+- **Stale cross-account IDs on prod `profiles`** block onboarding/checkout — clear Connect columns + `stripe_customer_id` to re-onboard fresh.
+- **`profiles` PK is `user_id`, NOT `id`.** All profile SQL keys on `WHERE user_id = (SELECT id FROM auth.users WHERE email='...')`.
+- **Live secret keys shown once.** Vercel masks sensitive var values — not a failed save.
+- **Env var changes only apply to NEW builds** — redeploy/push after editing.
+
+### Reset-to-free recipe (re-test upgrade flow)
 ```sql
 UPDATE public.profiles
 SET plan = 'free', stripe_subscription_id = NULL, subscription_status = NULL,
-    stripe_customer_id = NULL   -- also null this or checkout 500s on the old/stale customer
+    stripe_customer_id = NULL
 WHERE user_id = (SELECT id FROM auth.users WHERE email = 'samuelsaenz1996@gmail.com');
 ```
-
----
-
-## 🆕 This session: Payments dashboard real-data, invoice archive/delete, mobile polish, follow-up compose rebuild
-
-Several user-visible features shipped end-to-end (Preview → main):
-
-### Payments view → live data
-- Killed `MOCK_PAYMENTS` / `MOCK_PAYMENT_WEEKS`. Cards, split-bar, chart, and chase-list now derive from real invoices (cents-based reconciliation).
-- Date-range dropdown (this month / last month / last 3 months / YTD). Cards 1&2 are period-scoped (collected + outstanding/overdue in window); cards 3&4 are all-time (lifetime totals + avg days-to-pay computed off `paid_at`).
-- Split-bar shows collected / outstanding / overdue proportions for the period.
-- Chase list = unpaid + overdue invoices, sortable, balance-aware.
-- `paid_at` is now stamped when an invoice is marked paid manually (previously only PAY-C stamped it).
-- Mobile: `#paymentsTable` mirrors `#invoicesListTable` (compact padding, ellipsis, nowrap). Removed "Preview" badge from nav-Payments.
-
-### Invoices: archive + delete
-- Active/Archived segmented control on the invoices list; `viewingArchivedInvoices` state; Payments view always force-loads active via `loadInvoices({forceActive: true})`.
-- Archive + Delete buttons on the invoice detail page (`archiveInvoice` / `unarchiveInvoice` / `toggleArchiveCurrentInvoice` / `refreshInvoiceArchiveButton` / `deleteCurrentInvoice`).
-- Delete on a paid/partial invoice gets a stern confirmation showing the $ amount + PI id — by request.
-- Mobile: invoice-list table now fits the viewport, status pill pinned to 108px and tighter padding so "Partially paid" doesn't clip.
-
-### Migration ran in Supabase (user ran it)
-```sql
-ALTER TABLE invoices ADD COLUMN IF NOT EXISTS archived_at timestamptz NULL;
-CREATE INDEX IF NOT EXISTS invoices_archived_at_idx ON invoices (archived_at);
-```
-
-### Follow-up compose form — rebuilt (Stages 2a/2b/2c + sign-off refactor)
-- **Source picker**: From a quote · From an invoice · Manual. Replaces the old trade-list flow.
-- **Search + list picker** for quotes and invoices (real data, searchable). Manual mode keeps the original free-text trade.
-- **Dynamic scenarios** via `FOLLOWUP_SCENARIOS` config — separate scenario sets for quotes vs invoices (overdue / partial / thank-you-paid for invoices; nudge / objection / etc. for quotes). Pills render dynamically via `renderFollowupScenarios(setName)`.
-- **`buildFollowupPrompt({trade, sourceKind, ...})`** now frames the prompt with `isInvoice` / `docFraming` so the AI gets the right context.
-- **Sign-off externalized to code.** AI is now instructed to write NO closing at all. `appendFollowupSignoff(parsed)` (above `generateFollowup`) appends `\n\nBest,\n{first last}\n{company}` from `profileCache`, skipping empty slots — no more "[Your Name]" placeholders.
-- **CSS fix**: `#followupBody { white-space: pre-wrap; }` so the appended `\n` line breaks render as three lines on screen (the data was already correct; the div was collapsing newlines). `copyFollowupMessage` reads `.textContent` which preserves them natively.
-- **Polish**: age label now uses `followup.ageNeutral` ("How long has it been?" / "¿Cuánto tiempo ha pasado?") so it reads naturally for invoices too — old `followup.age` ("Quote age") key kept, harmless.
-- **Harness**: `__testFollowupPicker` now prints **13/13 passed** (7 picker/framing + 6 sign-off-related). Use it as the regression gate on the follow-up area going forward.
-
-### Defensive fix flagged (not in spec, but necessary)
-- After Stage 2a removed the trade-list and signature-summary DOM, `applyLanguage()` was still calling `renderFollowupTrades()` / `updateFollowupSignatureSummary()` unconditionally and null-deref'd on language switch. Both calls removed from `applyLanguage`.
-
----
-
-## 🔧 Still open: sidebar plan-card bug fix (spec written, NOT yet run in Claude Code)
-
-**Symptom:** sidebar shows "FREE PLAN", "Unlimited / 5 quotes" (contradiction), and the "Upgrade to Pro" button even though the account is pro.
-
-**Root cause:** `updateUsageDisplay()` runs in `init()` BEFORE `loadProfileCache()` resolves (profileCache still null → falls through to free branch), and is never re-run once the profile loads. Separately, the pro branch only set the `#quoteUsed` span to "Unlimited" but left the static second span (" / 5 quotes") untouched → "Unlimited / 5 quotes". The "FREE PLAN" label + Upgrade button were never touched by the function at all.
-
-**Fix (spec ready to paste into Claude Code):**
-1. Rewrite `updateUsageDisplay()` to drive the whole card: label (`.usage-label`), the suffix span (`#quoteUsed + span`, cleared when pro), and the upgrade button visibility. Toggles `data-i18n` attrs so a language switch doesn't clobber the pro display.
-2. Re-run `updateUsageDisplay()` after `loadProfileCache()` resolves in BOTH `init()` and `updateAuthUI()` (`.then(() => updateUsageDisplay())`).
-3. Added a non-destructive browser-console self-test harness `window.__testSidebar()` — saves/restores `profileCache`/`quoteUsed`/`tdLang`, asserts pro+free+language-toggle render states, logs `X/X passed`. Run it on the Preview console; expect 10/10. (It tests render logic, NOT the async timing bug — verify that one by eyeballing the real sidebar as the pro account on load.)
-
-**Next action:** paste the spec into Claude Code → branch → Vercel Preview → run `__testSidebar()` in console + eyeball pro sidebar → merge to main.
 
 ---
 
@@ -110,71 +131,53 @@ CREATE INDEX IF NOT EXISTS invoices_archived_at_idx ON invoices (archived_at);
 
 MyTradeDeck is an AI-powered admin tool for contractors and tradespeople. Drafts bilingual (EN/ES) quotes and follow-ups, with a CRM layer (clients → jobs → quotes/follow-ups/invoices). Contractors can get paid online: send an invoice with a pay link, the client pays by card on a Stripe-hosted page, money lands in the contractor's own Stripe account; the invoice auto-marks paid via webhook.
 
-- Pricing: Free (5 quotes/mo, server-enforced) · Pro $49/mo (annual $490) · Team $99/mo (priced, no multi-seat logic).
+- Pricing: **Free (3 quotes/mo, server-enforced; export gated behind email verification)** · Pro $49/mo (annual $490) · Team $99/mo (priced, no multi-seat logic).
 - Payments fee: 1% MyTradeDeck platform fee capped at $25/invoice, on top of Stripe's processing fee. Contractor is merchant of record.
-- Live at https://mytradedeck.com. Goal: a high-income side project, not full-time. Long-term: Capacitor wrap for the app stores.
+- Live at https://www.mytradedeck.com. Goal: a high-income side project, not full-time. Long-term: Capacitor wrap for the app stores.
 
 ## Tech Stack (current)
-- Frontend: single `index.html`, vanilla JS, no framework, no build step. Host path `c:\ST\GitHub\TradeDeck\TradeDeck\index.html`.
+- Frontend: single `index.html`, vanilla JS, no framework, no build step + standalone `verify.html`. Host path `c:\ST\GitHub\TradeDeck\TradeDeck\index.html`.
 - AI: Anthropic API via `/api/generate.js` (Edge proxy), model `claude-sonnet-4-6`, SSE streaming.
-- Auth: Supabase email — password (+ magic-link fallback), recovery. Dev bypass localhost-only.
-- Billing: Stripe Checkout + portal (`/api/create-checkout`, `/api/create-portal`), subscription webhook → `profiles.plan`.
-- Payments: Stripe Connect **Standard** accounts, **direct charges** on the connected account, platform `application_fee_amount` (1% capped $25), Stripe-**hosted** Checkout. Two separate webhooks (subscription vs Connect), separate secrets.
+- Auth: Supabase email — password (+ magic-link fallback), recovery. "Confirm email" toggle OFF (auto-confirm); custom `email_verified_by_us` flag gates export. Dev bypass localhost-only.
+- Billing: Stripe Checkout + portal, subscription webhook → `profiles.plan`.
+- Payments: Stripe Connect Standard, direct charges, platform `application_fee_amount` (1% capped $25), hosted Checkout. Two webhooks (subscription vs Connect), separate secrets.
+- Email: **Resend** — domain `mail.mytradedeck.com` VERIFIED. Used as Supabase SMTP provider AND now directly via Resend HTTP API from `/api/verify/send` (needs `RESEND_API_KEY`). Verify email from `noreply@mail.mytradedeck.com`.
 - Persistence: Supabase Postgres (`clients`, `quotes`, `jobs`, `followups`, `invoices`, `profiles`), 4-policy RLS on `auth.uid()`, cross-entity FKs ON DELETE SET NULL. Project `cqmctdhxticryelvhhze`.
-- Storage: Supabase `logos` bucket. Email: Resend SMTP via `mail.mytradedeck.com`.
-- Hosting: Vercel, auto-deploy from GitHub `main`. Domain on GoDaddy (apex 307s → www; webhook URLs must use www). PDF: html2pdf.js. API safety: $20/mo Anthropic cap.
+- Storage: Supabase `logos` bucket.
+- Hosting: Vercel, auto-deploy from GitHub `main`. `vercel.json` has one rewrite (`/verify`→`/verify.html`). Domain on GoDaddy (apex 307s → www). PDF: html2pdf.js. API safety: $20/mo Anthropic cap.
 
 ### Vercel environment variables (Production)
 - `STRIPE_SECRET_KEY` — Saenztech LLC live `sk_live_…` (Production); Preview = `sk_test`.
 - `STRIPE_PRICE_ID_MONTHLY` = `price_1TdxD62LuFwvqrU89lp9r6GP` ($49/mo); `STRIPE_PRICE_ID_ANNUAL` = the $490/yr price.
-- `STRIPE_WEBHOOK_SECRET` — Saenztech LLC subscription webhook secret.
-- `STRIPE_CONNECT_WEBHOOK_SECRET` — Saenztech LLC Connect webhook secret.
-- `PLATFORM_FEE_PERCENT` = 1 (fails open to 0% / no fee if missing); `PLATFORM_FEE_CAP_CENTS` defaults 2500 in code.
+- `STRIPE_WEBHOOK_SECRET`, `STRIPE_CONNECT_WEBHOOK_SECRET`.
+- `PLATFORM_FEE_PERCENT` = 1; `PLATFORM_FEE_CAP_CENTS` defaults 2500 in code.
 - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `APP_URL`, `ANTHROPIC_API_KEY`.
+- **`RESEND_API_KEY`** — added Jun 4 for `/api/verify/send` (Production + Preview).
 
 ### Backend endpoints (/api)
-`generate`; `create-checkout`; `create-portal`; `stripe-webhook` (subscription, `STRIPE_WEBHOOK_SECRET`); `connect/create-account-link`; `connect/account-status`; `invoice/create-pay-link`; `pay/[token]` (public); `pay-result` (public); `webhooks/stripe-connect` (public, Connect, `STRIPE_CONNECT_WEBHOOK_SECRET`). All Node/ESM, JWT-verify pattern, service-role Supabase client, Stripe apiVersion '2024-06-20'.
+`generate`; `create-checkout`; `create-portal`; `stripe-webhook`; `connect/create-account-link`; `connect/account-status`; `invoice/create-pay-link`; `pay/[token]` (public); `pay-result` (public); `webhooks/stripe-connect` (public, Connect); **`verify/send` (Bearer); `verify/confirm` (token-auth, no Bearer)**. All Node/ESM, JWT-verify pattern (except verify/confirm), service-role Supabase client, Stripe apiVersion '2024-06-20'.
 
 ## What's Built (functional)
 - Foundation, quotes, full CRM (clients/jobs/quotes/follow-ups), 10 trades / 7 pricing modes, full EN/ES, mobile drawer.
-- Auth (password + magic-link + recovery), Stripe subscriptions + portal, Profile/branding.
-- Archive + bulk + delete + confirmModal across all four core tables **+ invoices** (archive toggle, archive/delete on invoice detail, stern confirm for paid/partial).
-- Invoices: INV-A (convert-to-invoice RPC, doc view, payment tracking, PDF/email/text) + INV-B (invoices list view + nav) + active/archived view toggle.
-- Payments collection: PAY-A (Connect onboarding) + PAY-B (hosted-Checkout direct charges + 1%/$25 fee) + PAY-C (Connect webhook → auto-mark paid, `paid_at` stamped — and now also stamped on manual mark-paid). **All live and verified on Saenztech LLC.**
-- **Payments dashboard (real data)**: period-scoped collected/outstanding/overdue cards + all-time lifetime + avg-days-to-pay; date-range dropdown; split-bar; sortable chase list. No more mocks.
-- **Follow-up compose v2**: source picker (quote / invoice / manual) → searchable picker → dynamic scenario set → AI prompt is source-aware → sign-off appended in code from `profileCache`. `__testFollowupPicker` harness gates regressions (13/13).
-
-## What's NOT built / roadmap
-| Feature | Priority | Notes |
-|---|---|---|
-| Sidebar plan-card fix | **High (still open)** | Spec written + `__testSidebar()` harness; not yet run in Claude Code. |
-| Embedded card entry on our page | Med | User wants clients to enter card on-site instead of redirect. Deferred post-go-live. Path: Stripe **Embedded Checkout** (keeps token flow + PCI posture, smallest change) over full Elements. A real, separate sprint. |
-| Test the ANNUAL checkout path | Med | Monthly proven live via coupon; annual env var confirmed but never run end-to-end. Shares the monthly code path (low risk). |
-| Orphan i18n key sweep | Low | `toast.invoicePlaceholder`, `invoice.viewTitleHtml`, dead `followup.age` ("Quote age" — now replaced by `followup.ageNeutral`). One polish pass when convenient. |
-| Single-invoice topbar shows "Invoices" (plural) | Low | Cosmetic (VIEW_TOPBAR is view-keyed). |
-| Auto-link follow-up to job | Low-Med | ~2-line fix in `persistGeneratedFollowup`. With the new source picker we now know quote/invoice id at compose time — wiring is even smaller now. |
-| PAY-C partial-payment idempotency | Low (deferred) | Keys on last stored PI; multiple online partials + replayed earlier event could double-count. Revisit if multiple online partials are enabled. |
-| Retire dev bypass | Low | localhost-gated; parked. |
-| Capacitor wrap | Med | Sprint 4+. |
-| ~~Real Payments dashboard~~ | ✅ done | Replaced mocks, period vs all-time split, avg-days-to-pay live. |
-| ~~Extend archive to invoices~~ | ✅ done | `archived_at` migration ran; archive/unarchive/delete + active/archived toggle shipped. |
-
-## Stripe cleanup state (this session)
-- Promo code **`MyTradeDeckFree`** (100% off forever) — **deactivated** after the test.
-- Test Pro subscription (`sub_1TdxZG2LuFwvqrU8KYglgvJ3`) on the contractor account — **intentionally kept** ($0/forever; owner uses Pro for free).
-- `pay-b-preview` branch — was a rollback reference pre-go-live; safe to delete now that go-live is verified.
+- Auth (password + magic-link + recovery), Stripe subscriptions + portal, Settings/branding (formerly "Profile").
+- Archive + bulk + delete + confirmModal across all four core tables + invoices.
+- Invoices: INV-A + INV-B + active/archived toggle.
+- Payments collection: PAY-A/B/C, all live on Saenztech LLC.
+- Payments dashboard (real data): period-scoped + all-time + avg-days-to-pay; date-range; split-bar; chase list.
+- Follow-up compose v2: source picker → searchable picker → dynamic scenarios → source-aware AI → sign-off appended in code. `__testFollowupPicker` 13/13.
+- **Quota 3/mo (server-enforced).**
+- **Email-verification export gate (custom flag, all 5 stages live).**
+- **Post-signup onboarding card.**
 
 ## Data Model (current)
-clients → jobs → (quotes, followups, invoices); quotes/followups/invoices can also hang directly off a client. Invoices created from a quote via idempotent `create_invoice_from_quote` RPC. `invoices` has `pay_token` (unique), `stripe_checkout_session_id`, `stripe_payment_intent_id`, `paid_at` (stamped by PAY-C webhook **and** manual mark-paid), `archived_at` (nullable, indexed). `profiles` (PK = `user_id`) has quota RPCs, plan, business/branding fields, Stripe subscription fields, and Connect fields (`stripe_account_id`, `stripe_charges_enabled`, `stripe_details_submitted`, `stripe_payouts_enabled`, `stripe_connect_updated_at`).
+clients → jobs → (quotes, followups, invoices); quotes/followups/invoices can also hang directly off a client. Invoices created from a quote via idempotent `create_invoice_from_quote` RPC. `invoices` has `pay_token` (unique), `stripe_checkout_session_id`, `stripe_payment_intent_id`, `paid_at`, `archived_at` (nullable, indexed). `profiles` (PK = `user_id`) has quota RPCs (free cap now 3), plan, business/branding fields, Stripe subscription + Connect fields, and **`email_verified_by_us` / `verify_token` / `verify_token_expires_at`** (Jun 4). Onboarding writes to existing `first_name`/`last_name`/`company_name`/`phone`.
 
 ## Workflow preferences
-Small incremental sprints. Prompts in fenced blocks for Claude Code in VS Code, 4-section format (Manual setup → Changes → Self-tests → Test plan), explicit negative constraints, "X/X passed" before deploy, functions referenced by name. Migrations as a separate SQL block BEFORE code. Multi-phase manual procedures ONE step at a time. Push to a branch → Vercel Preview → verify → merge to main.
+Small incremental sprints. Prompts in fenced blocks for Claude Code in VS Code, 4-section format (Manual setup → Changes → Self-tests → Test plan), explicit negative constraints, "X/X passed" before deploy, functions referenced by name. Migrations as a separate SQL block BEFORE code. **Multi-phase manual procedures ONE step at a time — user gets confused by multi-step instructions, present exactly one action per message.** Push to a branch → Vercel Preview → verify → merge to main. (Reminder: features whose email/link points at production must be merged to PROD to test the link, not just Preview.)
 
 ## Open questions for next session
-- Run the sidebar fix in Claude Code; verify `__testSidebar()` 10/10 + eyeball pro sidebar; merge.
-- Embedded on-page card entry: schedule as its own sprint (Embedded Checkout).
+- **Build the Pro upgrade popup** (extend the existing $49/$490 toggle popup with a Free-vs-Pro comparison table; wire the 3-quote-cap "Generate again" to open it; confirm the final feature list first — which of invoicing/follow-ups/branding/bilingual are free vs Pro).
+- Then schedule the **free-tier enforcement sprint** (1 client max, no Jobs, no Get-Paid).
+- Confirm whether the prior **sidebar plan-card bug** is still present after this session's `updateUsageDisplay` changes.
+- Remove the "Draft" label (search first — confirm it's not a status badge).
 - Test the annual subscription path end-to-end.
-- Polish pass: orphan i18n keys (`toast.invoicePlaceholder`, `invoice.viewTitleHtml`, dead `followup.age`) + plural-topbar cosmetic.
-- Auto-link follow-up to job — even smaller now that the source picker exposes the quote/invoice id at compose time.
-- Delete `pay-b-preview`.
-- Working tree currently carries a large uncommitted stack (Payments dashboard real-data, invoice archive/delete + mobile, follow-up rebuild, sign-off-in-code, white-space + neutral-age polish). Decide whether to ship as one PR or split.
