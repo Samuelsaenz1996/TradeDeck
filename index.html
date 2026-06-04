@@ -69,6 +69,7 @@
     position: sticky;
     top: 0;
     height: 100vh;
+    height: 100dvh; /* dvh = the actually-visible viewport (excludes iOS Safari URL bar) */
     display: flex;
     flex-direction: column;
     overflow-y: auto;
@@ -1667,11 +1668,14 @@
       top: 0;
       left: 0;
       height: 100vh;
+      height: 100dvh; /* fixes iOS Safari URL bar clipping the bottom */
       width: min(280px, 80vw);
       z-index: 60;
       transform: translateX(-100%);
       transition: transform 0.22s ease;
       padding-top: 52px;
+      /* Reserve space for the iOS home indicator so the Upgrade button isn't covered. */
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
       overflow-y: auto;
     }
     .sidebar.open {
