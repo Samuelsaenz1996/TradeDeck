@@ -4002,6 +4002,20 @@
   </div>
 </div>
 
+<div id="verifyModalBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="verifyModalTitle">
+  <div class="modal-card">
+    <div class="modal-title" id="verifyModalTitle" data-i18n="verify.modal.title">Confirm your email to send &amp; download</div>
+    <div class="modal-body">
+      <p data-i18n="verify.modal.body">To download or send quotes, invoices, and follow-ups, please confirm your email address. We'll send you a link.</p>
+    </div>
+    <div class="modal-actions" style="flex-wrap:wrap;">
+      <button id="verifyModalCancelBtn" type="button" class="modal-btn modal-btn-cancel" data-i18n="modal.cancel">Cancel</button>
+      <button id="verifyModalRefreshBtn" type="button" class="modal-btn modal-btn-cancel" data-i18n="verify.modal.refresh">I've confirmed — refresh</button>
+      <button id="verifyModalResendBtn" type="button" class="modal-btn modal-btn-primary" data-i18n="verify.modal.resend">Send me the link</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = "https://cqmctdhxticryelvhhze.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_YOWddbCqAPdFrg-9otLSzw_akBdoAPh";
@@ -4687,6 +4701,15 @@ const I18N = {
     'onboarding.finishLater': 'Finish later',
     'onboarding.save': 'Save and continue',
     'onboarding.firstNameRequired': 'Please enter your first name.',
+    // Email verification modal
+    'verify.modal.title': 'Confirm your email to send & download',
+    'verify.modal.body': "To download or send quotes, invoices, and follow-ups, please confirm your email address. We'll send you a link.",
+    'verify.modal.resend': 'Send me the link',
+    'verify.modal.refresh': "I've confirmed — refresh",
+    'verify.modal.sent': 'Check your email for the confirmation link.',
+    'verify.modal.sendError': "Couldn't send the email. Please try again.",
+    'verify.modal.nowVerified': "You're verified — you can send and download now.",
+    'verify.modal.stillNot': 'Not verified yet — check the link in your email.',
     'archive.confirm.body': 'You can unarchive it later from the Archived tab.',
     'archive.confirm.client.title': 'Archive this client?',
     'archive.confirm.job.title': 'Archive this job?',
@@ -5470,6 +5493,15 @@ const I18N = {
     'onboarding.finishLater': 'Terminar después',
     'onboarding.save': 'Guardar y continuar',
     'onboarding.firstNameRequired': 'Ingresa tu nombre.',
+    // Email verification modal
+    'verify.modal.title': 'Confirma tu correo para enviar y descargar',
+    'verify.modal.body': 'Para descargar o enviar cotizaciones, facturas y seguimientos, confirma tu correo electrónico. Te enviaremos un enlace.',
+    'verify.modal.resend': 'Enviar el enlace',
+    'verify.modal.refresh': 'Ya confirmé — actualizar',
+    'verify.modal.sent': 'Revisa tu correo para encontrar el enlace de confirmación.',
+    'verify.modal.sendError': 'No se pudo enviar el correo. Inténtalo de nuevo.',
+    'verify.modal.nowVerified': 'Listo, ya estás verificado — ahora puedes enviar y descargar.',
+    'verify.modal.stillNot': 'Aún sin verificar — revisa el enlace en tu correo.',
     'archive.confirm.body': 'Puedes desarchivarlo más tarde desde la pestaña Archivados.',
     'archive.confirm.client.title': '¿Archivar este cliente?',
     'archive.confirm.job.title': '¿Archivar este trabajo?',
@@ -8312,6 +8344,7 @@ function renderFollowupMessage(data) {
 }
 
 function copyFollowupMessage() {
+  if (!requireVerifiedEmail()) return;
   const subject = document.getElementById('followupSubject').textContent.trim();
   const body = document.getElementById('followupBody').textContent.trim();
   const subjectLabel = t('followup.subject');
@@ -8342,6 +8375,7 @@ function followupClientContact() {
 }
 
 function sendFollowupMessage() {
+  if (!requireVerifiedEmail()) return;
   const subject = (document.getElementById('followupSubject').textContent || '').trim();
   const body = (document.getElementById('followupBody').textContent || '').trim();
   const contact = followupClientContact();
@@ -8745,6 +8779,73 @@ window.__testOnboarding = function () {
   const passed = results.filter(r => r.pass).length;
   results.forEach(r => console.log((r.pass ? 'PASS' : 'FAIL') + ' — ' + r.name));
   console.log(`__testOnboarding: ${passed}/${results.length} passed`);
+  return passed === results.length;
+};
+
+// Export-gate harness. Non-destructive: saves/restores profileCache and ensures
+// the verify modal is closed at the end. Stubs openVerifyModal during the
+// "should block" path so the modal doesn't get left open mid-test.
+window.__testExportGate = function () {
+  const results = [];
+  const assert = (name, cond) => results.push({ name, pass: !!cond });
+
+  const savedProfile = profileCache;
+  const realOpen = openVerifyModal;
+  let opened = 0;
+  openVerifyModal = function () { opened++; };
+
+  try {
+    // 1) Unverified free user → blocked + would open the modal
+    opened = 0;
+    profileCache = { plan: 'free', email_verified_by_us: false };
+    const r1 = requireVerifiedEmail();
+    assert('unverified free: requireVerifiedEmail returns false', r1 === false);
+    assert('unverified free: would open the modal', opened === 1);
+
+    // 2) Verified free user → allowed
+    opened = 0;
+    profileCache = { plan: 'free', email_verified_by_us: true };
+    const r2 = requireVerifiedEmail();
+    assert('verified free: returns true', r2 === true);
+    assert('verified free: modal not opened', opened === 0);
+
+    // 3) Pro (or Team) user, unverified → allowed (Pro bypass)
+    opened = 0;
+    profileCache = { plan: 'pro', email_verified_by_us: false };
+    const r3 = requireVerifiedEmail();
+    assert('pro/unverified: returns true (Pro bypass)', r3 === true);
+    assert('pro/unverified: modal not opened', opened === 0);
+
+    // 4) profileCache null → defensive allow
+    opened = 0;
+    profileCache = null;
+    const r4 = requireVerifiedEmail();
+    assert('null profileCache: returns true (defensive)', r4 === true);
+    assert('null profileCache: modal not opened', opened === 0);
+
+    // 5) Each of the 8 export functions begins with the guard call
+    const fns = [
+      ['downloadPdf', downloadPdf],
+      ['sendQuoteEmail', sendQuoteEmail],
+      ['sendQuoteText', sendQuoteText],
+      ['downloadInvoicePdf', downloadInvoicePdf],
+      ['sendInvoiceEmail', sendInvoiceEmail],
+      ['sendInvoiceText', sendInvoiceText],
+      ['copyFollowupMessage', copyFollowupMessage],
+      ['sendFollowupMessage', sendFollowupMessage],
+    ];
+    fns.forEach(([name, fn]) => {
+      const src = fn.toString();
+      assert(name + ' has requireVerifiedEmail guard', src.indexOf('requireVerifiedEmail()') !== -1);
+    });
+  } finally {
+    openVerifyModal = realOpen;
+    profileCache = savedProfile;
+  }
+
+  const passed = results.filter(r => r.pass).length;
+  results.forEach(r => console.log((r.pass ? 'PASS' : 'FAIL') + ' — ' + r.name));
+  console.log(`__testExportGate: ${passed}/${results.length} passed`);
   return passed === results.length;
 };
 
@@ -9762,6 +9863,7 @@ function triggerBlobDownload(blob, filename) {
 }
 
 async function downloadPdf() {
+  if (!requireVerifiedEmail()) return;
   showToast(t('toast.pdfGenerating'));
   const blob = await generateQuotePdfBlob();
   if (!blob) {
@@ -9773,6 +9875,7 @@ async function downloadPdf() {
 }
 
 async function sendQuoteEmail() {
+  if (!requireVerifiedEmail()) return;
   showToast(t('toast.pdfGenerating'));
   const blob = await generateQuotePdfBlob();
   if (!blob) {
@@ -9820,6 +9923,7 @@ async function sendQuoteEmail() {
 }
 
 async function sendQuoteText() {
+  if (!requireVerifiedEmail()) return;
   showToast(t('toast.pdfGenerating'));
   const blob = await generateQuotePdfBlob();
   if (!blob) {
@@ -10371,6 +10475,7 @@ function buildInvoicePdfFilename() {
 }
 
 async function downloadInvoicePdf() {
+  if (!requireVerifiedEmail()) return;
   showToast(t('toast.pdfGenerating'));
   const blob = await generateInvoicePdfBlob();
   if (!blob) { showToast(t('toast.pdfFailed'), true); return; }
@@ -10379,6 +10484,7 @@ async function downloadInvoicePdf() {
 }
 
 async function sendInvoiceEmail() {
+  if (!requireVerifiedEmail()) return;
   showToast(t('toast.pdfGenerating'));
   const blob = await generateInvoicePdfBlob();
   if (!blob) { showToast(t('toast.pdfFailed'), true); return; }
@@ -10404,6 +10510,7 @@ async function sendInvoiceEmail() {
 }
 
 async function sendInvoiceText() {
+  if (!requireVerifiedEmail()) return;
   showToast(t('toast.pdfGenerating'));
   const blob = await generateInvoicePdfBlob();
   if (!blob) { showToast(t('toast.pdfFailed'), true); return; }
@@ -11857,6 +11964,113 @@ function maybeShowOnboarding() {
     if (laterBtn) laterBtn.onclick = closeOnboardingModal;
     if (saveBtn) saveBtn.onclick = saveOnboardingHandler;
     backdrop.onclick = (e) => { if (e.target === backdrop) closeOnboardingModal(); };
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ready);
+  } else {
+    ready();
+  }
+})();
+
+// ============================================================================
+// Export gate — block download/send/copy for unverified free users.
+// Pro/Team always pass. Defensive allow if profileCache hasn't loaded yet
+// (bypass/dev session has profileCache === null and is localhost-only).
+// ============================================================================
+function requireVerifiedEmail() {
+  if (!profileCache) return true;
+  if (profileCache.plan && profileCache.plan !== 'free') return true;
+  if (profileCache.email_verified_by_us === true) return true;
+  openVerifyModal();
+  return false;
+}
+
+function openVerifyModal() {
+  const backdrop = document.getElementById('verifyModalBackdrop');
+  if (!backdrop) return;
+  backdrop.classList.remove('hidden');
+  requestAnimationFrame(() => backdrop.classList.add('visible'));
+}
+
+function closeVerifyModal() {
+  const backdrop = document.getElementById('verifyModalBackdrop');
+  if (!backdrop) return;
+  backdrop.classList.remove('visible');
+  setTimeout(() => backdrop.classList.add('hidden'), 130);
+}
+
+async function verifyModalResendHandler() {
+  const btn = document.getElementById('verifyModalResendBtn');
+  if (btn) btn.disabled = true;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session || !session.access_token) {
+      showToast(t('verify.modal.sendError'), true);
+      return;
+    }
+    const resp = await fetch('/api/verify/send', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + session.access_token },
+    });
+    if (!resp.ok) {
+      console.warn('verify/send failed:', resp.status);
+      showToast(t('verify.modal.sendError'), true);
+      return;
+    }
+    // alreadyVerified is a success shape — close the modal silently if so.
+    const data = await resp.json().catch(() => ({}));
+    if (data && data.alreadyVerified) {
+      // Re-sync cache and close.
+      try { await loadProfileCache(); updateUsageDisplay(); } catch (e) {}
+      closeVerifyModal();
+      showToast(t('verify.modal.nowVerified'));
+      return;
+    }
+    showToast(t('verify.modal.sent'));
+    closeVerifyModal();
+  } catch (e) {
+    console.warn('verify/send threw:', e);
+    showToast(t('verify.modal.sendError'), true);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function verifyModalRefreshHandler() {
+  const btn = document.getElementById('verifyModalRefreshBtn');
+  if (btn) btn.disabled = true;
+  try {
+    await loadProfileCache();
+    if (typeof updateUsageDisplay === 'function') updateUsageDisplay();
+    const verified = profileCache && (
+      (profileCache.plan && profileCache.plan !== 'free') ||
+      profileCache.email_verified_by_us === true
+    );
+    if (verified) {
+      closeVerifyModal();
+      showToast(t('verify.modal.nowVerified'));
+    } else {
+      showToast(t('verify.modal.stillNot'), true);
+    }
+  } catch (e) {
+    console.warn('verify refresh threw:', e);
+    showToast(t('verify.modal.stillNot'), true);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+(function bindVerifyModal() {
+  const ready = () => {
+    const backdrop = document.getElementById('verifyModalBackdrop');
+    if (!backdrop) return;
+    const cancelBtn = document.getElementById('verifyModalCancelBtn');
+    const resendBtn = document.getElementById('verifyModalResendBtn');
+    const refreshBtn = document.getElementById('verifyModalRefreshBtn');
+    if (cancelBtn) cancelBtn.onclick = closeVerifyModal;
+    if (resendBtn) resendBtn.onclick = verifyModalResendHandler;
+    if (refreshBtn) refreshBtn.onclick = verifyModalRefreshHandler;
+    backdrop.onclick = (e) => { if (e.target === backdrop) closeVerifyModal(); };
   };
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', ready);
