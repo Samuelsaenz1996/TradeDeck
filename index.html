@@ -284,6 +284,30 @@
      and overflow-y:auto on .sidebar never sees a reason to scroll. */
   .sidebar > * { flex-shrink: 0; }
   .sidebar-bottom { margin-top: auto; }
+  .verify-reminder {
+    font-size: 12px;
+    color: var(--ink-3);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    line-height: 1.45;
+  }
+  .verify-reminder-action {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-left: 4px;
+    color: var(--ink);
+    font-weight: 500;
+    font-size: 12px;
+    text-decoration: underline;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .verify-reminder-action:hover { color: var(--accent); }
+  .verify-reminder-action:disabled { opacity: 0.5; cursor: default; }
   .usage-card {
     background: var(--surface);
     border: 1px solid var(--line);
@@ -2018,6 +2042,10 @@
     </div>
 
     <div class="sidebar-bottom">
+      <div id="verifyReminder" class="verify-reminder hidden">
+        <span data-i18n="verify.sidebar.text">Confirm your email to send &amp; download</span>
+        <button id="verifyReminderAction" type="button" class="verify-reminder-action" data-i18n="verify.sidebar.action">Send link</button>
+      </div>
       <div class="usage-card">
         <div class="usage-label" data-i18n="sidebar.freePlan">Free Plan</div>
         <div class="usage-count"><span id="quoteUsed">0</span><span data-i18n="sidebar.quotesSuffix"> / 3 quotes</span></div>
@@ -4710,6 +4738,9 @@ const I18N = {
     'verify.modal.sendError': "Couldn't send the email. Please try again.",
     'verify.modal.nowVerified': "You're verified — you can send and download now.",
     'verify.modal.stillNot': 'Not verified yet — check the link in your email.',
+    'verify.sidebar.text': 'Confirm your email to send & download',
+    'verify.sidebar.action': 'Send link',
+    'verify.signup.nudge': 'Tip: confirm your email to unlock sending & downloading your quotes.',
     'archive.confirm.body': 'You can unarchive it later from the Archived tab.',
     'archive.confirm.client.title': 'Archive this client?',
     'archive.confirm.job.title': 'Archive this job?',
@@ -5502,6 +5533,9 @@ const I18N = {
     'verify.modal.sendError': 'No se pudo enviar el correo. Inténtalo de nuevo.',
     'verify.modal.nowVerified': 'Listo, ya estás verificado — ahora puedes enviar y descargar.',
     'verify.modal.stillNot': 'Aún sin verificar — revisa el enlace en tu correo.',
+    'verify.sidebar.text': 'Confirma tu correo para enviar y descargar',
+    'verify.sidebar.action': 'Enviar enlace',
+    'verify.signup.nudge': 'Consejo: confirma tu correo para poder enviar y descargar tus cotizaciones.',
     'archive.confirm.body': 'Puedes desarchivarlo más tarde desde la pestaña Archivados.',
     'archive.confirm.client.title': '¿Archivar este cliente?',
     'archive.confirm.job.title': '¿Archivar este trabajo?',
@@ -8619,6 +8653,7 @@ function updateRoofingSubtotal() {
 }
 
 function updateUsageDisplay() {
+  if (typeof refreshVerifyReminder === 'function') refreshVerifyReminder();
   const labelEl = document.querySelector('.usage-label');
   const suffixEl = document.querySelector('#quoteUsed + span');
   const upgradeBtn = document.getElementById('upgradeBtn');
@@ -8846,6 +8881,41 @@ window.__testExportGate = function () {
   const passed = results.filter(r => r.pass).length;
   results.forEach(r => console.log((r.pass ? 'PASS' : 'FAIL') + ' — ' + r.name));
   console.log(`__testExportGate: ${passed}/${results.length} passed`);
+  return passed === results.length;
+};
+
+// Verify-polish harness — sidebar reminder visibility only. Non-destructive.
+window.__testVerifyPolish = function () {
+  const results = [];
+  const assert = (name, cond) => results.push({ name, pass: !!cond });
+
+  const savedProfile = profileCache;
+  const el = document.getElementById('verifyReminder');
+
+  try {
+    profileCache = { plan: 'free', email_verified_by_us: false };
+    refreshVerifyReminder();
+    assert('unverified free: reminder shown', el && !el.classList.contains('hidden'));
+
+    profileCache = { plan: 'free', email_verified_by_us: true };
+    refreshVerifyReminder();
+    assert('verified free: reminder hidden', el && el.classList.contains('hidden'));
+
+    profileCache = { plan: 'pro', email_verified_by_us: false };
+    refreshVerifyReminder();
+    assert('pro unverified: reminder hidden (Pro bypass)', el && el.classList.contains('hidden'));
+
+    profileCache = null;
+    refreshVerifyReminder();
+    assert('null profileCache: reminder hidden', el && el.classList.contains('hidden'));
+  } finally {
+    profileCache = savedProfile;
+    refreshVerifyReminder();
+  }
+
+  const passed = results.filter(r => r.pass).length;
+  results.forEach(r => console.log((r.pass ? 'PASS' : 'FAIL') + ' — ' + r.name));
+  console.log(`__testVerifyPolish: ${passed}/${results.length} passed`);
   return passed === results.length;
 };
 
@@ -11999,8 +12069,10 @@ function closeVerifyModal() {
   setTimeout(() => backdrop.classList.add('hidden'), 130);
 }
 
-async function verifyModalResendHandler() {
-  const btn = document.getElementById('verifyModalResendBtn');
+// Shared resend used by BOTH the verify modal's primary button and the
+// sidebar reminder's "Send link" action. One code path, one set of toasts.
+// `btn` (optional) is disabled while the request is in flight.
+async function sendVerificationLink(btn) {
   if (btn) btn.disabled = true;
   try {
     const { data: { session } } = await sb.auth.getSession();
@@ -12017,13 +12089,11 @@ async function verifyModalResendHandler() {
       showToast(t('verify.modal.sendError'), true);
       return;
     }
-    // alreadyVerified is a success shape — close the modal silently if so.
     const data = await resp.json().catch(() => ({}));
     if (data && data.alreadyVerified) {
-      // Re-sync cache and close.
       try { await loadProfileCache(); updateUsageDisplay(); } catch (e) {}
-      closeVerifyModal();
       showToast(t('verify.modal.nowVerified'));
+      closeVerifyModal();
       return;
     }
     showToast(t('verify.modal.sent'));
@@ -12034,6 +12104,21 @@ async function verifyModalResendHandler() {
   } finally {
     if (btn) btn.disabled = false;
   }
+}
+
+async function verifyModalResendHandler() {
+  await sendVerificationLink(document.getElementById('verifyModalResendBtn'));
+}
+
+// Sidebar reminder: visible only for unverified free users with a loaded
+// profile. Hidden for Pro/Team, verified accounts, and bypass/dev sessions.
+function refreshVerifyReminder() {
+  const el = document.getElementById('verifyReminder');
+  if (!el) return;
+  if (!profileCache) { el.classList.add('hidden'); return; }
+  const isPro = !!(profileCache.plan && profileCache.plan !== 'free');
+  const isVerified = profileCache.email_verified_by_us === true;
+  el.classList.toggle('hidden', isPro || isVerified);
 }
 
 async function verifyModalRefreshHandler() {
@@ -12071,6 +12156,8 @@ async function verifyModalRefreshHandler() {
     if (resendBtn) resendBtn.onclick = verifyModalResendHandler;
     if (refreshBtn) refreshBtn.onclick = verifyModalRefreshHandler;
     backdrop.onclick = (e) => { if (e.target === backdrop) closeVerifyModal(); };
+    const reminderBtn = document.getElementById('verifyReminderAction');
+    if (reminderBtn) reminderBtn.onclick = () => sendVerificationLink(reminderBtn);
   };
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', ready);
@@ -13702,6 +13789,7 @@ async function handleSignUp() {
     if (error) throw error;
     if (data && data.session) {
       authStatus(t('auth.signup.success'), false);
+      showToast(t('verify.signup.nudge'));
     } else {
       authStatus(t('auth.signup.checkEmail'), false);
     }
