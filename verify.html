@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Verify email — MyTradeDeck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600&display=swap" />
+  <style>
+    :root {
+      --bg: #FAF7F2;
+      --surface: #FFFFFF;
+      --ink: #1A1F2E;
+      --ink-2: #4A5160;
+      --ink-3: #8A8F9C;
+      --line: #E6DFD2;
+      --good: #2F7A4D;
+      --bad: #B33A2A;
+      --warn: #B8731F;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 4px 14px rgba(26,31,46,0.06), 0 2px 4px rgba(26,31,46,0.03);
+      padding: 32px 28px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+    }
+    .brand {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 600;
+      font-size: 20px;
+      color: var(--ink);
+      margin-bottom: 22px;
+      letter-spacing: -0.01em;
+    }
+    .mark {
+      font-size: 44px;
+      line-height: 1;
+      margin-bottom: 14px;
+    }
+    h1 {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 600;
+      font-size: 22px;
+      color: var(--ink);
+      margin: 0 0 10px;
+      line-height: 1.25;
+    }
+    p {
+      font-size: 14.5px;
+      color: var(--ink-2);
+      line-height: 1.55;
+      margin: 0 0 22px;
+    }
+    .btn {
+      display: inline-block;
+      background: var(--ink);
+      color: #fff;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 11px 22px;
+      border-radius: 8px;
+      transition: filter 0.15s;
+    }
+    .btn:hover { filter: brightness(1.1); }
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--line);
+      border-top-color: var(--ink);
+      border-radius: 50%;
+      margin: 4px auto 14px;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .hidden { display: none !important; }
+    .mark.good { color: var(--good); }
+    .mark.bad  { color: var(--bad); }
+    .mark.warn { color: var(--warn); }
+    @media (max-width: 480px) {
+      .card { padding: 26px 20px; }
+      h1 { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card" role="status" aria-live="polite">
+    <div class="brand">MyTradeDeck</div>
+
+    <div id="state-loading">
+      <div class="spinner" aria-hidden="true"></div>
+      <h1 data-key="loading.title">Confirming…</h1>
+      <p data-key="loading.body">Just a moment.</p>
+    </div>
+
+    <div id="state-success" class="hidden">
+      <div class="mark good" aria-hidden="true">✓</div>
+      <h1 data-key="success.title">Email confirmed!</h1>
+      <p data-key="success.body">You can now download and send your quotes, invoices, and follow-ups.</p>
+      <a class="btn" href="/" data-key="back">Back to MyTradeDeck</a>
+    </div>
+
+    <div id="state-expired" class="hidden">
+      <div class="mark warn" aria-hidden="true">⏳</div>
+      <h1 data-key="expired.title">This link expired</h1>
+      <p data-key="expired.body">Verification links last 24 hours. Sign in and request a new one.</p>
+      <a class="btn" href="/" data-key="back">Back to MyTradeDeck</a>
+    </div>
+
+    <div id="state-invalid" class="hidden">
+      <div class="mark warn" aria-hidden="true">↺</div>
+      <h1 data-key="invalid.title">Link not valid</h1>
+      <p data-key="invalid.body">This link may have already been used. If you already confirmed, you're all set.</p>
+      <a class="btn" href="/" data-key="back">Back to MyTradeDeck</a>
+    </div>
+
+    <div id="state-error" class="hidden">
+      <div class="mark bad" aria-hidden="true">!</div>
+      <h1 data-key="error.title">Something went wrong</h1>
+      <p data-key="error.body">Please try the link again, or sign in and request a new one.</p>
+      <a class="btn" href="/" data-key="back">Back to MyTradeDeck</a>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var COPY = {
+        en: {
+          'loading.title': 'Confirming…',
+          'loading.body':  'Just a moment.',
+          'success.title': 'Email confirmed!',
+          'success.body':  'You can now download and send your quotes, invoices, and follow-ups.',
+          'expired.title': 'This link expired',
+          'expired.body':  'Verification links last 24 hours. Sign in and request a new one.',
+          'invalid.title': 'Link not valid',
+          'invalid.body':  "This link may have already been used. If you already confirmed, you're all set.",
+          'error.title':   'Something went wrong',
+          'error.body':    'Please try the link again, or sign in and request a new one.',
+          'back':          'Back to MyTradeDeck',
+        },
+        es: {
+          'loading.title': 'Confirmando…',
+          'loading.body':  'Un momento.',
+          'success.title': '¡Correo confirmado!',
+          'success.body':  'Ya puedes descargar y enviar tus cotizaciones, facturas y seguimientos.',
+          'expired.title': 'Este enlace expiró',
+          'expired.body':  'Los enlaces de verificación duran 24 horas. Inicia sesión y solicita uno nuevo.',
+          'invalid.title': 'Enlace no válido',
+          'invalid.body':  'Es posible que este enlace ya se haya usado. Si ya confirmaste, todo está listo.',
+          'error.title':   'Algo salió mal',
+          'error.body':    'Intenta el enlace otra vez, o inicia sesión y solicita uno nuevo.',
+          'back':          'Volver a MyTradeDeck',
+        }
+      };
+
+      var lang = 'en';
+      try {
+        var stored = localStorage.getItem('tdLang');
+        if (stored === 'es') lang = 'es';
+      } catch (e) {}
+      document.documentElement.setAttribute('lang', lang);
+      var dict = COPY[lang];
+
+      document.querySelectorAll('[data-key]').forEach(function (el) {
+        var k = el.getAttribute('data-key');
+        if (dict[k] != null) el.textContent = dict[k];
+      });
+
+      function show(stateId) {
+        ['state-loading','state-success','state-expired','state-invalid','state-error'].forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el) el.classList.toggle('hidden', id !== stateId);
+        });
+      }
+
+      var token = null;
+      try { token = new URLSearchParams(location.search).get('token'); } catch (e) {}
+
+      if (!token) { show('state-invalid'); return; }
+
+      show('state-loading');
+
+      fetch('/api/verify/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: token }),
+      })
+        .then(function (r) { return r.json().then(function (data) { return { status: r.status, data: data || {} }; }); })
+        .then(function (res) {
+          var data = res.data;
+          if (data && data.verified) { show('state-success'); return; }
+          if (data && data.error === 'expired_token') { show('state-expired'); return; }
+          if (data && data.error === 'invalid_token') { show('state-invalid'); return; }
+          if (data && data.error === 'missing_token') { show('state-invalid'); return; }
+          show('state-error');
+        })
+        .catch(function (err) {
+          console.warn('verify confirm failed:', err);
+          show('state-error');
+        });
+    })();
+  </script>
+</body>
+</html>
