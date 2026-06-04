@@ -2016,7 +2016,7 @@
     <div class="sidebar-bottom">
       <div class="usage-card">
         <div class="usage-label" data-i18n="sidebar.freePlan">Free Plan</div>
-        <div class="usage-count"><span id="quoteUsed">0</span><span data-i18n="sidebar.quotesSuffix"> / 5 quotes</span></div>
+        <div class="usage-count"><span id="quoteUsed">0</span><span data-i18n="sidebar.quotesSuffix"> / 3 quotes</span></div>
         <div class="usage-bar"><div class="usage-bar-fill" id="usageBar" style="width: 0%"></div></div>
       </div>
       <button class="upgrade-btn" id="upgradeBtn">
@@ -3989,7 +3989,7 @@ const I18N = {
     'nav.profile': 'Profile',
     'nav.settings': 'Settings',
     'sidebar.freePlan': 'Free Plan',
-    'sidebar.quotesSuffix': ' / 5 quotes',
+    'sidebar.quotesSuffix': ' / 3 quotes',
     'sidebar.upgrade': 'Upgrade to Pro',
     'sidebar.upgradeSub': '$49/month · unlimited',
     'sidebar.upgradeAlert': 'Stripe checkout coming soon. For now, this is a placeholder.',
@@ -4761,7 +4761,7 @@ const I18N = {
     'nav.profile': 'Perfil',
     'nav.settings': 'Configuración',
     'sidebar.freePlan': 'Plan Gratis',
-    'sidebar.quotesSuffix': ' / 5 cotizaciones',
+    'sidebar.quotesSuffix': ' / 3 cotizaciones',
     'sidebar.upgrade': 'Mejorar a Pro',
     'sidebar.upgradeSub': '$49/mes · ilimitado',
     'sidebar.upgradeAlert': 'Próximamente checkout con Stripe. Por ahora es un marcador.',
@@ -8544,7 +8544,7 @@ function updateUsageDisplay() {
   if (suffixEl) { suffixEl.setAttribute('data-i18n', 'sidebar.quotesSuffix'); suffixEl.textContent = t('sidebar.quotesSuffix'); }
   if (upgradeBtn) upgradeBtn.classList.remove('hidden');
   document.getElementById('quoteUsed').textContent = quoteUsed;
-  const pct = Math.min(100, (quoteUsed / 5) * 100);
+  const pct = Math.min(100, (quoteUsed / 3) * 100);
   document.getElementById('usageBar').style.width = pct + '%';
 }
 
@@ -8570,7 +8570,7 @@ window.__testSidebar = function () {
   profileCache = { plan: 'pro' };
   updateUsageDisplay();
   assert('pro: quoteUsed shows Unlimited', usedEl.textContent === t('sidebar.unlimited'));
-  assert('pro: suffix is empty (no "/ 5 quotes")', suffixEl && suffixEl.textContent === '');
+  assert('pro: suffix is empty (no "/ 3 quotes")', suffixEl && suffixEl.textContent === '');
   assert('pro: label reads Pro plan', labelEl && labelEl.textContent === t('profile.plan.proName'));
   assert('pro: upgrade button hidden', upgradeBtn && upgradeBtn.classList.contains('hidden'));
 
@@ -10768,7 +10768,7 @@ async function consumeQuotaOrShowError() {
     }
   }
   // Bypass user: localStorage enforces (legacy path, preserved on purpose)
-  if (quoteUsed >= 5) {
+  if (quoteUsed >= 3) {
     showToast(t('toast.freeLimit'), true);
     return false;
   }
@@ -11519,7 +11519,7 @@ async function loadProfileData(opts) {
     } else {
       const { data: status } = await sb.rpc('get_quote_status');
       const used = (status && typeof status.quotes_used === 'number') ? status.quotes_used : 0;
-      const limit = (status && typeof status.limit === 'number') ? status.limit : 5;
+      const limit = (status && typeof status.limit === 'number') ? status.limit : 3;
       const pct = Math.min(100, Math.round((used / limit) * 100));
       if (progressFill) {
         progressFill.style.width = pct + '%';
