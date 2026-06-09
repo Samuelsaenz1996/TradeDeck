@@ -2858,14 +2858,14 @@
           </div>
 
           <div id="gutterPanel" class="trucking-panel hidden">
-            <div class="pricing-substruct-toggle" id="gutterSubstructToggle"
+            <div class="pricing-substruct-toggle" id="guttersSubstructToggle"
                  role="group" aria-label="Pricing structure">
               <button data-substruct="per-unit" class="active" type="button"
                       data-i18n="substruct.perUnit">Per-unit</button>
               <button data-substruct="flat-rate" type="button"
                       data-i18n="substruct.flat">Flat rate</button>
             </div>
-            <div class="per-unit-fields" id="gutterPerUnitFields">
+            <div class="per-unit-fields" id="guttersPerUnitFields">
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="gutter.linearFt">Linear feet</label>
@@ -2926,23 +2926,23 @@
                 <span class="trucking-subtotal-amt" id="gutterSubtotal">$0.00</span>
               </div>
             </div>
-            <div class="flat-rate-fields hidden" id="gutterFlatRateFields">
+            <div class="flat-rate-fields hidden" id="guttersFlatRateFields">
               <div class="field-row cols-3">
                 <div>
                   <label class="label" data-i18n="flat.quantity">Quantity</label>
-                  <input type="number" class="input" id="gutterFlatQty" placeholder="0" min="0" step="0.1" />
+                  <input type="number" class="input" id="guttersFlatQty" placeholder="0" min="0" step="0.1" />
                 </div>
                 <div>
                   <label class="label" data-i18n="flat.unit">Unit</label>
-                  <select class="select" id="gutterFlatUnit">
+                  <select class="select" id="guttersFlatUnit">
                     <option value="linft">Linear ft</option>
                     <option value="sections">Sections</option>
                     <option value="custom">Custom...</option>
                   </select>
                 </div>
                 <div>
-                  <label class="label" data-i18n="flat.customUnit" id="gutterFlatCustomUnitLabel">Custom unit</label>
-                  <input type="text" class="input hidden" id="gutterFlatCustomUnit"
+                  <label class="label" data-i18n="flat.customUnit" id="guttersFlatCustomUnitLabel">Custom unit</label>
+                  <input type="text" class="input hidden" id="guttersFlatCustomUnit"
                          data-i18n-placeholder="flat.customUnitPlaceholder"
                          placeholder="e.g. buckets, runs, pieces" />
                 </div>
@@ -2950,16 +2950,16 @@
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
-                  <input type="number" class="input" id="gutterFlatMaterial" placeholder="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="guttersFlatMaterial" placeholder="0" min="0" step="0.01" />
                 </div>
                 <div>
                   <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
-                  <input type="number" class="input" id="gutterFlatRate" placeholder="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="guttersFlatRate" placeholder="0" min="0" step="0.01" />
                 </div>
               </div>
               <div class="trucking-subtotal">
                 <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
-                <span class="trucking-subtotal-amt" id="gutterFlatSubtotal">$0.00</span>
+                <span class="trucking-subtotal-amt" id="guttersFlatSubtotal">$0.00</span>
               </div>
             </div>
           </div>
@@ -7872,7 +7872,7 @@ const PRICING_INPUTS_BY_MODE = {
   painting:  ['paintArea','paintCoats','paintRate','paintCost','paintPrep','paintTrim','paintingFlatQty','paintingFlatUnit','paintingFlatCustomUnit','paintingFlatMaterial','paintingFlatRate'],
   flooring:  ['floorArea','floorMaterialType','floorMaterialRate','floorInstallRate','floorWasteFactor','floorTearOut','floorSubfloorPrep','floorTransitions','flooringFlatQty','flooringFlatUnit','flooringFlatCustomUnit','flooringFlatMaterial','flooringFlatRate'],
   roofing:   ['roofSquares','roofMaterialType','roofMaterialRate','roofLaborRate','roofTearOffRate','roofDisposal','roofAccessories','roofingFlatQty','roofingFlatUnit','roofingFlatCustomUnit','roofingFlatMaterial','roofingFlatRate'],
-  gutters:   ['gutterLinearFt','gutterRate','gutterMaterial','gutterStyle','gutterDownspoutCount','gutterDownspoutRate','gutterGuardFt','gutterGuardRate','gutterDisposal','gutterFlatQty','gutterFlatUnit','gutterFlatCustomUnit','gutterFlatMaterial','gutterFlatRate'],
+  gutters:   ['gutterLinearFt','gutterRate','gutterMaterial','gutterStyle','gutterDownspoutCount','gutterDownspoutRate','gutterGuardFt','gutterGuardRate','gutterDisposal','guttersFlatQty','guttersFlatUnit','guttersFlatCustomUnit','guttersFlatMaterial','guttersFlatRate'],
   siding:    ['sidingArea','sidingMaterial','sidingMaterialRate','sidingInstallRate','sidingWasteFactor','sidingTearOff','sidingTrim','sidingFlatQty','sidingFlatUnit','sidingFlatCustomUnit','sidingFlatMaterial','sidingFlatRate'],
   framing:   ['framingArea','framingRate','framingLumber'],
   // Per-row Windows fields (count/type/frameMaterial/installType/unitCost/laborPerWindow)
@@ -7899,7 +7899,7 @@ const PRICING_DEFAULTS = {
   painting:  { paintArea: '', paintCoats: '2', paintRate: '', paintCost: '', paintPrep: '', paintTrim: '', paintingFlatQty: '', paintingFlatUnit: 'sqft', paintingFlatCustomUnit: '', paintingFlatMaterial: '', paintingFlatRate: '' },
   flooring:  { floorArea: '', floorMaterialType: 'Laminate', floorMaterialRate: '', floorInstallRate: '', floorWasteFactor: '', floorTearOut: '', floorSubfloorPrep: '', floorTransitions: '', flooringFlatQty: '', flooringFlatUnit: 'sqft', flooringFlatCustomUnit: '', flooringFlatMaterial: '', flooringFlatRate: '' },
   roofing:   { roofSquares: '', roofMaterialType: 'Asphalt shingles', roofMaterialRate: '', roofLaborRate: '', roofTearOffRate: '', roofDisposal: '', roofAccessories: '', roofingFlatQty: '', roofingFlatUnit: 'squares', roofingFlatCustomUnit: '', roofingFlatMaterial: '', roofingFlatRate: '' },
-  gutters:   { gutterLinearFt: '', gutterRate: '', gutterMaterial: 'Aluminum', gutterStyle: 'K-style', gutterDownspoutCount: '', gutterDownspoutRate: '', gutterGuardFt: '', gutterGuardRate: '', gutterDisposal: '', gutterFlatQty: '', gutterFlatUnit: 'linft', gutterFlatCustomUnit: '', gutterFlatMaterial: '', gutterFlatRate: '' },
+  gutters:   { gutterLinearFt: '', gutterRate: '', gutterMaterial: 'Aluminum', gutterStyle: 'K-style', gutterDownspoutCount: '', gutterDownspoutRate: '', gutterGuardFt: '', gutterGuardRate: '', gutterDisposal: '', guttersFlatQty: '', guttersFlatUnit: 'linft', guttersFlatCustomUnit: '', guttersFlatMaterial: '', guttersFlatRate: '' },
   siding:    { sidingArea: '', sidingMaterial: 'Vinyl', sidingMaterialRate: '', sidingInstallRate: '', sidingWasteFactor: '', sidingTearOff: '', sidingTrim: '', sidingFlatQty: '', sidingFlatUnit: 'sqft', sidingFlatCustomUnit: '', sidingFlatMaterial: '', sidingFlatRate: '' },
   framing:   { framingArea: '', framingRate: '', framingLumber: '' },
   windows:   { windowsRows: null /* sentinel: setWindowsRows uses [defaultWindowRow()] */, windowDisposal: '', windowsFlatQty: '', windowsFlatUnit: 'windows', windowsFlatCustomUnit: '', windowsFlatMaterial: '', windowsFlatRate: '' },
@@ -12965,7 +12965,7 @@ async function clearForm(silent) {
     ['paintingFlatQty', ''], ['paintingFlatUnit', 'sqft'], ['paintingFlatCustomUnit', ''], ['paintingFlatMaterial', ''], ['paintingFlatRate', ''],
     ['flooringFlatQty', ''], ['flooringFlatUnit', 'sqft'], ['flooringFlatCustomUnit', ''], ['flooringFlatMaterial', ''], ['flooringFlatRate', ''],
     ['roofingFlatQty', ''], ['roofingFlatUnit', 'squares'], ['roofingFlatCustomUnit', ''], ['roofingFlatMaterial', ''], ['roofingFlatRate', ''],
-    ['gutterFlatQty', ''], ['gutterFlatUnit', 'linft'], ['gutterFlatCustomUnit', ''], ['gutterFlatMaterial', ''], ['gutterFlatRate', ''],
+    ['guttersFlatQty', ''], ['guttersFlatUnit', 'linft'], ['guttersFlatCustomUnit', ''], ['guttersFlatMaterial', ''], ['guttersFlatRate', ''],
     ['sidingFlatQty', ''], ['sidingFlatUnit', 'sqft'], ['sidingFlatCustomUnit', ''], ['sidingFlatMaterial', ''], ['sidingFlatRate', ''],
     ['windowsFlatQty', ''], ['windowsFlatUnit', 'windows'], ['windowsFlatCustomUnit', ''], ['windowsFlatMaterial', ''], ['windowsFlatRate', ''],
     // Rush surcharge
