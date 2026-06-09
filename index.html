@@ -7249,14 +7249,20 @@ const PRICING_INPUTS_BY_MODE = {
 // Defaults per pricing mode. Used as fallback when a trade's saved
 // snapshot doesn't have a value for an input (e.g. brand-new trade
 // just selected, or a field that didn't exist in an older snapshot).
+// Numeric pricing defaults are '' (empty) so that when a fresh trade is
+// selected, restorePricingInputs() leaves the inputs blank — the HTML
+// placeholder "0" shows through. The math (parseFloat(...) || 0 and the
+// buildContextForTradeState fallback `|| 0`) treats '' as 0, so totals
+// and prompts are unaffected. Select/method/unit defaults and meaningful
+// non-zero defaults (paintCoats: '2') keep their real values.
 const PRICING_DEFAULTS = {
-  hourly:    { hours: '0', rate: '0', materials: '0' },
-  flat:      { flatPrice: '0', flatIncludes: '' },
-  trucking:  { truckType: 'Dump truck', truckCount: '0', billingMethod: 'load', truckRate: '0', truckQty: '0', disposalFee: '0', materialHauled: '', truckingFlatQty: '0', truckingFlatUnit: 'trips', truckingFlatCustomUnit: '', truckingFlatMaterial: '0', truckingFlatRate: '0' },
-  logistics: { serviceType: 'Freight reworking', logisticsBillingMethod: 'pallet', logisticsRate: '0', logisticsQty: '0', logisticsDays: '0', accessorialFees: '0', specialHandling: '', logisticsFlatQty: '0', logisticsFlatUnit: 'pallets', logisticsFlatCustomUnit: '', logisticsFlatMaterial: '0', logisticsFlatRate: '0' },
-  painting:  { paintArea: '0', paintCoats: '2', paintRate: '0', paintCost: '0', paintPrep: '0', paintTrim: '0', paintingFlatQty: '0', paintingFlatUnit: 'sqft', paintingFlatCustomUnit: '', paintingFlatMaterial: '0', paintingFlatRate: '0' },
-  flooring:  { floorArea: '0', floorMaterialType: 'Laminate', floorMaterialRate: '0', floorInstallRate: '0', floorWasteFactor: '0', floorTearOut: '0', floorSubfloorPrep: '0', floorTransitions: '0', flooringFlatQty: '0', flooringFlatUnit: 'sqft', flooringFlatCustomUnit: '', flooringFlatMaterial: '0', flooringFlatRate: '0' },
-  roofing:   { roofSquares: '0', roofMaterialType: 'Asphalt shingles', roofMaterialRate: '0', roofLaborRate: '0', roofTearOffRate: '0', roofDisposal: '0', roofAccessories: '0', roofingFlatQty: '0', roofingFlatUnit: 'squares', roofingFlatCustomUnit: '', roofingFlatMaterial: '0', roofingFlatRate: '0' },
+  hourly:    { hours: '', rate: '', materials: '' },
+  flat:      { flatPrice: '', flatIncludes: '' },
+  trucking:  { truckType: 'Dump truck', truckCount: '', billingMethod: 'load', truckRate: '', truckQty: '', disposalFee: '', materialHauled: '', truckingFlatQty: '', truckingFlatUnit: 'trips', truckingFlatCustomUnit: '', truckingFlatMaterial: '', truckingFlatRate: '' },
+  logistics: { serviceType: 'Freight reworking', logisticsBillingMethod: 'pallet', logisticsRate: '', logisticsQty: '', logisticsDays: '', accessorialFees: '', specialHandling: '', logisticsFlatQty: '', logisticsFlatUnit: 'pallets', logisticsFlatCustomUnit: '', logisticsFlatMaterial: '', logisticsFlatRate: '' },
+  painting:  { paintArea: '', paintCoats: '2', paintRate: '', paintCost: '', paintPrep: '', paintTrim: '', paintingFlatQty: '', paintingFlatUnit: 'sqft', paintingFlatCustomUnit: '', paintingFlatMaterial: '', paintingFlatRate: '' },
+  flooring:  { floorArea: '', floorMaterialType: 'Laminate', floorMaterialRate: '', floorInstallRate: '', floorWasteFactor: '', floorTearOut: '', floorSubfloorPrep: '', floorTransitions: '', flooringFlatQty: '', flooringFlatUnit: 'sqft', flooringFlatCustomUnit: '', flooringFlatMaterial: '', flooringFlatRate: '' },
+  roofing:   { roofSquares: '', roofMaterialType: 'Asphalt shingles', roofMaterialRate: '', roofLaborRate: '', roofTearOffRate: '', roofDisposal: '', roofAccessories: '', roofingFlatQty: '', roofingFlatUnit: 'squares', roofingFlatCustomUnit: '', roofingFlatMaterial: '', roofingFlatRate: '' },
 };
 
 function tradeNameOf(emojiPlusName) {
