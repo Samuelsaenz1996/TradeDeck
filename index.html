@@ -3357,6 +3357,41 @@
           </button>
         </div>
 
+        <div id="jobsTeaserSub" class="hidden">
+          <div style="margin-bottom: 20px;">
+            <h2 style="font-family: var(--display); font-weight: 600; font-size: 22px; letter-spacing: -0.01em; margin-bottom: 8px;" data-i18n="jobs.teaser.title">Track jobs from quote to paid</h2>
+            <p style="color: var(--ink-2); font-size: 14px; line-height: 1.55; max-width: 640px; margin-bottom: 6px;" data-i18n="jobs.teaser.body">Jobs link your quotes to the work and the invoice that follows. Track each job's status — quoted, in progress, complete, paid — and see per-job stats at a glance.</p>
+            <p style="color: var(--ink-3); font-size: 12px; font-style: italic; margin: 0;" data-i18n="jobs.teaser.sampleNote">Sample data</p>
+          </div>
+          <div class="field-row cols-4">
+            <div class="stat-card">
+              <div class="stat-card-title" data-i18n="jobs.openQuotes">Open quotes</div>
+              <div class="stat-card-value">4</div>
+              <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$12,400</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-title" data-i18n="jobs.inProgress">In progress</div>
+              <div class="stat-card-value">2</div>
+              <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$8,750</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-title" data-i18n="jobs.awaiting">Awaiting payment</div>
+              <div class="stat-card-value">3</div>
+              <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$15,200</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-title" data-i18n="jobs.completed">Completed this month</div>
+              <div class="stat-card-value">7</div>
+              <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$32,100</div>
+            </div>
+          </div>
+          <div style="text-align: center; margin-top: 28px;">
+            <button id="jobsTeaserUpgradeBtn" type="button" class="btn-primary">
+              ⭐ <span data-i18n="jobs.teaser.cta">Upgrade to Pro</span>
+            </button>
+          </div>
+        </div>
+
         <div id="jobsListSub">
           <div class="card">
             <div class="card-title" data-i18n="jobs.title">Jobs</div>
@@ -4508,6 +4543,10 @@ const I18N = {
     'jobs.inProgress': 'In progress',
     'jobs.awaiting': 'Awaiting payment',
     'jobs.completed': 'Completed this month',
+    'jobs.teaser.title': 'Track jobs from quote to paid',
+    'jobs.teaser.body': "Jobs link your quotes to the work and the invoice that follows. Track each job's status — quoted, in progress, complete, paid — and see per-job stats at a glance.",
+    'jobs.teaser.cta': 'Upgrade to Pro',
+    'jobs.teaser.sampleNote': 'Sample data',
     'jobs.col.job': 'Job',
     'jobs.col.client': 'Client',
     'jobs.col.trade': 'Trade',
@@ -4812,6 +4851,8 @@ const I18N = {
     'connect.statusNotConnected': 'Not connected yet.',
     'connect.statusIncomplete': 'Setup started — finish onboarding to accept payments.',
     'connect.statusConnected': '✓ Connected — you can accept online payments.',
+    'connect.proOnly': 'Online payments are a Pro feature.',
+    'connect.upgradeCta': 'Upgrade to accept payments',
     'connect.btnConnect': 'Connect Stripe',
     'connect.btnFinish': 'Finish setup',
     'connect.manage': 'Manage on Stripe',
@@ -5304,6 +5345,10 @@ const I18N = {
     'jobs.inProgress': 'En proceso',
     'jobs.awaiting': 'Esperando pago',
     'jobs.completed': 'Completados este mes',
+    'jobs.teaser.title': 'Lleva tus trabajos desde la cotización hasta el pago',
+    'jobs.teaser.body': 'Los trabajos conectan tus cotizaciones con la obra y la factura. Sigue el estado de cada trabajo — cotizado, en proceso, completado, pagado — y mira las estadísticas de cada trabajo de un vistazo.',
+    'jobs.teaser.cta': 'Mejora a Pro',
+    'jobs.teaser.sampleNote': 'Datos de muestra',
     'jobs.col.job': 'Trabajo',
     'jobs.col.client': 'Cliente',
     'jobs.col.trade': 'Oficio',
@@ -5608,6 +5653,8 @@ const I18N = {
     'connect.statusNotConnected': 'Aún no conectado.',
     'connect.statusIncomplete': 'Configuración iniciada — termina el registro para aceptar pagos.',
     'connect.statusConnected': '✓ Conectado — puedes aceptar pagos en línea.',
+    'connect.proOnly': 'Los pagos en línea son una función Pro.',
+    'connect.upgradeCta': 'Mejora para aceptar pagos',
     'connect.btnConnect': 'Conectar Stripe',
     'connect.btnFinish': 'Terminar configuración',
     'connect.manage': 'Administrar en Stripe',
@@ -6143,7 +6190,32 @@ function bindJobsFilterPills() {
   });
 }
 
+// Pure helper for the Jobs gate. Free → 'teaser'; Pro/Team → 'real'.
+// Null profileCache (bypass/dev) → 'real' so the dev path isn't blocked.
+function jobsViewForPlan() {
+  if (!profileCache) return 'real';
+  if (profileCache.plan && profileCache.plan !== 'free') return 'real';
+  return 'teaser';
+}
+
+function showJobsTeaser() {
+  const list = document.getElementById('jobsListSub');
+  const detail = document.getElementById('jobsDetailSub');
+  const teaser = document.getElementById('jobsTeaserSub');
+  const newBtn = document.getElementById('jobsNewBtn');
+  const backBtn = document.getElementById('jobsBackBtn');
+  if (list) list.classList.add('hidden');
+  if (detail) detail.classList.add('hidden');
+  if (teaser) teaser.classList.remove('hidden');
+  if (newBtn) newBtn.classList.add('hidden');
+  if (backBtn) backBtn.classList.add('hidden');
+}
+
 function switchJobsSubView(view) {
+  // Defensive: an upgraded-mid-session user routes through here on the next
+  // Jobs visit; make sure the teaser is gone before showing the real UI.
+  const teaser = document.getElementById('jobsTeaserSub');
+  if (teaser) teaser.classList.add('hidden');
   const valid = ['list', 'detail'];
   jobsSubView = valid.includes(view) ? view : 'list';
   const list = document.getElementById('jobsListSub');
@@ -7173,6 +7245,8 @@ function init() {
   bindJobsFilterPills();
   const jobsNewBtn = document.getElementById('jobsNewBtn');
   if (jobsNewBtn) jobsNewBtn.onclick = () => enterNewJobMode({});
+  const jobsTeaserUpgrade = document.getElementById('jobsTeaserUpgradeBtn');
+  if (jobsTeaserUpgrade) jobsTeaserUpgrade.onclick = openUpgradeModal;
   const jobsBackBtn = document.getElementById('jobsBackBtn');
   if (jobsBackBtn) jobsBackBtn.onclick = () => {
     clearTimeout(jobsSaveTimer);
@@ -7851,7 +7925,8 @@ function switchView(view) {
     switchFollowupsSubView('list');
   }
   if (view === 'jobs') {
-    switchJobsSubView('list');
+    if (jobsViewForPlan() === 'teaser') showJobsTeaser();
+    else switchJobsSubView('list');
   }
   if (view === 'profile') {
     loadProfileData();
@@ -8381,6 +8456,7 @@ function renderFollowupMessage(data) {
 
 function copyFollowupMessage() {
   if (!requireVerifiedEmail()) return;
+  if (!requirePro()) return;
   const subject = document.getElementById('followupSubject').textContent.trim();
   const body = document.getElementById('followupBody').textContent.trim();
   const subjectLabel = t('followup.subject');
@@ -8412,6 +8488,7 @@ function followupClientContact() {
 
 function sendFollowupMessage() {
   if (!requireVerifiedEmail()) return;
+  if (!requirePro()) return;
   const subject = (document.getElementById('followupSubject').textContent || '').trim();
   const body = (document.getElementById('followupBody').textContent || '').trim();
   const contact = followupClientContact();
@@ -8875,6 +8952,28 @@ window.__testExportGate = function () {
       const src = fn.toString();
       assert(name + ' has requireVerifiedEmail guard', src.indexOf('requireVerifiedEmail()') !== -1);
     });
+
+    // 6) The 5 Pro-gated export functions also contain requirePro(),
+    //    and the verify guard appears BEFORE the Pro guard in source order.
+    const proGated = [
+      ['downloadInvoicePdf', downloadInvoicePdf],
+      ['sendInvoiceEmail', sendInvoiceEmail],
+      ['sendInvoiceText', sendInvoiceText],
+      ['copyFollowupMessage', copyFollowupMessage],
+      ['sendFollowupMessage', sendFollowupMessage],
+    ];
+    proGated.forEach(([name, fn]) => {
+      const src = fn.toString();
+      const vIdx = src.indexOf('requireVerifiedEmail()');
+      const pIdx = src.indexOf('requirePro()');
+      assert(name + ' has requirePro guard', pIdx !== -1);
+      assert(name + ' verify-before-pro', vIdx !== -1 && pIdx !== -1 && vIdx < pIdx);
+    });
+
+    // 7) Quote export functions stay verification-only — no requirePro guard.
+    [['downloadPdf', downloadPdf], ['sendQuoteEmail', sendQuoteEmail], ['sendQuoteText', sendQuoteText]].forEach(([name, fn]) => {
+      assert(name + ' has NO requirePro guard', fn.toString().indexOf('requirePro()') === -1);
+    });
   } finally {
     openVerifyModal = realOpen;
     profileCache = savedProfile;
@@ -8883,6 +8982,62 @@ window.__testExportGate = function () {
   const passed = results.filter(r => r.pass).length;
   results.forEach(r => console.log((r.pass ? 'PASS' : 'FAIL') + ' — ' + r.name));
   console.log(`__testExportGate: ${passed}/${results.length} passed`);
+  return passed === results.length;
+};
+
+// Pro-gates harness — Connect onboarding + Jobs teaser branch. Non-destructive.
+// Stubs openUpgradeModal so any incidental modal opens don't leak.
+window.__testProGates = function () {
+  const results = [];
+  const assert = (name, cond) => results.push({ name, pass: !!cond });
+
+  const savedProfile = profileCache;
+  const realOpenUpgrade = openUpgradeModal;
+  openUpgradeModal = function () { /* swallow */ };
+
+  try {
+    // 1) startConnectOnboarding contains the Pro guard.
+    assert('startConnectOnboarding source includes requirePro()',
+      startConnectOnboarding.toString().indexOf('requirePro()') !== -1);
+
+    // 2) jobsViewForPlan pure helper — covers every plan state we care about.
+    profileCache = { plan: 'free' };
+    assert('free → teaser', jobsViewForPlan() === 'teaser');
+    profileCache = { plan: 'pro' };
+    assert('pro → real', jobsViewForPlan() === 'real');
+    profileCache = { plan: 'team' };
+    assert('team → real', jobsViewForPlan() === 'real');
+    profileCache = null;
+    assert('null profileCache → real (defensive)', jobsViewForPlan() === 'real');
+    profileCache = {};
+    assert('empty plan → teaser', jobsViewForPlan() === 'teaser');
+
+    // 3) renderConnectCard: free + not connected → upsell strings.
+    profileCache = { plan: 'free' }; // no stripe_account_id
+    renderConnectCard();
+    const line = document.getElementById('connectStatusLine');
+    const btn = document.getElementById('connectBtn');
+    const lineUpsell = !!(line && line.textContent === t('connect.proOnly'));
+    const btnUpsell = !!(btn && btn.textContent === t('connect.upgradeCta'));
+    assert('free renderConnectCard: upsell state',
+      lineUpsell || btnUpsell);
+
+    // 4) Pro + not connected → normal Connect button (NOT proOnly).
+    profileCache = { plan: 'pro' }; // no stripe_account_id
+    renderConnectCard();
+    const lineNormal = !!(line && line.textContent === t('connect.statusNotConnected'));
+    const btnNormal = !!(btn && btn.textContent === t('connect.btnConnect'));
+    assert('pro renderConnectCard: normal not-connected state',
+      lineNormal && btnNormal);
+  } finally {
+    openUpgradeModal = realOpenUpgrade;
+    profileCache = savedProfile;
+    if (typeof renderConnectCard === 'function') renderConnectCard();
+  }
+
+  const passed = results.filter(r => r.pass).length;
+  results.forEach(r => console.log((r.pass ? 'PASS' : 'FAIL') + ' — ' + r.name));
+  console.log(`__testProGates: ${passed}/${results.length} passed`);
   return passed === results.length;
 };
 
@@ -10607,6 +10762,7 @@ function buildInvoicePdfFilename() {
 
 async function downloadInvoicePdf() {
   if (!requireVerifiedEmail()) return;
+  if (!requirePro()) return;
   showToast(t('toast.pdfGenerating'));
   const blob = await generateInvoicePdfBlob();
   if (!blob) { showToast(t('toast.pdfFailed'), true); return; }
@@ -10616,6 +10772,7 @@ async function downloadInvoicePdf() {
 
 async function sendInvoiceEmail() {
   if (!requireVerifiedEmail()) return;
+  if (!requirePro()) return;
   showToast(t('toast.pdfGenerating'));
   const blob = await generateInvoicePdfBlob();
   if (!blob) { showToast(t('toast.pdfFailed'), true); return; }
@@ -10642,6 +10799,7 @@ async function sendInvoiceEmail() {
 
 async function sendInvoiceText() {
   if (!requireVerifiedEmail()) return;
+  if (!requirePro()) return;
   showToast(t('toast.pdfGenerating'));
   const blob = await generateInvoicePdfBlob();
   if (!blob) { showToast(t('toast.pdfFailed'), true); return; }
@@ -10837,6 +10995,7 @@ function handleCheckoutReturn() {
 // Stripe Connect — onboarding + status (no money moves; UI-cache booleans only)
 // ============================================================================
 async function startConnectOnboarding() {
+  if (!requirePro()) return;
   const btn = document.getElementById('connectBtn');
   if (btn) { btn.disabled = true; btn.textContent = t('connect.redirecting'); }
   try {
@@ -10885,7 +11044,16 @@ function renderConnectCard() {
   const manage = document.getElementById('connectManageLink');
   if (!line || !btn) return;
   const p = profileCache || {};
-  if (!p.stripe_account_id) {
+  const isFree = profileCache && (!profileCache.plan || profileCache.plan === 'free');
+  if (isFree && !p.stripe_account_id) {
+    // (0) Free user, not yet connected — upsell. Clicking flows to
+    // startConnectOnboarding which immediately requirePro()-bounces.
+    line.textContent = t('connect.proOnly');
+    line.style.color = '';
+    btn.textContent = t('connect.upgradeCta');
+    btn.classList.remove('hidden');
+    if (manage) manage.classList.add('hidden');
+  } else if (!p.stripe_account_id) {
     // (a) Not connected
     line.textContent = t('connect.statusNotConnected');
     line.style.color = '';
