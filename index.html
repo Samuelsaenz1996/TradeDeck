@@ -2244,6 +2244,7 @@
         <div class="field">
           <label class="label" data-i18n="form.pricingApproach">Pricing approach</label>
           <div class="pricing-toggle" id="pricingToggle">
+            <button data-mode="framing" class="framing-only hidden" data-i18n="form.framing">📐 Per area</button>
             <button data-mode="hourly" class="active" data-i18n="form.hourly">⏱ Hourly</button>
             <button data-mode="flat" data-i18n="form.flat">📋 Flat rate</button>
           </div>
@@ -2779,6 +2780,229 @@
                 <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
                 <span class="trucking-subtotal-amt" id="roofingFlatSubtotal">$0.00</span>
               </div>
+            </div>
+          </div>
+
+          <div id="gutterPanel" class="trucking-panel hidden">
+            <div class="pricing-substruct-toggle" id="gutterSubstructToggle"
+                 role="group" aria-label="Pricing structure">
+              <button data-substruct="per-unit" class="active" type="button"
+                      data-i18n="substruct.perUnit">Per-unit</button>
+              <button data-substruct="flat-rate" type="button"
+                      data-i18n="substruct.flat">Flat rate</button>
+            </div>
+            <div class="per-unit-fields" id="gutterPerUnitFields">
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="gutter.linearFt">Linear feet</label>
+                  <input type="number" class="input" id="gutterLinearFt" placeholder="0" min="0" step="0.1" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="gutter.rate">Rate per linear foot ($)</label>
+                  <input type="number" class="input" id="gutterRate" placeholder="0" min="0" step="0.01" />
+                </div>
+              </div>
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="gutter.material">Gutter material</label>
+                  <select class="select" id="gutterMaterial">
+                    <option value="Aluminum" data-i18n="gutter.materials.aluminum">Aluminum</option>
+                    <option value="Vinyl" data-i18n="gutter.materials.vinyl">Vinyl</option>
+                    <option value="Steel" data-i18n="gutter.materials.steel">Steel</option>
+                    <option value="Copper" data-i18n="gutter.materials.copper">Copper</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="label" data-i18n="gutter.style">Style</label>
+                  <select class="select" id="gutterStyle">
+                    <option value="K-style" data-i18n="gutter.styles.k">K-style</option>
+                    <option value="Half-round" data-i18n="gutter.styles.halfRound">Half-round</option>
+                    <option value="Seamless" data-i18n="gutter.styles.seamless">Seamless</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="gutter.downspoutCount"># of downspouts</label>
+                  <input type="number" class="input" id="gutterDownspoutCount" placeholder="0" min="0" step="1" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="gutter.downspoutRate">Rate per downspout ($)</label>
+                  <input type="number" class="input" id="gutterDownspoutRate" placeholder="0" min="0" step="0.01" />
+                </div>
+              </div>
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="gutter.guardFt">Gutter guard (linear feet)</label>
+                  <input type="number" class="input" id="gutterGuardFt" placeholder="0" min="0" step="0.1" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="gutter.guardRate">Guard rate per ft ($)</label>
+                  <input type="number" class="input" id="gutterGuardRate" placeholder="0" min="0" step="0.01" />
+                </div>
+              </div>
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="gutter.disposal">Tear-off &amp; disposal of old gutters ($)</label>
+                  <input type="number" class="input" id="gutterDisposal" placeholder="0" min="0" step="0.01" />
+                </div>
+              </div>
+              <div class="trucking-subtotal">
+                <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
+                <span class="trucking-subtotal-amt" id="gutterSubtotal">$0.00</span>
+              </div>
+            </div>
+            <div class="flat-rate-fields hidden" id="gutterFlatRateFields">
+              <div class="field-row cols-3">
+                <div>
+                  <label class="label" data-i18n="flat.quantity">Quantity</label>
+                  <input type="number" class="input" id="gutterFlatQty" placeholder="0" min="0" step="0.1" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.unit">Unit</label>
+                  <select class="select" id="gutterFlatUnit">
+                    <option value="linft">Linear ft</option>
+                    <option value="sections">Sections</option>
+                    <option value="custom">Custom...</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.customUnit" id="gutterFlatCustomUnitLabel">Custom unit</label>
+                  <input type="text" class="input hidden" id="gutterFlatCustomUnit"
+                         data-i18n-placeholder="flat.customUnitPlaceholder"
+                         placeholder="e.g. buckets, runs, pieces" />
+                </div>
+              </div>
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
+                  <input type="number" class="input" id="gutterFlatMaterial" placeholder="0" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
+                  <input type="number" class="input" id="gutterFlatRate" placeholder="0" min="0" step="0.01" />
+                </div>
+              </div>
+              <div class="trucking-subtotal">
+                <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
+                <span class="trucking-subtotal-amt" id="gutterFlatSubtotal">$0.00</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="sidingPanel" class="trucking-panel hidden">
+            <div class="pricing-substruct-toggle" id="sidingSubstructToggle"
+                 role="group" aria-label="Pricing structure">
+              <button data-substruct="per-unit" class="active" type="button"
+                      data-i18n="substruct.perUnit">Per-unit</button>
+              <button data-substruct="flat-rate" type="button"
+                      data-i18n="substruct.flat">Flat rate</button>
+            </div>
+            <div class="per-unit-fields" id="sidingPerUnitFields">
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="siding.area">Wall area (sq ft)</label>
+                  <input type="number" class="input" id="sidingArea" placeholder="0" min="0" step="0.1" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="siding.material">Siding material</label>
+                  <select class="select" id="sidingMaterial">
+                    <option value="Vinyl" data-i18n="siding.materials.vinyl">Vinyl</option>
+                    <option value="Aluminum" data-i18n="siding.materials.aluminum">Aluminum</option>
+                    <option value="Fiber cement" data-i18n="siding.materials.fiberCement">Fiber cement</option>
+                    <option value="Wood" data-i18n="siding.materials.wood">Wood</option>
+                    <option value="Engineered wood" data-i18n="siding.materials.engineered">Engineered wood</option>
+                    <option value="Steel" data-i18n="siding.materials.steel">Steel</option>
+                    <option value="Other" data-i18n="siding.materials.other">Other</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-row cols-3">
+                <div>
+                  <label class="label" data-i18n="siding.materialRate">Material cost per sq ft ($)</label>
+                  <input type="number" class="input" id="sidingMaterialRate" placeholder="0" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="siding.installRate">Installation rate per sq ft ($)</label>
+                  <input type="number" class="input" id="sidingInstallRate" placeholder="0" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="siding.waste">Waste factor (%)</label>
+                  <input type="number" class="input" id="sidingWasteFactor" placeholder="0" min="0" step="0.1" />
+                  <small style="color: var(--ink-3); font-size: 11px;" data-i18n="siding.wasteHelp">Typically 10%</small>
+                </div>
+              </div>
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="siding.tearOff">Tear-off &amp; disposal of old siding ($)</label>
+                  <input type="number" class="input" id="sidingTearOff" placeholder="0" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="siding.trim">Trim, flashing &amp; accessories ($)</label>
+                  <input type="number" class="input" id="sidingTrim" placeholder="0" min="0" step="0.01" />
+                </div>
+              </div>
+              <div class="trucking-subtotal">
+                <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
+                <span class="trucking-subtotal-amt" id="sidingSubtotal">$0.00</span>
+              </div>
+            </div>
+            <div class="flat-rate-fields hidden" id="sidingFlatRateFields">
+              <div class="field-row cols-3">
+                <div>
+                  <label class="label" data-i18n="flat.quantity">Quantity</label>
+                  <input type="number" class="input" id="sidingFlatQty" placeholder="0" min="0" step="0.1" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.unit">Unit</label>
+                  <select class="select" id="sidingFlatUnit">
+                    <option value="sqft">Sq ft</option>
+                    <option value="squares">Squares</option>
+                    <option value="custom">Custom...</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.customUnit" id="sidingFlatCustomUnitLabel">Custom unit</label>
+                  <input type="text" class="input hidden" id="sidingFlatCustomUnit"
+                         data-i18n-placeholder="flat.customUnitPlaceholder"
+                         placeholder="e.g. buckets, runs, pieces" />
+                </div>
+              </div>
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
+                  <input type="number" class="input" id="sidingFlatMaterial" placeholder="0" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
+                  <input type="number" class="input" id="sidingFlatRate" placeholder="0" min="0" step="0.01" />
+                </div>
+              </div>
+              <div class="trucking-subtotal">
+                <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
+                <span class="trucking-subtotal-amt" id="sidingFlatSubtotal">$0.00</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="framingPanel" class="trucking-panel hidden">
+            <div class="field-row cols-3">
+              <div>
+                <label class="label" data-i18n="framing.area">Framing area (sq ft)</label>
+                <input type="number" class="input" id="framingArea" placeholder="0" min="0" step="0.1" />
+              </div>
+              <div>
+                <label class="label" data-i18n="framing.rate">Rate per sq ft ($)</label>
+                <input type="number" class="input" id="framingRate" placeholder="0" min="0" step="0.01" />
+              </div>
+              <div>
+                <label class="label" data-i18n="framing.lumber">Lumber &amp; materials ($)</label>
+                <input type="number" class="input" id="framingLumber" placeholder="0" min="0" step="0.01" />
+              </div>
+            </div>
+            <div class="trucking-subtotal">
+              <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
+              <span class="trucking-subtotal-amt" id="framingSubtotal">$0.00</span>
             </div>
           </div>
         </div>
@@ -4280,6 +4504,7 @@ const I18N = {
     'form.pricingApproach': 'Pricing approach',
     'form.hourly': '⏱ Hourly',
     'form.flat': '📋 Flat rate',
+    'form.framing': '📐 Per area',
     // Hourly
     'hourly.estHours': 'Estimated hours',
     'hourly.rate': 'Hourly rate ($)',
@@ -4311,6 +4536,8 @@ const I18N = {
     'flat.unitNames.rooms': 'rooms',
     'flat.unitNames.linft': 'linear ft',
     'flat.unitNames.squares': 'squares',
+    'flat.unitNames.sections': 'sections',
+    'flat.unitNames.board': 'board',
     // Trucking
     'trucking.type': 'Truck type',
     'trucking.types.dump': 'Dump truck',
@@ -4408,6 +4635,43 @@ const I18N = {
     'roofing.disposal': 'Disposal / dump fees ($)',
     'roofing.accessories': 'Underlayment, flashing, accessories ($)',
     'roofing.accessoriesHelp': 'Ice & water shield, drip edge, ridge vent, flashing',
+    // Gutters
+    'gutter.linearFt': 'Linear feet',
+    'gutter.rate': 'Rate per linear foot ($)',
+    'gutter.material': 'Gutter material',
+    'gutter.materials.aluminum': 'Aluminum',
+    'gutter.materials.vinyl': 'Vinyl',
+    'gutter.materials.steel': 'Steel',
+    'gutter.materials.copper': 'Copper',
+    'gutter.style': 'Style',
+    'gutter.styles.k': 'K-style',
+    'gutter.styles.halfRound': 'Half-round',
+    'gutter.styles.seamless': 'Seamless',
+    'gutter.downspoutCount': '# of downspouts',
+    'gutter.downspoutRate': 'Rate per downspout ($)',
+    'gutter.guardFt': 'Gutter guard (linear feet)',
+    'gutter.guardRate': 'Guard rate per ft ($)',
+    'gutter.disposal': 'Tear-off & disposal of old gutters ($)',
+    // Siding
+    'siding.area': 'Wall area (sq ft)',
+    'siding.material': 'Siding material',
+    'siding.materials.vinyl': 'Vinyl',
+    'siding.materials.aluminum': 'Aluminum',
+    'siding.materials.fiberCement': 'Fiber cement',
+    'siding.materials.wood': 'Wood',
+    'siding.materials.engineered': 'Engineered wood',
+    'siding.materials.steel': 'Steel',
+    'siding.materials.other': 'Other',
+    'siding.materialRate': 'Material cost per sq ft ($)',
+    'siding.installRate': 'Installation rate per sq ft ($)',
+    'siding.waste': 'Waste factor (%)',
+    'siding.wasteHelp': 'Typically 10%',
+    'siding.tearOff': 'Tear-off & disposal of old siding ($)',
+    'siding.trim': 'Trim, flashing & accessories ($)',
+    // Framing
+    'framing.area': 'Framing area (sq ft)',
+    'framing.rate': 'Rate per sq ft ($)',
+    'framing.lumber': 'Lumber & materials ($)',
     // Form Card 2
     'who.title': 'Who & when',
     'who.sub': 'Client details, urgency, and tax setup.',
@@ -5095,6 +5359,7 @@ const I18N = {
     'form.pricingApproach': 'Forma de cobro',
     'form.hourly': '⏱ Por hora',
     'form.flat': '📋 Precio fijo',
+    'form.framing': '📐 Por área',
     // Hourly
     'hourly.estHours': 'Horas estimadas',
     'hourly.rate': 'Tarifa por hora ($)',
@@ -5126,6 +5391,8 @@ const I18N = {
     'flat.unitNames.rooms': 'cuartos',
     'flat.unitNames.linft': 'pies lineales',
     'flat.unitNames.squares': 'cuadros',
+    'flat.unitNames.sections': 'secciones',
+    'flat.unitNames.board': 'tabla',
     // Trucking
     'trucking.type': 'Tipo de camión',
     'trucking.types.dump': 'Camión de volteo',
@@ -5223,6 +5490,43 @@ const I18N = {
     'roofing.disposal': 'Costos de desecho / vertedero ($)',
     'roofing.accessories': 'Bajoteja, flashings y accesorios ($)',
     'roofing.accessoriesHelp': 'Capa contra hielo y agua, goterón, ventilación de cumbrera, flashing',
+    // Canaletas (Gutters)
+    'gutter.linearFt': 'Pies lineales',
+    'gutter.rate': 'Tarifa por pie lineal ($)',
+    'gutter.material': 'Material de la canaleta',
+    'gutter.materials.aluminum': 'Aluminio',
+    'gutter.materials.vinyl': 'Vinilo',
+    'gutter.materials.steel': 'Acero',
+    'gutter.materials.copper': 'Cobre',
+    'gutter.style': 'Estilo',
+    'gutter.styles.k': 'Estilo K',
+    'gutter.styles.halfRound': 'Media caña',
+    'gutter.styles.seamless': 'Sin costura',
+    'gutter.downspoutCount': '# de bajantes',
+    'gutter.downspoutRate': 'Tarifa por bajante ($)',
+    'gutter.guardFt': 'Guarda-canaleta (pies lineales)',
+    'gutter.guardRate': 'Tarifa de guarda por pie ($)',
+    'gutter.disposal': 'Retiro y desecho de canaletas viejas ($)',
+    // Revestimiento (Siding)
+    'siding.area': 'Área de pared (pies²)',
+    'siding.material': 'Material del revestimiento',
+    'siding.materials.vinyl': 'Vinilo',
+    'siding.materials.aluminum': 'Aluminio',
+    'siding.materials.fiberCement': 'Fibrocemento',
+    'siding.materials.wood': 'Madera',
+    'siding.materials.engineered': 'Madera ingenierizada',
+    'siding.materials.steel': 'Acero',
+    'siding.materials.other': 'Otro',
+    'siding.materialRate': 'Costo de material por pie² ($)',
+    'siding.installRate': 'Tarifa de instalación por pie² ($)',
+    'siding.waste': 'Factor de desperdicio (%)',
+    'siding.wasteHelp': 'Generalmente 10%',
+    'siding.tearOff': 'Retiro y desecho del revestimiento viejo ($)',
+    'siding.trim': 'Molduras, flashing y accesorios ($)',
+    // Armazón (Framing)
+    'framing.area': 'Área de la estructura (pies²)',
+    'framing.rate': 'Tarifa por pie² ($)',
+    'framing.lumber': 'Madera y materiales ($)',
     // Form Card 2
     'who.title': 'Quién y cuándo',
     'who.sub': 'Datos del cliente, urgencia y configuración de impuestos.',
@@ -5859,6 +6163,9 @@ const TRADE_LABELS_ES = {
   Landscaping: 'Jardinería',
   'Hauling & Trucking': 'Acarreo y transporte',
   Logistics: 'Logística',
+  Gutters: 'Canaletas',
+  Siding: 'Revestimiento',
+  Framing: 'Armazón',
 };
 
 const TRADE_DESC_EXAMPLES_ES = {
@@ -5872,6 +6179,9 @@ const TRADE_DESC_EXAMPLES_ES = {
   Landscaping: 'Ej. Instalar elevadores de riego nuevos, agregar camas de mantillo, plantar arbustos y perennes, instalar bordillo de piedra y nivelar para drenaje.',
   'Hauling & Trucking': 'Ej. Cargar y transportar 12 yardas cúbicas de escombro de obra al vertedero, dar servicio de roll-off y manejar limpieza del sitio y boletos de descarga.',
   Logistics: 'Ej. Reacondicionar tarimas, preparar embarques para cross-docking, coordinar logística de última milla y administrar manejo accesorial.',
+  Gutters: 'Ej. Instalar 180 pies lineales de canaletas de aluminio sin costura estilo K, 6 bajantes y guarda-canaletas, incluyendo retiro y desecho de las canaletas viejas.',
+  Siding: 'Ej. Demoler y reemplazar 1,400 pies² de revestimiento existente con tablilla de fibrocemento, instalar housewrap, flashings y molduras nuevas, e incluir el desecho del material viejo.',
+  Framing: 'Ej. Estructura de pared interior de 320 pies² con vigas 2×4 a 16 pulgadas al centro, cabeceros sobre dos puertas, bloqueo entre studs y sheathing de OSB en la sección portante.',
 };
 
 function t(key, vars) {
@@ -6138,6 +6448,9 @@ const TRADES = [
   { emoji: '🌿', name: 'Landscaping' },
   { emoji: '🚛', name: 'Hauling & Trucking' },
   { emoji: '📦', name: 'Logistics' },
+  { emoji: '🌧️', name: 'Gutters' },
+  { emoji: '🧱', name: 'Siding' },
+  { emoji: '🧰', name: 'Framing' },
 ];
 
 const TRADE_DESC_EXAMPLES = {
@@ -6151,6 +6464,9 @@ const TRADE_DESC_EXAMPLES = {
   Landscaping: 'e.g. Install new irrigation risers, add mulch beds, plant shrubs and perennials, install stone edging, and grade for proper drainage.',
   'Hauling & Trucking': 'e.g. Load and haul 12 cubic yards of construction debris to the dump, provide roll-off service, and handle site cleanup and disposal tickets.',
   Logistics: 'e.g. Rework freight pallets, stage shipments for cross-docking, coordinate last-mile delivery logistics, and manage accessorial handling.',
+  Gutters: 'e.g. Install 180 linear feet of seamless K-style aluminum gutters, 6 downspouts and gutter guards, including tear-off and disposal of the old gutters.',
+  Siding: 'e.g. Tear off and replace 1,400 sq ft of existing siding with fiber cement lap siding, install new housewrap, flashing, and trim, and dispose of the old material.',
+  Framing: 'e.g. Frame a 320 sq ft interior wall with 2×4 studs at 16" on-center, install headers over two doorways, blocking between studs, and OSB sheathing on the load-bearing section.',
 };
 
 function getClientInitials(name) {
@@ -7055,7 +7371,7 @@ let selectedTrades = [];
 let activeTradeIndex = -1;
 let tradePricingState = {};             // { 'Plumbing': { mode, ...inputs } }
 let selectedFollowupTrade = '🔧 Plumbing';
-let pricingMode = 'hourly';      // 'hourly' | 'flat' | 'trucking' | 'logistics' | 'painting' | 'flooring' | 'roofing'
+let pricingMode = 'hourly';      // 'hourly' | 'flat' | 'trucking' | 'logistics' | 'painting' | 'flooring' | 'roofing' | 'gutters' | 'siding' | 'framing'
 let taxMode = 'none';            // 'none' | 'custom'
 let depositPercent = parseFloat(localStorage.getItem('tdDepositPercent'));
 if (!isFinite(depositPercent) || depositPercent < 0 || depositPercent > 100) {
@@ -7244,6 +7560,9 @@ const PRICING_INPUTS_BY_MODE = {
   painting:  ['paintArea','paintCoats','paintRate','paintCost','paintPrep','paintTrim','paintingFlatQty','paintingFlatUnit','paintingFlatCustomUnit','paintingFlatMaterial','paintingFlatRate'],
   flooring:  ['floorArea','floorMaterialType','floorMaterialRate','floorInstallRate','floorWasteFactor','floorTearOut','floorSubfloorPrep','floorTransitions','flooringFlatQty','flooringFlatUnit','flooringFlatCustomUnit','flooringFlatMaterial','flooringFlatRate'],
   roofing:   ['roofSquares','roofMaterialType','roofMaterialRate','roofLaborRate','roofTearOffRate','roofDisposal','roofAccessories','roofingFlatQty','roofingFlatUnit','roofingFlatCustomUnit','roofingFlatMaterial','roofingFlatRate'],
+  gutters:   ['gutterLinearFt','gutterRate','gutterMaterial','gutterStyle','gutterDownspoutCount','gutterDownspoutRate','gutterGuardFt','gutterGuardRate','gutterDisposal','gutterFlatQty','gutterFlatUnit','gutterFlatCustomUnit','gutterFlatMaterial','gutterFlatRate'],
+  siding:    ['sidingArea','sidingMaterial','sidingMaterialRate','sidingInstallRate','sidingWasteFactor','sidingTearOff','sidingTrim','sidingFlatQty','sidingFlatUnit','sidingFlatCustomUnit','sidingFlatMaterial','sidingFlatRate'],
+  framing:   ['framingArea','framingRate','framingLumber'],
 };
 
 // Defaults per pricing mode. Used as fallback when a trade's saved
@@ -7263,6 +7582,9 @@ const PRICING_DEFAULTS = {
   painting:  { paintArea: '', paintCoats: '2', paintRate: '', paintCost: '', paintPrep: '', paintTrim: '', paintingFlatQty: '', paintingFlatUnit: 'sqft', paintingFlatCustomUnit: '', paintingFlatMaterial: '', paintingFlatRate: '' },
   flooring:  { floorArea: '', floorMaterialType: 'Laminate', floorMaterialRate: '', floorInstallRate: '', floorWasteFactor: '', floorTearOut: '', floorSubfloorPrep: '', floorTransitions: '', flooringFlatQty: '', flooringFlatUnit: 'sqft', flooringFlatCustomUnit: '', flooringFlatMaterial: '', flooringFlatRate: '' },
   roofing:   { roofSquares: '', roofMaterialType: 'Asphalt shingles', roofMaterialRate: '', roofLaborRate: '', roofTearOffRate: '', roofDisposal: '', roofAccessories: '', roofingFlatQty: '', roofingFlatUnit: 'squares', roofingFlatCustomUnit: '', roofingFlatMaterial: '', roofingFlatRate: '' },
+  gutters:   { gutterLinearFt: '', gutterRate: '', gutterMaterial: 'Aluminum', gutterStyle: 'K-style', gutterDownspoutCount: '', gutterDownspoutRate: '', gutterGuardFt: '', gutterGuardRate: '', gutterDisposal: '', gutterFlatQty: '', gutterFlatUnit: 'linft', gutterFlatCustomUnit: '', gutterFlatMaterial: '', gutterFlatRate: '' },
+  siding:    { sidingArea: '', sidingMaterial: 'Vinyl', sidingMaterialRate: '', sidingInstallRate: '', sidingWasteFactor: '', sidingTearOff: '', sidingTrim: '', sidingFlatQty: '', sidingFlatUnit: 'sqft', sidingFlatCustomUnit: '', sidingFlatMaterial: '', sidingFlatRate: '' },
+  framing:   { framingArea: '', framingRate: '', framingLumber: '' },
 };
 
 function tradeNameOf(emojiPlusName) {
@@ -7275,6 +7597,9 @@ function defaultModeForTrade(name) {
   if (name === 'Painting') return 'painting';
   if (name === 'Flooring') return 'flooring';
   if (name === 'Roofing') return 'roofing';
+  if (name === 'Gutters') return 'gutters';
+  if (name === 'Siding') return 'siding';
+  if (name === 'Framing') return 'framing';
   return 'hourly';
 }
 
@@ -7284,7 +7609,7 @@ function snapshotPricingInputs(mode) {
     const el = document.getElementById(id);
     if (el) out[id] = el.value;
   });
-  if (['trucking','logistics','painting','flooring','roofing'].includes(mode)) {
+  if (['trucking','logistics','painting','flooring','roofing','gutters','siding'].includes(mode)) {
     const trade = mode;
     const toggle = document.getElementById(`${trade}SubstructToggle`);
     if (toggle) {
@@ -7308,7 +7633,7 @@ function restorePricingInputs(snapshot) {
       el.value = defaults[id];
     }
   });
-  if (['trucking','logistics','painting','flooring','roofing'].includes(mode)) {
+  if (['trucking','logistics','painting','flooring','roofing','gutters','siding'].includes(mode)) {
     const structure = snapshot.pricingStructure || 'per-unit';
     applyPricingStructure(mode, structure);
     const trade = mode;
@@ -7337,6 +7662,9 @@ function refreshAllSubtotals() {
   if (typeof updatePaintingSubtotal === 'function') updatePaintingSubtotal();
   if (typeof updateFlooringSubtotal === 'function') updateFlooringSubtotal();
   if (typeof updateRoofingSubtotal === 'function') updateRoofingSubtotal();
+  if (typeof updateGutterSubtotal === 'function') updateGutterSubtotal();
+  if (typeof updateSidingSubtotal === 'function') updateSidingSubtotal();
+  if (typeof updateFramingSubtotal === 'function') updateFramingSubtotal();
 }
 
 function saveActiveTradeState() {
@@ -7384,7 +7712,10 @@ function init() {
   bindPaintingInputs();
   bindFlooringInputs();
   bindRoofingInputs();
-  ['trucking','logistics','painting','flooring','roofing'].forEach(trade => {
+  bindGutterInputs();
+  bindSidingInputs();
+  bindFramingInputs();
+  ['trucking','logistics','painting','flooring','roofing','gutters','siding'].forEach(trade => {
     bindSubstructToggle(trade);
     bindFlatRateInputs(trade);
     updateFlatSubtotal(trade);
@@ -7761,7 +8092,7 @@ function bindPricingToggle() {
 function hideAllPricingPanels() {
   const toggle = document.getElementById('pricingToggle');
   if (toggle) toggle.style.display = 'none';
-  ['hourlyPanel','flatPanel','truckingPanel','logisticsPanel','paintingPanel','flooringPanel','roofingPanel'].forEach(id => {
+  ['hourlyPanel','flatPanel','truckingPanel','logisticsPanel','paintingPanel','flooringPanel','roofingPanel','gutterPanel','sidingPanel','framingPanel'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.add('hidden');
   });
@@ -7783,11 +8114,21 @@ function setPricingMode(mode) {
   if (empty) empty.classList.add('hidden');
   // hide toggle when transportation or measurement-based modes are active
   const toggle = document.getElementById('pricingToggle');
-  toggle.style.display = (['trucking','logistics','painting','flooring','roofing'].includes(mode)) ? 'none' : 'inline-flex';
+  toggle.style.display = (['trucking','logistics','painting','flooring','roofing','gutters','siding'].includes(mode)) ? 'none' : 'inline-flex';
 
   document.querySelectorAll('#pricingToggle button').forEach(b =>
     b.classList.toggle('active', b.dataset.mode === mode)
   );
+  // Show the "Per area" framing button only when the ACTIVE trade is Framing.
+  // Lets the user override Framing's per-unit panel with the simpler Hourly or
+  // Flat panels by clicking those buttons, while keeping the per-area path
+  // highlighted by default — toggle never sits with zero buttons active.
+  const framingBtn = document.querySelector('#pricingToggle .framing-only');
+  if (framingBtn) {
+    const activeName = (activeTradeIndex >= 0 && selectedTrades[activeTradeIndex])
+      ? tradeNameOf(selectedTrades[activeTradeIndex]) : '';
+    framingBtn.classList.toggle('hidden', activeName !== 'Framing');
+  }
 
   document.getElementById('hourlyPanel').classList.toggle('hidden', mode !== 'hourly');
   document.getElementById('flatPanel').classList.toggle('hidden', mode !== 'flat');
@@ -7796,6 +8137,9 @@ function setPricingMode(mode) {
   document.getElementById('paintingPanel').classList.toggle('hidden', mode !== 'painting');
   document.getElementById('flooringPanel').classList.toggle('hidden', mode !== 'flooring');
   document.getElementById('roofingPanel').classList.toggle('hidden', mode !== 'roofing');
+  document.getElementById('gutterPanel').classList.toggle('hidden', mode !== 'gutters');
+  document.getElementById('sidingPanel').classList.toggle('hidden', mode !== 'siding');
+  document.getElementById('framingPanel').classList.toggle('hidden', mode !== 'framing');
 }
 
 function applyPricingStructure(trade, structure) {
@@ -7982,6 +8326,27 @@ function bindRoofingInputs() {
     document.getElementById(id).addEventListener('input', updateRoofingSubtotal);
   });
   updateRoofingSubtotal();
+}
+
+function bindGutterInputs() {
+  ['gutterLinearFt','gutterRate','gutterDownspoutCount','gutterDownspoutRate','gutterGuardFt','gutterGuardRate','gutterDisposal'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateGutterSubtotal);
+  });
+  updateGutterSubtotal();
+}
+
+function bindSidingInputs() {
+  ['sidingArea','sidingMaterialRate','sidingInstallRate','sidingWasteFactor','sidingTearOff','sidingTrim'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateSidingSubtotal);
+  });
+  updateSidingSubtotal();
+}
+
+function bindFramingInputs() {
+  ['framingArea','framingRate','framingLumber'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateFramingSubtotal);
+  });
+  updateFramingSubtotal();
 }
 
 function bindNav() {
@@ -8889,6 +9254,37 @@ function updateRoofingSubtotal() {
   document.getElementById('roofingSubtotal').textContent = fmt(sub);
 }
 
+function updateGutterSubtotal() {
+  const linft = parseFloat(document.getElementById('gutterLinearFt').value) || 0;
+  const rate = parseFloat(document.getElementById('gutterRate').value) || 0;
+  const dsCount = parseFloat(document.getElementById('gutterDownspoutCount').value) || 0;
+  const dsRate = parseFloat(document.getElementById('gutterDownspoutRate').value) || 0;
+  const guardFt = parseFloat(document.getElementById('gutterGuardFt').value) || 0;
+  const guardRate = parseFloat(document.getElementById('gutterGuardRate').value) || 0;
+  const disposal = parseFloat(document.getElementById('gutterDisposal').value) || 0;
+  const sub = (linft * rate) + (dsCount * dsRate) + (guardFt * guardRate) + disposal;
+  document.getElementById('gutterSubtotal').textContent = fmt(sub);
+}
+
+function updateSidingSubtotal() {
+  const area = parseFloat(document.getElementById('sidingArea').value) || 0;
+  const materialRate = parseFloat(document.getElementById('sidingMaterialRate').value) || 0;
+  const installRate = parseFloat(document.getElementById('sidingInstallRate').value) || 0;
+  const waste = parseFloat(document.getElementById('sidingWasteFactor').value) || 0;
+  const tearOff = parseFloat(document.getElementById('sidingTearOff').value) || 0;
+  const trim = parseFloat(document.getElementById('sidingTrim').value) || 0;
+  const sub = (area * (materialRate + installRate) * (1 + waste / 100)) + tearOff + trim;
+  document.getElementById('sidingSubtotal').textContent = fmt(sub);
+}
+
+function updateFramingSubtotal() {
+  const area = parseFloat(document.getElementById('framingArea').value) || 0;
+  const rate = parseFloat(document.getElementById('framingRate').value) || 0;
+  const lumber = parseFloat(document.getElementById('framingLumber').value) || 0;
+  const sub = (area * rate) + lumber;
+  document.getElementById('framingSubtotal').textContent = fmt(sub);
+}
+
 function updateUsageDisplay() {
   if (typeof refreshVerifyReminder === 'function') refreshVerifyReminder();
   const labelEl = document.querySelector('.usage-label');
@@ -9462,7 +9858,7 @@ function buildContextForTradeState(tradeName, state) {
   const mode = state.mode;
 
   if (state.pricingStructure === 'flat-rate' &&
-      ['trucking','logistics','painting','flooring','roofing'].includes(state.mode)) {
+      ['trucking','logistics','painting','flooring','roofing','gutters','siding'].includes(state.mode)) {
     const trade = state.mode;
     const qty = parseFloat(get(`${trade}FlatQty`)) || 0;
     const unitKey = getStr(`${trade}FlatUnit`) || '';
@@ -9613,6 +10009,72 @@ function buildContextForTradeState(tradeName, state) {
       total,
     };
   }
+  if (mode === 'gutters') {
+    const linft = parseFloat(get('gutterLinearFt')) || 0;
+    const rate = parseFloat(get('gutterRate')) || 0;
+    const material = getStr('gutterMaterial') || 'Aluminum';
+    const style = getStr('gutterStyle') || 'K-style';
+    const dsCount = parseFloat(get('gutterDownspoutCount')) || 0;
+    const dsRate = parseFloat(get('gutterDownspoutRate')) || 0;
+    const guardFt = parseFloat(get('gutterGuardFt')) || 0;
+    const guardRate = parseFloat(get('gutterGuardRate')) || 0;
+    const disposal = parseFloat(get('gutterDisposal')) || 0;
+    const gutterRun = linft * rate;
+    const downspouts = dsCount * dsRate;
+    const guards = guardFt * guardRate;
+    const total = gutterRun + downspouts + guards + disposal;
+    return {
+      mode,
+      summary: [
+        `${linft} linear feet of ${style} ${material.toLowerCase()} gutters at $${rate}/ft = $${gutterRun.toFixed(2)}.`,
+        dsCount > 0 ? `${dsCount} downspouts at $${dsRate} each = $${downspouts.toFixed(2)}.` : '',
+        guardFt > 0 ? `${guardFt} ft of gutter guard at $${guardRate}/ft = $${guards.toFixed(2)}.` : '',
+        disposal > 0 ? `Tear-off and disposal: $${disposal}.` : '',
+        `Total: $${total.toFixed(2)}.`,
+      ].filter(Boolean).join(' '),
+      total,
+    };
+  }
+  if (mode === 'siding') {
+    const area = parseFloat(get('sidingArea')) || 0;
+    const material = getStr('sidingMaterial') || 'Vinyl';
+    const materialRate = parseFloat(get('sidingMaterialRate')) || 0;
+    const installRate = parseFloat(get('sidingInstallRate')) || 0;
+    const waste = parseFloat(get('sidingWasteFactor')) || 0;
+    const tearOff = parseFloat(get('sidingTearOff')) || 0;
+    const trim = parseFloat(get('sidingTrim')) || 0;
+    const base = area * (materialRate + installRate);
+    const wasteCost = base * (waste / 100);
+    const total = base + wasteCost + tearOff + trim;
+    return {
+      mode,
+      summary: [
+        `${area} sq ft of ${material.toLowerCase()} siding with ${waste}% waste factor.`,
+        `Materials: $${materialRate}/sq ft, installation: $${installRate}/sq ft.`,
+        `Base cost $${base.toFixed(2)}, waste $${wasteCost.toFixed(2)}.`,
+        tearOff > 0 ? `Tear-off and disposal: $${tearOff}.` : '',
+        trim > 0 ? `Trim, flashing and accessories: $${trim}.` : '',
+        `Total: $${total.toFixed(2)}.`,
+      ].filter(Boolean).join(' '),
+      total,
+    };
+  }
+  if (mode === 'framing') {
+    const area = parseFloat(get('framingArea')) || 0;
+    const rate = parseFloat(get('framingRate')) || 0;
+    const lumber = parseFloat(get('framingLumber')) || 0;
+    const labor = area * rate;
+    const total = labor + lumber;
+    return {
+      mode,
+      summary: [
+        `${area} sq ft of framing at $${rate}/sq ft labor = $${labor.toFixed(2)}.`,
+        lumber > 0 ? `Lumber and materials: $${lumber}.` : '',
+        `Total: $${total.toFixed(2)}.`,
+      ].filter(Boolean).join(' '),
+      total,
+    };
+  }
   return { mode, summary: '', total: 0 };
 }
 
@@ -9648,6 +10110,9 @@ const TRADE_GUIDANCE = {
   Flooring: 'Flooring quote conventions: Use flooring terminology: subfloor, underlayment, acclimation (hardwood), transitions/T-molding, baseboards, waste factor. Always include a waste factor (typically 10% for most materials, 15% for diagonal patterns). Distinguish material cost from installation labor. Mention tear-out and disposal of existing flooring as a separate line. Typical payment: 50% on materials, balance on completion. Typical warranty: manufacturer warranty on materials, 1-year labor. Common line items: Tear-out and disposal, Subfloor prep, Materials (with waste factor), Installation labor, Transitions and finish work.',
   General: 'General contracting conventions: Scope tends to span multiple trades and may include subcontractors. Use construction terminology: scope, change orders, subcontractors, permits, project management/supervision. Mention how change orders are handled in payment terms. For larger jobs, structure payments as progress milestones (e.g., 25% deposit, 25% at rough-in, 25% at substantial completion, 25% retainage on final). Typical warranty: 1 year on workmanship, longer on structural elements. Common line items vary widely by job — break out by major scope area.',
   Logistics: 'Logistics quote conventions: Use logistics terminology like BOL, pallet positions, accessorials, dock-to-dock, and freight class. Distinguish linehaul/transportation from accessorial fees and handling charges. Mention standard commercial payment terms such as NET 30 and include cargo claims/ liability language when appropriate. Common line items: Linehaul, Accessorials, Handling & labor, Storage or special services.',
+  Gutters: 'Gutters quote conventions: Bid by linear feet of gutter run, with downspouts counted and priced separately (typically $50-100 each installed). Use gutter terminology: K-style vs half-round, seamless (run on-site) vs sectional, fascia and soffit, downspout elbows, splash blocks, gutter guards/leaf protection. Always include tear-off and disposal of old gutters as a separate line when applicable. Note material on the line items (aluminum, copper, steel) since cost varies widely. Typical payment: 50% deposit on jobs over $1,000, balance on completion. Typical warranty: 1-year workmanship, manufacturer warranty on materials (often 20+ years on seamless aluminum). Common line items: Gutter run, Downspouts, Gutter guards (if included), Tear-off and disposal, Trip/setup charge if applicable.',
+  Siding: 'Siding quote conventions: Bid by square feet of wall area. Material choice drives the bulk of cost (vinyl entry-level → fiber cement mid → wood/steel premium). Always include a waste factor (typically 10%, higher on cut-up walls or board-and-batten patterns). Use siding terminology: housewrap/weather barrier, J-channel, starter strip, corner posts, flashing around windows/doors, soffit and fascia, drip cap. Tear-off and disposal of existing siding is a major separate line on replacement jobs. Trim, flashing, and accessories often run 10-20% of material cost. Typical payment: 1/3 deposit, 1/3 on material delivery, 1/3 on completion for jobs over $5,000. Typical warranty: 1-2 years workmanship, manufacturer warranty on materials (20-50 years on premium products). Common line items: Tear-off and disposal, Housewrap/weather barrier, Siding material (with waste), Installation labor, Trim and flashing, Cleanup.',
+  Framing: 'Framing quote conventions: Bid by square feet of framed area, with lumber/materials broken out separately since prices fluctuate weekly. Use framing terminology: studs (2×4 / 2×6), on-center spacing (16" or 24"), top and bottom plates, headers over openings, blocking, fire-blocking, jack studs, king studs, cripples, joists, rim board, sheathing (OSB or plywood), shear walls, load-bearing vs non-load-bearing. Lumber package should be its own line item with the species and grade noted (e.g., #2 SPF 2×4×8). For interior framing, simple per sqft labor + lumber works. For exterior/structural, include sheathing, fasteners, and engineered headers separately. Always note inspection responsibility and code compliance. Typical payment: 30-50% deposit, balance on rough-in inspection passing. Typical warranty: 1-year workmanship; structural elements covered longer on new construction. Common line items: Lumber & materials, Sheathing, Framing labor, Fasteners and connectors, Trip/setup if applicable.',
   Landscaping: 'Landscaping quote conventions: Use landscaping terminology: hardscape, softscape, irrigation runs, drainage, grading, specimen plants, mulch, soil amendments, edging. Distinguish between hardscape (pavers, walls, patios) and softscape (plants, sod, mulch). Mention plant warranty (typically 1 year / one growing season — must be cared for per instructions). Typical payment: 50% deposit on installs, NET 30 on maintenance. Typical warranty: 1 year on plants, longer on hardscape. Common line items: Site prep and grading, Materials (plants/hardscape/mulch), Installation labor, Cleanup and haul-off.',
 };
 
@@ -9663,6 +10128,9 @@ function buildPrompt({ pricingContext, timeline, taxRate, taxLabel, clientName, 
       if (t.mode === 'painting') return 'This is a PAINTING segment. Use painting terminology (surface prep, cut-in, rolling, primer, coats, trim/detail).';
       if (t.mode === 'flooring') return 'This is a FLOORING segment. Use flooring terminology (subfloor prep, waste factor, transitions, tear-out, underlayment, finish).';
       if (t.mode === 'roofing') return 'This is a ROOFING segment. Use roofing terminology (squares, tear-off, underlayment, flashing, disposal, accessories). Mention weather contingency.';
+      if (t.mode === 'gutters') return 'This is a GUTTERS segment. Use gutter terminology (linear feet, downspouts, K-style vs half-round, seamless vs sectional, fascia, splash blocks, gutter guards, tear-off of old gutters). Mention the material (aluminum/copper/etc.) since it drives perception of value.';
+      if (t.mode === 'siding') return 'This is a SIDING segment. Use siding terminology (sqft, housewrap/weather barrier, J-channel, starter strip, corner posts, flashing around openings, trim, drip cap, tear-off of old siding). Name the material since it sets the price tier.';
+      if (t.mode === 'framing') return 'This is a FRAMING segment. Use carpentry/framing terminology (studs 2×4 or 2×6, on-center spacing, top/bottom plates, headers, blocking, sheathing, joists, load-bearing). Lumber is typically a separate line because prices fluctuate.';
       return '';
     })();
     const flatRateNote = t.isFlatRate
@@ -11438,12 +11906,24 @@ async function clearForm(silent) {
     ['roofSquares', ''], ['roofMaterialType', 'Asphalt shingles'],
     ['roofMaterialRate', ''], ['roofLaborRate', ''],
     ['roofTearOffRate', ''], ['roofDisposal', ''], ['roofAccessories', ''],
+    // Gutters
+    ['gutterLinearFt', ''], ['gutterRate', ''], ['gutterMaterial', 'Aluminum'], ['gutterStyle', 'K-style'],
+    ['gutterDownspoutCount', ''], ['gutterDownspoutRate', ''],
+    ['gutterGuardFt', ''], ['gutterGuardRate', ''], ['gutterDisposal', ''],
+    // Siding
+    ['sidingArea', ''], ['sidingMaterial', 'Vinyl'],
+    ['sidingMaterialRate', ''], ['sidingInstallRate', ''], ['sidingWasteFactor', ''],
+    ['sidingTearOff', ''], ['sidingTrim', ''],
+    // Framing
+    ['framingArea', ''], ['framingRate', ''], ['framingLumber', ''],
     // Flat-rate sub-mode fields
     ['truckingFlatQty', ''], ['truckingFlatUnit', 'trips'], ['truckingFlatCustomUnit', ''], ['truckingFlatMaterial', ''], ['truckingFlatRate', ''],
     ['logisticsFlatQty', ''], ['logisticsFlatUnit', 'pallets'], ['logisticsFlatCustomUnit', ''], ['logisticsFlatMaterial', ''], ['logisticsFlatRate', ''],
     ['paintingFlatQty', ''], ['paintingFlatUnit', 'sqft'], ['paintingFlatCustomUnit', ''], ['paintingFlatMaterial', ''], ['paintingFlatRate', ''],
     ['flooringFlatQty', ''], ['flooringFlatUnit', 'sqft'], ['flooringFlatCustomUnit', ''], ['flooringFlatMaterial', ''], ['flooringFlatRate', ''],
     ['roofingFlatQty', ''], ['roofingFlatUnit', 'squares'], ['roofingFlatCustomUnit', ''], ['roofingFlatMaterial', ''], ['roofingFlatRate', ''],
+    ['gutterFlatQty', ''], ['gutterFlatUnit', 'linft'], ['gutterFlatCustomUnit', ''], ['gutterFlatMaterial', ''], ['gutterFlatRate', ''],
+    ['sidingFlatQty', ''], ['sidingFlatUnit', 'sqft'], ['sidingFlatCustomUnit', ''], ['sidingFlatMaterial', ''], ['sidingFlatRate', ''],
     // Rush surcharge
     ['rushSurcharge', ''],
     ['depositPercent', String(resolvedDeposit)],
@@ -11485,7 +11965,7 @@ async function clearForm(silent) {
   updateRoofingSubtotal();
 
   // Reset all specialty pricing structures back to per-unit
-  ['trucking','logistics','painting','flooring','roofing'].forEach(trade => {
+  ['trucking','logistics','painting','flooring','roofing','gutters','siding'].forEach(trade => {
     applyPricingStructure(trade, 'per-unit');
     const customInput = document.getElementById(`${trade}FlatCustomUnit`);
     if (customInput) customInput.classList.add('hidden');
