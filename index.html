@@ -605,6 +605,80 @@
     letter-spacing: -0.02em;
   }
 
+  /* === Windows row repeater === */
+  .windows-row-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .windows-row {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+  }
+  .windows-row-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-2);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .windows-row-remove {
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--ink-3);
+    font-size: 14px;
+    line-height: 1;
+    padding: 4px 8px;
+    cursor: pointer;
+  }
+  .windows-row-remove:hover:not(:disabled) {
+    background: var(--surface-2);
+    color: var(--ink);
+  }
+  .windows-row-remove:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .windows-row-subtotal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--line);
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .windows-row-subtotal-amt {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .windows-add-row {
+    width: 100%;
+    background: transparent;
+    border: 1px dashed var(--line);
+    border-radius: var(--radius-sm);
+    color: var(--ink-2);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    cursor: pointer;
+  }
+  .windows-add-row:hover {
+    background: var(--surface);
+    color: var(--ink);
+    border-style: solid;
+  }
+
   /* === Timeline === */
   .timeline-pills {
     display: flex;
@@ -3015,54 +3089,8 @@
                       data-i18n="substruct.flat">Flat rate</button>
             </div>
             <div class="per-unit-fields" id="windowsPerUnitFields">
-              <div class="field-row cols-2">
-                <div>
-                  <label class="label" data-i18n="windows.count"># of windows</label>
-                  <input type="number" class="input" id="windowCount" placeholder="0" min="0" step="1" />
-                </div>
-                <div>
-                  <label class="label" data-i18n="windows.type">Window type</label>
-                  <select class="select" id="windowType">
-                    <option value="Double-hung" data-i18n="windows.types.doubleHung">Double-hung</option>
-                    <option value="Single-hung" data-i18n="windows.types.singleHung">Single-hung</option>
-                    <option value="Casement" data-i18n="windows.types.casement">Casement</option>
-                    <option value="Sliding" data-i18n="windows.types.sliding">Sliding</option>
-                    <option value="Picture" data-i18n="windows.types.picture">Picture</option>
-                    <option value="Awning" data-i18n="windows.types.awning">Awning</option>
-                    <option value="Bay or bow" data-i18n="windows.types.bayBow">Bay or bow</option>
-                    <option value="Other" data-i18n="windows.types.other">Other</option>
-                  </select>
-                </div>
-              </div>
-              <div class="field-row cols-2">
-                <div>
-                  <label class="label" data-i18n="windows.frameMaterial">Frame material</label>
-                  <select class="select" id="windowFrameMaterial">
-                    <option value="Vinyl" data-i18n="windows.frames.vinyl">Vinyl</option>
-                    <option value="Aluminum" data-i18n="windows.frames.aluminum">Aluminum</option>
-                    <option value="Wood" data-i18n="windows.frames.wood">Wood</option>
-                    <option value="Fiberglass" data-i18n="windows.frames.fiberglass">Fiberglass</option>
-                    <option value="Composite" data-i18n="windows.frames.composite">Composite</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="label" data-i18n="windows.installType">Install type</label>
-                  <select class="select" id="windowInstallType">
-                    <option value="Insert / pocket" data-i18n="windows.installs.insert">Insert / pocket</option>
-                    <option value="Full-frame" data-i18n="windows.installs.fullFrame">Full-frame</option>
-                  </select>
-                </div>
-              </div>
-              <div class="field-row cols-2">
-                <div>
-                  <label class="label" data-i18n="windows.unitCost">Cost per window unit ($)</label>
-                  <input type="number" class="input" id="windowUnitCost" placeholder="0" min="0" step="0.01" />
-                </div>
-                <div>
-                  <label class="label" data-i18n="windows.laborPerWindow">Labor per window ($)</label>
-                  <input type="number" class="input" id="windowLaborPerWindow" placeholder="0" min="0" step="0.01" />
-                </div>
-              </div>
+              <div id="windowsRowList" class="windows-row-list"></div>
+              <button type="button" id="windowsAddRowBtn" class="windows-add-row" data-i18n="windows.addRow">+ Add window type</button>
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="windows.disposal">Tear-off &amp; disposal of old windows ($)</label>
@@ -4872,6 +4900,9 @@ const I18N = {
     'windows.unitCost': 'Cost per window unit ($)',
     'windows.laborPerWindow': 'Labor per window ($)',
     'windows.disposal': 'Tear-off & disposal of old windows ($)',
+    'windows.rowHeader': 'Window type {n}',
+    'windows.addRow': '+ Add window type',
+    'windows.removeRow': 'Remove window type',
 
     'drywall.scope.hang': 'Hang',
     'drywall.scope.finish': 'Finish',
@@ -5774,6 +5805,9 @@ const I18N = {
     'windows.unitCost': 'Costo por unidad de ventana ($)',
     'windows.laborPerWindow': 'Mano de obra por ventana ($)',
     'windows.disposal': 'Retiro y desecho de ventanas viejas ($)',
+    'windows.rowHeader': 'Tipo de ventana {n}',
+    'windows.addRow': '+ Agregar tipo de ventana',
+    'windows.removeRow': 'Eliminar tipo de ventana',
 
     'drywall.scope.hang': 'Colgar',
     'drywall.scope.finish': 'Resanar',
@@ -6579,6 +6613,9 @@ function applyLanguage() {
   if (typeof renderTrades === 'function') renderTrades();
   if (typeof renderTradeTabs === 'function') renderTradeTabs();
   if (typeof renderJobsView === 'function') renderJobsView();
+  // Dynamic Windows row headers carry interpolated {n} that data-i18n alone
+  // can't refresh — re-render them after a language toggle.
+  if (typeof renumberWindowRowHeaders === 'function') renumberWindowRowHeaders();
   if (typeof renderPaymentsView === 'function'
       && typeof currentView !== 'undefined' && currentView === 'payments') {
     renderPaymentsView();
@@ -7838,7 +7875,10 @@ const PRICING_INPUTS_BY_MODE = {
   gutters:   ['gutterLinearFt','gutterRate','gutterMaterial','gutterStyle','gutterDownspoutCount','gutterDownspoutRate','gutterGuardFt','gutterGuardRate','gutterDisposal','gutterFlatQty','gutterFlatUnit','gutterFlatCustomUnit','gutterFlatMaterial','gutterFlatRate'],
   siding:    ['sidingArea','sidingMaterial','sidingMaterialRate','sidingInstallRate','sidingWasteFactor','sidingTearOff','sidingTrim','sidingFlatQty','sidingFlatUnit','sidingFlatCustomUnit','sidingFlatMaterial','sidingFlatRate'],
   framing:   ['framingArea','framingRate','framingLumber'],
-  windows:   ['windowCount','windowType','windowFrameMaterial','windowInstallType','windowUnitCost','windowLaborPerWindow','windowDisposal','windowsFlatQty','windowsFlatUnit','windowsFlatCustomUnit','windowsFlatMaterial','windowsFlatRate'],
+  // Per-row Windows fields (count/type/frameMaterial/installType/unitCost/laborPerWindow)
+  // are dynamic-row elements with NO global IDs after the row-repeater refactor —
+  // they're handled by custom snapshot/restore branches via setWindowsRows().
+  windows:   ['windowDisposal','windowsFlatQty','windowsFlatUnit','windowsFlatCustomUnit','windowsFlatMaterial','windowsFlatRate'],
   drywall:   ['drywallSheetCount','drywallArea','drywallHangRate','drywallFinishRate','drywallHangFlat','drywallFinishFlat','drywallFinishLevel'],
 };
 
@@ -7862,7 +7902,7 @@ const PRICING_DEFAULTS = {
   gutters:   { gutterLinearFt: '', gutterRate: '', gutterMaterial: 'Aluminum', gutterStyle: 'K-style', gutterDownspoutCount: '', gutterDownspoutRate: '', gutterGuardFt: '', gutterGuardRate: '', gutterDisposal: '', gutterFlatQty: '', gutterFlatUnit: 'linft', gutterFlatCustomUnit: '', gutterFlatMaterial: '', gutterFlatRate: '' },
   siding:    { sidingArea: '', sidingMaterial: 'Vinyl', sidingMaterialRate: '', sidingInstallRate: '', sidingWasteFactor: '', sidingTearOff: '', sidingTrim: '', sidingFlatQty: '', sidingFlatUnit: 'sqft', sidingFlatCustomUnit: '', sidingFlatMaterial: '', sidingFlatRate: '' },
   framing:   { framingArea: '', framingRate: '', framingLumber: '' },
-  windows:   { windowCount: '', windowType: 'Double-hung', windowFrameMaterial: 'Vinyl', windowInstallType: 'Insert / pocket', windowUnitCost: '', windowLaborPerWindow: '', windowDisposal: '', windowsFlatQty: '', windowsFlatUnit: 'windows', windowsFlatCustomUnit: '', windowsFlatMaterial: '', windowsFlatRate: '' },
+  windows:   { windowsRows: null /* sentinel: setWindowsRows uses [defaultWindowRow()] */, windowDisposal: '', windowsFlatQty: '', windowsFlatUnit: 'windows', windowsFlatCustomUnit: '', windowsFlatMaterial: '', windowsFlatRate: '' },
   drywall:   { drywallScope: 'both', drywallUnit: 'sqft', drywallFinishLevel: '4', drywallSheetCount: '', drywallArea: '', drywallHangRate: '', drywallFinishRate: '', drywallHangFlat: '', drywallFinishFlat: '' },
 };
 
@@ -7904,6 +7944,9 @@ function snapshotPricingInputs(mode) {
     out.drywallScope = scopeBtn ? scopeBtn.dataset.scope : 'both';
     out.drywallUnit = unitBtn ? unitBtn.dataset.unit : 'sqft';
   }
+  if (mode === 'windows') {
+    out.windowsRows = readWindowRowsFromDOM();
+  }
   return out;
 }
 
@@ -7935,6 +7978,12 @@ function restorePricingInputs(snapshot) {
     applyDrywallScope(snapshot.drywallScope || 'both');
     applyDrywallUnit(snapshot.drywallUnit || 'sqft');
     renderDrywallFields();
+  }
+  if (mode === 'windows') {
+    const rows = (Array.isArray(snapshot.windowsRows) && snapshot.windowsRows.length > 0)
+      ? snapshot.windowsRows
+      : [defaultWindowRow()];
+    setWindowsRows(rows);
   }
 }
 
@@ -8647,10 +8696,268 @@ function bindFramingInputs() {
   updateFramingSubtotal();
 }
 
-function bindWindowsInputs() {
-  ['windowCount','windowUnitCost','windowLaborPerWindow','windowDisposal'].forEach(id => {
-    document.getElementById(id).addEventListener('input', updateWindowsSubtotal);
+// ============================================================================
+// Windows — multi-row repeater (per-unit mode). Each row is an independent
+// {count, type, frameMaterial, installType, unitCost, laborPerWindow} record.
+// Disposal stays panel-level. State lives ONLY in the DOM (cards) and in the
+// per-trade snapshot — no parallel JS array kept in sync.
+// ============================================================================
+const WINDOW_TYPE_OPTIONS = [
+  ['Double-hung',  'windows.types.doubleHung'],
+  ['Single-hung',  'windows.types.singleHung'],
+  ['Casement',     'windows.types.casement'],
+  ['Sliding',      'windows.types.sliding'],
+  ['Picture',      'windows.types.picture'],
+  ['Awning',       'windows.types.awning'],
+  ['Bay or bow',   'windows.types.bayBow'],
+  ['Other',        'windows.types.other'],
+];
+const WINDOW_FRAME_OPTIONS = [
+  ['Vinyl',        'windows.frames.vinyl'],
+  ['Aluminum',     'windows.frames.aluminum'],
+  ['Wood',         'windows.frames.wood'],
+  ['Fiberglass',   'windows.frames.fiberglass'],
+  ['Composite',    'windows.frames.composite'],
+];
+const WINDOW_INSTALL_OPTIONS = [
+  ['Insert / pocket', 'windows.installs.insert'],
+  ['Full-frame',      'windows.installs.fullFrame'],
+];
+
+function defaultWindowRow() {
+  return {
+    count: '',
+    type: 'Double-hung',
+    frameMaterial: 'Vinyl',
+    installType: 'Insert / pocket',
+    unitCost: '',
+    laborPerWindow: '',
+  };
+}
+
+// Pure subtotal math — DOM-free, harness-testable.
+function computeWindowsSubtotal(rows, disposal) {
+  const safeRows = Array.isArray(rows) ? rows : [];
+  let sum = 0;
+  for (const r of safeRows) {
+    const c = parseFloat(r && r.count) || 0;
+    const u = parseFloat(r && r.unitCost) || 0;
+    const l = parseFloat(r && r.laborPerWindow) || 0;
+    sum += c * (u + l);
+  }
+  sum += parseFloat(disposal) || 0;
+  return sum;
+}
+
+function readWindowRowsFromDOM() {
+  const cards = document.querySelectorAll('#windowsRowList .windows-row');
+  const out = [];
+  cards.forEach(card => {
+    const get = (f) => {
+      const el = card.querySelector(`[data-field="${f}"]`);
+      return el ? el.value : '';
+    };
+    out.push({
+      count: get('count'),
+      type: get('type'),
+      frameMaterial: get('frameMaterial'),
+      installType: get('installType'),
+      unitCost: get('unitCost'),
+      laborPerWindow: get('laborPerWindow'),
+    });
   });
+  return out;
+}
+
+function makeSelect(field, options, value) {
+  const sel = document.createElement('select');
+  sel.className = 'select';
+  sel.setAttribute('data-field', field);
+  options.forEach(([val, i18nKey]) => {
+    const opt = document.createElement('option');
+    opt.value = val;
+    opt.setAttribute('data-i18n', i18nKey);
+    opt.textContent = val;
+    if (val === value) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  return sel;
+}
+
+function createWindowRowCard(row) {
+  const safeRow = Object.assign(defaultWindowRow(), row || {});
+  const card = document.createElement('div');
+  card.className = 'windows-row';
+
+  // Header: "Window type N" + remove button
+  const header = document.createElement('div');
+  header.className = 'windows-row-header';
+  const title = document.createElement('span');
+  title.className = 'windows-row-title';
+  title.textContent = 'Window type'; // numeric suffix added by renumberWindowRowHeaders
+  const removeBtn = document.createElement('button');
+  removeBtn.type = 'button';
+  removeBtn.className = 'windows-row-remove';
+  removeBtn.setAttribute('data-i18n-aria', 'windows.removeRow');
+  removeBtn.setAttribute('aria-label', 'Remove window type');
+  removeBtn.textContent = '✕';
+  removeBtn.addEventListener('click', () => {
+    const list = document.getElementById('windowsRowList');
+    if (list.children.length <= 1) return; // guard: always keep at least one
+    card.remove();
+    renumberWindowRowHeaders();
+    updateWindowsSubtotal();
+  });
+  header.appendChild(title);
+  header.appendChild(removeBtn);
+  card.appendChild(header);
+
+  // Field group 1: count + type
+  const row1 = document.createElement('div');
+  row1.className = 'field-row cols-2';
+  row1.appendChild(makeField('windows.count', '# of windows', () => {
+    const i = document.createElement('input');
+    i.type = 'number'; i.className = 'input';
+    i.setAttribute('data-field', 'count');
+    i.placeholder = '0'; i.min = '0'; i.step = '1';
+    i.value = safeRow.count;
+    return i;
+  }));
+  row1.appendChild(makeField('windows.type', 'Window type', () =>
+    makeSelect('type', WINDOW_TYPE_OPTIONS, safeRow.type)));
+  card.appendChild(row1);
+
+  // Field group 2: frame material + install type
+  const row2 = document.createElement('div');
+  row2.className = 'field-row cols-2';
+  row2.appendChild(makeField('windows.frameMaterial', 'Frame material', () =>
+    makeSelect('frameMaterial', WINDOW_FRAME_OPTIONS, safeRow.frameMaterial)));
+  row2.appendChild(makeField('windows.installType', 'Install type', () =>
+    makeSelect('installType', WINDOW_INSTALL_OPTIONS, safeRow.installType)));
+  card.appendChild(row2);
+
+  // Field group 3: unitCost + laborPerWindow
+  const row3 = document.createElement('div');
+  row3.className = 'field-row cols-2';
+  row3.appendChild(makeField('windows.unitCost', 'Cost per window unit ($)', () => {
+    const i = document.createElement('input');
+    i.type = 'number'; i.className = 'input';
+    i.setAttribute('data-field', 'unitCost');
+    i.placeholder = '0'; i.min = '0'; i.step = '0.01';
+    i.value = safeRow.unitCost;
+    return i;
+  }));
+  row3.appendChild(makeField('windows.laborPerWindow', 'Labor per window ($)', () => {
+    const i = document.createElement('input');
+    i.type = 'number'; i.className = 'input';
+    i.setAttribute('data-field', 'laborPerWindow');
+    i.placeholder = '0'; i.min = '0'; i.step = '0.01';
+    i.value = safeRow.laborPerWindow;
+    return i;
+  }));
+  card.appendChild(row3);
+
+  // Per-row live subtotal
+  const subRow = document.createElement('div');
+  subRow.className = 'windows-row-subtotal';
+  const subLabel = document.createElement('span');
+  subLabel.className = 'windows-row-subtotal-label';
+  subLabel.textContent = '—';
+  const subAmt = document.createElement('span');
+  subAmt.className = 'windows-row-subtotal-amt';
+  subAmt.textContent = '$0.00';
+  subRow.appendChild(subLabel);
+  subRow.appendChild(subAmt);
+  card.appendChild(subRow);
+
+  // Recompute on any field change
+  card.querySelectorAll('input,select').forEach(el => {
+    const evt = el.tagName === 'SELECT' ? 'change' : 'input';
+    el.addEventListener(evt, updateWindowsSubtotal);
+  });
+
+  return card;
+}
+
+// Helper: build a label+field <div> with data-i18n on the label.
+function makeField(i18nKey, fallbackLabel, fieldBuilder) {
+  const wrap = document.createElement('div');
+  const lbl = document.createElement('label');
+  lbl.className = 'label';
+  lbl.setAttribute('data-i18n', i18nKey);
+  lbl.textContent = fallbackLabel;
+  wrap.appendChild(lbl);
+  wrap.appendChild(fieldBuilder());
+  return wrap;
+}
+
+function renumberWindowRowHeaders() {
+  const list = document.getElementById('windowsRowList');
+  if (!list) return;
+  const cards = list.querySelectorAll('.windows-row');
+  cards.forEach((card, i) => {
+    const title = card.querySelector('.windows-row-title');
+    if (title) title.textContent = t('windows.rowHeader', { n: i + 1 });
+    const removeBtn = card.querySelector('.windows-row-remove');
+    if (removeBtn) removeBtn.disabled = (cards.length <= 1);
+  });
+}
+
+function setWindowsRows(rows) {
+  const list = document.getElementById('windowsRowList');
+  if (!list) return;
+  list.innerHTML = '';
+  const safe = Array.isArray(rows) && rows.length > 0 ? rows : [defaultWindowRow()];
+  safe.forEach(r => list.appendChild(createWindowRowCard(r)));
+  renumberWindowRowHeaders();
+  applyLanguage(); // re-translate data-i18n on freshly-built rows
+  updateWindowsSubtotal();
+}
+
+function addWindowRow() {
+  const list = document.getElementById('windowsRowList');
+  if (!list) return;
+  list.appendChild(createWindowRowCard(defaultWindowRow()));
+  renumberWindowRowHeaders();
+  applyLanguage();
+  updateWindowsSubtotal();
+}
+
+function updateWindowsSubtotal() {
+  const rows = readWindowRowsFromDOM();
+  const disposalEl = document.getElementById('windowDisposal');
+  const disposal = disposalEl ? disposalEl.value : '';
+  const grand = computeWindowsSubtotal(rows, disposal);
+  const out = document.getElementById('windowsSubtotal');
+  if (out) out.textContent = fmt(grand);
+  // Update each row's own subtotal display.
+  const cards = document.querySelectorAll('#windowsRowList .windows-row');
+  cards.forEach((card, i) => {
+    const r = rows[i] || {};
+    const c = parseFloat(r.count) || 0;
+    const u = parseFloat(r.unitCost) || 0;
+    const l = parseFloat(r.laborPerWindow) || 0;
+    const rowSub = c * (u + l);
+    const lblEl = card.querySelector('.windows-row-subtotal-label');
+    const amtEl = card.querySelector('.windows-row-subtotal-amt');
+    if (lblEl) {
+      lblEl.textContent = (c > 0 && (u + l) > 0)
+        ? `${c} × $${(u + l).toFixed(2)}`
+        : '—';
+    }
+    if (amtEl) amtEl.textContent = fmt(rowSub);
+  });
+}
+
+function bindWindowsInputs() {
+  // Initial single row
+  setWindowsRows([defaultWindowRow()]);
+  // Add button
+  const addBtn = document.getElementById('windowsAddRowBtn');
+  if (addBtn) addBtn.addEventListener('click', addWindowRow);
+  // Disposal (panel-level)
+  const disposal = document.getElementById('windowDisposal');
+  if (disposal) disposal.addEventListener('input', updateWindowsSubtotal);
   updateWindowsSubtotal();
 }
 
@@ -9711,15 +10018,6 @@ function updateFramingSubtotal() {
   document.getElementById('framingSubtotal').textContent = fmt(sub);
 }
 
-function updateWindowsSubtotal() {
-  const count = parseFloat(document.getElementById('windowCount').value) || 0;
-  const unitCost = parseFloat(document.getElementById('windowUnitCost').value) || 0;
-  const laborPerWindow = parseFloat(document.getElementById('windowLaborPerWindow').value) || 0;
-  const disposal = parseFloat(document.getElementById('windowDisposal').value) || 0;
-  const sub = (count * (unitCost + laborPerWindow)) + disposal;
-  document.getElementById('windowsSubtotal').textContent = fmt(sub);
-}
-
 function updateUsageDisplay() {
   if (typeof refreshVerifyReminder === 'function') refreshVerifyReminder();
   const labelEl = document.querySelector('.usage-label');
@@ -10266,6 +10564,110 @@ window.__testDrywall = function () {
   return passed === results.length;
 };
 
+// Browser-console self-test harness for the Windows row repeater. Mostly
+// pure (computeWindowsSubtotal) with one optional DOM section that exercises
+// setWindowsRows + addWindowRow round-tripping through readWindowRowsFromDOM
+// when the Windows panel exists on the page.
+window.__testWindowsRepeater = function () {
+  const results = [];
+  const assert = (name, cond) => results.push({ name, pass: !!cond });
+  const near = (a, b) => Math.abs(a - b) < 0.0001;
+
+  // Single row: 6 × ($400 + $200) + $150 disposal = 3,750
+  assert('1 row: 6×($400+$200)+$150 = 3750',
+    near(3750, computeWindowsSubtotal(
+      [{ count: 6, unitCost: 400, laborPerWindow: 200 }],
+      150,
+    )));
+
+  // Three rows: 6×$600 + 2×$900 + 1×$2,600 + $150 = 8,150
+  assert('3 rows: 6×$600 + 2×$900 + 1×$2600 + $150 = 8150',
+    near(8150, computeWindowsSubtotal(
+      [
+        { count: 6, unitCost: 400, laborPerWindow: 200 }, // = 3600
+        { count: 2, unitCost: 600, laborPerWindow: 300 }, // = 1800
+        { count: 1, unitCost: 2000, laborPerWindow: 600 }, // = 2600
+      ],
+      150,
+    )));
+
+  // Empty row → 0 (no NaN), empty disposal → 0
+  assert('empty rows + empty disposal → 0',
+    computeWindowsSubtotal([{ count: '', unitCost: '', laborPerWindow: '' }], '') === 0);
+  assert('empty rows + empty disposal → not NaN',
+    !isNaN(computeWindowsSubtotal([{ count: '', unitCost: '', laborPerWindow: '' }], '')));
+
+  // Removing a row recomputes: start with 3 rows totalling 8000, drop the
+  // middle row (1800) → 6200 (still + $150 disposal = 6,350)
+  const threeRows = [
+    { count: 6, unitCost: 400, laborPerWindow: 200 }, // 3600
+    { count: 2, unitCost: 600, laborPerWindow: 300 }, // 1800
+    { count: 1, unitCost: 2000, laborPerWindow: 600 }, // 2600
+  ];
+  const twoRows = threeRows.filter((_, i) => i !== 1);
+  assert('drop middle row recomputes: 3600+2600+150 = 6350',
+    near(6350, computeWindowsSubtotal(twoRows, 150)));
+
+  // Disposal-only (zero rows of actual work)
+  assert('rows array with 0 counts + disposal $200 = 200',
+    near(200, computeWindowsSubtotal(
+      [{ count: 0, unitCost: 999, laborPerWindow: 999 }], 200)));
+
+  // Defensive: non-array → treated as empty
+  assert('non-array rows treated as empty',
+    computeWindowsSubtotal(null, 100) === 100);
+  assert('undefined rows treated as empty',
+    computeWindowsSubtotal(undefined, 50) === 50);
+
+  // DOM round-trip (only if the panel is rendered)
+  const list = document.getElementById('windowsRowList');
+  const disposalEl = document.getElementById('windowDisposal');
+  if (list && disposalEl && typeof setWindowsRows === 'function') {
+    const savedRows = readWindowRowsFromDOM();
+    const savedDisposal = disposalEl.value;
+    try {
+      setWindowsRows([
+        { count: '6', type: 'Double-hung', frameMaterial: 'Vinyl', installType: 'Insert / pocket', unitCost: '400', laborPerWindow: '200' },
+        { count: '2', type: 'Casement', frameMaterial: 'Wood', installType: 'Full-frame', unitCost: '700', laborPerWindow: '200' },
+      ]);
+      disposalEl.value = '150';
+      const cards = document.querySelectorAll('#windowsRowList .windows-row');
+      assert('DOM: setWindowsRows built 2 cards', cards.length === 2);
+      const readBack = readWindowRowsFromDOM();
+      assert('DOM: row 1 count round-trips',
+        readBack[0] && readBack[0].count === '6');
+      assert('DOM: row 1 type round-trips',
+        readBack[0] && readBack[0].type === 'Double-hung');
+      assert('DOM: row 2 frameMaterial round-trips',
+        readBack[1] && readBack[1].frameMaterial === 'Wood');
+      assert('DOM: row 2 installType round-trips',
+        readBack[1] && readBack[1].installType === 'Full-frame');
+      // 6×$600 + 2×$900 + $150 = 5,550
+      const live = computeWindowsSubtotal(readBack, '150');
+      assert('DOM: live grand total = 5550', near(5550, live));
+      // Remove button should be enabled (>1 row)
+      const removeBtns = document.querySelectorAll('#windowsRowList .windows-row-remove');
+      assert('DOM: 2 rows → remove buttons enabled',
+        Array.from(removeBtns).every(b => !b.disabled));
+      // Reset to single row → remove button should be disabled
+      setWindowsRows([defaultWindowRow()]);
+      const oneRemove = document.querySelector('#windowsRowList .windows-row-remove');
+      assert('DOM: 1 row → remove button disabled',
+        oneRemove && oneRemove.disabled === true);
+    } finally {
+      setWindowsRows(savedRows.length ? savedRows : [defaultWindowRow()]);
+      disposalEl.value = savedDisposal;
+    }
+  } else {
+    assert('DOM panel not present — DOM tests skipped (pass)', true);
+  }
+
+  const passed = results.filter(r => r.pass).length;
+  results.forEach(r => console.log((r.pass ? 'PASS' : 'FAIL') + ' — ' + r.name));
+  console.log(`__testWindowsRepeater: ${passed}/${results.length} passed`);
+  return passed === results.length;
+};
+
 // ============================================================================
 // Generate Quote (Anthropic API call)
 // ============================================================================
@@ -10672,27 +11074,29 @@ function buildContextForTradeState(tradeName, state) {
     return { mode, summary: lines.filter(Boolean).join(' '), total };
   }
   if (mode === 'windows') {
-    const count = parseFloat(get('windowCount')) || 0;
-    const type = getStr('windowType') || 'Double-hung';
-    const frame = getStr('windowFrameMaterial') || 'Vinyl';
-    const install = getStr('windowInstallType') || 'Insert / pocket';
-    const unitCost = parseFloat(get('windowUnitCost')) || 0;
-    const laborPerWindow = parseFloat(get('windowLaborPerWindow')) || 0;
+    const rawRows = Array.isArray(state.windowsRows) ? state.windowsRows : [defaultWindowRow()];
+    const rows = rawRows.map(r => ({
+      count: parseFloat(r.count) || 0,
+      type: (r.type || 'Double-hung'),
+      frameMaterial: (r.frameMaterial || 'Vinyl'),
+      installType: (r.installType || 'Insert / pocket'),
+      unitCost: parseFloat(r.unitCost) || 0,
+      laborPerWindow: parseFloat(r.laborPerWindow) || 0,
+    }));
     const disposal = parseFloat(get('windowDisposal')) || 0;
-    const units = count * unitCost;
-    const labor = count * laborPerWindow;
-    const total = units + labor + disposal;
-    return {
-      mode,
-      summary: [
-        `${count} ${type.toLowerCase()} window${count === 1 ? '' : 's'} with ${frame.toLowerCase()} frames, ${install.toLowerCase()} install.`,
-        `Window units: ${count} × $${unitCost} = $${units.toFixed(2)}.`,
-        laborPerWindow > 0 ? `Installation labor: ${count} × $${laborPerWindow} = $${labor.toFixed(2)}.` : '',
-        disposal > 0 ? `Tear-off and disposal of old windows: $${disposal}.` : '',
-        `Total: $${total.toFixed(2)}.`,
-      ].filter(Boolean).join(' '),
-      total,
-    };
+    const total = computeWindowsSubtotal(rawRows, disposal);
+    const lines = [];
+    rows.forEach((r, i) => {
+      const perWindow = r.unitCost + r.laborPerWindow;
+      const rowSub = r.count * perWindow;
+      if (r.count <= 0 && perWindow <= 0) return;
+      lines.push(
+        `ROW ${i + 1}: ${r.count}× ${r.type} ${r.frameMaterial} ${r.installType.toLowerCase()} window${r.count === 1 ? '' : 's'} at $${perWindow.toFixed(2)}/window = $${rowSub.toFixed(2)}.`
+      );
+    });
+    if (disposal > 0) lines.push(`Tear-off and disposal of old windows: $${disposal.toFixed(2)}.`);
+    lines.push(`Total: $${total.toFixed(2)}.`);
+    return { mode, summary: lines.join(' '), total };
   }
   return { mode, summary: '', total: 0 };
 }
@@ -10752,7 +11156,7 @@ function buildPrompt({ pricingContext, timeline, taxRate, taxLabel, clientName, 
       if (t.mode === 'gutters') return 'This is a GUTTERS segment. Use gutter terminology (linear feet, downspouts, K-style vs half-round, seamless vs sectional, fascia, splash blocks, gutter guards, tear-off of old gutters). Mention the material (aluminum/copper/etc.) since it drives perception of value.';
       if (t.mode === 'siding') return 'This is a SIDING segment. Use siding terminology (sqft, housewrap/weather barrier, J-channel, starter strip, corner posts, flashing around openings, trim, drip cap, tear-off of old siding). Name the material since it sets the price tier.';
       if (t.mode === 'framing') return 'This is a FRAMING segment. Use carpentry/framing terminology (studs 2×4 or 2×6, on-center spacing, top/bottom plates, headers, blocking, sheathing, joists, load-bearing). Lumber is typically a separate line because prices fluctuate.';
-      if (t.mode === 'windows') return 'This is a WINDOWS replacement segment. Pricing is PER WINDOW (count × per-window cost), not per area. Use window terminology (per-window unit pricing, insert/pocket vs full-frame replacement, frame material, U-factor, Low-E, ENERGY STAR, brickmold, sill flashing). Note the install type — full-frame disturbs exterior trim/siding while insert/pocket does not. Frame material drives the bulk of unit cost.';
+      if (t.mode === 'windows') return 'This is a WINDOWS replacement segment. Pricing is PER WINDOW (count × per-window cost), not per area. Use window terminology (per-window unit pricing, insert/pocket vs full-frame replacement, frame material, U-factor, Low-E, ENERGY STAR, brickmold, sill flashing). Note the install type — full-frame disturbs exterior trim/siding while insert/pocket does not. Frame material drives the bulk of unit cost. CRITICAL — MULTI-ROW HANDLING: The pricing context above may list multiple ROW lines (ROW 1, ROW 2, ...). When multiple rows are present, you MUST emit ONE distinct line item per row, named by window type and material (e.g. "6 Double-hung Vinyl windows", "2 Casement Wood windows" as SEPARATE line items). Do NOT combine rows into a single aggregated "8 windows" line item. Each row\'s amount must equal that row\'s subtotal. Disposal is its own separate line item if > $0.';
       if (t.mode === 'drywall') return 'This is a DRYWALL segment. Hanging and finishing are distinct operations — read the pricing context above to see whether the scope is hang-only, finish-only, or both, and respect that scope in the line items (do NOT add a finishing line if scope is hang-only, and vice versa). Use drywall terminology (sheets 4×8 / 4×12, 1/2" vs 5/8" Type-X, hanging vs finishing, taping/mudding/sanding, mesh vs paper tape, corner bead, Levels 0-5 finish — Level 4 standard, Level 5 for critical lighting). Honor the specified finish level if present. If pricing is per-sheet vs per-sq-ft vs flat-rate, mirror that structure in the line items.';
       return '';
     })();
@@ -12547,10 +12951,9 @@ async function clearForm(silent) {
     ['sidingTearOff', ''], ['sidingTrim', ''],
     // Framing
     ['framingArea', ''], ['framingRate', ''], ['framingLumber', ''],
-    // Windows
-    ['windowCount', ''], ['windowType', 'Double-hung'],
-    ['windowFrameMaterial', 'Vinyl'], ['windowInstallType', 'Insert / pocket'],
-    ['windowUnitCost', ''], ['windowLaborPerWindow', ''], ['windowDisposal', ''],
+    // Windows (per-row fields are dynamic — managed by setWindowsRows below;
+    // only disposal lives as a fixed panel-level input)
+    ['windowDisposal', ''],
     // Drywall
     ['drywallSheetCount', ''], ['drywallArea', ''],
     ['drywallHangRate', ''], ['drywallFinishRate', ''],
@@ -12624,6 +13027,10 @@ async function clearForm(silent) {
   applyDrywallScope('both');
   applyDrywallUnit('sqft');
   renderDrywallFields();
+
+  // Windows is a multi-row repeater — reset to a single default row so a
+  // cleared form doesn't keep yesterday's added rows around.
+  setWindowsRows([defaultWindowRow()]);
 
   document.getElementById('quoteWrap').classList.remove('visible');
   // Drop the bilingual snapshot so a future language toggle won't try to
