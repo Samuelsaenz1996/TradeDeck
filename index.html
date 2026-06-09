@@ -5048,6 +5048,7 @@ const I18N = {
     'toast.addJobDescFirst': 'Add a job description first',
     'toast.selectTradeFirst': 'Pick a trade first',
     'toast.addDescForTrade': 'Add a description for {trade} first',
+    'toast.addPricingForTrade': 'Add pricing for {trade} first',
     'toast.quoteDrafted': 'Quote drafted ✓',
     'toast.followupDrafted': 'Follow-up drafted ✓',
     'toast.genFailed': 'Generation failed',
@@ -5903,6 +5904,7 @@ const I18N = {
     'toast.addJobDescFirst': 'Agrega una descripción del trabajo primero',
     'toast.selectTradeFirst': 'Elige un oficio primero',
     'toast.addDescForTrade': 'Agrega una descripción para {trade} primero',
+    'toast.addPricingForTrade': 'Agrega el precio para {trade} primero',
     'toast.quoteDrafted': 'Cotización lista ✓',
     'toast.followupDrafted': 'Seguimiento listo ✓',
     'toast.genFailed': 'Falló la generación',
@@ -9773,6 +9775,22 @@ async function generateQuote() {
     }
   }
 
+  // Validate every selected trade has non-zero pricing. With placeholder-0
+  // empty inputs evaluate to $0, and the AI silently skips a trade whose
+  // subtotal is $0 (or any items it does generate get dropped by the
+  // amount > 0 filter downstream). Bounce the user to fix it before
+  // burning a quote credit on a partial result.
+  for (let i = 0; i < selectedTrades.length; i++) {
+    const name = tradeNameOf(selectedTrades[i]);
+    const state = tradePricingState[name];
+    const ctx = buildContextForTradeState(name, state);
+    if ((ctx.total || 0) <= 0) {
+      setActiveTrade(i);
+      showToast(t('toast.addPricingForTrade', { trade: tradeDisplay(name) }), true);
+      return;
+    }
+  }
+
   // Consume a credit. Real users → server-enforced RPC. Bypass → localStorage.
   if (!(await consumeQuotaOrShowError())) return;
 
@@ -9810,6 +9828,33 @@ async function generateQuote() {
       parsed.lineItems = parsed.lineItems.filter(li =>
         (parseFloat(li.amount) || 0) > 0
       );
+    }
+    // Defensive safety net: the AI sometimes silently drops a trade on multi-
+    // trade quotes (especially with mixed pricing modes). For any trade with
+    // > $0 subtotal that came back with zero matching line items, inject a
+    // single placeholder item carrying that trade's full subtotal — the user
+    // can edit/expand it. Better than letting the trade vanish.
+    if (!Array.isArray(parsed.lineItems)) parsed.lineItems = [];
+    const itemsByTrade = {};
+    parsed.lineItems.forEach(li => {
+      if (li.trade) itemsByTrade[li.trade] = (itemsByTrade[li.trade] || 0) + 1;
+    });
+    const droppedTrades = [];
+    pricingContext.trades.forEach(td => {
+      if (!itemsByTrade[td.name] && (td.total || 0) > 0) {
+        droppedTrades.push(td.name);
+        const desc = (td.jobDesc || '').trim().slice(0, 200);
+        parsed.lineItems.push({
+          name: { en: td.name + ' work', es: 'Trabajo de ' + (TRADE_LABELS_ES[td.name] || td.name).toLowerCase() },
+          desc: { en: desc, es: desc },
+          amount: td.total,
+          trade: td.name,
+        });
+      }
+    });
+    if (droppedTrades.length > 0) {
+      console.warn('AI dropped trades — placeholders injected:', droppedTrades,
+                   '| items by trade:', itemsByTrade);
     }
     parsed.tradePricingTargets = {};
     pricingContext.trades.forEach(td => {
@@ -10156,10 +10201,18 @@ function buildPrompt({ pricingContext, timeline, taxRate, taxLabel, clientName, 
 
 MULTI-TRADE QUOTE RULES:
 - This quote covers ${trades.length} distinct trades. Treat them as separate scopes of work in one document.
+- ⚠ CRITICAL — TRADE TAGGING: The lineItems array MUST contain entries for EVERY trade listed above. Every single item MUST include a "trade" field that EXACTLY matches one of these names (case-sensitive, no abbreviations, no synonyms): ${trades.map(t => '"' + t.name + '"').join(', ')}. Do NOT lump items from one trade under another's tag. Do NOT skip a trade because its pricing seems lower — generate items for it regardless. An item without a trade field, or with a misspelled trade field, will be incorrectly attributed and the quote will be wrong.
 - SCOPE: Write ${trades.length} short paragraphs, one per trade, in the order listed above. Start each paragraph with the trade name (e.g. "Roofing: ..."). Separate paragraphs with a blank line. The whole thing goes inside the single "scope.en" and "scope.es" strings — DO NOT use markdown headings, just plain text with blank-line separators.
-- LINE ITEMS: Generate 4 line items PER TRADE (so ${trades.length * 4} total), each reflecting a PHASE of the work in that trade's job description — NOT a 1:1 mapping of pricing components. If a contractor specified only labor for a trade (e.g. "10 hours × $50/hr"), still break that total across 4 descriptive phases (diagnosis, prep, primary work, finishing/testing). Every line item MUST include a "trade" field matching one of these trade names EXACTLY: ${trades.map(t => '"' + t.name + '"').join(', ')}. The amounts for each trade's line items must sum to approximately that trade's subtotal listed above. Do NOT invent new pricing components — only split the existing total into descriptive phases.
+- LINE ITEMS: Generate 4 line items PER TRADE (so ${trades.length * 4} total), each reflecting a PHASE of the work in that trade's job description — NOT a 1:1 mapping of pricing components. If a contractor specified only labor for a trade (e.g. "10 hours × $50/hr"), still break that total across 4 descriptive phases (diagnosis, prep, primary work, finishing/testing). The amounts for each trade's line items must sum to approximately that trade's subtotal listed above. Do NOT invent new pricing components — only split the existing total into descriptive phases.
 - WARRANTY: Write ${trades.length} short warranty paragraphs, one per trade, addressing the relevant warranty conventions for each. Same blank-line-separated format as scope. Start each with the trade name.
 - PAYMENT TERMS: Write ONE set of payment terms covering the combined total. Single deposit, single balance.
+
+VERIFY BEFORE RETURNING:
+1. lineItems contains exactly ${trades.length * 4} entries (4 per trade × ${trades.length} trades).
+2. Each of these trade names appears 4 times in the "trade" fields: ${trades.map(t => '"' + t.name + '"').join(', ')}.
+3. No item has a missing, empty, misspelled, or abbreviated "trade" field.
+4. The sum of amounts for each trade is within ±10% of its subtotal listed above.
+If your draft would violate any of these, regenerate it before returning the JSON.
 ` : `
 
 SINGLE-TRADE QUOTE:
