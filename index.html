@@ -792,6 +792,45 @@
   }
   .btn-danger:hover { background: #8F2C20; border-color: #8F2C20; color: #FFFFFF; }
 
+  /* === Settings → Account sections === */
+  .account-section {
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line-2);
+  }
+  .account-section-title {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-2);
+    margin-bottom: 12px;
+  }
+  .account-help {
+    color: var(--ink-3);
+    font-size: 11px;
+    display: block;
+    margin-top: 6px;
+    line-height: 1.45;
+  }
+  .account-danger-zone {
+    margin-top: 22px;
+    padding: 16px;
+    border: 1px solid #E8C7C0;
+    background: #FDF4F2;
+    border-radius: var(--radius);
+  }
+  .account-danger-title {
+    color: var(--bad);
+    margin-bottom: 8px;
+  }
+  .account-danger-desc {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+
   /* === Loading === */
   .spinner {
     width: 14px;
@@ -4315,6 +4354,37 @@
             <span data-i18n="profile.account.memberSince">Member since</span>
             <span id="profileMemberSince">—</span>
           </div>
+
+          <div class="account-section">
+            <div class="account-section-title" data-i18n="account.password.title">Change password</div>
+            <div class="field-row cols-2">
+              <div class="field">
+                <label class="label" for="accountNewPassword" data-i18n="account.password.new">New password</label>
+                <input type="password" class="input" id="accountNewPassword" autocomplete="new-password" minlength="8" />
+              </div>
+              <div class="field">
+                <label class="label" for="accountNewPasswordConfirm" data-i18n="account.password.confirm">Confirm new password</label>
+                <input type="password" class="input" id="accountNewPasswordConfirm" autocomplete="new-password" minlength="8" />
+              </div>
+            </div>
+            <button id="accountChangePasswordBtn" type="button" class="btn-secondary" data-i18n="account.password.btn">Update password</button>
+          </div>
+
+          <div class="account-section">
+            <div class="account-section-title" data-i18n="account.email.title">Change email</div>
+            <div class="field">
+              <label class="label" for="accountNewEmail" data-i18n="account.email.new">New email address</label>
+              <input type="email" class="input" id="accountNewEmail" autocomplete="email" />
+              <small class="account-help" data-i18n="account.email.help">We'll send a confirmation link to the new address. You'll also need to re-verify it to download and send your quotes again.</small>
+            </div>
+            <button id="accountChangeEmailBtn" type="button" class="btn-secondary" data-i18n="account.email.btn">Update email</button>
+          </div>
+
+          <div class="account-danger-zone">
+            <div class="account-section-title account-danger-title" data-i18n="account.danger.title">Danger zone</div>
+            <div class="account-danger-desc" data-i18n="account.delete.desc">Permanently delete your account and all your quotes, invoices, clients, follow-ups, and jobs. Your subscription will be cancelled. This cannot be undone.</div>
+            <button id="accountDeleteBtn" type="button" class="btn-secondary btn-danger" data-i18n="account.delete.btn">Delete account</button>
+          </div>
         </div>
       </div>
 
@@ -4534,6 +4604,28 @@
   </div>
 </div>
 
+<div id="deleteAccountBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="deleteAccountTitle">
+  <div class="modal-card">
+    <div class="modal-title" id="deleteAccountTitle" data-i18n="account.delete.modalTitle">Delete account</div>
+    <div class="modal-body">
+      <p data-i18n="account.delete.modalBody">This permanently deletes your account and all your quotes, invoices, clients, follow-ups, and jobs. Your subscription will be cancelled. This cannot be undone.</p>
+      <div class="field" style="margin-top: 16px;">
+        <label class="label" for="deleteAccountConfirmText" data-i18n="account.delete.typePrompt">Type DELETE to confirm</label>
+        <input type="text" class="input" id="deleteAccountConfirmText" autocomplete="off" autocapitalize="characters" spellcheck="false" />
+      </div>
+      <div class="field">
+        <label class="label" for="deleteAccountPassword" data-i18n="account.delete.passwordPrompt">Your password</label>
+        <input type="password" class="input" id="deleteAccountPassword" autocomplete="current-password" />
+      </div>
+      <div id="deleteAccountError" class="hidden" style="margin-top: 10px; color: var(--bad); font-size: 13px; line-height: 1.45;"></div>
+    </div>
+    <div class="modal-actions">
+      <button id="deleteAccountCancel" type="button" class="modal-btn modal-btn-cancel" data-i18n="modal.cancel">Cancel</button>
+      <button id="deleteAccountConfirm" type="button" class="modal-btn modal-btn-danger" disabled data-i18n="account.delete.modalConfirm">Delete my account</button>
+    </div>
+  </div>
+</div>
+
 <div id="upgradeModalBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="upgradeModalTitle">
   <div class="modal-card modal-card-wide">
     <div class="modal-title" id="upgradeModalTitle" data-i18n="upgrade.title">Upgrade to Pro</div>
@@ -4695,6 +4787,35 @@ const I18N = {
     'upgrade.continue': 'Get Pro',
     'upgrade.continuing': 'Redirecting…',
     'upgrade.manage': 'Manage subscription',
+
+    'account.password.title': 'Change password',
+    'account.password.new': 'New password',
+    'account.password.confirm': 'Confirm new password',
+    'account.password.btn': 'Update password',
+    'account.password.updating': 'Updating…',
+    'account.password.success': 'Password updated.',
+    'account.password.failed': 'Could not update password',
+    'account.email.title': 'Change email',
+    'account.email.new': 'New email address',
+    'account.email.help': "We'll send a confirmation link to the new address. You'll also need to re-verify it to download and send your quotes again.",
+    'account.email.btn': 'Update email',
+    'account.email.updating': 'Updating…',
+    'account.email.invalid': 'Please enter a valid email address.',
+    'account.email.success': 'Check your new email to confirm the change. You\'ll also need to verify the new address to download and send your quotes again.',
+    'account.email.failed': 'Could not update email',
+    'account.danger.title': 'Danger zone',
+    'account.delete.desc': 'Permanently delete your account and all your quotes, invoices, clients, follow-ups, and jobs. Your subscription will be cancelled. This cannot be undone.',
+    'account.delete.btn': 'Delete account',
+    'account.delete.modalTitle': 'Delete account',
+    'account.delete.modalBody': 'This permanently deletes your account and all your quotes, invoices, clients, follow-ups, and jobs. Your subscription will be cancelled. This cannot be undone.',
+    'account.delete.typePrompt': 'Type DELETE to confirm',
+    'account.delete.passwordPrompt': 'Your password',
+    'account.delete.passwordRequired': 'Please enter your password.',
+    'account.delete.wrongPassword': 'Incorrect password. If you signed in with a magic link, set a password first using Change Password above.',
+    'account.delete.modalConfirm': 'Delete my account',
+    'account.delete.deleting': 'Deleting…',
+    'account.delete.success': 'Your account has been deleted.',
+    'account.delete.failed': 'Could not delete account, please try again.',
     'upgrade.alreadyPro': "You're already on Pro.",
     'upgrade.checkoutSuccess': '🎉 Welcome to Pro! Your subscription is active.',
     'upgrade.checkoutCanceled': 'Checkout canceled — no charge was made.',
@@ -5600,6 +5721,35 @@ const I18N = {
     'upgrade.continue': 'Obtener Pro',
     'upgrade.continuing': 'Redirigiendo…',
     'upgrade.manage': 'Administrar suscripción',
+
+    'account.password.title': 'Cambiar contraseña',
+    'account.password.new': 'Nueva contraseña',
+    'account.password.confirm': 'Confirmar nueva contraseña',
+    'account.password.btn': 'Actualizar contraseña',
+    'account.password.updating': 'Actualizando…',
+    'account.password.success': 'Contraseña actualizada.',
+    'account.password.failed': 'No se pudo actualizar la contraseña',
+    'account.email.title': 'Cambiar correo',
+    'account.email.new': 'Nuevo correo electrónico',
+    'account.email.help': 'Te enviaremos un enlace de confirmación al nuevo correo. También deberás verificarlo de nuevo para descargar y enviar tus cotizaciones.',
+    'account.email.btn': 'Actualizar correo',
+    'account.email.updating': 'Actualizando…',
+    'account.email.invalid': 'Ingresa un correo válido.',
+    'account.email.success': 'Revisa tu nuevo correo para confirmar el cambio. También deberás verificarlo de nuevo para descargar y enviar tus cotizaciones.',
+    'account.email.failed': 'No se pudo actualizar el correo',
+    'account.danger.title': 'Zona de peligro',
+    'account.delete.desc': 'Elimina permanentemente tu cuenta y todas tus cotizaciones, facturas, clientes, seguimientos y trabajos. Tu suscripción será cancelada. Esto no se puede deshacer.',
+    'account.delete.btn': 'Eliminar cuenta',
+    'account.delete.modalTitle': 'Eliminar cuenta',
+    'account.delete.modalBody': 'Esto elimina permanentemente tu cuenta y todas tus cotizaciones, facturas, clientes, seguimientos y trabajos. Tu suscripción será cancelada. No se puede deshacer.',
+    'account.delete.typePrompt': 'Escribe DELETE para confirmar',
+    'account.delete.passwordPrompt': 'Tu contraseña',
+    'account.delete.passwordRequired': 'Ingresa tu contraseña.',
+    'account.delete.wrongPassword': 'Contraseña incorrecta. Si entraste con un enlace mágico, primero establece una contraseña arriba en Cambiar contraseña.',
+    'account.delete.modalConfirm': 'Eliminar mi cuenta',
+    'account.delete.deleting': 'Eliminando…',
+    'account.delete.success': 'Tu cuenta fue eliminada.',
+    'account.delete.failed': 'No se pudo eliminar la cuenta, intenta de nuevo.',
     'upgrade.alreadyPro': 'Ya tienes el plan Pro.',
     'upgrade.checkoutSuccess': '🎉 ¡Bienvenido a Pro! Tu suscripción está activa.',
     'upgrade.checkoutCanceled': 'Pago cancelado — no se realizó ningún cargo.',
@@ -8157,6 +8307,7 @@ function init() {
   if (profileUpgradeBtn) profileUpgradeBtn.onclick = openUpgradeModal;
   const mgBtn = document.getElementById('profileManageSubBtn');
   if (mgBtn) mgBtn.onclick = openBillingPortal;
+  bindAccountActions();
   const connectBtn = document.getElementById('connectBtn');
   if (connectBtn) connectBtn.onclick = startConnectOnboarding;
   // Upgrade modal wiring: interval toggle, cancel, continue, backdrop dismiss.
@@ -12719,6 +12870,240 @@ async function openBillingPortal() {
     console.warn('openBillingPortal:', e);
     showToast(t('upgrade.portalError'), true);
   }
+}
+
+// ============================================================================
+// Settings → Account section: change password, change email, delete account.
+// Change-password / change-email use sb.auth.updateUser directly (the user
+// has a current session, no current-password reprompt is needed for either).
+// Delete-account is gated by a typed "DELETE" confirmation AND a password
+// reauth before posting to /api/delete-account.
+// ============================================================================
+async function handleChangePassword() {
+  const newEl = document.getElementById('accountNewPassword');
+  const confirmEl = document.getElementById('accountNewPasswordConfirm');
+  if (!newEl || !confirmEl) return;
+  const pw = newEl.value || '';
+  const pw2 = confirmEl.value || '';
+  // Same threshold + error key as handleRecovery so the user gets a
+  // consistent message regardless of which surface they hit.
+  if (pw.length < 8) { showToast(t('auth.pwTooShort'), true); newEl.focus(); return; }
+  if (pw !== pw2) { showToast(t('auth.pwMismatch'), true); confirmEl.focus(); return; }
+  const btn = document.getElementById('accountChangePasswordBtn');
+  if (btn) { btn.disabled = true; btn.textContent = t('account.password.updating'); }
+  try {
+    const { error } = await sb.auth.updateUser({ password: pw });
+    if (error) throw error;
+    newEl.value = '';
+    confirmEl.value = '';
+    showToast(t('account.password.success'), false);
+  } catch (e) {
+    console.warn('handleChangePassword:', e);
+    showToast(t('account.password.failed') + (e && e.message ? ': ' + e.message : ''), true);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = t('account.password.btn'); }
+  }
+}
+
+async function handleChangeEmail() {
+  const el = document.getElementById('accountNewEmail');
+  if (!el) return;
+  const newEmail = (el.value || '').trim();
+  // Light format check — Supabase will reject malformed addresses too, but
+  // catching it client-side avoids a wasted round-trip.
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+    showToast(t('account.email.invalid'), true);
+    el.focus();
+    return;
+  }
+  const btn = document.getElementById('accountChangeEmailBtn');
+  if (btn) { btn.disabled = true; btn.textContent = t('account.email.updating'); }
+  try {
+    const { error } = await sb.auth.updateUser({ email: newEmail });
+    if (error) throw error;
+    // Reset our custom verification flag — Supabase confirms the new email
+    // at the auth layer, but our export gate checks email_verified_by_us
+    // separately. Without this reset the user keeps export access on the
+    // new (unverified-by-us) email.
+    try {
+      const { data: { user } } = await sb.auth.getUser();
+      if (user) {
+        await sb.from('profiles').update({
+          email_verified_by_us: false,
+          verify_token: null,
+          verify_token_expires_at: null,
+        }).eq('user_id', user.id);
+        if (profileCache) {
+          profileCache.email_verified_by_us = false;
+          profileCache.verify_token = null;
+          profileCache.verify_token_expires_at = null;
+        }
+      }
+    } catch (innerErr) {
+      // Don't block the success toast on the verification-reset failing —
+      // the email change has already kicked off in Supabase.
+      console.warn('handleChangeEmail: verification reset failed:', innerErr);
+    }
+    el.value = '';
+    showToast(t('account.email.success'), false);
+  } catch (e) {
+    console.warn('handleChangeEmail:', e);
+    showToast(t('account.email.failed') + (e && e.message ? ': ' + e.message : ''), true);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = t('account.email.btn'); }
+  }
+}
+
+function openDeleteAccountModal() {
+  const backdrop = document.getElementById('deleteAccountBackdrop');
+  const confirmText = document.getElementById('deleteAccountConfirmText');
+  const password = document.getElementById('deleteAccountPassword');
+  const confirmBtn = document.getElementById('deleteAccountConfirm');
+  const cancelBtn = document.getElementById('deleteAccountCancel');
+  const errorEl = document.getElementById('deleteAccountError');
+  if (!backdrop || !confirmText || !password || !confirmBtn || !cancelBtn) return;
+  // Reset modal state on every open — stale values from a previous attempt
+  // would let a user "confirm" without re-typing DELETE.
+  confirmText.value = '';
+  password.value = '';
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = t('account.delete.modalConfirm');
+  errorEl.classList.add('hidden');
+  errorEl.textContent = '';
+  backdrop.classList.remove('hidden');
+  requestAnimationFrame(() => backdrop.classList.add('visible'));
+  setTimeout(() => { try { confirmText.focus(); } catch (e) {} }, 50);
+}
+
+function closeDeleteAccountModal() {
+  const backdrop = document.getElementById('deleteAccountBackdrop');
+  if (!backdrop) return;
+  backdrop.classList.remove('visible');
+  setTimeout(() => backdrop.classList.add('hidden'), 130);
+}
+
+function bindDeleteAccountModal() {
+  const backdrop = document.getElementById('deleteAccountBackdrop');
+  const confirmText = document.getElementById('deleteAccountConfirmText');
+  const password = document.getElementById('deleteAccountPassword');
+  const confirmBtn = document.getElementById('deleteAccountConfirm');
+  const cancelBtn = document.getElementById('deleteAccountCancel');
+  const errorEl = document.getElementById('deleteAccountError');
+  if (!backdrop || !confirmText || !password || !confirmBtn || !cancelBtn) return;
+
+  // Confirm button stays disabled until the typed text is exactly "DELETE".
+  // Comparison is case-sensitive — typing "delete" or "Delete" does NOT
+  // arm the button. Keeps the gate explicit and intentional.
+  const recomputeArmed = () => {
+    confirmBtn.disabled = (confirmText.value !== 'DELETE');
+  };
+  confirmText.addEventListener('input', recomputeArmed);
+
+  cancelBtn.addEventListener('click', closeDeleteAccountModal);
+  backdrop.addEventListener('click', (e) => {
+    if (e.target === backdrop) closeDeleteAccountModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (backdrop.classList.contains('hidden')) return;
+    if (e.key === 'Escape') { e.preventDefault(); closeDeleteAccountModal(); }
+  });
+
+  confirmBtn.addEventListener('click', async () => {
+    if (confirmText.value !== 'DELETE') return; // belt-and-braces
+    const pw = password.value || '';
+    if (!pw) {
+      errorEl.textContent = t('account.delete.passwordRequired');
+      errorEl.classList.remove('hidden');
+      password.focus();
+      return;
+    }
+    errorEl.classList.add('hidden');
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = t('account.delete.deleting');
+    cancelBtn.disabled = true;
+    try {
+      // Step 1: reauthenticate the user via current email + typed password.
+      // Credentials never leave the client. signInWithPassword on the same
+      // user refreshes the existing session in place.
+      const { data: { session: currentSession } } = await sb.auth.getSession();
+      if (!currentSession || !currentSession.user) {
+        errorEl.textContent = t('account.delete.failed');
+        errorEl.classList.remove('hidden');
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = t('account.delete.modalConfirm');
+        cancelBtn.disabled = false;
+        return;
+      }
+      const { error: reauthErr } = await sb.auth.signInWithPassword({
+        email: currentSession.user.email,
+        password: pw,
+      });
+      if (reauthErr) {
+        // Magic-link-only users have no password set — surface that
+        // specific guidance so they don't get stuck.
+        errorEl.textContent = t('account.delete.wrongPassword');
+        errorEl.classList.remove('hidden');
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = t('account.delete.modalConfirm');
+        cancelBtn.disabled = false;
+        password.focus();
+        return;
+      }
+
+      // Step 2: post to /api/delete-account with the (refreshed) bearer.
+      const { data: { session } } = await sb.auth.getSession();
+      const token = session && session.access_token;
+      if (!token) {
+        errorEl.textContent = t('account.delete.failed');
+        errorEl.classList.remove('hidden');
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = t('account.delete.modalConfirm');
+        cancelBtn.disabled = false;
+        return;
+      }
+      const resp = await fetch('/api/delete-account', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token },
+      });
+      let data = {};
+      try { data = await resp.json(); } catch (e) {}
+      if (!resp.ok || !data.ok) {
+        errorEl.textContent = t('account.delete.failed');
+        errorEl.classList.remove('hidden');
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = t('account.delete.modalConfirm');
+        cancelBtn.disabled = false;
+        return;
+      }
+
+      // Step 3: sign out locally. The auth user has already been deleted
+      // server-side so the session is invalid — signOut() may error trying
+      // to revoke remotely. Catch and ignore; the local-state cleanup
+      // (clearing the JWT from storage) is what we need.
+      try { await sb.auth.signOut(); } catch (e) { /* expected */ }
+
+      // Show a brief "deleted" message and reload to the landing/login.
+      showToast(t('account.delete.success'), false);
+      setTimeout(() => { window.location.href = '/'; }, 1200);
+    } catch (e) {
+      console.warn('delete-account: client error:', e);
+      errorEl.textContent = t('account.delete.failed');
+      errorEl.classList.remove('hidden');
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = t('account.delete.modalConfirm');
+      cancelBtn.disabled = false;
+    }
+  });
+}
+
+function bindAccountActions() {
+  const pwBtn = document.getElementById('accountChangePasswordBtn');
+  if (pwBtn) pwBtn.onclick = handleChangePassword;
+  const emailBtn = document.getElementById('accountChangeEmailBtn');
+  if (emailBtn) emailBtn.onclick = handleChangeEmail;
+  const deleteBtn = document.getElementById('accountDeleteBtn');
+  if (deleteBtn) deleteBtn.onclick = openDeleteAccountModal;
+  bindDeleteAccountModal();
 }
 
 function handleCheckoutReturn() {
