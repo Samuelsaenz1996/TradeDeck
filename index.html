@@ -1257,7 +1257,7 @@
   }
   #upgradeCompareTable th,
   #upgradeCompareTable td {
-    padding: 9px 6px;
+    padding: 12px 8px;
     border-bottom: 1px solid var(--line-2);
   }
   #upgradeCompareTable th {
@@ -1273,21 +1273,47 @@
   #upgradeCompareTable td {
     text-align: right;
     color: var(--ink-2);
+    vertical-align: middle;
   }
   #upgradeCompareTable td:first-child {
     text-align: left;
     color: var(--ink);
+    font-weight: 500;
+  }
+  /* Stacked label + sub-line layout inside the first cell. */
+  #upgradeCompareTable td:first-child .row-sub {
+    display: block;
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-top: 3px;
+    line-height: 1.4;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
   }
   #upgradeCompareTable tr:last-child td { border-bottom: none; }
-  #upgradeCompareTable .upgrade-col-free { width: 78px; }
+  #upgradeCompareTable .upgrade-col-free { width: 70px; }
   #upgradeCompareTable .upgrade-col-pro {
     width: 78px;
     background: var(--accent-soft);
     color: var(--accent-ink);
     font-weight: 600;
   }
-  #upgradeCompareTable th.upgrade-col-pro { font-weight: 700; }
+  /* Pro header: solid accent surface frames the column as the "chosen path". */
+  #upgradeCompareTable th.upgrade-col-pro {
+    background: var(--accent);
+    color: #FFFFFF;
+    border-top: 2px solid var(--accent);
+    font-weight: 700;
+  }
+  #upgradeCompareTable th.upgrade-col-pro::before { content: '⭐ '; }
   #upgradeCompareTable td.upgrade-col-free.cell-na { color: var(--ink-3); }
+  /* Green ✓ for "included" — semantic positive, distinct from the accent tint. */
+  #upgradeCompareTable td.cell-yes {
+    color: var(--good);
+    font-weight: 700;
+    font-size: 16px;
+  }
 
   /* === Archived rows in cross-reference cards === */
   .archived-row {
@@ -4070,34 +4096,52 @@
         </thead>
         <tbody>
           <tr>
-            <td data-i18n="upgrade.row.quotes">Quotes per month</td>
+            <td>
+              <span data-i18n="upgrade.row.quotes">Quotes</span>
+              <span class="row-sub" data-i18n="upgrade.row.quotes.sub">3 free quotes to get started — Pro is unlimited so you never hit a wall mid-job.</span>
+            </td>
             <td class="upgrade-col-free">3</td>
             <td class="upgrade-col-pro" data-i18n="sidebar.unlimited">Unlimited</td>
           </tr>
           <tr>
-            <td data-i18n="upgrade.row.clients">Clients</td>
+            <td>
+              <span data-i18n="upgrade.row.clients">Clients</span>
+              <span class="row-sub" data-i18n="upgrade.row.clients.sub">Keep every customer organized — not just your first one.</span>
+            </td>
             <td class="upgrade-col-free">1</td>
             <td class="upgrade-col-pro" data-i18n="sidebar.unlimited">Unlimited</td>
           </tr>
           <tr>
-            <td data-i18n="upgrade.row.jobs">Jobs / project tracking</td>
+            <td>
+              <span data-i18n="upgrade.row.jobs">Jobs / project tracking</span>
+              <span class="row-sub" data-i18n="upgrade.row.jobs.sub">Track each job from quote to paid, with status and totals.</span>
+            </td>
             <td class="upgrade-col-free cell-na">—</td>
-            <td class="upgrade-col-pro">✓</td>
+            <td class="upgrade-col-pro cell-yes">✓</td>
           </tr>
           <tr>
-            <td data-i18n="upgrade.row.getPaid">Accept card payments</td>
+            <td>
+              <span data-i18n="upgrade.row.getPaid">Accept card payments</span>
+              <span class="row-sub" data-i18n="upgrade.row.getPaid.sub">Send a pay link; customers pay by card, money lands in your account.</span>
+            </td>
             <td class="upgrade-col-free cell-na">—</td>
-            <td class="upgrade-col-pro">✓</td>
+            <td class="upgrade-col-pro cell-yes">✓</td>
           </tr>
           <tr>
-            <td data-i18n="upgrade.row.invoiceExport">Download &amp; send invoices</td>
+            <td>
+              <span data-i18n="upgrade.row.invoiceExport">Download &amp; send invoices</span>
+              <span class="row-sub" data-i18n="upgrade.row.invoiceExport.sub">Send polished invoices with a tap-to-pay link built in.</span>
+            </td>
             <td class="upgrade-col-free cell-na">—</td>
-            <td class="upgrade-col-pro">✓</td>
+            <td class="upgrade-col-pro cell-yes">✓</td>
           </tr>
           <tr>
-            <td data-i18n="upgrade.row.followupExport">Download &amp; send follow-ups</td>
+            <td>
+              <span data-i18n="upgrade.row.followupExport">Download &amp; send follow-ups</span>
+              <span class="row-sub" data-i18n="upgrade.row.followupExport.sub">Send the AI-drafted follow-ups that win the job and get you paid.</span>
+            </td>
             <td class="upgrade-col-free cell-na">—</td>
-            <td class="upgrade-col-pro">✓</td>
+            <td class="upgrade-col-pro cell-yes">✓</td>
           </tr>
         </tbody>
       </table>
@@ -4204,12 +4248,18 @@ const I18N = {
     'upgrade.checkoutError': 'Could not start checkout. Please try again.',
     'upgrade.portalError': 'Could not open the billing portal.',
     'upgrade.compareTitle': 'What you get with Pro',
-    'upgrade.row.quotes': 'Quotes per month',
+    'upgrade.row.quotes': 'Quotes',
+    'upgrade.row.quotes.sub': '3 free quotes to get started — Pro is unlimited so you never hit a wall mid-job.',
     'upgrade.row.clients': 'Clients',
+    'upgrade.row.clients.sub': 'Keep every customer organized — not just your first one.',
     'upgrade.row.jobs': 'Jobs / project tracking',
+    'upgrade.row.jobs.sub': 'Track each job from quote to paid, with status and totals.',
     'upgrade.row.getPaid': 'Accept card payments',
+    'upgrade.row.getPaid.sub': 'Send a pay link; customers pay by card, money lands in your account.',
     'upgrade.row.invoiceExport': 'Download & send invoices',
+    'upgrade.row.invoiceExport.sub': 'Send polished invoices with a tap-to-pay link built in.',
     'upgrade.row.followupExport': 'Download & send follow-ups',
+    'upgrade.row.followupExport.sub': 'Send the AI-drafted follow-ups that win the job and get you paid.',
     'sidebar.unlimited': 'Unlimited',
     // Topbar
     'topbar.newQuoteHtml': 'New <em>quote</em>',
@@ -4969,8 +5019,8 @@ const I18N = {
     'profile.plan.freeName': 'Free plan',
     'profile.plan.proName': 'Pro plan',
     'profile.usage.title': 'Plan & Usage',
-    'profile.usage.quotaLine': '{used} of {limit} quotes used this month',
-    'profile.usage.unlimited': 'Unlimited quotes this month',
+    'profile.usage.quotaLine': '{used} of {limit} free quotes used',
+    'profile.usage.unlimited': 'Unlimited quotes',
     'profile.usage.upgrade': 'Upgrade to Pro',
     'profile.stats.title': 'Activity',
     'profile.stats.clients': 'Clients',
@@ -5013,12 +5063,18 @@ const I18N = {
     'upgrade.checkoutError': 'No se pudo iniciar el pago. Inténtalo de nuevo.',
     'upgrade.portalError': 'No se pudo abrir el portal de facturación.',
     'upgrade.compareTitle': 'Lo que obtienes con Pro',
-    'upgrade.row.quotes': 'Cotizaciones al mes',
+    'upgrade.row.quotes': 'Cotizaciones',
+    'upgrade.row.quotes.sub': '3 cotizaciones gratis para empezar — con Pro son ilimitadas para no parar a mitad de trabajo.',
     'upgrade.row.clients': 'Clientes',
+    'upgrade.row.clients.sub': 'Mantén organizados a todos tus clientes — no solo al primero.',
     'upgrade.row.jobs': 'Trabajos / seguimiento de proyectos',
+    'upgrade.row.jobs.sub': 'Lleva cada trabajo desde la cotización hasta el cobro, con estatus y totales.',
     'upgrade.row.getPaid': 'Aceptar pagos con tarjeta',
+    'upgrade.row.getPaid.sub': 'Envía un enlace de pago; el cliente paga con tarjeta y el dinero llega a tu cuenta.',
     'upgrade.row.invoiceExport': 'Descargar y enviar facturas',
+    'upgrade.row.invoiceExport.sub': 'Envía facturas profesionales con enlace de pago integrado.',
     'upgrade.row.followupExport': 'Descargar y enviar seguimientos',
+    'upgrade.row.followupExport.sub': 'Envía los seguimientos generados por la IA que cierran el trabajo y te hacen cobrar.',
     'sidebar.unlimited': 'Ilimitado',
     // Topbar
     'topbar.newQuoteHtml': 'Nueva <em>cotización</em>',
@@ -5778,8 +5834,8 @@ const I18N = {
     'profile.plan.freeName': 'Plan gratis',
     'profile.plan.proName': 'Plan Pro',
     'profile.usage.title': 'Plan y uso',
-    'profile.usage.quotaLine': '{used} de {limit} cotizaciones usadas este mes',
-    'profile.usage.unlimited': 'Cotizaciones ilimitadas este mes',
+    'profile.usage.quotaLine': '{used} de {limit} cotizaciones gratis usadas',
+    'profile.usage.unlimited': 'Cotizaciones ilimitadas',
     'profile.usage.upgrade': 'Mejorar a Pro',
     'profile.stats.title': 'Actividad',
     'profile.stats.clients': 'Clientes',
@@ -9161,6 +9217,20 @@ window.__testUpgradePopup = function () {
   rowKeys.forEach(key => {
     const el = document.querySelector('#upgradeCompareTable [data-i18n="' + key + '"]');
     assert('row label exists: ' + key, !!el);
+  });
+
+  // 2b) Each row also has a `.sub` benefit explanation line.
+  const subKeys = [
+    'upgrade.row.quotes.sub',
+    'upgrade.row.clients.sub',
+    'upgrade.row.jobs.sub',
+    'upgrade.row.getPaid.sub',
+    'upgrade.row.invoiceExport.sub',
+    'upgrade.row.followupExport.sub',
+  ];
+  subKeys.forEach(key => {
+    const el = document.querySelector('#upgradeCompareTable [data-i18n="' + key + '"]');
+    assert('sub-line exists: ' + key, !!el);
   });
 
   // 3) Table precedes #upgradeIntervalToggle in DOM order (value prop before price).
