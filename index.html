@@ -3005,6 +3005,114 @@
               <span class="trucking-subtotal-amt" id="framingSubtotal">$0.00</span>
             </div>
           </div>
+
+          <div id="windowsPanel" class="trucking-panel hidden">
+            <div class="pricing-substruct-toggle" id="windowsSubstructToggle"
+                 role="group" aria-label="Pricing structure">
+              <button data-substruct="per-unit" class="active" type="button"
+                      data-i18n="substruct.perUnit">Per-unit</button>
+              <button data-substruct="flat-rate" type="button"
+                      data-i18n="substruct.flat">Flat rate</button>
+            </div>
+            <div class="per-unit-fields" id="windowsPerUnitFields">
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="windows.count"># of windows</label>
+                  <input type="number" class="input" id="windowCount" placeholder="0" min="0" step="1" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="windows.type">Window type</label>
+                  <select class="select" id="windowType">
+                    <option value="Double-hung" data-i18n="windows.types.doubleHung">Double-hung</option>
+                    <option value="Single-hung" data-i18n="windows.types.singleHung">Single-hung</option>
+                    <option value="Casement" data-i18n="windows.types.casement">Casement</option>
+                    <option value="Sliding" data-i18n="windows.types.sliding">Sliding</option>
+                    <option value="Picture" data-i18n="windows.types.picture">Picture</option>
+                    <option value="Awning" data-i18n="windows.types.awning">Awning</option>
+                    <option value="Bay or bow" data-i18n="windows.types.bayBow">Bay or bow</option>
+                    <option value="Other" data-i18n="windows.types.other">Other</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="windows.frameMaterial">Frame material</label>
+                  <select class="select" id="windowFrameMaterial">
+                    <option value="Vinyl" data-i18n="windows.frames.vinyl">Vinyl</option>
+                    <option value="Aluminum" data-i18n="windows.frames.aluminum">Aluminum</option>
+                    <option value="Wood" data-i18n="windows.frames.wood">Wood</option>
+                    <option value="Fiberglass" data-i18n="windows.frames.fiberglass">Fiberglass</option>
+                    <option value="Composite" data-i18n="windows.frames.composite">Composite</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="label" data-i18n="windows.installType">Install type</label>
+                  <select class="select" id="windowInstallType">
+                    <option value="Insert / pocket" data-i18n="windows.installs.insert">Insert / pocket</option>
+                    <option value="Full-frame" data-i18n="windows.installs.fullFrame">Full-frame</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="windows.unitCost">Cost per window unit ($)</label>
+                  <input type="number" class="input" id="windowUnitCost" placeholder="0" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="windows.laborPerWindow">Labor per window ($)</label>
+                  <input type="number" class="input" id="windowLaborPerWindow" placeholder="0" min="0" step="0.01" />
+                </div>
+              </div>
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="windows.disposal">Tear-off &amp; disposal of old windows ($)</label>
+                  <input type="number" class="input" id="windowDisposal" placeholder="0" min="0" step="0.01" />
+                </div>
+              </div>
+              <div class="trucking-subtotal">
+                <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
+                <span class="trucking-subtotal-amt" id="windowsSubtotal">$0.00</span>
+              </div>
+            </div>
+            <div class="flat-rate-fields hidden" id="windowsFlatRateFields">
+              <div class="field-row cols-3">
+                <div>
+                  <label class="label" data-i18n="flat.quantity">Quantity</label>
+                  <input type="number" class="input" id="windowsFlatQty" placeholder="0" min="0" step="0.1" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.unit">Unit</label>
+                  <select class="select" id="windowsFlatUnit">
+                    <option value="windows">Windows</option>
+                    <option value="openings">Openings</option>
+                    <option value="sashes">Sashes</option>
+                    <option value="units">Units</option>
+                    <option value="custom">Custom...</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.customUnit" id="windowsFlatCustomUnitLabel">Custom unit</label>
+                  <input type="text" class="input hidden" id="windowsFlatCustomUnit"
+                         data-i18n-placeholder="flat.customUnitPlaceholder"
+                         placeholder="e.g. buckets, runs, pieces" />
+                </div>
+              </div>
+              <div class="field-row cols-2">
+                <div>
+                  <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
+                  <input type="number" class="input" id="windowsFlatMaterial" placeholder="0" min="0" step="0.01" />
+                </div>
+                <div>
+                  <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
+                  <input type="number" class="input" id="windowsFlatRate" placeholder="0" min="0" step="0.01" />
+                </div>
+              </div>
+              <div class="trucking-subtotal">
+                <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
+                <span class="trucking-subtotal-amt" id="windowsFlatSubtotal">$0.00</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -4538,6 +4646,10 @@ const I18N = {
     'flat.unitNames.squares': 'squares',
     'flat.unitNames.sections': 'sections',
     'flat.unitNames.board': 'board',
+    'flat.unitNames.windows': 'windows',
+    'flat.unitNames.openings': 'openings',
+    'flat.unitNames.sashes': 'sashes',
+    'flat.unitNames.units': 'units',
     // Trucking
     'trucking.type': 'Truck type',
     'trucking.types.dump': 'Dump truck',
@@ -4672,6 +4784,29 @@ const I18N = {
     'framing.area': 'Framing area (sq ft)',
     'framing.rate': 'Rate per sq ft ($)',
     'framing.lumber': 'Lumber & materials ($)',
+
+    'windows.count': '# of windows',
+    'windows.type': 'Window type',
+    'windows.types.doubleHung': 'Double-hung',
+    'windows.types.singleHung': 'Single-hung',
+    'windows.types.casement': 'Casement',
+    'windows.types.sliding': 'Sliding',
+    'windows.types.picture': 'Picture',
+    'windows.types.awning': 'Awning',
+    'windows.types.bayBow': 'Bay or bow',
+    'windows.types.other': 'Other',
+    'windows.frameMaterial': 'Frame material',
+    'windows.frames.vinyl': 'Vinyl',
+    'windows.frames.aluminum': 'Aluminum',
+    'windows.frames.wood': 'Wood',
+    'windows.frames.fiberglass': 'Fiberglass',
+    'windows.frames.composite': 'Composite',
+    'windows.installType': 'Install type',
+    'windows.installs.insert': 'Insert / pocket',
+    'windows.installs.fullFrame': 'Full-frame',
+    'windows.unitCost': 'Cost per window unit ($)',
+    'windows.laborPerWindow': 'Labor per window ($)',
+    'windows.disposal': 'Tear-off & disposal of old windows ($)',
     // Form Card 2
     'who.title': 'Who & when',
     'who.sub': 'Client details, urgency, and tax setup.',
@@ -5394,6 +5529,10 @@ const I18N = {
     'flat.unitNames.squares': 'cuadros',
     'flat.unitNames.sections': 'secciones',
     'flat.unitNames.board': 'tabla',
+    'flat.unitNames.windows': 'ventanas',
+    'flat.unitNames.openings': 'vanos',
+    'flat.unitNames.sashes': 'hojas',
+    'flat.unitNames.units': 'unidades',
     // Trucking
     'trucking.type': 'Tipo de camión',
     'trucking.types.dump': 'Camión de volteo',
@@ -5528,6 +5667,29 @@ const I18N = {
     'framing.area': 'Área de la estructura (pies²)',
     'framing.rate': 'Tarifa por pie² ($)',
     'framing.lumber': 'Madera y materiales ($)',
+
+    'windows.count': '# de ventanas',
+    'windows.type': 'Tipo de ventana',
+    'windows.types.doubleHung': 'Doble guillotina',
+    'windows.types.singleHung': 'Guillotina sencilla',
+    'windows.types.casement': 'Batiente (casement)',
+    'windows.types.sliding': 'Corrediza',
+    'windows.types.picture': 'Fija (picture)',
+    'windows.types.awning': 'Proyectante (awning)',
+    'windows.types.bayBow': 'Mirador (bay o bow)',
+    'windows.types.other': 'Otro',
+    'windows.frameMaterial': 'Material del marco',
+    'windows.frames.vinyl': 'Vinilo',
+    'windows.frames.aluminum': 'Aluminio',
+    'windows.frames.wood': 'Madera',
+    'windows.frames.fiberglass': 'Fibra de vidrio',
+    'windows.frames.composite': 'Compuesto',
+    'windows.installType': 'Tipo de instalación',
+    'windows.installs.insert': 'Insert / pocket',
+    'windows.installs.fullFrame': 'Marco completo (full-frame)',
+    'windows.unitCost': 'Costo por unidad de ventana ($)',
+    'windows.laborPerWindow': 'Mano de obra por ventana ($)',
+    'windows.disposal': 'Retiro y desecho de ventanas viejas ($)',
     // Form Card 2
     'who.title': 'Quién y cuándo',
     'who.sub': 'Datos del cliente, urgencia y configuración de impuestos.',
@@ -6168,6 +6330,7 @@ const TRADE_LABELS_ES = {
   Gutters: 'Canaletas',
   Siding: 'Revestimiento',
   Framing: 'Armazón',
+  Windows: 'Ventanas',
 };
 
 const TRADE_DESC_EXAMPLES_ES = {
@@ -6184,6 +6347,7 @@ const TRADE_DESC_EXAMPLES_ES = {
   Gutters: 'Ej. Instalar 180 pies lineales de canaletas de aluminio sin costura estilo K, 6 bajantes y guarda-canaletas, incluyendo retiro y desecho de las canaletas viejas.',
   Siding: 'Ej. Demoler y reemplazar 1,400 pies² de revestimiento existente con tablilla de fibrocemento, instalar housewrap, flashings y molduras nuevas, e incluir el desecho del material viejo.',
   Framing: 'Ej. Estructura de pared interior de 320 pies² con vigas 2×4 a 16 pulgadas al centro, cabeceros sobre dos puertas, bloqueo entre studs y sheathing de OSB en la sección portante.',
+  Windows: 'Ej. Reemplazar 12 ventanas dobles de guillotina con inserts de vinilo, retirar las unidades viejas y re-sellar las molduras exteriores.',
 };
 
 function t(key, vars) {
@@ -6453,6 +6617,7 @@ const TRADES = [
   { emoji: '🌧️', name: 'Gutters' },
   { emoji: '🧱', name: 'Siding' },
   { emoji: '🧰', name: 'Framing' },
+  { emoji: '🪟', name: 'Windows' },
 ];
 
 const TRADE_DESC_EXAMPLES = {
@@ -6469,6 +6634,7 @@ const TRADE_DESC_EXAMPLES = {
   Gutters: 'e.g. Install 180 linear feet of seamless K-style aluminum gutters, 6 downspouts and gutter guards, including tear-off and disposal of the old gutters.',
   Siding: 'e.g. Tear off and replace 1,400 sq ft of existing siding with fiber cement lap siding, install new housewrap, flashing, and trim, and dispose of the old material.',
   Framing: 'e.g. Frame a 320 sq ft interior wall with 2×4 studs at 16" on-center, install headers over two doorways, blocking between studs, and OSB sheathing on the load-bearing section.',
+  Windows: 'e.g. Replace 12 double-hung windows with vinyl inserts, haul away the old units, and re-caulk exterior trim.',
 };
 
 function getClientInitials(name) {
@@ -7373,7 +7539,7 @@ let selectedTrades = [];
 let activeTradeIndex = -1;
 let tradePricingState = {};             // { 'Plumbing': { mode, ...inputs } }
 let selectedFollowupTrade = '🔧 Plumbing';
-let pricingMode = 'hourly';      // 'hourly' | 'flat' | 'trucking' | 'logistics' | 'painting' | 'flooring' | 'roofing' | 'gutters' | 'siding' | 'framing'
+let pricingMode = 'hourly';      // 'hourly' | 'flat' | 'trucking' | 'logistics' | 'painting' | 'flooring' | 'roofing' | 'gutters' | 'siding' | 'framing' | 'windows'
 let taxMode = 'none';            // 'none' | 'custom'
 let depositPercent = parseFloat(localStorage.getItem('tdDepositPercent'));
 if (!isFinite(depositPercent) || depositPercent < 0 || depositPercent > 100) {
@@ -7565,6 +7731,7 @@ const PRICING_INPUTS_BY_MODE = {
   gutters:   ['gutterLinearFt','gutterRate','gutterMaterial','gutterStyle','gutterDownspoutCount','gutterDownspoutRate','gutterGuardFt','gutterGuardRate','gutterDisposal','gutterFlatQty','gutterFlatUnit','gutterFlatCustomUnit','gutterFlatMaterial','gutterFlatRate'],
   siding:    ['sidingArea','sidingMaterial','sidingMaterialRate','sidingInstallRate','sidingWasteFactor','sidingTearOff','sidingTrim','sidingFlatQty','sidingFlatUnit','sidingFlatCustomUnit','sidingFlatMaterial','sidingFlatRate'],
   framing:   ['framingArea','framingRate','framingLumber'],
+  windows:   ['windowCount','windowType','windowFrameMaterial','windowInstallType','windowUnitCost','windowLaborPerWindow','windowDisposal','windowsFlatQty','windowsFlatUnit','windowsFlatCustomUnit','windowsFlatMaterial','windowsFlatRate'],
 };
 
 // Defaults per pricing mode. Used as fallback when a trade's saved
@@ -7587,6 +7754,7 @@ const PRICING_DEFAULTS = {
   gutters:   { gutterLinearFt: '', gutterRate: '', gutterMaterial: 'Aluminum', gutterStyle: 'K-style', gutterDownspoutCount: '', gutterDownspoutRate: '', gutterGuardFt: '', gutterGuardRate: '', gutterDisposal: '', gutterFlatQty: '', gutterFlatUnit: 'linft', gutterFlatCustomUnit: '', gutterFlatMaterial: '', gutterFlatRate: '' },
   siding:    { sidingArea: '', sidingMaterial: 'Vinyl', sidingMaterialRate: '', sidingInstallRate: '', sidingWasteFactor: '', sidingTearOff: '', sidingTrim: '', sidingFlatQty: '', sidingFlatUnit: 'sqft', sidingFlatCustomUnit: '', sidingFlatMaterial: '', sidingFlatRate: '' },
   framing:   { framingArea: '', framingRate: '', framingLumber: '' },
+  windows:   { windowCount: '', windowType: 'Double-hung', windowFrameMaterial: 'Vinyl', windowInstallType: 'Insert / pocket', windowUnitCost: '', windowLaborPerWindow: '', windowDisposal: '', windowsFlatQty: '', windowsFlatUnit: 'windows', windowsFlatCustomUnit: '', windowsFlatMaterial: '', windowsFlatRate: '' },
 };
 
 function tradeNameOf(emojiPlusName) {
@@ -7602,6 +7770,7 @@ function defaultModeForTrade(name) {
   if (name === 'Gutters') return 'gutters';
   if (name === 'Siding') return 'siding';
   if (name === 'Framing') return 'framing';
+  if (name === 'Windows') return 'windows';
   return 'hourly';
 }
 
@@ -7611,7 +7780,7 @@ function snapshotPricingInputs(mode) {
     const el = document.getElementById(id);
     if (el) out[id] = el.value;
   });
-  if (['trucking','logistics','painting','flooring','roofing','gutters','siding'].includes(mode)) {
+  if (['trucking','logistics','painting','flooring','roofing','gutters','siding','windows'].includes(mode)) {
     const trade = mode;
     const toggle = document.getElementById(`${trade}SubstructToggle`);
     if (toggle) {
@@ -7635,7 +7804,7 @@ function restorePricingInputs(snapshot) {
       el.value = defaults[id];
     }
   });
-  if (['trucking','logistics','painting','flooring','roofing','gutters','siding'].includes(mode)) {
+  if (['trucking','logistics','painting','flooring','roofing','gutters','siding','windows'].includes(mode)) {
     const structure = snapshot.pricingStructure || 'per-unit';
     applyPricingStructure(mode, structure);
     const trade = mode;
@@ -7667,6 +7836,7 @@ function refreshAllSubtotals() {
   if (typeof updateGutterSubtotal === 'function') updateGutterSubtotal();
   if (typeof updateSidingSubtotal === 'function') updateSidingSubtotal();
   if (typeof updateFramingSubtotal === 'function') updateFramingSubtotal();
+  if (typeof updateWindowsSubtotal === 'function') updateWindowsSubtotal();
 }
 
 function saveActiveTradeState() {
@@ -7717,7 +7887,8 @@ function init() {
   bindGutterInputs();
   bindSidingInputs();
   bindFramingInputs();
-  ['trucking','logistics','painting','flooring','roofing','gutters','siding'].forEach(trade => {
+  bindWindowsInputs();
+  ['trucking','logistics','painting','flooring','roofing','gutters','siding','windows'].forEach(trade => {
     bindSubstructToggle(trade);
     bindFlatRateInputs(trade);
     updateFlatSubtotal(trade);
@@ -8094,7 +8265,7 @@ function bindPricingToggle() {
 function hideAllPricingPanels() {
   const toggle = document.getElementById('pricingToggle');
   if (toggle) toggle.style.display = 'none';
-  ['hourlyPanel','flatPanel','truckingPanel','logisticsPanel','paintingPanel','flooringPanel','roofingPanel','gutterPanel','sidingPanel','framingPanel'].forEach(id => {
+  ['hourlyPanel','flatPanel','truckingPanel','logisticsPanel','paintingPanel','flooringPanel','roofingPanel','gutterPanel','sidingPanel','framingPanel','windowsPanel'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.add('hidden');
   });
@@ -8116,7 +8287,7 @@ function setPricingMode(mode) {
   if (empty) empty.classList.add('hidden');
   // hide toggle when transportation or measurement-based modes are active
   const toggle = document.getElementById('pricingToggle');
-  toggle.style.display = (['trucking','logistics','painting','flooring','roofing','gutters','siding'].includes(mode)) ? 'none' : 'inline-flex';
+  toggle.style.display = (['trucking','logistics','painting','flooring','roofing','gutters','siding','windows'].includes(mode)) ? 'none' : 'inline-flex';
 
   document.querySelectorAll('#pricingToggle button').forEach(b =>
     b.classList.toggle('active', b.dataset.mode === mode)
@@ -8142,6 +8313,7 @@ function setPricingMode(mode) {
   document.getElementById('gutterPanel').classList.toggle('hidden', mode !== 'gutters');
   document.getElementById('sidingPanel').classList.toggle('hidden', mode !== 'siding');
   document.getElementById('framingPanel').classList.toggle('hidden', mode !== 'framing');
+  document.getElementById('windowsPanel').classList.toggle('hidden', mode !== 'windows');
 }
 
 function applyPricingStructure(trade, structure) {
@@ -8349,6 +8521,13 @@ function bindFramingInputs() {
     document.getElementById(id).addEventListener('input', updateFramingSubtotal);
   });
   updateFramingSubtotal();
+}
+
+function bindWindowsInputs() {
+  ['windowCount','windowUnitCost','windowLaborPerWindow','windowDisposal'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateWindowsSubtotal);
+  });
+  updateWindowsSubtotal();
 }
 
 function bindNav() {
@@ -9287,6 +9466,15 @@ function updateFramingSubtotal() {
   document.getElementById('framingSubtotal').textContent = fmt(sub);
 }
 
+function updateWindowsSubtotal() {
+  const count = parseFloat(document.getElementById('windowCount').value) || 0;
+  const unitCost = parseFloat(document.getElementById('windowUnitCost').value) || 0;
+  const laborPerWindow = parseFloat(document.getElementById('windowLaborPerWindow').value) || 0;
+  const disposal = parseFloat(document.getElementById('windowDisposal').value) || 0;
+  const sub = (count * (unitCost + laborPerWindow)) + disposal;
+  document.getElementById('windowsSubtotal').textContent = fmt(sub);
+}
+
 function updateUsageDisplay() {
   if (typeof refreshVerifyReminder === 'function') refreshVerifyReminder();
   const labelEl = document.querySelector('.usage-label');
@@ -9903,7 +10091,7 @@ function buildContextForTradeState(tradeName, state) {
   const mode = state.mode;
 
   if (state.pricingStructure === 'flat-rate' &&
-      ['trucking','logistics','painting','flooring','roofing','gutters','siding'].includes(state.mode)) {
+      ['trucking','logistics','painting','flooring','roofing','gutters','siding','windows'].includes(state.mode)) {
     const trade = state.mode;
     const qty = parseFloat(get(`${trade}FlatQty`)) || 0;
     const unitKey = getStr(`${trade}FlatUnit`) || '';
@@ -10120,6 +10308,29 @@ function buildContextForTradeState(tradeName, state) {
       total,
     };
   }
+  if (mode === 'windows') {
+    const count = parseFloat(get('windowCount')) || 0;
+    const type = getStr('windowType') || 'Double-hung';
+    const frame = getStr('windowFrameMaterial') || 'Vinyl';
+    const install = getStr('windowInstallType') || 'Insert / pocket';
+    const unitCost = parseFloat(get('windowUnitCost')) || 0;
+    const laborPerWindow = parseFloat(get('windowLaborPerWindow')) || 0;
+    const disposal = parseFloat(get('windowDisposal')) || 0;
+    const units = count * unitCost;
+    const labor = count * laborPerWindow;
+    const total = units + labor + disposal;
+    return {
+      mode,
+      summary: [
+        `${count} ${type.toLowerCase()} window${count === 1 ? '' : 's'} with ${frame.toLowerCase()} frames, ${install.toLowerCase()} install.`,
+        `Window units: ${count} × $${unitCost} = $${units.toFixed(2)}.`,
+        laborPerWindow > 0 ? `Installation labor: ${count} × $${laborPerWindow} = $${labor.toFixed(2)}.` : '',
+        disposal > 0 ? `Tear-off and disposal of old windows: $${disposal}.` : '',
+        `Total: $${total.toFixed(2)}.`,
+      ].filter(Boolean).join(' '),
+      total,
+    };
+  }
   return { mode, summary: '', total: 0 };
 }
 
@@ -10159,6 +10370,7 @@ const TRADE_GUIDANCE = {
   Siding: 'Siding quote conventions: Bid by square feet of wall area. Material choice drives the bulk of cost (vinyl entry-level → fiber cement mid → wood/steel premium). Always include a waste factor (typically 10%, higher on cut-up walls or board-and-batten patterns). Use siding terminology: housewrap/weather barrier, J-channel, starter strip, corner posts, flashing around windows/doors, soffit and fascia, drip cap. Tear-off and disposal of existing siding is a major separate line on replacement jobs. Trim, flashing, and accessories often run 10-20% of material cost. Typical payment: 1/3 deposit, 1/3 on material delivery, 1/3 on completion for jobs over $5,000. Typical warranty: 1-2 years workmanship, manufacturer warranty on materials (20-50 years on premium products). Common line items: Tear-off and disposal, Housewrap/weather barrier, Siding material (with waste), Installation labor, Trim and flashing, Cleanup.',
   Framing: 'Framing quote conventions: Bid by square feet of framed area, with lumber/materials broken out separately since prices fluctuate weekly. Use framing terminology: studs (2×4 / 2×6), on-center spacing (16" or 24"), top and bottom plates, headers over openings, blocking, fire-blocking, jack studs, king studs, cripples, joists, rim board, sheathing (OSB or plywood), shear walls, load-bearing vs non-load-bearing. Lumber package should be its own line item with the species and grade noted (e.g., #2 SPF 2×4×8). For interior framing, simple per sqft labor + lumber works. For exterior/structural, include sheathing, fasteners, and engineered headers separately. Always note inspection responsibility and code compliance. Typical payment: 30-50% deposit, balance on rough-in inspection passing. Typical warranty: 1-year workmanship; structural elements covered longer on new construction. Common line items: Lumber & materials, Sheathing, Framing labor, Fasteners and connectors, Trip/setup if applicable.',
   Landscaping: 'Landscaping quote conventions: Use landscaping terminology: hardscape, softscape, irrigation runs, drainage, grading, specimen plants, mulch, soil amendments, edging. Distinguish between hardscape (pavers, walls, patios) and softscape (plants, sod, mulch). Mention plant warranty (typically 1 year / one growing season — must be cared for per instructions). Typical payment: 50% deposit on installs, NET 30 on maintenance. Typical warranty: 1 year on plants, longer on hardscape. Common line items: Site prep and grading, Materials (plants/hardscape/mulch), Installation labor, Cleanup and haul-off.',
+  Windows: 'Windows quote conventions: Bid per window (unit pricing), with unit cost and installation labor often itemized separately. Use window terminology: insert/pocket replacement (less invasive, no trim/siding disturbance) vs full-frame replacement (involves exterior trim and siding work), double-hung / single-hung / casement / sliding / picture / awning / bay-or-bow, U-factor and Low-E glazing for energy efficiency, ENERGY STAR rating, NFRC labels, brickmold, J-channel, sill flashing. Frame material (vinyl is the volume entry tier; aluminum cheaper but less efficient; wood and fiberglass premium; composite increasingly common) drives the bulk of cost. Tear-off and disposal of old units is a normal separate line. Bulk-count jobs typically attract a per-window discount (12+ units). Mention permits where required by AHJ and any structural framing changes. Typical payment: 50% deposit on jobs over $2,000, balance on completion. Typical warranty: 1-2 years workmanship, manufacturer warranty on units (often 20-year limited or lifetime on vinyl). Common line items: Window units (per-window cost), Installation labor (per-window), Tear-off and disposal, Trim, flashing and caulking, Permits if applicable.',
 };
 
 function buildPrompt({ pricingContext, timeline, taxRate, taxLabel, clientName, clientAddr, quoteLanguages }) {
@@ -10176,6 +10388,7 @@ function buildPrompt({ pricingContext, timeline, taxRate, taxLabel, clientName, 
       if (t.mode === 'gutters') return 'This is a GUTTERS segment. Use gutter terminology (linear feet, downspouts, K-style vs half-round, seamless vs sectional, fascia, splash blocks, gutter guards, tear-off of old gutters). Mention the material (aluminum/copper/etc.) since it drives perception of value.';
       if (t.mode === 'siding') return 'This is a SIDING segment. Use siding terminology (sqft, housewrap/weather barrier, J-channel, starter strip, corner posts, flashing around openings, trim, drip cap, tear-off of old siding). Name the material since it sets the price tier.';
       if (t.mode === 'framing') return 'This is a FRAMING segment. Use carpentry/framing terminology (studs 2×4 or 2×6, on-center spacing, top/bottom plates, headers, blocking, sheathing, joists, load-bearing). Lumber is typically a separate line because prices fluctuate.';
+      if (t.mode === 'windows') return 'This is a WINDOWS replacement segment. Pricing is PER WINDOW (count × per-window cost), not per area. Use window terminology (per-window unit pricing, insert/pocket vs full-frame replacement, frame material, U-factor, Low-E, ENERGY STAR, brickmold, sill flashing). Note the install type — full-frame disturbs exterior trim/siding while insert/pocket does not. Frame material drives the bulk of unit cost.';
       return '';
     })();
     const flatRateNote = t.isFlatRate
@@ -11969,6 +12182,10 @@ async function clearForm(silent) {
     ['sidingTearOff', ''], ['sidingTrim', ''],
     // Framing
     ['framingArea', ''], ['framingRate', ''], ['framingLumber', ''],
+    // Windows
+    ['windowCount', ''], ['windowType', 'Double-hung'],
+    ['windowFrameMaterial', 'Vinyl'], ['windowInstallType', 'Insert / pocket'],
+    ['windowUnitCost', ''], ['windowLaborPerWindow', ''], ['windowDisposal', ''],
     // Flat-rate sub-mode fields
     ['truckingFlatQty', ''], ['truckingFlatUnit', 'trips'], ['truckingFlatCustomUnit', ''], ['truckingFlatMaterial', ''], ['truckingFlatRate', ''],
     ['logisticsFlatQty', ''], ['logisticsFlatUnit', 'pallets'], ['logisticsFlatCustomUnit', ''], ['logisticsFlatMaterial', ''], ['logisticsFlatRate', ''],
@@ -11977,6 +12194,7 @@ async function clearForm(silent) {
     ['roofingFlatQty', ''], ['roofingFlatUnit', 'squares'], ['roofingFlatCustomUnit', ''], ['roofingFlatMaterial', ''], ['roofingFlatRate', ''],
     ['gutterFlatQty', ''], ['gutterFlatUnit', 'linft'], ['gutterFlatCustomUnit', ''], ['gutterFlatMaterial', ''], ['gutterFlatRate', ''],
     ['sidingFlatQty', ''], ['sidingFlatUnit', 'sqft'], ['sidingFlatCustomUnit', ''], ['sidingFlatMaterial', ''], ['sidingFlatRate', ''],
+    ['windowsFlatQty', ''], ['windowsFlatUnit', 'windows'], ['windowsFlatCustomUnit', ''], ['windowsFlatMaterial', ''], ['windowsFlatRate', ''],
     // Rush surcharge
     ['rushSurcharge', ''],
     ['depositPercent', String(resolvedDeposit)],
@@ -12016,9 +12234,13 @@ async function clearForm(silent) {
   updatePaintingSubtotal();
   updateFlooringSubtotal();
   updateRoofingSubtotal();
+  updateGutterSubtotal();
+  updateSidingSubtotal();
+  updateFramingSubtotal();
+  updateWindowsSubtotal();
 
   // Reset all specialty pricing structures back to per-unit
-  ['trucking','logistics','painting','flooring','roofing','gutters','siding'].forEach(trade => {
+  ['trucking','logistics','painting','flooring','roofing','gutters','siding','windows'].forEach(trade => {
     applyPricingStructure(trade, 'per-unit');
     const customInput = document.getElementById(`${trade}FlatCustomUnit`);
     if (customInput) customInput.classList.add('hidden');
