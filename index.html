@@ -9331,6 +9331,10 @@ window.__testClientCap = function () {
       'persistGeneratedQuote source includes can_create_client',
       persistGeneratedQuote.toString().indexOf('can_create_client') !== -1
     );
+    assert(
+      'enterNewClientMode source includes can_create_client',
+      enterNewClientMode.toString().indexOf('can_create_client') !== -1
+    );
   } finally {
     openUpgradeModal = realOpenUpgrade;
     openVerifyModal = realOpenVerify;
@@ -12830,6 +12834,20 @@ function switchClientsSubView(view) {
 // blank form. The first meaningful edit triggers an INSERT via the
 // shared saveClientEdits autosave path.
 async function enterNewClientMode() {
+  // Free-tier client cap: bounce to the upgrade modal BEFORE opening the
+  // empty detail form. Pre-spec UX was: user fills the form, hits Save,
+  // gets the modal — worse because they've already invested effort.
+  // Fail open on RPC error so a transient backend hiccup doesn't lock
+  // the button out. The save-time cap check in saveClientEdits remains
+  // as defense-in-depth.
+  try {
+    const { data: cap } = await sb.rpc('can_create_client');
+    if (cap && cap.allowed === false) {
+      openUpgradeModal();
+      return;
+    }
+  } catch (e) { /* fail open */ }
+
   // Flush any pending save from a previous open detail
   clearTimeout(clientsSaveTimer);
   if (activeClientId) {
