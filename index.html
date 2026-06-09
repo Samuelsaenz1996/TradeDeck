@@ -3113,6 +3113,71 @@
               </div>
             </div>
           </div>
+
+          <div id="drywallPanel" class="trucking-panel hidden">
+            <div class="pricing-substruct-toggle" id="drywallScopeToggle"
+                 role="group" aria-label="Scope">
+              <button data-scope="hang" type="button"
+                      data-i18n="drywall.scope.hang">Hang</button>
+              <button data-scope="finish" type="button"
+                      data-i18n="drywall.scope.finish">Finish</button>
+              <button data-scope="both" class="active" type="button"
+                      data-i18n="drywall.scope.both">Hang + Finish</button>
+            </div>
+            <div class="pricing-substruct-toggle" id="drywallUnitToggle"
+                 role="group" aria-label="Pricing unit">
+              <button data-unit="sheet" type="button"
+                      data-i18n="drywall.unit.sheet">Per sheet</button>
+              <button data-unit="sqft" class="active" type="button"
+                      data-i18n="drywall.unit.sqft">Per sq ft</button>
+              <button data-unit="flat" type="button"
+                      data-i18n="drywall.unit.flat">Flat rate</button>
+            </div>
+            <div class="field-row cols-2" id="drywallQtyRow">
+              <div id="drywallSheetCountField">
+                <label class="label" data-i18n="drywall.sheetCount"># of sheets</label>
+                <input type="number" class="input" id="drywallSheetCount" placeholder="0" min="0" step="1" />
+              </div>
+              <div id="drywallAreaField">
+                <label class="label" data-i18n="drywall.area">Area (sq ft)</label>
+                <input type="number" class="input" id="drywallArea" placeholder="0" min="0" step="0.1" />
+              </div>
+            </div>
+            <div class="field-row cols-2" id="drywallRateRow">
+              <div id="drywallHangRateField">
+                <label class="label" id="drywallHangRateLabel" data-i18n="drywall.hangRate.sqft">Hang rate ($/sq ft)</label>
+                <input type="number" class="input" id="drywallHangRate" placeholder="0" min="0" step="0.01" />
+              </div>
+              <div id="drywallFinishRateField">
+                <label class="label" id="drywallFinishRateLabel" data-i18n="drywall.finishRate.sqft">Finish rate ($/sq ft)</label>
+                <input type="number" class="input" id="drywallFinishRate" placeholder="0" min="0" step="0.01" />
+              </div>
+            </div>
+            <div class="field-row cols-2 hidden" id="drywallFlatRow">
+              <div id="drywallHangFlatField">
+                <label class="label" data-i18n="drywall.hangFlat">Hang flat price ($)</label>
+                <input type="number" class="input" id="drywallHangFlat" placeholder="0" min="0" step="0.01" />
+              </div>
+              <div id="drywallFinishFlatField">
+                <label class="label" data-i18n="drywall.finishFlat">Finish flat price ($)</label>
+                <input type="number" class="input" id="drywallFinishFlat" placeholder="0" min="0" step="0.01" />
+              </div>
+            </div>
+            <div class="field-row cols-2" id="drywallFinishLevelRow">
+              <div id="drywallFinishLevelField">
+                <label class="label" data-i18n="drywall.finishLevel">Finish level</label>
+                <select class="select" id="drywallFinishLevel">
+                  <option value="3" data-i18n="drywall.finishLevels.3">Level 3</option>
+                  <option value="4" data-i18n="drywall.finishLevels.4">Level 4</option>
+                  <option value="5" data-i18n="drywall.finishLevels.5">Level 5</option>
+                </select>
+              </div>
+            </div>
+            <div class="trucking-subtotal">
+              <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
+              <span class="trucking-subtotal-amt" id="drywallSubtotal">$0.00</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -4807,6 +4872,25 @@ const I18N = {
     'windows.unitCost': 'Cost per window unit ($)',
     'windows.laborPerWindow': 'Labor per window ($)',
     'windows.disposal': 'Tear-off & disposal of old windows ($)',
+
+    'drywall.scope.hang': 'Hang',
+    'drywall.scope.finish': 'Finish',
+    'drywall.scope.both': 'Hang + Finish',
+    'drywall.unit.sheet': 'Per sheet',
+    'drywall.unit.sqft': 'Per sq ft',
+    'drywall.unit.flat': 'Flat rate',
+    'drywall.sheetCount': '# of sheets',
+    'drywall.area': 'Area (sq ft)',
+    'drywall.hangRate.sheet': 'Hang rate ($/sheet)',
+    'drywall.hangRate.sqft': 'Hang rate ($/sq ft)',
+    'drywall.finishRate.sheet': 'Finish rate ($/sheet)',
+    'drywall.finishRate.sqft': 'Finish rate ($/sq ft)',
+    'drywall.hangFlat': 'Hang flat price ($)',
+    'drywall.finishFlat': 'Finish flat price ($)',
+    'drywall.finishLevel': 'Finish level',
+    'drywall.finishLevels.3': 'Level 3',
+    'drywall.finishLevels.4': 'Level 4',
+    'drywall.finishLevels.5': 'Level 5',
     // Form Card 2
     'who.title': 'Who & when',
     'who.sub': 'Client details, urgency, and tax setup.',
@@ -5690,6 +5774,25 @@ const I18N = {
     'windows.unitCost': 'Costo por unidad de ventana ($)',
     'windows.laborPerWindow': 'Mano de obra por ventana ($)',
     'windows.disposal': 'Retiro y desecho de ventanas viejas ($)',
+
+    'drywall.scope.hang': 'Colgar',
+    'drywall.scope.finish': 'Resanar',
+    'drywall.scope.both': 'Colgar + Resanar',
+    'drywall.unit.sheet': 'Por hoja',
+    'drywall.unit.sqft': 'Por pie²',
+    'drywall.unit.flat': 'Tarifa fija',
+    'drywall.sheetCount': '# de hojas',
+    'drywall.area': 'Área (pies²)',
+    'drywall.hangRate.sheet': 'Tarifa de colgado ($/hoja)',
+    'drywall.hangRate.sqft': 'Tarifa de colgado ($/pie²)',
+    'drywall.finishRate.sheet': 'Tarifa de resane ($/hoja)',
+    'drywall.finishRate.sqft': 'Tarifa de resane ($/pie²)',
+    'drywall.hangFlat': 'Precio fijo de colgado ($)',
+    'drywall.finishFlat': 'Precio fijo de resane ($)',
+    'drywall.finishLevel': 'Nivel de acabado',
+    'drywall.finishLevels.3': 'Nivel 3',
+    'drywall.finishLevels.4': 'Nivel 4',
+    'drywall.finishLevels.5': 'Nivel 5',
     // Form Card 2
     'who.title': 'Quién y cuándo',
     'who.sub': 'Datos del cliente, urgencia y configuración de impuestos.',
@@ -6331,6 +6434,7 @@ const TRADE_LABELS_ES = {
   Siding: 'Revestimiento',
   Framing: 'Armazón',
   Windows: 'Ventanas',
+  Drywall: 'Tablaroca',
 };
 
 const TRADE_DESC_EXAMPLES_ES = {
@@ -6348,6 +6452,7 @@ const TRADE_DESC_EXAMPLES_ES = {
   Siding: 'Ej. Demoler y reemplazar 1,400 pies² de revestimiento existente con tablilla de fibrocemento, instalar housewrap, flashings y molduras nuevas, e incluir el desecho del material viejo.',
   Framing: 'Ej. Estructura de pared interior de 320 pies² con vigas 2×4 a 16 pulgadas al centro, cabeceros sobre dos puertas, bloqueo entre studs y sheathing de OSB en la sección portante.',
   Windows: 'Ej. Reemplazar 12 ventanas dobles de guillotina con inserts de vinilo, retirar las unidades viejas y re-sellar las molduras exteriores.',
+  Drywall: 'Ej. Colgar y resanar 40 hojas de tablaroca de 5/8" en el sótano, acabado Nivel 4, listo para pintar.',
 };
 
 function t(key, vars) {
@@ -6618,6 +6723,7 @@ const TRADES = [
   { emoji: '🧱', name: 'Siding' },
   { emoji: '🧰', name: 'Framing' },
   { emoji: '🪟', name: 'Windows' },
+  { emoji: '⬜', name: 'Drywall' },
 ];
 
 const TRADE_DESC_EXAMPLES = {
@@ -6635,6 +6741,7 @@ const TRADE_DESC_EXAMPLES = {
   Siding: 'e.g. Tear off and replace 1,400 sq ft of existing siding with fiber cement lap siding, install new housewrap, flashing, and trim, and dispose of the old material.',
   Framing: 'e.g. Frame a 320 sq ft interior wall with 2×4 studs at 16" on-center, install headers over two doorways, blocking between studs, and OSB sheathing on the load-bearing section.',
   Windows: 'e.g. Replace 12 double-hung windows with vinyl inserts, haul away the old units, and re-caulk exterior trim.',
+  Drywall: 'e.g. Hang and finish 40 sheets of 5/8" drywall in the basement, Level 4 finish, ready for primer.',
 };
 
 function getClientInitials(name) {
@@ -7539,7 +7646,7 @@ let selectedTrades = [];
 let activeTradeIndex = -1;
 let tradePricingState = {};             // { 'Plumbing': { mode, ...inputs } }
 let selectedFollowupTrade = '🔧 Plumbing';
-let pricingMode = 'hourly';      // 'hourly' | 'flat' | 'trucking' | 'logistics' | 'painting' | 'flooring' | 'roofing' | 'gutters' | 'siding' | 'framing' | 'windows'
+let pricingMode = 'hourly';      // 'hourly' | 'flat' | 'trucking' | 'logistics' | 'painting' | 'flooring' | 'roofing' | 'gutters' | 'siding' | 'framing' | 'windows' | 'drywall'
 let taxMode = 'none';            // 'none' | 'custom'
 let depositPercent = parseFloat(localStorage.getItem('tdDepositPercent'));
 if (!isFinite(depositPercent) || depositPercent < 0 || depositPercent > 100) {
@@ -7732,6 +7839,7 @@ const PRICING_INPUTS_BY_MODE = {
   siding:    ['sidingArea','sidingMaterial','sidingMaterialRate','sidingInstallRate','sidingWasteFactor','sidingTearOff','sidingTrim','sidingFlatQty','sidingFlatUnit','sidingFlatCustomUnit','sidingFlatMaterial','sidingFlatRate'],
   framing:   ['framingArea','framingRate','framingLumber'],
   windows:   ['windowCount','windowType','windowFrameMaterial','windowInstallType','windowUnitCost','windowLaborPerWindow','windowDisposal','windowsFlatQty','windowsFlatUnit','windowsFlatCustomUnit','windowsFlatMaterial','windowsFlatRate'],
+  drywall:   ['drywallSheetCount','drywallArea','drywallHangRate','drywallFinishRate','drywallHangFlat','drywallFinishFlat','drywallFinishLevel'],
 };
 
 // Defaults per pricing mode. Used as fallback when a trade's saved
@@ -7755,6 +7863,7 @@ const PRICING_DEFAULTS = {
   siding:    { sidingArea: '', sidingMaterial: 'Vinyl', sidingMaterialRate: '', sidingInstallRate: '', sidingWasteFactor: '', sidingTearOff: '', sidingTrim: '', sidingFlatQty: '', sidingFlatUnit: 'sqft', sidingFlatCustomUnit: '', sidingFlatMaterial: '', sidingFlatRate: '' },
   framing:   { framingArea: '', framingRate: '', framingLumber: '' },
   windows:   { windowCount: '', windowType: 'Double-hung', windowFrameMaterial: 'Vinyl', windowInstallType: 'Insert / pocket', windowUnitCost: '', windowLaborPerWindow: '', windowDisposal: '', windowsFlatQty: '', windowsFlatUnit: 'windows', windowsFlatCustomUnit: '', windowsFlatMaterial: '', windowsFlatRate: '' },
+  drywall:   { drywallScope: 'both', drywallUnit: 'sqft', drywallFinishLevel: '4', drywallSheetCount: '', drywallArea: '', drywallHangRate: '', drywallFinishRate: '', drywallHangFlat: '', drywallFinishFlat: '' },
 };
 
 function tradeNameOf(emojiPlusName) {
@@ -7771,6 +7880,7 @@ function defaultModeForTrade(name) {
   if (name === 'Siding') return 'siding';
   if (name === 'Framing') return 'framing';
   if (name === 'Windows') return 'windows';
+  if (name === 'Drywall') return 'drywall';
   return 'hourly';
 }
 
@@ -7787,6 +7897,12 @@ function snapshotPricingInputs(mode) {
       const activeBtn = toggle.querySelector('button.active');
       out.pricingStructure = activeBtn ? activeBtn.dataset.substruct : 'per-unit';
     }
+  }
+  if (mode === 'drywall') {
+    const scopeBtn = document.querySelector('#drywallScopeToggle button.active');
+    const unitBtn = document.querySelector('#drywallUnitToggle button.active');
+    out.drywallScope = scopeBtn ? scopeBtn.dataset.scope : 'both';
+    out.drywallUnit = unitBtn ? unitBtn.dataset.unit : 'sqft';
   }
   return out;
 }
@@ -7815,6 +7931,11 @@ function restorePricingInputs(snapshot) {
     }
     updateFlatSubtotal(trade);
   }
+  if (mode === 'drywall') {
+    applyDrywallScope(snapshot.drywallScope || 'both');
+    applyDrywallUnit(snapshot.drywallUnit || 'sqft');
+    renderDrywallFields();
+  }
 }
 
 function restoreJobDescForActiveTrade() {
@@ -7837,6 +7958,7 @@ function refreshAllSubtotals() {
   if (typeof updateSidingSubtotal === 'function') updateSidingSubtotal();
   if (typeof updateFramingSubtotal === 'function') updateFramingSubtotal();
   if (typeof updateWindowsSubtotal === 'function') updateWindowsSubtotal();
+  if (typeof updateDrywallSubtotal === 'function') updateDrywallSubtotal();
 }
 
 function saveActiveTradeState() {
@@ -7888,6 +8010,7 @@ function init() {
   bindSidingInputs();
   bindFramingInputs();
   bindWindowsInputs();
+  bindDrywallInputs();
   ['trucking','logistics','painting','flooring','roofing','gutters','siding','windows'].forEach(trade => {
     bindSubstructToggle(trade);
     bindFlatRateInputs(trade);
@@ -8265,7 +8388,7 @@ function bindPricingToggle() {
 function hideAllPricingPanels() {
   const toggle = document.getElementById('pricingToggle');
   if (toggle) toggle.style.display = 'none';
-  ['hourlyPanel','flatPanel','truckingPanel','logisticsPanel','paintingPanel','flooringPanel','roofingPanel','gutterPanel','sidingPanel','framingPanel','windowsPanel'].forEach(id => {
+  ['hourlyPanel','flatPanel','truckingPanel','logisticsPanel','paintingPanel','flooringPanel','roofingPanel','gutterPanel','sidingPanel','framingPanel','windowsPanel','drywallPanel'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.add('hidden');
   });
@@ -8287,7 +8410,7 @@ function setPricingMode(mode) {
   if (empty) empty.classList.add('hidden');
   // hide toggle when transportation or measurement-based modes are active
   const toggle = document.getElementById('pricingToggle');
-  toggle.style.display = (['trucking','logistics','painting','flooring','roofing','gutters','siding','windows'].includes(mode)) ? 'none' : 'inline-flex';
+  toggle.style.display = (['trucking','logistics','painting','flooring','roofing','gutters','siding','windows','drywall'].includes(mode)) ? 'none' : 'inline-flex';
 
   document.querySelectorAll('#pricingToggle button').forEach(b =>
     b.classList.toggle('active', b.dataset.mode === mode)
@@ -8314,6 +8437,7 @@ function setPricingMode(mode) {
   document.getElementById('sidingPanel').classList.toggle('hidden', mode !== 'siding');
   document.getElementById('framingPanel').classList.toggle('hidden', mode !== 'framing');
   document.getElementById('windowsPanel').classList.toggle('hidden', mode !== 'windows');
+  document.getElementById('drywallPanel').classList.toggle('hidden', mode !== 'drywall');
 }
 
 function applyPricingStructure(trade, structure) {
@@ -8528,6 +8652,127 @@ function bindWindowsInputs() {
     document.getElementById(id).addEventListener('input', updateWindowsSubtotal);
   });
   updateWindowsSubtotal();
+}
+
+// ============================================================================
+// Drywall — custom 2-toggle (scope + unit) + conditional fields
+// ============================================================================
+function currentDrywallScope() {
+  const btn = document.querySelector('#drywallScopeToggle button.active');
+  return btn ? btn.dataset.scope : 'both';
+}
+
+function currentDrywallUnit() {
+  const btn = document.querySelector('#drywallUnitToggle button.active');
+  return btn ? btn.dataset.unit : 'sqft';
+}
+
+function applyDrywallScope(scope) {
+  document.querySelectorAll('#drywallScopeToggle button').forEach(b => {
+    b.classList.toggle('active', b.dataset.scope === scope);
+  });
+}
+
+function applyDrywallUnit(unit) {
+  document.querySelectorAll('#drywallUnitToggle button').forEach(b => {
+    b.classList.toggle('active', b.dataset.unit === unit);
+  });
+}
+
+// Single source of truth for drywall field visibility. Reads current scope +
+// unit (from active buttons), toggles each field-group and row, updates the
+// rate-label i18n key based on unit, then recomputes the live subtotal.
+function renderDrywallFields() {
+  const scope = currentDrywallScope();
+  const unit = currentDrywallUnit();
+  const isHang = (scope === 'hang' || scope === 'both');
+  const isFinish = (scope === 'finish' || scope === 'both');
+  const isFlat = (unit === 'flat');
+  const isSheet = (unit === 'sheet');
+  const isSqft = (unit === 'sqft');
+
+  document.getElementById('drywallQtyRow').classList.toggle('hidden', isFlat);
+  document.getElementById('drywallSheetCountField').classList.toggle('hidden', !isSheet);
+  document.getElementById('drywallAreaField').classList.toggle('hidden', !isSqft);
+
+  document.getElementById('drywallRateRow').classList.toggle('hidden', isFlat);
+  document.getElementById('drywallHangRateField').classList.toggle('hidden', !isHang);
+  document.getElementById('drywallFinishRateField').classList.toggle('hidden', !isFinish);
+
+  document.getElementById('drywallFlatRow').classList.toggle('hidden', !isFlat);
+  document.getElementById('drywallHangFlatField').classList.toggle('hidden', !isHang);
+  document.getElementById('drywallFinishFlatField').classList.toggle('hidden', !isFinish);
+
+  document.getElementById('drywallFinishLevelRow').classList.toggle('hidden', !isFinish);
+
+  // Rate labels: $/sheet vs $/sq ft. Set data-i18n so applyLanguage() can
+  // re-translate on language toggle; also set textContent for the immediate
+  // visual update without waiting for a global re-apply.
+  const unitKey = isSheet ? 'sheet' : 'sqft';
+  const hangLabel = document.getElementById('drywallHangRateLabel');
+  const finishLabel = document.getElementById('drywallFinishRateLabel');
+  hangLabel.setAttribute('data-i18n', `drywall.hangRate.${unitKey}`);
+  finishLabel.setAttribute('data-i18n', `drywall.finishRate.${unitKey}`);
+  hangLabel.textContent = t(`drywall.hangRate.${unitKey}`);
+  finishLabel.textContent = t(`drywall.finishRate.${unitKey}`);
+
+  updateDrywallSubtotal();
+}
+
+// Pure subtotal math, factored out for harness testing without the DOM.
+function computeDrywallSubtotal({ scope, unit, sheetCount, area, hangRate, finishRate, hangFlat, finishFlat }) {
+  const sc = parseFloat(sheetCount) || 0;
+  const ar = parseFloat(area) || 0;
+  const hr = parseFloat(hangRate) || 0;
+  const fr = parseFloat(finishRate) || 0;
+  const hf = parseFloat(hangFlat) || 0;
+  const ff = parseFloat(finishFlat) || 0;
+  const qty = unit === 'sheet' ? sc : (unit === 'sqft' ? ar : 0);
+  let hangPart, finishPart;
+  if (unit === 'flat') {
+    hangPart = hf;
+    finishPart = ff;
+  } else {
+    hangPart = qty * hr;
+    finishPart = qty * fr;
+  }
+  const includesHang = (scope === 'hang' || scope === 'both');
+  const includesFinish = (scope === 'finish' || scope === 'both');
+  return (includesHang ? hangPart : 0) + (includesFinish ? finishPart : 0);
+}
+
+function updateDrywallSubtotal() {
+  const sub = computeDrywallSubtotal({
+    scope: currentDrywallScope(),
+    unit: currentDrywallUnit(),
+    sheetCount: document.getElementById('drywallSheetCount').value,
+    area: document.getElementById('drywallArea').value,
+    hangRate: document.getElementById('drywallHangRate').value,
+    finishRate: document.getElementById('drywallFinishRate').value,
+    hangFlat: document.getElementById('drywallHangFlat').value,
+    finishFlat: document.getElementById('drywallFinishFlat').value,
+  });
+  document.getElementById('drywallSubtotal').textContent = fmt(sub);
+}
+
+function bindDrywallInputs() {
+  document.querySelectorAll('#drywallScopeToggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      applyDrywallScope(btn.dataset.scope);
+      renderDrywallFields();
+    });
+  });
+  document.querySelectorAll('#drywallUnitToggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      applyDrywallUnit(btn.dataset.unit);
+      renderDrywallFields();
+    });
+  });
+  ['drywallSheetCount','drywallArea','drywallHangRate','drywallFinishRate','drywallHangFlat','drywallFinishFlat'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateDrywallSubtotal);
+  });
+  document.getElementById('drywallFinishLevel').addEventListener('change', updateDrywallSubtotal);
+  renderDrywallFields();
 }
 
 function bindNav() {
@@ -9939,6 +10184,88 @@ window.__testClientCap = function () {
   return passed === results.length;
 };
 
+// Browser-console self-test harness for the Drywall subtotal math. Pure
+// computation — does not touch the DOM, so it can run before the panel is
+// rendered. Asserts all 9 scope x unit combos plus the empty-input fallback.
+window.__testDrywall = function () {
+  const results = [];
+  const assert = (name, cond) => results.push({ name, pass: !!cond });
+  const near = (a, b) => Math.abs(a - b) < 0.0001;
+
+  // hang / sheet : 10 sheets x $15 = 150
+  assert('hang/sheet 10×$15 = 150',
+    near(150, computeDrywallSubtotal({
+      scope: 'hang', unit: 'sheet', sheetCount: 10, area: 0,
+      hangRate: 15, finishRate: 0, hangFlat: 0, finishFlat: 0,
+    })));
+  // hang / sqft : 500 sqft x $1.20 = 600
+  assert('hang/sqft 500×$1.20 = 600',
+    near(600, computeDrywallSubtotal({
+      scope: 'hang', unit: 'sqft', sheetCount: 0, area: 500,
+      hangRate: 1.20, finishRate: 0, hangFlat: 0, finishFlat: 0,
+    })));
+  // hang / flat : $400 hang flat = 400 (finish ignored)
+  assert('hang/flat $400 = 400',
+    near(400, computeDrywallSubtotal({
+      scope: 'hang', unit: 'flat', sheetCount: 0, area: 0,
+      hangRate: 0, finishRate: 0, hangFlat: 400, finishFlat: 999,
+    })));
+
+  // finish / sheet : 10 sheets x $25 = 250
+  assert('finish/sheet 10×$25 = 250',
+    near(250, computeDrywallSubtotal({
+      scope: 'finish', unit: 'sheet', sheetCount: 10, area: 0,
+      hangRate: 0, finishRate: 25, hangFlat: 0, finishFlat: 0,
+    })));
+  // finish / sqft : 500 sqft x $1.20 = 600
+  assert('finish/sqft 500×$1.20 = 600',
+    near(600, computeDrywallSubtotal({
+      scope: 'finish', unit: 'sqft', sheetCount: 0, area: 500,
+      hangRate: 0, finishRate: 1.20, hangFlat: 0, finishFlat: 0,
+    })));
+  // finish / flat : $1200 finish flat = 1200 (hang ignored)
+  assert('finish/flat $1200 = 1200',
+    near(1200, computeDrywallSubtotal({
+      scope: 'finish', unit: 'flat', sheetCount: 0, area: 0,
+      hangRate: 0, finishRate: 0, hangFlat: 999, finishFlat: 1200,
+    })));
+
+  // both / sheet : 10 × ($15 + $25) = 400
+  assert('both/sheet 10×($15+$25) = 400',
+    near(400, computeDrywallSubtotal({
+      scope: 'both', unit: 'sheet', sheetCount: 10, area: 0,
+      hangRate: 15, finishRate: 25, hangFlat: 0, finishFlat: 0,
+    })));
+  // both / sqft : 500 × ($1.20 + $1.50) = 1350
+  assert('both/sqft 500×($1.20+$1.50) = 1350',
+    near(1350, computeDrywallSubtotal({
+      scope: 'both', unit: 'sqft', sheetCount: 0, area: 500,
+      hangRate: 1.20, finishRate: 1.50, hangFlat: 0, finishFlat: 0,
+    })));
+  // both / flat : $800 + $1200 = 2000
+  assert('both/flat $800 + $1200 = 2000',
+    near(2000, computeDrywallSubtotal({
+      scope: 'both', unit: 'flat', sheetCount: 0, area: 0,
+      hangRate: 0, finishRate: 0, hangFlat: 800, finishFlat: 1200,
+    })));
+
+  // Empty inputs → 0 (no NaN), all 9 combos
+  ['hang','finish','both'].forEach(scope => {
+    ['sheet','sqft','flat'].forEach(unit => {
+      const v = computeDrywallSubtotal({
+        scope, unit, sheetCount: '', area: '',
+        hangRate: '', finishRate: '', hangFlat: '', finishFlat: '',
+      });
+      assert(`empty ${scope}/${unit} → 0 (got ${v})`, v === 0 && !isNaN(v));
+    });
+  });
+
+  const passed = results.filter(r => r.pass).length;
+  results.forEach(r => console.log((r.pass ? 'PASS' : 'FAIL') + ' — ' + r.name));
+  console.log(`__testDrywall: ${passed}/${results.length} passed`);
+  return passed === results.length;
+};
+
 // ============================================================================
 // Generate Quote (Anthropic API call)
 // ============================================================================
@@ -10308,6 +10635,42 @@ function buildContextForTradeState(tradeName, state) {
       total,
     };
   }
+  if (mode === 'drywall') {
+    const scope = (state.drywallScope) || 'both';
+    const unit = (state.drywallUnit) || 'sqft';
+    const sheetCount = get('drywallSheetCount');
+    const area = get('drywallArea');
+    const hangRate = get('drywallHangRate');
+    const finishRate = get('drywallFinishRate');
+    const hangFlat = get('drywallHangFlat');
+    const finishFlat = get('drywallFinishFlat');
+    const finishLevel = getStr('drywallFinishLevel') || '4';
+    const total = computeDrywallSubtotal({
+      scope, unit, sheetCount, area, hangRate, finishRate, hangFlat, finishFlat,
+    });
+    const scopeLabel = scope === 'hang' ? 'Hang only'
+      : scope === 'finish' ? 'Finish only'
+      : 'Hang AND Finish';
+    const lines = [`Drywall scope: ${scopeLabel}.`];
+    if (unit === 'sheet') {
+      const sc = parseFloat(sheetCount) || 0;
+      lines.push(`Sheet-count pricing: ${sc} sheets.`);
+      if (scope !== 'finish') lines.push(`Hang rate: $${hangRate || 0}/sheet.`);
+      if (scope !== 'hang')   lines.push(`Finish rate: $${finishRate || 0}/sheet.`);
+    } else if (unit === 'sqft') {
+      const ar = parseFloat(area) || 0;
+      lines.push(`Per sq ft pricing: ${ar} sq ft.`);
+      if (scope !== 'finish') lines.push(`Hang rate: $${hangRate || 0}/sq ft.`);
+      if (scope !== 'hang')   lines.push(`Finish rate: $${finishRate || 0}/sq ft.`);
+    } else {
+      lines.push(`Flat-rate pricing.`);
+      if (scope !== 'finish') lines.push(`Hang flat price: $${hangFlat || 0}.`);
+      if (scope !== 'hang')   lines.push(`Finish flat price: $${finishFlat || 0}.`);
+    }
+    if (scope !== 'hang') lines.push(`Finish level: Level ${finishLevel}.`);
+    lines.push(`Total: $${total.toFixed(2)}.`);
+    return { mode, summary: lines.filter(Boolean).join(' '), total };
+  }
   if (mode === 'windows') {
     const count = parseFloat(get('windowCount')) || 0;
     const type = getStr('windowType') || 'Double-hung';
@@ -10371,6 +10734,7 @@ const TRADE_GUIDANCE = {
   Framing: 'Framing quote conventions: Bid by square feet of framed area, with lumber/materials broken out separately since prices fluctuate weekly. Use framing terminology: studs (2×4 / 2×6), on-center spacing (16" or 24"), top and bottom plates, headers over openings, blocking, fire-blocking, jack studs, king studs, cripples, joists, rim board, sheathing (OSB or plywood), shear walls, load-bearing vs non-load-bearing. Lumber package should be its own line item with the species and grade noted (e.g., #2 SPF 2×4×8). For interior framing, simple per sqft labor + lumber works. For exterior/structural, include sheathing, fasteners, and engineered headers separately. Always note inspection responsibility and code compliance. Typical payment: 30-50% deposit, balance on rough-in inspection passing. Typical warranty: 1-year workmanship; structural elements covered longer on new construction. Common line items: Lumber & materials, Sheathing, Framing labor, Fasteners and connectors, Trip/setup if applicable.',
   Landscaping: 'Landscaping quote conventions: Use landscaping terminology: hardscape, softscape, irrigation runs, drainage, grading, specimen plants, mulch, soil amendments, edging. Distinguish between hardscape (pavers, walls, patios) and softscape (plants, sod, mulch). Mention plant warranty (typically 1 year / one growing season — must be cared for per instructions). Typical payment: 50% deposit on installs, NET 30 on maintenance. Typical warranty: 1 year on plants, longer on hardscape. Common line items: Site prep and grading, Materials (plants/hardscape/mulch), Installation labor, Cleanup and haul-off.',
   Windows: 'Windows quote conventions: Bid per window (unit pricing), with unit cost and installation labor often itemized separately. Use window terminology: insert/pocket replacement (less invasive, no trim/siding disturbance) vs full-frame replacement (involves exterior trim and siding work), double-hung / single-hung / casement / sliding / picture / awning / bay-or-bow, U-factor and Low-E glazing for energy efficiency, ENERGY STAR rating, NFRC labels, brickmold, J-channel, sill flashing. Frame material (vinyl is the volume entry tier; aluminum cheaper but less efficient; wood and fiberglass premium; composite increasingly common) drives the bulk of cost. Tear-off and disposal of old units is a normal separate line. Bulk-count jobs typically attract a per-window discount (12+ units). Mention permits where required by AHJ and any structural framing changes. Typical payment: 50% deposit on jobs over $2,000, balance on completion. Typical warranty: 1-2 years workmanship, manufacturer warranty on units (often 20-year limited or lifetime on vinyl). Common line items: Window units (per-window cost), Installation labor (per-window), Tear-off and disposal, Trim, flashing and caulking, Permits if applicable.',
+  Drywall: 'Drywall quote conventions: Hanging and finishing are distinct trade operations — separate crews, separate skill sets, often priced separately. Bid per sheet (4×8 standard, 4×10 / 4×12 for taller walls) or per sq ft of wall/ceiling area. Common board specs: 1/2" for walls, 5/8" Type-X for ceilings and garages (fire-rated), moisture-resistant (green/purple board) in baths. Finish levels run 0-5: Level 0 framing-ready, Level 1-2 utility/garage, Level 3 textured walls, Level 4 standard residential (paint-ready), Level 5 critical lighting / glossy paint / floor-to-ceiling windows where wall imperfections show. Finishing involves taping (paper or mesh — paper is stronger on flats, mesh self-adheres on butt joints), three or more coats of joint compound, sanding between coats, corner bead (metal or vinyl). Note disposal of cutoff scrap, and texture (orange peel / knockdown / smooth) if applicable. Typical payment: 30-50% deposit on larger jobs, balance on completion. Typical warranty: 1 year on workmanship (cracks at seams from settling are usually excluded). Common line items: Drywall material (sheets + screws + tape + mud + corner bead), Hanging labor, Finishing labor (taping/mudding/sanding), Texture (if applied), Cleanup and disposal.',
 };
 
 function buildPrompt({ pricingContext, timeline, taxRate, taxLabel, clientName, clientAddr, quoteLanguages }) {
@@ -10389,6 +10753,7 @@ function buildPrompt({ pricingContext, timeline, taxRate, taxLabel, clientName, 
       if (t.mode === 'siding') return 'This is a SIDING segment. Use siding terminology (sqft, housewrap/weather barrier, J-channel, starter strip, corner posts, flashing around openings, trim, drip cap, tear-off of old siding). Name the material since it sets the price tier.';
       if (t.mode === 'framing') return 'This is a FRAMING segment. Use carpentry/framing terminology (studs 2×4 or 2×6, on-center spacing, top/bottom plates, headers, blocking, sheathing, joists, load-bearing). Lumber is typically a separate line because prices fluctuate.';
       if (t.mode === 'windows') return 'This is a WINDOWS replacement segment. Pricing is PER WINDOW (count × per-window cost), not per area. Use window terminology (per-window unit pricing, insert/pocket vs full-frame replacement, frame material, U-factor, Low-E, ENERGY STAR, brickmold, sill flashing). Note the install type — full-frame disturbs exterior trim/siding while insert/pocket does not. Frame material drives the bulk of unit cost.';
+      if (t.mode === 'drywall') return 'This is a DRYWALL segment. Hanging and finishing are distinct operations — read the pricing context above to see whether the scope is hang-only, finish-only, or both, and respect that scope in the line items (do NOT add a finishing line if scope is hang-only, and vice versa). Use drywall terminology (sheets 4×8 / 4×12, 1/2" vs 5/8" Type-X, hanging vs finishing, taping/mudding/sanding, mesh vs paper tape, corner bead, Levels 0-5 finish — Level 4 standard, Level 5 for critical lighting). Honor the specified finish level if present. If pricing is per-sheet vs per-sq-ft vs flat-rate, mirror that structure in the line items.';
       return '';
     })();
     const flatRateNote = t.isFlatRate
@@ -12186,6 +12551,11 @@ async function clearForm(silent) {
     ['windowCount', ''], ['windowType', 'Double-hung'],
     ['windowFrameMaterial', 'Vinyl'], ['windowInstallType', 'Insert / pocket'],
     ['windowUnitCost', ''], ['windowLaborPerWindow', ''], ['windowDisposal', ''],
+    // Drywall
+    ['drywallSheetCount', ''], ['drywallArea', ''],
+    ['drywallHangRate', ''], ['drywallFinishRate', ''],
+    ['drywallHangFlat', ''], ['drywallFinishFlat', ''],
+    ['drywallFinishLevel', '4'],
     // Flat-rate sub-mode fields
     ['truckingFlatQty', ''], ['truckingFlatUnit', 'trips'], ['truckingFlatCustomUnit', ''], ['truckingFlatMaterial', ''], ['truckingFlatRate', ''],
     ['logisticsFlatQty', ''], ['logisticsFlatUnit', 'pallets'], ['logisticsFlatCustomUnit', ''], ['logisticsFlatMaterial', ''], ['logisticsFlatRate', ''],
@@ -12238,6 +12608,7 @@ async function clearForm(silent) {
   updateSidingSubtotal();
   updateFramingSubtotal();
   updateWindowsSubtotal();
+  updateDrywallSubtotal();
 
   // Reset all specialty pricing structures back to per-unit
   ['trucking','logistics','painting','flooring','roofing','gutters','siding','windows'].forEach(trade => {
@@ -12246,6 +12617,13 @@ async function clearForm(silent) {
     if (customInput) customInput.classList.add('hidden');
     updateFlatSubtotal(trade);
   });
+
+  // Drywall has custom toggles (scope + unit), not the standard per-unit /
+  // flat-rate substruct — reset its button states explicitly so a cleared
+  // form doesn't carry over stale Hang/Finish/sheet/flat selections.
+  applyDrywallScope('both');
+  applyDrywallUnit('sqft');
+  renderDrywallFields();
 
   document.getElementById('quoteWrap').classList.remove('visible');
   // Drop the bilingual snapshot so a future language toggle won't try to
