@@ -2257,15 +2257,15 @@
             <div class="field-row cols-3">
               <div>
                 <label class="label" data-i18n="hourly.estHours">Estimated hours</label>
-                <input type="number" class="input" id="hours" value="0" min="0" step="0.5" />
+                <input type="number" class="input" id="hours" placeholder="0" min="0" step="0.5" />
               </div>
               <div>
                 <label class="label" data-i18n="hourly.rate">Hourly rate ($)</label>
-                <input type="number" class="input" id="rate" value="0" min="0" />
+                <input type="number" class="input" id="rate" placeholder="0" min="0" />
               </div>
               <div>
                 <label class="label" data-i18n="hourly.materials">Materials estimate ($)</label>
-                <input type="number" class="input" id="materials" value="0" min="0" />
+                <input type="number" class="input" id="materials" placeholder="0" min="0" />
               </div>
             </div>
           </div>
@@ -2275,7 +2275,7 @@
             <div class="field-row cols-2">
               <div>
                 <label class="label" data-i18n="flat.price">All-in price ($)</label>
-                <input type="number" class="input" id="flatPrice" value="0" min="0" />
+                <input type="number" class="input" id="flatPrice" placeholder="0" min="0" />
               </div>
               <div>
                 <label class="label" data-i18n="flat.includes">Includes (optional)</label>
@@ -2308,7 +2308,7 @@
                 </div>
                 <div>
                   <label class="label" data-i18n="trucking.count"># of trucks</label>
-                  <input type="number" class="input" id="truckCount" value="0" min="0" />
+                  <input type="number" class="input" id="truckCount" placeholder="0" min="0" />
                 </div>
               </div>
               <div class="field-row cols-3">
@@ -2324,17 +2324,17 @@
                 </div>
                 <div>
                   <label class="label" data-i18n="trucking.rate">Rate ($)</label>
-                  <input type="number" class="input" id="truckRate" value="0" min="0" />
+                  <input type="number" class="input" id="truckRate" placeholder="0" min="0" />
                 </div>
                 <div>
                   <label class="label" data-i18n="trucking.qty">Quantity</label>
-                  <input type="number" class="input" id="truckQty" value="0" min="0" step="0.5" />
+                  <input type="number" class="input" id="truckQty" placeholder="0" min="0" step="0.5" />
                 </div>
               </div>
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="trucking.disposal">Disposal / dump fees ($)</label>
-                  <input type="number" class="input" id="disposalFee" value="0" min="0" />
+                  <input type="number" class="input" id="disposalFee" placeholder="0" min="0" />
                 </div>
                 <div>
                   <label class="label" data-i18n="trucking.materialHauled">Materials hauled (optional)</label>
@@ -2350,7 +2350,7 @@
               <div class="field-row cols-3">
                 <div>
                   <label class="label" data-i18n="flat.quantity">Quantity</label>
-                  <input type="number" class="input" id="truckingFlatQty" value="0" min="0" step="0.1" />
+                  <input type="number" class="input" id="truckingFlatQty" placeholder="0" min="0" step="0.1" />
                 </div>
                 <div>
                   <label class="label" data-i18n="flat.unit">Unit</label>
@@ -2373,11 +2373,11 @@
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
-                  <input type="number" class="input" id="truckingFlatMaterial" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="truckingFlatMaterial" placeholder="0" min="0" step="0.01" />
                 </div>
                 <div>
                   <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
-                  <input type="number" class="input" id="truckingFlatRate" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="truckingFlatRate" placeholder="0" min="0" step="0.01" />
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -2428,21 +2428,21 @@
               <div class="field-row cols-3">
                 <div>
                   <label class="label" data-i18n="logistics.rate">Rate ($)</label>
-                  <input type="number" class="input" id="logisticsRate" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="logisticsRate" placeholder="0" min="0" step="0.01" />
                 </div>
                 <div>
                   <label class="label" id="logisticsQtyLabel" data-i18n="logistics.qty.pallet"># of pallets</label>
-                  <input type="number" class="input" id="logisticsQty" value="0" min="0" step="0.1" />
+                  <input type="number" class="input" id="logisticsQty" placeholder="0" min="0" step="0.1" />
                 </div>
                 <div id="logisticsDaysField" class="hidden">
                   <label class="label" data-i18n="logistics.days">Days</label>
-                  <input type="number" class="input" id="logisticsDays" value="0" min="0" />
+                  <input type="number" class="input" id="logisticsDays" placeholder="0" min="0" />
                 </div>
               </div>
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="logistics.accessorial">Accessorial fees ($)</label>
-                  <input type="number" class="input" id="accessorialFees" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="accessorialFees" placeholder="0" min="0" step="0.01" />
                   <small style="color: var(--ink-3); font-size: 11px;" data-i18n="logistics.accessorialHelp">Lift gate, waiting time, residential delivery, hazmat handling, etc.</small>
                 </div>
                 <div>
@@ -2459,7 +2459,7 @@
               <div class="field-row cols-3">
                 <div>
                   <label class="label" data-i18n="flat.quantity">Quantity</label>
-                  <input type="number" class="input" id="logisticsFlatQty" value="0" min="0" step="0.1" />
+                  <input type="number" class="input" id="logisticsFlatQty" placeholder="0" min="0" step="0.1" />
                 </div>
                 <div>
                   <label class="label" data-i18n="flat.unit">Unit</label>
@@ -2482,11 +2482,11 @@
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
-                  <input type="number" class="input" id="logisticsFlatMaterial" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="logisticsFlatMaterial" placeholder="0" min="0" step="0.01" />
                 </div>
                 <div>
                   <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
-                  <input type="number" class="input" id="logisticsFlatRate" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="logisticsFlatRate" placeholder="0" min="0" step="0.01" />
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -2508,7 +2508,7 @@
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="painting.area">Wall area (sq ft)</label>
-                  <input type="number" class="input" id="paintArea" value="0" min="0" />
+                  <input type="number" class="input" id="paintArea" placeholder="0" min="0" />
                 </div>
                 <div>
                   <label class="label" data-i18n="painting.coats">Number of coats</label>
@@ -2522,23 +2522,23 @@
               <div class="field-row cols-3">
                 <div>
                   <label class="label" data-i18n="painting.rate">Rate per sq ft per coat ($)</label>
-                  <input type="number" class="input" id="paintRate" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="paintRate" placeholder="0" min="0" step="0.01" />
                 </div>
                 <div>
                   <label class="label" data-i18n="painting.cost">Paint cost ($)</label>
-                  <input type="number" class="input" id="paintCost" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="paintCost" placeholder="0" min="0" step="0.01" />
                   <small style="color: var(--ink-3); font-size: 11px;" data-i18n="painting.costHelp">Total paint and supplies</small>
                 </div>
                 <div>
                   <label class="label" data-i18n="painting.prep">Surface prep ($)</label>
-                  <input type="number" class="input" id="paintPrep" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="paintPrep" placeholder="0" min="0" step="0.01" />
                   <small style="color: var(--ink-3); font-size: 11px;" data-i18n="painting.prepHelp">Sanding, patching, caulking, masking</small>
                 </div>
               </div>
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="painting.trim">Trim and detail work ($)</label>
-                  <input type="number" class="input" id="paintTrim" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="paintTrim" placeholder="0" min="0" step="0.01" />
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -2550,7 +2550,7 @@
               <div class="field-row cols-3">
                 <div>
                   <label class="label" data-i18n="flat.quantity">Quantity</label>
-                  <input type="number" class="input" id="paintingFlatQty" value="0" min="0" step="0.1" />
+                  <input type="number" class="input" id="paintingFlatQty" placeholder="0" min="0" step="0.1" />
                 </div>
                 <div>
                   <label class="label" data-i18n="flat.unit">Unit</label>
@@ -2571,11 +2571,11 @@
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
-                  <input type="number" class="input" id="paintingFlatMaterial" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="paintingFlatMaterial" placeholder="0" min="0" step="0.01" />
                 </div>
                 <div>
                   <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
-                  <input type="number" class="input" id="paintingFlatRate" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="paintingFlatRate" placeholder="0" min="0" step="0.01" />
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -2597,7 +2597,7 @@
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="flooring.area">Floor area (sq ft)</label>
-                  <input type="number" class="input" id="floorArea" value="0" min="0" step="0.1" />
+                  <input type="number" class="input" id="floorArea" placeholder="0" min="0" step="0.1" />
                 </div>
                 <div>
                   <label class="label" data-i18n="flooring.material">Material type</label>
@@ -2615,32 +2615,32 @@
               <div class="field-row cols-3">
                 <div>
                   <label class="label" data-i18n="flooring.materialRate">Material cost per sq ft ($)</label>
-                  <input type="number" class="input" id="floorMaterialRate" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="floorMaterialRate" placeholder="0" min="0" step="0.01" />
                 </div>
                 <div>
                   <label class="label" data-i18n="flooring.installRate">Installation rate per sq ft ($)</label>
-                  <input type="number" class="input" id="floorInstallRate" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="floorInstallRate" placeholder="0" min="0" step="0.01" />
                 </div>
                 <div>
                   <label class="label" data-i18n="flooring.waste">Waste factor (%)</label>
-                  <input type="number" class="input" id="floorWasteFactor" value="0" min="0" step="0.1" />
+                  <input type="number" class="input" id="floorWasteFactor" placeholder="0" min="0" step="0.1" />
                   <small style="color: var(--ink-3); font-size: 11px;" data-i18n="flooring.wasteHelp">Typically 10% (standard) or 15% (diagonal patterns)</small>
                 </div>
               </div>
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="flooring.tearOut">Tear-out and disposal ($)</label>
-                  <input type="number" class="input" id="floorTearOut" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="floorTearOut" placeholder="0" min="0" step="0.01" />
                 </div>
                 <div>
                   <label class="label" data-i18n="flooring.subfloor">Subfloor prep ($)</label>
-                  <input type="number" class="input" id="floorSubfloorPrep" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="floorSubfloorPrep" placeholder="0" min="0" step="0.01" />
                 </div>
               </div>
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="flooring.transitions">Transitions and finish work ($)</label>
-                  <input type="number" class="input" id="floorTransitions" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="floorTransitions" placeholder="0" min="0" step="0.01" />
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -2652,7 +2652,7 @@
               <div class="field-row cols-3">
                 <div>
                   <label class="label" data-i18n="flat.quantity">Quantity</label>
-                  <input type="number" class="input" id="flooringFlatQty" value="0" min="0" step="0.1" />
+                  <input type="number" class="input" id="flooringFlatQty" placeholder="0" min="0" step="0.1" />
                 </div>
                 <div>
                   <label class="label" data-i18n="flat.unit">Unit</label>
@@ -2673,11 +2673,11 @@
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
-                  <input type="number" class="input" id="flooringFlatMaterial" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="flooringFlatMaterial" placeholder="0" min="0" step="0.01" />
                 </div>
                 <div>
                   <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
-                  <input type="number" class="input" id="flooringFlatRate" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="flooringFlatRate" placeholder="0" min="0" step="0.01" />
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -2699,7 +2699,7 @@
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="roofing.area">Roof area (squares)</label>
-                  <input type="number" class="input" id="roofSquares" value="0" min="0" step="0.1" />
+                  <input type="number" class="input" id="roofSquares" placeholder="0" min="0" step="0.1" />
                   <small style="color: var(--ink-3); font-size: 11px;" data-i18n="roofing.areaHelp">1 square = 100 sq ft</small>
                 </div>
                 <div>
@@ -2717,25 +2717,25 @@
               <div class="field-row cols-3">
                 <div>
                   <label class="label" data-i18n="roofing.materialRate">Material cost per square ($)</label>
-                  <input type="number" class="input" id="roofMaterialRate" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="roofMaterialRate" placeholder="0" min="0" step="0.01" />
                 </div>
                 <div>
                   <label class="label" data-i18n="roofing.laborRate">Labor per square ($)</label>
-                  <input type="number" class="input" id="roofLaborRate" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="roofLaborRate" placeholder="0" min="0" step="0.01" />
                 </div>
                 <div>
                   <label class="label" data-i18n="roofing.tearOff">Tear-off per square ($)</label>
-                  <input type="number" class="input" id="roofTearOffRate" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="roofTearOffRate" placeholder="0" min="0" step="0.01" />
                 </div>
               </div>
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="roofing.disposal">Disposal / dump fees ($)</label>
-                  <input type="number" class="input" id="roofDisposal" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="roofDisposal" placeholder="0" min="0" step="0.01" />
                 </div>
                 <div>
                   <label class="label" data-i18n="roofing.accessories">Underlayment, flashing, accessories ($)</label>
-                  <input type="number" class="input" id="roofAccessories" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="roofAccessories" placeholder="0" min="0" step="0.01" />
                   <small style="color: var(--ink-3); font-size: 11px;" data-i18n="roofing.accessoriesHelp">Ice & water shield, drip edge, ridge vent, flashing</small>
                 </div>
               </div>
@@ -2748,7 +2748,7 @@
               <div class="field-row cols-3">
                 <div>
                   <label class="label" data-i18n="flat.quantity">Quantity</label>
-                  <input type="number" class="input" id="roofingFlatQty" value="0" min="0" step="0.1" />
+                  <input type="number" class="input" id="roofingFlatQty" placeholder="0" min="0" step="0.1" />
                 </div>
                 <div>
                   <label class="label" data-i18n="flat.unit">Unit</label>
@@ -2768,11 +2768,11 @@
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
-                  <input type="number" class="input" id="roofingFlatMaterial" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="roofingFlatMaterial" placeholder="0" min="0" step="0.01" />
                 </div>
                 <div>
                   <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
-                  <input type="number" class="input" id="roofingFlatRate" value="0" min="0" step="0.01" />
+                  <input type="number" class="input" id="roofingFlatRate" placeholder="0" min="0" step="0.01" />
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -2813,7 +2813,7 @@
         </div>
         <div id="timelineSurchargeField" class="field hidden">
           <label class="label" id="timelineSurchargeLabel" data-i18n="timeline.surcharge">Rush surcharge ($)</label>
-          <input type="number" class="input" id="rushSurcharge" value="0" min="0" step="0.01" />
+          <input type="number" class="input" id="rushSurcharge" placeholder="0" min="0" step="0.01" />
         </div>
 
         <div class="field">
@@ -11401,39 +11401,45 @@ async function clearForm(silent) {
     ? Number(profileCache.default_deposit_percent)
     : 50;
 
+  // Numeric pricing fields reset to '' (not '0') so they show the greyed
+  // placeholder '0' from the HTML — typing into a fresh field doesn't
+  // require deleting a "0" first. The math (parseFloat(...) || 0) treats
+  // '' as 0, so totals are identical to the old behavior.
+  // Select dropdowns and meaningful non-zero defaults (paintCoats=2,
+  // depositPercent) keep their real values.
   const FIELD_DEFAULTS = [
     // Common
     ['jobDesc', ''], ['clientName', ''], ['clientAddr', ''],
-    ['hours', '0'], ['rate', '0'], ['materials', '0'],
-    ['flatPrice', '0'], ['flatIncludes', ''],
+    ['hours', ''], ['rate', ''], ['materials', ''],
+    ['flatPrice', ''], ['flatIncludes', ''],
     // Trucking
-    ['truckType', 'Dump truck'], ['truckCount', '0'],
-    ['billingMethod', 'load'], ['truckRate', '0'], ['truckQty', '0'],
-    ['disposalFee', '0'], ['materialHauled', ''],
+    ['truckType', 'Dump truck'], ['truckCount', ''],
+    ['billingMethod', 'load'], ['truckRate', ''], ['truckQty', ''],
+    ['disposalFee', ''], ['materialHauled', ''],
     // Logistics
     ['serviceType', 'Freight reworking'], ['logisticsBillingMethod', 'pallet'],
-    ['logisticsRate', '0'], ['logisticsQty', '0'], ['logisticsDays', '0'],
-    ['accessorialFees', '0'], ['specialHandling', ''],
+    ['logisticsRate', ''], ['logisticsQty', ''], ['logisticsDays', ''],
+    ['accessorialFees', ''], ['specialHandling', ''],
     // Painting
-    ['paintArea', '0'], ['paintCoats', '2'], ['paintRate', '0'],
-    ['paintCost', '0'], ['paintPrep', '0'], ['paintTrim', '0'],
+    ['paintArea', ''], ['paintCoats', '2'], ['paintRate', ''],
+    ['paintCost', ''], ['paintPrep', ''], ['paintTrim', ''],
     // Flooring
-    ['floorArea', '0'], ['floorMaterialType', 'Laminate'],
-    ['floorMaterialRate', '0'], ['floorInstallRate', '0'],
-    ['floorWasteFactor', '0'], ['floorTearOut', '0'],
-    ['floorSubfloorPrep', '0'], ['floorTransitions', '0'],
+    ['floorArea', ''], ['floorMaterialType', 'Laminate'],
+    ['floorMaterialRate', ''], ['floorInstallRate', ''],
+    ['floorWasteFactor', ''], ['floorTearOut', ''],
+    ['floorSubfloorPrep', ''], ['floorTransitions', ''],
     // Roofing
-    ['roofSquares', '0'], ['roofMaterialType', 'Asphalt shingles'],
-    ['roofMaterialRate', '0'], ['roofLaborRate', '0'],
-    ['roofTearOffRate', '0'], ['roofDisposal', '0'], ['roofAccessories', '0'],
+    ['roofSquares', ''], ['roofMaterialType', 'Asphalt shingles'],
+    ['roofMaterialRate', ''], ['roofLaborRate', ''],
+    ['roofTearOffRate', ''], ['roofDisposal', ''], ['roofAccessories', ''],
     // Flat-rate sub-mode fields
-    ['truckingFlatQty', '0'], ['truckingFlatUnit', 'trips'], ['truckingFlatCustomUnit', ''], ['truckingFlatMaterial', '0'], ['truckingFlatRate', '0'],
-    ['logisticsFlatQty', '0'], ['logisticsFlatUnit', 'pallets'], ['logisticsFlatCustomUnit', ''], ['logisticsFlatMaterial', '0'], ['logisticsFlatRate', '0'],
-    ['paintingFlatQty', '0'], ['paintingFlatUnit', 'sqft'], ['paintingFlatCustomUnit', ''], ['paintingFlatMaterial', '0'], ['paintingFlatRate', '0'],
-    ['flooringFlatQty', '0'], ['flooringFlatUnit', 'sqft'], ['flooringFlatCustomUnit', ''], ['flooringFlatMaterial', '0'], ['flooringFlatRate', '0'],
-    ['roofingFlatQty', '0'], ['roofingFlatUnit', 'squares'], ['roofingFlatCustomUnit', ''], ['roofingFlatMaterial', '0'], ['roofingFlatRate', '0'],
+    ['truckingFlatQty', ''], ['truckingFlatUnit', 'trips'], ['truckingFlatCustomUnit', ''], ['truckingFlatMaterial', ''], ['truckingFlatRate', ''],
+    ['logisticsFlatQty', ''], ['logisticsFlatUnit', 'pallets'], ['logisticsFlatCustomUnit', ''], ['logisticsFlatMaterial', ''], ['logisticsFlatRate', ''],
+    ['paintingFlatQty', ''], ['paintingFlatUnit', 'sqft'], ['paintingFlatCustomUnit', ''], ['paintingFlatMaterial', ''], ['paintingFlatRate', ''],
+    ['flooringFlatQty', ''], ['flooringFlatUnit', 'sqft'], ['flooringFlatCustomUnit', ''], ['flooringFlatMaterial', ''], ['flooringFlatRate', ''],
+    ['roofingFlatQty', ''], ['roofingFlatUnit', 'squares'], ['roofingFlatCustomUnit', ''], ['roofingFlatMaterial', ''], ['roofingFlatRate', ''],
     // Rush surcharge
-    ['rushSurcharge', '0'],
+    ['rushSurcharge', ''],
     ['depositPercent', String(resolvedDeposit)],
   ];
   FIELD_DEFAULTS.forEach(([id, val]) => {
