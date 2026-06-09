@@ -1263,6 +1263,10 @@
     max-height: calc(100vh - 32px);
     overflow: auto;
   }
+  /* Wider variant for content-heavy modals like the upgrade comparison. */
+  .modal-card.modal-card-wide {
+    max-width: 540px;
+  }
   .modal-title {
     font-size: 17px;
     font-weight: 600;
@@ -1322,16 +1326,23 @@
     outline-offset: 2px;
   }
 
-  /* === Upgrade comparison table (inside the upgrade modal) === */
+  /* === Upgrade comparison table (inside the upgrade modal) ===
+     Design language: the Pro column reads like a premium tile — dark
+     header (charcoal, not orange), warm cream body cells, a slim gold
+     left-rail that anchors the column, and a soft shadow that lifts it
+     off the page. The body cells use a SOFT cream (surface-2) instead
+     of the previous solid accent-soft tint, which was reading as
+     "highlighter orange" against the white modal background. */
   #upgradeCompareTable {
     width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-    margin-bottom: 18px;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13.5px;
+    margin-bottom: 22px;
   }
   #upgradeCompareTable th,
   #upgradeCompareTable td {
-    padding: 12px 8px;
+    padding: 13px 10px;
     border-bottom: 1px solid var(--line-2);
   }
   #upgradeCompareTable th {
@@ -1353,6 +1364,7 @@
     text-align: left;
     color: var(--ink);
     font-weight: 500;
+    padding-right: 14px;
   }
   /* Stacked label + sub-line layout inside the first cell. */
   #upgradeCompareTable td:first-child .row-sub {
@@ -1365,24 +1377,40 @@
     text-transform: none;
     letter-spacing: 0;
   }
-  #upgradeCompareTable tr:last-child td { border-bottom: none; }
-  #upgradeCompareTable .upgrade-col-free { width: 70px; }
+  #upgradeCompareTable .upgrade-col-free { width: 80px; }
+  /* Pro column: tile-like, with a slim gold rail and warm cream wash. */
   #upgradeCompareTable .upgrade-col-pro {
-    width: 78px;
-    background: var(--accent-soft);
-    color: var(--accent-ink);
+    width: 110px;
+    background: var(--surface-2);
+    color: var(--ink);
     font-weight: 600;
+    border-left: 3px solid var(--gold);
   }
-  /* Pro header: solid accent surface frames the column as the "chosen path". */
+  /* Pro header: dark charcoal panel — premium "platinum tier" feel.
+     Gold star ties to the column's gold rail; rounded top corner makes
+     the column read as a tile rising above the rest of the table. */
   #upgradeCompareTable th.upgrade-col-pro {
-    background: var(--accent);
+    background: var(--ink);
     color: #FFFFFF;
-    border-top: 2px solid var(--accent);
     font-weight: 700;
+    font-size: 12px;
+    border-bottom: none;
+    border-top-right-radius: 8px;
+    padding: 14px 10px;
   }
-  #upgradeCompareTable th.upgrade-col-pro::before { content: '⭐ '; }
+  #upgradeCompareTable th.upgrade-col-pro::before {
+    content: '★';
+    color: var(--gold);
+    margin-right: 5px;
+    font-size: 13px;
+  }
+  /* Round the bottom of the Pro tile on the last data row. */
+  #upgradeCompareTable tbody tr:last-child td.upgrade-col-pro {
+    border-bottom-right-radius: 8px;
+  }
+  #upgradeCompareTable tbody tr:last-child td { border-bottom: none; }
   #upgradeCompareTable td.upgrade-col-free.cell-na { color: var(--ink-3); }
-  /* Green ✓ for "included" — semantic positive, distinct from the accent tint. */
+  /* Green ✓ for "included" — semantic positive, distinct from accent. */
   #upgradeCompareTable td.cell-yes {
     color: var(--good);
     font-weight: 700;
@@ -4507,7 +4535,7 @@
 </div>
 
 <div id="upgradeModalBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="upgradeModalTitle">
-  <div class="modal-card">
+  <div class="modal-card modal-card-wide">
     <div class="modal-title" id="upgradeModalTitle" data-i18n="upgrade.title">Upgrade to Pro</div>
     <div class="modal-body">
       <p style="margin-bottom:14px; font-weight:600; font-size:15px; color:var(--ink);" data-i18n="upgrade.compareTitle">What you get with Pro</p>
