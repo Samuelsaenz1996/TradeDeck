@@ -1248,6 +1248,47 @@
     outline-offset: 2px;
   }
 
+  /* === Upgrade comparison table (inside the upgrade modal) === */
+  #upgradeCompareTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+  #upgradeCompareTable th,
+  #upgradeCompareTable td {
+    padding: 9px 6px;
+    border-bottom: 1px solid var(--line-2);
+  }
+  #upgradeCompareTable th {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-3);
+    border-bottom: 1px solid var(--line);
+    text-align: right;
+  }
+  #upgradeCompareTable th:first-child { text-align: left; }
+  #upgradeCompareTable td {
+    text-align: right;
+    color: var(--ink-2);
+  }
+  #upgradeCompareTable td:first-child {
+    text-align: left;
+    color: var(--ink);
+  }
+  #upgradeCompareTable tr:last-child td { border-bottom: none; }
+  #upgradeCompareTable .upgrade-col-free { width: 78px; }
+  #upgradeCompareTable .upgrade-col-pro {
+    width: 78px;
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    font-weight: 600;
+  }
+  #upgradeCompareTable th.upgrade-col-pro { font-weight: 700; }
+  #upgradeCompareTable td.upgrade-col-free.cell-na { color: var(--ink-3); }
+
   /* === Archived rows in cross-reference cards === */
   .archived-row {
     opacity: 0.55;
@@ -4018,7 +4059,48 @@
   <div class="modal-card">
     <div class="modal-title" id="upgradeModalTitle" data-i18n="upgrade.title">Upgrade to Pro</div>
     <div class="modal-body">
-      <p style="margin-bottom:16px;" data-i18n="upgrade.sub">Unlimited quotes and follow-ups.</p>
+      <p style="margin-bottom:14px; font-weight:600; font-size:15px; color:var(--ink);" data-i18n="upgrade.compareTitle">What you get with Pro</p>
+      <table id="upgradeCompareTable">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="upgrade-col-free" data-i18n="profile.plan.free">Free</th>
+            <th class="upgrade-col-pro" data-i18n="profile.plan.pro">Pro</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-i18n="upgrade.row.quotes">Quotes per month</td>
+            <td class="upgrade-col-free">3</td>
+            <td class="upgrade-col-pro" data-i18n="sidebar.unlimited">Unlimited</td>
+          </tr>
+          <tr>
+            <td data-i18n="upgrade.row.clients">Clients</td>
+            <td class="upgrade-col-free">1</td>
+            <td class="upgrade-col-pro" data-i18n="sidebar.unlimited">Unlimited</td>
+          </tr>
+          <tr>
+            <td data-i18n="upgrade.row.jobs">Jobs / project tracking</td>
+            <td class="upgrade-col-free cell-na">—</td>
+            <td class="upgrade-col-pro">✓</td>
+          </tr>
+          <tr>
+            <td data-i18n="upgrade.row.getPaid">Accept card payments</td>
+            <td class="upgrade-col-free cell-na">—</td>
+            <td class="upgrade-col-pro">✓</td>
+          </tr>
+          <tr>
+            <td data-i18n="upgrade.row.invoiceExport">Download &amp; send invoices</td>
+            <td class="upgrade-col-free cell-na">—</td>
+            <td class="upgrade-col-pro">✓</td>
+          </tr>
+          <tr>
+            <td data-i18n="upgrade.row.followupExport">Download &amp; send follow-ups</td>
+            <td class="upgrade-col-free cell-na">—</td>
+            <td class="upgrade-col-pro">✓</td>
+          </tr>
+        </tbody>
+      </table>
       <div class="pricing-toggle" id="upgradeIntervalToggle" role="group" aria-label="Billing interval" style="margin-bottom:16px; display:flex;">
         <button data-interval="monthly" class="active" type="button" style="flex:1;" data-i18n="upgrade.monthly">Monthly</button>
         <button data-interval="annual" type="button" style="flex:1;" data-i18n="upgrade.annual">Annual</button>
@@ -4121,6 +4203,13 @@ const I18N = {
     'upgrade.checkoutCanceled': 'Checkout canceled — no charge was made.',
     'upgrade.checkoutError': 'Could not start checkout. Please try again.',
     'upgrade.portalError': 'Could not open the billing portal.',
+    'upgrade.compareTitle': 'What you get with Pro',
+    'upgrade.row.quotes': 'Quotes per month',
+    'upgrade.row.clients': 'Clients',
+    'upgrade.row.jobs': 'Jobs / project tracking',
+    'upgrade.row.getPaid': 'Accept card payments',
+    'upgrade.row.invoiceExport': 'Download & send invoices',
+    'upgrade.row.followupExport': 'Download & send follow-ups',
     'sidebar.unlimited': 'Unlimited',
     // Topbar
     'topbar.newQuoteHtml': 'New <em>quote</em>',
@@ -4923,6 +5012,13 @@ const I18N = {
     'upgrade.checkoutCanceled': 'Pago cancelado — no se realizó ningún cargo.',
     'upgrade.checkoutError': 'No se pudo iniciar el pago. Inténtalo de nuevo.',
     'upgrade.portalError': 'No se pudo abrir el portal de facturación.',
+    'upgrade.compareTitle': 'Lo que obtienes con Pro',
+    'upgrade.row.quotes': 'Cotizaciones al mes',
+    'upgrade.row.clients': 'Clientes',
+    'upgrade.row.jobs': 'Trabajos / seguimiento de proyectos',
+    'upgrade.row.getPaid': 'Aceptar pagos con tarjeta',
+    'upgrade.row.invoiceExport': 'Descargar y enviar facturas',
+    'upgrade.row.followupExport': 'Descargar y enviar seguimientos',
     'sidebar.unlimited': 'Ilimitado',
     // Topbar
     'topbar.newQuoteHtml': 'Nueva <em>cotización</em>',
@@ -9041,6 +9137,48 @@ window.__testProGates = function () {
   return passed === results.length;
 };
 
+// Upgrade-popup harness — verifies the comparison table rendered + the
+// quota-exceeded trigger routes through openUpgradeModal instead of a toast.
+// Pure source/DOM checks; nothing destructive.
+window.__testUpgradePopup = function () {
+  const results = [];
+  const assert = (name, cond) => results.push({ name, pass: !!cond });
+
+  // 1) consumeQuotaOrShowError source rewires the cap-reached branch to the modal.
+  const src = consumeQuotaOrShowError.toString();
+  assert('consumeQuotaOrShowError calls openUpgradeModal', src.indexOf('openUpgradeModal') !== -1);
+  assert('consumeQuotaOrShowError still returns false on cap', src.indexOf('return false') !== -1);
+
+  // 2) The 6 row-label elements exist in the DOM, scoped under #upgradeCompareTable.
+  const rowKeys = [
+    'upgrade.row.quotes',
+    'upgrade.row.clients',
+    'upgrade.row.jobs',
+    'upgrade.row.getPaid',
+    'upgrade.row.invoiceExport',
+    'upgrade.row.followupExport',
+  ];
+  rowKeys.forEach(key => {
+    const el = document.querySelector('#upgradeCompareTable [data-i18n="' + key + '"]');
+    assert('row label exists: ' + key, !!el);
+  });
+
+  // 3) Table precedes #upgradeIntervalToggle in DOM order (value prop before price).
+  const table = document.getElementById('upgradeCompareTable');
+  const toggle = document.getElementById('upgradeIntervalToggle');
+  assert('upgradeCompareTable element exists', !!table);
+  assert('upgradeIntervalToggle element exists', !!toggle);
+  if (table && toggle) {
+    const pos = table.compareDocumentPosition(toggle);
+    assert('table precedes interval toggle', !!(pos & Node.DOCUMENT_POSITION_FOLLOWING));
+  }
+
+  const passed = results.filter(r => r.pass).length;
+  results.forEach(r => console.log((r.pass ? 'PASS' : 'FAIL') + ' — ' + r.name));
+  console.log(`__testUpgradePopup: ${passed}/${results.length} passed`);
+  return passed === results.length;
+};
+
 // Verify-polish harness — sidebar reminder visibility only. Non-destructive.
 window.__testVerifyPolish = function () {
   const results = [];
@@ -11301,7 +11439,7 @@ async function consumeQuotaOrShowError() {
       }
       if (!data || !data.allowed) {
         if (data && data.reason === 'quota_exceeded') {
-          showToast(t('toast.freeLimit'), true);
+          openUpgradeModal();
         } else {
           showToast(t('toast.genFailed'), true);
         }
@@ -11320,7 +11458,7 @@ async function consumeQuotaOrShowError() {
   }
   // Bypass user: localStorage enforces (legacy path, preserved on purpose)
   if (quoteUsed >= 3) {
-    showToast(t('toast.freeLimit'), true);
+    openUpgradeModal();
     return false;
   }
   quoteUsed += 1;
