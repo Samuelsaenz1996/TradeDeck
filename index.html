@@ -830,6 +830,63 @@
     line-height: 1.5;
     margin-bottom: 14px;
   }
+  /* Password field with inline Show/Hide toggle on the right. */
+  .password-field {
+    position: relative;
+  }
+  .password-field .input {
+    padding-right: 60px;
+  }
+  .password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--ink-3);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: color 0.12s, background 0.12s;
+  }
+  .password-toggle:hover {
+    color: var(--ink);
+    background: var(--surface-2);
+  }
+  .password-toggle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  /* Live match indicator under the confirm field. */
+  .account-match-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .account-match-hint.is-ok {
+    color: var(--good);
+  }
+  .account-match-hint.is-warn {
+    color: var(--warn);
+  }
+  /* Inline error block above the submit button (used in place of toast for
+     failures that need to persist until the user retries). */
+  .account-inline-error {
+    margin: 10px 0 14px;
+    padding: 10px 12px;
+    background: #FDF4F2;
+    border: 1px solid #E8C7C0;
+    border-radius: var(--radius-sm);
+    color: var(--bad);
+    font-size: 13px;
+    line-height: 1.45;
+  }
 
   /* === Loading === */
   .spinner {
@@ -4357,16 +4414,36 @@
 
           <div class="account-section">
             <div class="account-section-title" data-i18n="account.password.title">Change password</div>
-            <div class="field-row cols-2">
-              <div class="field">
-                <label class="label" for="accountNewPassword" data-i18n="account.password.new">New password</label>
-                <input type="password" class="input" id="accountNewPassword" autocomplete="new-password" minlength="8" />
-              </div>
-              <div class="field">
-                <label class="label" for="accountNewPasswordConfirm" data-i18n="account.password.confirm">Confirm new password</label>
-                <input type="password" class="input" id="accountNewPasswordConfirm" autocomplete="new-password" minlength="8" />
+            <div class="field">
+              <label class="label" for="accountOldPassword" data-i18n="account.password.old">Current password</label>
+              <div class="password-field">
+                <input type="password" class="input" id="accountOldPassword" autocomplete="current-password" />
+                <button type="button" class="password-toggle" data-target="accountOldPassword"
+                        data-i18n-aria="account.password.showAria" aria-label="Show password"
+                        data-i18n="account.password.show">Show</button>
               </div>
             </div>
+            <div class="field">
+              <label class="label" for="accountNewPassword" data-i18n="account.password.new">New password</label>
+              <div class="password-field">
+                <input type="password" class="input" id="accountNewPassword" autocomplete="new-password" minlength="8" />
+                <button type="button" class="password-toggle" data-target="accountNewPassword"
+                        data-i18n-aria="account.password.showAria" aria-label="Show password"
+                        data-i18n="account.password.show">Show</button>
+              </div>
+              <small class="account-help" data-i18n="account.password.hint">At least 8 characters.</small>
+            </div>
+            <div class="field">
+              <label class="label" for="accountNewPasswordConfirm" data-i18n="account.password.confirm">Confirm new password</label>
+              <div class="password-field">
+                <input type="password" class="input" id="accountNewPasswordConfirm" autocomplete="new-password" minlength="8" />
+                <button type="button" class="password-toggle" data-target="accountNewPasswordConfirm"
+                        data-i18n-aria="account.password.showAria" aria-label="Show password"
+                        data-i18n="account.password.show">Show</button>
+              </div>
+              <small id="accountPasswordMatchHint" class="account-match-hint hidden"></small>
+            </div>
+            <div id="accountPasswordError" class="account-inline-error hidden"></div>
             <button id="accountChangePasswordBtn" type="button" class="btn-secondary" data-i18n="account.password.btn">Update password</button>
           </div>
 
@@ -4789,12 +4866,23 @@ const I18N = {
     'upgrade.manage': 'Manage subscription',
 
     'account.password.title': 'Change password',
+    'account.password.old': 'Current password',
     'account.password.new': 'New password',
     'account.password.confirm': 'Confirm new password',
+    'account.password.hint': 'At least 8 characters.',
+    'account.password.show': 'Show',
+    'account.password.hide': 'Hide',
+    'account.password.showAria': 'Show password',
+    'account.password.hideAria': 'Hide password',
+    'account.password.matchOk': 'Passwords match',
+    'account.password.matchOff': "Passwords don't match yet",
+    'account.password.oldRequired': 'Please enter your current password.',
+    'account.password.sameAsOld': 'Your new password must be different from your current one.',
+    'account.password.wrongOld': "That current password isn't right. If you signed in with a magic link, you don't have a password set yet — sign out and use Forgot password on the sign-in screen to create one.",
     'account.password.btn': 'Update password',
     'account.password.updating': 'Updating…',
     'account.password.success': 'Password updated.',
-    'account.password.failed': 'Could not update password',
+    'account.password.failed': "Couldn't update password. Please try again.",
     'account.email.title': 'Change email',
     'account.email.new': 'New email address',
     'account.email.help': "We'll send a confirmation link to the new address. You'll also need to re-verify it to download and send your quotes again.",
@@ -5723,12 +5811,23 @@ const I18N = {
     'upgrade.manage': 'Administrar suscripción',
 
     'account.password.title': 'Cambiar contraseña',
+    'account.password.old': 'Contraseña actual',
     'account.password.new': 'Nueva contraseña',
     'account.password.confirm': 'Confirmar nueva contraseña',
+    'account.password.hint': 'Al menos 8 caracteres.',
+    'account.password.show': 'Mostrar',
+    'account.password.hide': 'Ocultar',
+    'account.password.showAria': 'Mostrar contraseña',
+    'account.password.hideAria': 'Ocultar contraseña',
+    'account.password.matchOk': 'Las contraseñas coinciden',
+    'account.password.matchOff': 'Las contraseñas aún no coinciden',
+    'account.password.oldRequired': 'Ingresa tu contraseña actual.',
+    'account.password.sameAsOld': 'La nueva contraseña debe ser distinta a la actual.',
+    'account.password.wrongOld': 'Esa contraseña actual no es correcta. Si entraste con un enlace mágico, todavía no tienes una contraseña — cierra sesión y usa "Olvidé mi contraseña" en la pantalla de inicio para crear una.',
     'account.password.btn': 'Actualizar contraseña',
     'account.password.updating': 'Actualizando…',
     'account.password.success': 'Contraseña actualizada.',
-    'account.password.failed': 'No se pudo actualizar la contraseña',
+    'account.password.failed': 'No se pudo actualizar la contraseña. Inténtalo de nuevo.',
     'account.email.title': 'Cambiar correo',
     'account.email.new': 'Nuevo correo electrónico',
     'account.email.help': 'Te enviaremos un enlace de confirmación al nuevo correo. También deberás verificarlo de nuevo para descargar y enviar tus cotizaciones.',
@@ -12879,27 +12978,147 @@ async function openBillingPortal() {
 // Delete-account is gated by a typed "DELETE" confirmation AND a password
 // reauth before posting to /api/delete-account.
 // ============================================================================
-async function handleChangePassword() {
+// Toggle a password field between masked and plain text. Used by the
+// in-input "Show / Hide" button. Stays scoped to the targeted field — each
+// button only affects its own paired input.
+function togglePasswordVisibility(targetId, btn) {
+  const input = document.getElementById(targetId);
+  if (!input) return;
+  const showing = input.type === 'text';
+  input.type = showing ? 'password' : 'text';
+  // Keep data-i18n in sync so a language toggle re-applies the right label.
+  const labelKey = showing ? 'account.password.show' : 'account.password.hide';
+  const ariaKey = showing ? 'account.password.showAria' : 'account.password.hideAria';
+  btn.setAttribute('data-i18n', labelKey);
+  btn.setAttribute('data-i18n-aria', ariaKey);
+  btn.textContent = t(labelKey);
+  btn.setAttribute('aria-label', t(ariaKey));
+  // Return focus to the input so users can keep typing after toggling.
+  try { input.focus(); } catch (e) {}
+  // Move cursor to end (some browsers reset position on type change).
+  try {
+    const v = input.value;
+    input.setSelectionRange(v.length, v.length);
+  } catch (e) {}
+}
+
+// Live match-indicator under the confirm field. Hidden while either field
+// is empty (no premature red), green ✓ when they match, amber when they
+// don't. Pure visual — does not block submit; submit-time validation is
+// authoritative.
+function refreshPasswordMatchHint() {
   const newEl = document.getElementById('accountNewPassword');
   const confirmEl = document.getElementById('accountNewPasswordConfirm');
-  if (!newEl || !confirmEl) return;
-  const pw = newEl.value || '';
-  const pw2 = confirmEl.value || '';
-  // Same threshold + error key as handleRecovery so the user gets a
-  // consistent message regardless of which surface they hit.
-  if (pw.length < 8) { showToast(t('auth.pwTooShort'), true); newEl.focus(); return; }
-  if (pw !== pw2) { showToast(t('auth.pwMismatch'), true); confirmEl.focus(); return; }
+  const hint = document.getElementById('accountPasswordMatchHint');
+  if (!newEl || !confirmEl || !hint) return;
+  const a = newEl.value || '';
+  const b = confirmEl.value || '';
+  if (!a || !b) {
+    hint.classList.add('hidden');
+    hint.classList.remove('is-ok', 'is-warn');
+    hint.textContent = '';
+    return;
+  }
+  hint.classList.remove('hidden');
+  if (a === b) {
+    hint.classList.add('is-ok');
+    hint.classList.remove('is-warn');
+    hint.textContent = '✓ ' + t('account.password.matchOk');
+  } else {
+    hint.classList.add('is-warn');
+    hint.classList.remove('is-ok');
+    hint.textContent = t('account.password.matchOff');
+  }
+}
+
+function showAccountPasswordError(key) {
+  const box = document.getElementById('accountPasswordError');
+  if (!box) return;
+  box.textContent = t(key);
+  box.classList.remove('hidden');
+}
+function clearAccountPasswordError() {
+  const box = document.getElementById('accountPasswordError');
+  if (!box) return;
+  box.classList.add('hidden');
+  box.textContent = '';
+}
+
+async function handleChangePassword() {
+  const oldEl = document.getElementById('accountOldPassword');
+  const newEl = document.getElementById('accountNewPassword');
+  const confirmEl = document.getElementById('accountNewPasswordConfirm');
+  if (!oldEl || !newEl || !confirmEl) return;
+  const oldPw = oldEl.value || '';
+  const newPw = newEl.value || '';
+  const confirmPw = confirmEl.value || '';
   const btn = document.getElementById('accountChangePasswordBtn');
+
+  clearAccountPasswordError();
+
+  // Validation cascade — surface the most relevant problem first.
+  if (!oldPw) {
+    showAccountPasswordError('account.password.oldRequired');
+    oldEl.focus();
+    return;
+  }
+  // Match handleRecovery: <8 chars uses auth.pwTooShort key for consistency.
+  if (newPw.length < 8) {
+    showAccountPasswordError('auth.pwTooShort');
+    newEl.focus();
+    return;
+  }
+  if (newPw !== confirmPw) {
+    showAccountPasswordError('auth.pwMismatch');
+    confirmEl.focus();
+    return;
+  }
+  // Soft block — silently allowing this would let users "change" to the
+  // same password and create the impression that nothing happened.
+  if (newPw === oldPw) {
+    showAccountPasswordError('account.password.sameAsOld');
+    newEl.focus();
+    return;
+  }
+
   if (btn) { btn.disabled = true; btn.textContent = t('account.password.updating'); }
   try {
-    const { error } = await sb.auth.updateUser({ password: pw });
-    if (error) throw error;
+    // Verify the old password by attempting a fresh sign-in with the same
+    // credentials. Credentials never leave the client; signInWithPassword
+    // on the same user refreshes the existing session in place. This is
+    // the same reauth pattern used by the delete-account flow.
+    const { data: { session: currentSession } } = await sb.auth.getSession();
+    if (!currentSession || !currentSession.user || !currentSession.user.email) {
+      showAccountPasswordError('account.password.failed');
+      return;
+    }
+    const { error: reauthErr } = await sb.auth.signInWithPassword({
+      email: currentSession.user.email,
+      password: oldPw,
+    });
+    if (reauthErr) {
+      // Most likely "Invalid login credentials". Also covers the magic-link-
+      // only case (user never set a password) — surface that explicitly so
+      // they understand why their current password isn't accepted.
+      showAccountPasswordError('account.password.wrongOld');
+      oldEl.focus();
+      try { oldEl.select(); } catch (e) {}
+      return;
+    }
+    // Old password verified — apply the new one.
+    const { error: updErr } = await sb.auth.updateUser({ password: newPw });
+    if (updErr) throw updErr;
+
+    // Clear all three fields and the match hint on success so the form
+    // visually resets without re-rendering.
+    oldEl.value = '';
     newEl.value = '';
     confirmEl.value = '';
+    refreshPasswordMatchHint();
     showToast(t('account.password.success'), false);
   } catch (e) {
     console.warn('handleChangePassword:', e);
-    showToast(t('account.password.failed') + (e && e.message ? ': ' + e.message : ''), true);
+    showAccountPasswordError('account.password.failed');
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = t('account.password.btn'); }
   }
@@ -13104,6 +13323,33 @@ function bindAccountActions() {
   const deleteBtn = document.getElementById('accountDeleteBtn');
   if (deleteBtn) deleteBtn.onclick = openDeleteAccountModal;
   bindDeleteAccountModal();
+
+  // Show/Hide toggles — one button per password field, scoped via data-target.
+  document.querySelectorAll('.password-toggle').forEach(btn => {
+    btn.onclick = () => togglePasswordVisibility(btn.dataset.target, btn);
+  });
+
+  // Live match indicator — runs on every keystroke in either new/confirm
+  // field. Clearing the error box too so a previous failed submit doesn't
+  // linger while the user is mid-correction.
+  const newEl = document.getElementById('accountNewPassword');
+  const confirmEl = document.getElementById('accountNewPasswordConfirm');
+  const oldEl = document.getElementById('accountOldPassword');
+  if (newEl) {
+    newEl.addEventListener('input', () => {
+      refreshPasswordMatchHint();
+      clearAccountPasswordError();
+    });
+  }
+  if (confirmEl) {
+    confirmEl.addEventListener('input', () => {
+      refreshPasswordMatchHint();
+      clearAccountPasswordError();
+    });
+  }
+  if (oldEl) {
+    oldEl.addEventListener('input', clearAccountPasswordError);
+  }
 }
 
 function handleCheckoutReturn() {
