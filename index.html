@@ -4741,6 +4741,7 @@ const I18N = {
     'verify.sidebar.text': 'Confirm your email to send & download',
     'verify.sidebar.action': 'Send link',
     'verify.signup.nudge': 'Tip: confirm your email to unlock sending & downloading your quotes.',
+    'toast.freeClientCapNote': 'Quote saved. Upgrade to Pro to also save this as a new client.',
     'archive.confirm.body': 'You can unarchive it later from the Archived tab.',
     'archive.confirm.client.title': 'Archive this client?',
     'archive.confirm.job.title': 'Archive this job?',
@@ -5536,6 +5537,7 @@ const I18N = {
     'verify.sidebar.text': 'Confirma tu correo para enviar y descargar',
     'verify.sidebar.action': 'Enviar enlace',
     'verify.signup.nudge': 'Consejo: confirma tu correo para poder enviar y descargar tus cotizaciones.',
+    'toast.freeClientCapNote': 'Cotización guardada. Mejora a Pro para guardar también este cliente nuevo.',
     'archive.confirm.body': 'Puedes desarchivarlo más tarde desde la pestaña Archivados.',
     'archive.confirm.client.title': '¿Archivar este cliente?',
     'archive.confirm.job.title': '¿Archivar este trabajo?',
@@ -8919,6 +8921,65 @@ window.__testVerifyPolish = function () {
   return passed === results.length;
 };
 
+// Client-cap harness. Non-destructive: stubs openUpgradeModal +
+// openVerifyModal by reassignment (both are function declarations,
+// so the bindings are mutable), counts modal opens, restores at end.
+window.__testClientCap = function () {
+  const results = [];
+  const assert = (name, cond) => results.push({ name, pass: !!cond });
+
+  const savedProfile = profileCache;
+  const realOpenUpgrade = openUpgradeModal;
+  const realOpenVerify = openVerifyModal;
+  let upgradeOpened = 0;
+  openUpgradeModal = function () { upgradeOpened++; };
+  openVerifyModal = function () { /* swallow */ };
+
+  try {
+    upgradeOpened = 0;
+    profileCache = { plan: 'free' };
+    const r1 = requirePro();
+    assert('free: requirePro returns false', r1 === false);
+    assert('free: opens upgrade modal once', upgradeOpened === 1);
+
+    upgradeOpened = 0;
+    profileCache = { plan: 'pro' };
+    const r2 = requirePro();
+    assert('pro: returns true', r2 === true);
+    assert('pro: no modal', upgradeOpened === 0);
+
+    upgradeOpened = 0;
+    profileCache = null;
+    const r3 = requirePro();
+    assert('null profileCache: returns true (defensive)', r3 === true);
+    assert('null profileCache: no modal', upgradeOpened === 0);
+
+    upgradeOpened = 0;
+    profileCache = { plan: 'team' };
+    const r4 = requirePro();
+    assert('team: returns true', r4 === true);
+    assert('team: no modal', upgradeOpened === 0);
+
+    assert(
+      'saveClientEdits source includes can_create_client',
+      saveClientEdits.toString().indexOf('can_create_client') !== -1
+    );
+    assert(
+      'persistGeneratedQuote source includes can_create_client',
+      persistGeneratedQuote.toString().indexOf('can_create_client') !== -1
+    );
+  } finally {
+    openUpgradeModal = realOpenUpgrade;
+    openVerifyModal = realOpenVerify;
+    profileCache = savedProfile;
+  }
+
+  const passed = results.filter(r => r.pass).length;
+  results.forEach(r => console.log((r.pass ? 'PASS' : 'FAIL') + ' — ' + r.name));
+  console.log(`__testClientCap: ${passed}/${results.length} passed`);
+  return passed === results.length;
+};
+
 // ============================================================================
 // Generate Quote (Anthropic API call)
 // ============================================================================
@@ -11131,21 +11192,34 @@ async function persistGeneratedQuote() {
       if (existing && existing.id) {
         clientId = existing.id;
       } else {
-        const { data: newClient, error: cErr } = await sb
-          .from('clients')
-          .insert({
-            user_id: userId,
-            name: clientName,
-            addr: clientAddr || null,
-            status: 'lead',
-          })
-          .select('id')
-          .single();
-        if (cErr) {
-          console.warn('client insert failed:', cErr);
-        } else if (newClient) {
-          clientId = newClient.id;
-          refreshClientsLookupCache().catch(e => console.warn('lookup refresh:', e));
+        // Free-tier client cap. Background save: skip silently on cap-block
+        // (quote still saves with client_id null + denormalized client_name).
+        // Deferred toast surfaces what happened, ~1s after the success toast
+        // in generateQuote() so they don't collide. Fail open on RPC error.
+        let capAllowed = true;
+        try {
+          const { data: cap } = await sb.rpc('can_create_client');
+          if (cap && cap.allowed === false) capAllowed = false;
+        } catch (e) { /* fail open */ }
+        if (!capAllowed) {
+          setTimeout(() => showToast(t('toast.freeClientCapNote')), 1000);
+        } else {
+          const { data: newClient, error: cErr } = await sb
+            .from('clients')
+            .insert({
+              user_id: userId,
+              name: clientName,
+              addr: clientAddr || null,
+              status: 'lead',
+            })
+            .select('id')
+            .single();
+          if (cErr) {
+            console.warn('client insert failed:', cErr);
+          } else if (newClient) {
+            clientId = newClient.id;
+            refreshClientsLookupCache().catch(e => console.warn('lookup refresh:', e));
+          }
         }
       }
     }
@@ -12055,6 +12129,15 @@ function requireVerifiedEmail() {
   return false;
 }
 
+// Pro/Team gate. Defensive allow when profileCache is null (bypass/dev).
+// Used by the free-tier client cap; not wired to the 8 export functions.
+function requirePro() {
+  if (!profileCache) return true;
+  if (profileCache.plan && profileCache.plan !== 'free') return true;
+  openUpgradeModal();
+  return false;
+}
+
 function openVerifyModal() {
   const backdrop = document.getElementById('verifyModalBackdrop');
   if (!backdrop) return;
@@ -12615,7 +12698,13 @@ async function saveClientEdits() {
     };
 
     if (isCreatingNewClient) {
-      // INSERT path
+      // INSERT path. Free-tier client cap: server-side RPC; fail open on RPC
+      // error. Silent no-op on cap-block — clickClientDetailSave() surfaces
+      // the upgrade modal so we don't pop one mid-typing from the autosave.
+      try {
+        const { data: cap } = await sb.rpc('can_create_client');
+        if (cap && cap.allowed === false) return null;
+      } catch (e) { /* fail open */ }
       payload.user_id = session.user.id;
       const { data, error } = await sb.from('clients')
         .insert(payload).select('*').single();
@@ -12687,6 +12776,16 @@ async function clickClientDetailSave() {
     // intentionally silent. The explicit Save button SHOULD toast.
     if (result && !wasNew) {
       showToast(t('toast.clientSaved'));
+    }
+    // New-client save came back null with a non-empty name (validated above)
+    // — the most likely cause is the free-tier client cap. Confirm via the
+    // RPC (fail open so we don't pile an upgrade modal onto a server failure
+    // that already showed its own error toast).
+    if (!result && wasNew) {
+      try {
+        const { data: cap } = await sb.rpc('can_create_client');
+        if (cap && cap.allowed === false) openUpgradeModal();
+      } catch (e) { /* fail open */ }
     }
   } finally {
     if (btn) btn.disabled = false;
