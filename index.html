@@ -2089,6 +2089,114 @@
     .settings-hero.with-action .card-title-action { align-self: stretch; width: 100%; }
   }
 
+  /* === Job detail view: hero + status pill + quick actions + client-card buttons === */
+  .job-detail-hero-card {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    overflow: hidden;
+  }
+  .job-detail-hero {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+  }
+  .job-detail-hero-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 16px;
+    /* Warm orange tint to match the Jobs list hero. */
+    background: linear-gradient(135deg, #FBE8D6 0%, #fff 100%);
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .job-detail-hero-text { flex: 1; min-width: 0; padding-top: 2px; }
+  .job-detail-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 6px;
+    line-height: 1;
+  }
+  .job-detail-status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  /* Color tints echo the Jobs list chip palette so visual language
+     carries from the list view straight into the detail. */
+  .job-detail-status-pill--quoted      { background: rgba(90,95,108,0.16); color: #5A5F6C; }
+  .job-detail-status-pill--in_progress { background: rgba(184,115,31,0.14); color: #B8731F; }
+  .job-detail-status-pill--complete    { background: rgba(72,98,165,0.14); color: #4862A5; }
+  .job-detail-status-pill--paid        { background: rgba(29,158,117,0.14); color: #1D9E75; }
+  .job-detail-trades-summary {
+    font-size: 11.5px;
+    color: var(--ink-3);
+    line-height: 1.4;
+  }
+  .job-detail-hero-name {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+  .job-detail-hero-sub {
+    color: var(--ink-3);
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* Client card action buttons (Change / + New Client) */
+  .job-client-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    align-self: center;
+  }
+  @media (max-width: 640px) {
+    .job-detail-hero { flex-direction: column; gap: 14px; }
+    .job-detail-hero-icon { width: 60px; height: 60px; font-size: 26px; }
+    .job-detail-hero-name { font-size: 22px; }
+    .job-client-actions { flex-direction: column; width: 100%; }
+    .job-client-actions .card-title-action { width: 100%; }
+  }
+
+  /* New Client modal — small, focused, mirrors the existing modal-backdrop
+     pattern used elsewhere (Stripe-setup, Pro-welcome, etc.) */
+  .new-client-modal {
+    max-width: 460px;
+    width: calc(100% - 32px);
+  }
+  .new-client-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .new-client-modal .pricing-toggle { margin-bottom: 0; }
+  .new-client-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  @media (max-width: 480px) {
+    .new-client-modal-actions { flex-direction: column-reverse; }
+    .new-client-modal-actions .modal-btn { width: 100%; }
+  }
+
   /* === Invoices view: hero + filter chips + toolbar === */
   .invoices-hero-card {
     position: relative;
@@ -6025,20 +6133,109 @@
         </div>
 
         <div id="jobsDetailSub" class="hidden">
-          <div class="card">
-            <div class="card-title">
-              <span id="jobDetailHeaderTitle">—</span>
-            </div>
-            <div class="card-sub" data-i18n="jobDetail.sub">
-              Update info, status, and related work. Changes save automatically.
+          <!-- Hero card -->
+          <div class="card job-detail-hero-card">
+            <div class="job-detail-hero">
+              <div class="job-detail-hero-icon" aria-hidden="true">🧰</div>
+              <div class="job-detail-hero-text">
+                <div class="job-detail-hero-meta" id="jobDetailHeroMeta">
+                  <span class="job-detail-status-pill" id="jobDetailStatusPill">—</span>
+                  <span class="job-detail-trades-summary" id="jobDetailTradesSummary"></span>
+                </div>
+                <h2 class="job-detail-hero-name">
+                  <span id="jobDetailHeaderTitle">—</span>
+                </h2>
+                <p class="job-detail-hero-sub" id="jobDetailHeroSub">—</p>
+              </div>
             </div>
 
+            <!-- Quick action toolbar — buttons hide based on job/client state. -->
+            <div class="client-detail-quick-actions" id="jobDetailQuickActions"></div>
+          </div>
+
+          <!-- Stat tiles -->
+          <div class="field-row cols-4">
+            <div class="stat-card stat-card-fancy">
+              <div class="stat-card-header">
+                <div class="stat-card-icon stat-card-icon--received" aria-hidden="true">💰</div>
+                <div class="stat-card-title" data-i18n="jobDetail.stat.amount">Job amount</div>
+              </div>
+              <div class="stat-card-value" id="jobStatAmountVal">$0.00</div>
+              <div class="stat-card-sub" id="jobStatAmountSub">—</div>
+            </div>
+            <div class="stat-card stat-card-fancy">
+              <div class="stat-card-header">
+                <div class="stat-card-icon stat-card-icon--invoiced" aria-hidden="true">📋</div>
+                <div class="stat-card-title" data-i18n="jobDetail.stat.quotes">Related quotes</div>
+              </div>
+              <div class="stat-card-value" id="jobStatQuotesVal">0</div>
+              <div class="stat-card-sub" id="jobStatQuotesSub">—</div>
+            </div>
+            <div class="stat-card stat-card-fancy">
+              <div class="stat-card-header">
+                <div class="stat-card-icon stat-card-icon--outstanding" aria-hidden="true">📬</div>
+                <div class="stat-card-title" data-i18n="jobDetail.stat.followups">Follow-ups</div>
+              </div>
+              <div class="stat-card-value" id="jobStatFollowupsVal">0</div>
+              <div class="stat-card-sub" id="jobStatFollowupsSub">—</div>
+            </div>
+            <div class="stat-card stat-card-fancy">
+              <div class="stat-card-header">
+                <div class="stat-card-icon stat-card-icon--invoiced" aria-hidden="true">⏱️</div>
+                <div class="stat-card-title" data-i18n="jobDetail.stat.daysActive">Days active</div>
+              </div>
+              <div class="stat-card-value" id="jobStatDaysVal">0</div>
+              <div class="stat-card-sub" id="jobStatDaysSub">—</div>
+            </div>
+          </div>
+
+          <!-- Client card -->
+          <div class="card" id="jobDetailClientCard">
+            <div class="settings-hero with-action">
+              <div class="settings-hero-icon" aria-hidden="true">👤</div>
+              <div class="settings-hero-text">
+                <div class="card-title" data-i18n="jobDetail.clientTitle">Client</div>
+                <div class="card-sub" id="jobDetailClientSub" data-i18n="jobDetail.clientCardSub">The customer this job belongs to. Click the row to open their record.</div>
+              </div>
+              <div class="job-client-actions" id="jobDetailClientActions">
+                <button class="btn-secondary card-title-action" id="jobDetailChangeClientBtn" type="button">
+                  🔁 <span data-i18n="jobDetail.changeClient">Change</span>
+                </button>
+                <button class="btn-primary card-title-action" id="jobDetailNewClientBtn" type="button">
+                  + <span data-i18n="jobDetail.newClient">New Client</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Inline client picker (typed-name datalist match). Shown in
+                 new-job mode, and also when the user clicks Change. -->
             <div class="field hidden" id="jobDetailClientField">
               <label class="label" data-i18n="jobDetail.clientLabel">Client</label>
               <input type="text" class="input" id="jobDetailClientInput"
                      list="clientsDatalist" autocomplete="off"
                      data-i18n-placeholder="jobDetail.clientPlaceholder"
                      placeholder="Type or pick a client..." />
+              <small class="settings-help" data-i18n="jobDetail.clientPickerHelp">Type a known client's name to link, or use "+ New Client" to add a brand-new customer.</small>
+            </div>
+
+            <div id="jobDetailClientEmpty" class="hidden invoices-empty">
+              <div class="invoices-empty-icon" aria-hidden="true">👤</div>
+              <p class="invoices-empty-title" data-i18n="jobDetail.noClient">No client linked yet</p>
+              <p class="invoices-empty-sub" data-i18n="jobDetail.noClientSub">Pick or create a client so quotes, follow-ups, and invoices can link back to the right customer.</p>
+            </div>
+            <table class="line-table" id="jobDetailClientTable">
+              <tbody id="jobDetailClientBody"></tbody>
+            </table>
+          </div>
+
+          <!-- Job details form card -->
+          <div class="card">
+            <div class="settings-hero">
+              <div class="settings-hero-icon" aria-hidden="true">🛠️</div>
+              <div class="settings-hero-text">
+                <div class="card-title" data-i18n="jobDetail.detailsCardTitle">Job details</div>
+                <div class="card-sub" data-i18n="jobDetail.detailsCardSub">Description, trades, amount, status. Changes save automatically — no need to hit Save.</div>
+              </div>
             </div>
 
             <div class="field">
@@ -6067,38 +6264,38 @@
                 </select>
               </div>
             </div>
+          </div>
 
-            <div class="field">
-              <label class="label" data-i18n="jobDetail.notes">Notes</label>
+          <!-- Notes card -->
+          <div class="card">
+            <div class="settings-hero">
+              <div class="settings-hero-icon" aria-hidden="true">📝</div>
+              <div class="settings-hero-text">
+                <div class="card-title" data-i18n="jobDetail.notesCardTitle">Notes</div>
+                <div class="card-sub" data-i18n="jobDetail.notesCardSub">Materials waiting on delivery, change orders, photos taken on site, gate codes — anything you need to remember.</div>
+              </div>
+            </div>
+            <div class="field" style="margin-bottom: 0;">
               <textarea class="textarea" id="jobDetailNotes"
                         data-i18n-placeholder="jobDetail.notesPlaceholder"
-                        placeholder="Anything to remember about this job..."></textarea>
-            </div>
-
-            <div class="field" style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
-              <button id="jobDetailDeleteBtn" type="button" class="btn-secondary btn-danger">
-                🗑 <span data-i18n="jobDetail.delete">Delete job</span>
-              </button>
-              <div style="display: flex; gap: 12px;">
-                <button id="jobDetailArchiveBtn" type="button" class="btn-secondary">
-                  📦 <span id="jobDetailArchiveBtnLabel" data-i18n="archive.button.archive">Archive</span>
-                </button>
-                <button id="jobDetailSaveBtn" type="button" class="btn-primary">
-                  💾 <span data-i18n="jobDetail.save">Save</span>
-                </button>
-              </div>
+                        placeholder="Anything to remember about this job..."
+                        style="min-height: 110px;"></textarea>
             </div>
           </div>
 
-          <div class="card" id="jobDetailClientCard">
-            <div class="card-title" data-i18n="jobDetail.clientTitle">Client</div>
-            <div id="jobDetailClientEmpty" class="hidden"
-                 style="text-align: center; padding: 24px; color: var(--ink-3);">
-              <span data-i18n="jobDetail.noClient">(no client)</span>
+          <!-- Action bar -->
+          <div class="field" style="margin: 8px 0 24px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <button id="jobDetailDeleteBtn" type="button" class="btn-secondary btn-danger">
+              🗑 <span data-i18n="jobDetail.delete">Delete job</span>
+            </button>
+            <div style="display: flex; gap: 12px;">
+              <button id="jobDetailArchiveBtn" type="button" class="btn-secondary">
+                📦 <span id="jobDetailArchiveBtnLabel" data-i18n="archive.button.archive">Archive</span>
+              </button>
+              <button id="jobDetailSaveBtn" type="button" class="btn-primary">
+                💾 <span data-i18n="jobDetail.save">Save</span>
+              </button>
             </div>
-            <table class="line-table" id="jobDetailClientTable">
-              <tbody id="jobDetailClientBody"></tbody>
-            </table>
           </div>
 
           <div class="card">
@@ -6996,6 +7193,57 @@
   </div>
 </div>
 
+<div id="newClientBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="newClientModalTitle">
+  <div class="modal-card new-client-modal">
+    <div class="modal-title" id="newClientModalTitle" data-i18n="newClientModal.title">Add a new client</div>
+    <div class="card-sub" data-i18n="newClientModal.sub">They'll be linked to this job and saved to your Clients list.</div>
+    <div class="new-client-modal-body">
+      <div class="field" style="margin-bottom: 0;">
+        <label class="label" data-i18n="newClientModal.type">Type</label>
+        <div class="pricing-toggle" id="newClientType" role="group" aria-label="Client type">
+          <button data-type="person" type="button" class="active">
+            👤 <span data-i18n="clientDetail.typePerson">Person</span>
+          </button>
+          <button data-type="company" type="button">
+            🏢 <span data-i18n="clientDetail.typeCompany">Company</span>
+          </button>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom: 0;">
+        <label class="label" for="newClientName" data-i18n="newClientModal.name">Name</label>
+        <input type="text" class="input" id="newClientName"
+               data-i18n-placeholder="newClientModal.namePlaceholder"
+               placeholder="Anderson Residence" />
+      </div>
+      <div class="field hidden" id="newClientCompanyContactField" style="margin-bottom: 0;">
+        <label class="label" for="newClientContactName" data-i18n="newClientModal.companyContact">Contact name</label>
+        <input type="text" class="input" id="newClientContactName"
+               data-i18n-placeholder="newClientModal.companyContactPlaceholder"
+               placeholder="Raj Patel" />
+      </div>
+      <div class="field-row cols-2" style="margin-bottom: 0;">
+        <div>
+          <label class="label" for="newClientEmail" data-i18n="newClientModal.email">Email</label>
+          <input type="email" class="input" id="newClientEmail" autocomplete="email" />
+        </div>
+        <div>
+          <label class="label" for="newClientPhone" data-i18n="newClientModal.phone">Phone</label>
+          <input type="tel" class="input" id="newClientPhone" autocomplete="tel" />
+        </div>
+      </div>
+      <div class="field" style="margin-bottom: 0;">
+        <label class="label" for="newClientAddr" data-i18n="newClientModal.address">Address</label>
+        <input type="text" class="input" id="newClientAddr" autocomplete="street-address" />
+      </div>
+      <div id="newClientError" class="hidden" style="color: var(--bad); font-size: 12.5px; line-height: 1.4;"></div>
+    </div>
+    <div class="modal-actions new-client-modal-actions">
+      <button id="newClientCancelBtn" type="button" class="modal-btn modal-btn-cancel" data-i18n="newClientModal.cancel">Cancel</button>
+      <button id="newClientSaveBtn" type="button" class="modal-btn modal-btn-primary" data-i18n="newClientModal.save">Add client</button>
+    </div>
+  </div>
+</div>
+
 <div id="stripeSetupBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="stripeSetupTitle">
   <div class="modal-card">
     <div class="stripe-setup-hero">
@@ -7889,6 +8137,51 @@ const I18N = {
     'jobs.backToList': 'Jobs',
     'jobs.newButton': 'New Job',
     'jobDetail.sub': 'Update info, status, and related work. Changes save automatically.',
+    'jobDetail.detailsCardTitle': 'Job details',
+    'jobDetail.detailsCardSub': 'Description, trades, amount, status. Changes save automatically — no need to hit Save.',
+    'jobDetail.notesCardTitle': 'Notes',
+    'jobDetail.notesCardSub': 'Materials waiting on delivery, change orders, photos taken on site, gate codes — anything you need to remember.',
+    'jobDetail.clientCardSub': 'The customer this job belongs to. Click the row to open their record.',
+    'jobDetail.noClient': 'No client linked yet',
+    'jobDetail.noClientSub': 'Pick or create a client so quotes, follow-ups, and invoices can link back to the right customer.',
+    'jobDetail.changeClient': 'Change',
+    'jobDetail.newClient': 'New Client',
+    'jobDetail.clientPickerHelp': 'Type a known client’s name to link, or use "+ New Client" to add a brand-new customer.',
+    'jobDetail.stat.amount': 'Job amount',
+    'jobDetail.stat.amountSub.status': 'Status: {label}',
+    'jobDetail.stat.quotes': 'Related quotes',
+    'jobDetail.stat.quotesSub.zero': 'No quotes attached',
+    'jobDetail.stat.quotesSub.one': '{amount} quoted total',
+    'jobDetail.stat.quotesSub.many': '{amount} quoted total',
+    'jobDetail.stat.followups': 'Follow-ups',
+    'jobDetail.stat.followupsSub.zero': 'No follow-ups yet',
+    'jobDetail.stat.followupsSub.one': '1 drafted',
+    'jobDetail.stat.followupsSub.many': '{count} drafted',
+    'jobDetail.stat.daysActive': 'Days active',
+    'jobDetail.stat.daysSub.created': 'Since {date}',
+    'jobDetail.stat.daysSub.paid': 'Marked paid {when}',
+    'jobDetail.heroSub.new': 'New job — fill in the details below and pick a client.',
+    'jobDetail.heroSub.created': 'Created {date}',
+    'jobDetail.heroSub.updated': 'Updated {when}',
+    'jobDetail.quick.openClient': 'Open client',
+    'jobDetail.quick.newQuote': 'New quote',
+    'jobDetail.quick.newFollowup': 'New follow-up',
+    'newClientModal.title': 'Add a new client',
+    'newClientModal.sub': 'They’ll be linked to this job and saved to your Clients list.',
+    'newClientModal.type': 'Type',
+    'newClientModal.name': 'Name',
+    'newClientModal.namePlaceholder': 'Anderson Residence',
+    'newClientModal.companyContact': 'Contact name',
+    'newClientModal.companyContactPlaceholder': 'Raj Patel',
+    'newClientModal.email': 'Email',
+    'newClientModal.phone': 'Phone',
+    'newClientModal.address': 'Address',
+    'newClientModal.cancel': 'Cancel',
+    'newClientModal.save': 'Add client',
+    'newClientModal.nameRequired': 'A name is required to add the client.',
+    'newClientModal.saveFailed': 'Could not add client. Try again.',
+    'newClientModal.capReached': 'Free plan is capped at 5 clients. Upgrade to add more.',
+    'toast.clientLinkedToJob': 'Client linked to this job',
     'jobDetail.description': 'Description',
     'jobDetail.trade': 'Trade',
     'jobDetail.trades': 'Trades',
@@ -9044,6 +9337,51 @@ const I18N = {
     'jobs.backToList': 'Trabajos',
     'jobs.newButton': 'Nuevo trabajo',
     'jobDetail.sub': 'Actualiza datos, estado y trabajos relacionados. Los cambios se guardan automáticamente.',
+    'jobDetail.detailsCardTitle': 'Detalles del trabajo',
+    'jobDetail.detailsCardSub': 'Descripción, oficios, monto, estado. Los cambios se guardan automáticamente — no necesitas presionar Guardar.',
+    'jobDetail.notesCardTitle': 'Notas',
+    'jobDetail.notesCardSub': 'Materiales pendientes de entrega, cambios de alcance, fotos tomadas en el sitio, códigos de portón — cualquier cosa que necesites recordar.',
+    'jobDetail.clientCardSub': 'El cliente al que pertenece este trabajo. Haz clic en la fila para abrir su registro.',
+    'jobDetail.noClient': 'Aún no hay cliente vinculado',
+    'jobDetail.noClientSub': 'Elige o crea un cliente para que las cotizaciones, seguimientos y facturas se enlacen al cliente correcto.',
+    'jobDetail.changeClient': 'Cambiar',
+    'jobDetail.newClient': 'Nuevo cliente',
+    'jobDetail.clientPickerHelp': 'Escribe el nombre de un cliente conocido para vincularlo, o usa "+ Nuevo cliente" para agregar uno nuevo.',
+    'jobDetail.stat.amount': 'Monto del trabajo',
+    'jobDetail.stat.amountSub.status': 'Estado: {label}',
+    'jobDetail.stat.quotes': 'Cotizaciones',
+    'jobDetail.stat.quotesSub.zero': 'No hay cotizaciones',
+    'jobDetail.stat.quotesSub.one': '{amount} cotizado en total',
+    'jobDetail.stat.quotesSub.many': '{amount} cotizado en total',
+    'jobDetail.stat.followups': 'Seguimientos',
+    'jobDetail.stat.followupsSub.zero': 'Aún no hay seguimientos',
+    'jobDetail.stat.followupsSub.one': '1 redactado',
+    'jobDetail.stat.followupsSub.many': '{count} redactados',
+    'jobDetail.stat.daysActive': 'Días activo',
+    'jobDetail.stat.daysSub.created': 'Desde {date}',
+    'jobDetail.stat.daysSub.paid': 'Marcado pagado {when}',
+    'jobDetail.heroSub.new': 'Trabajo nuevo — completa los detalles abajo y elige un cliente.',
+    'jobDetail.heroSub.created': 'Creado {date}',
+    'jobDetail.heroSub.updated': 'Actualizado {when}',
+    'jobDetail.quick.openClient': 'Abrir cliente',
+    'jobDetail.quick.newQuote': 'Nueva cotización',
+    'jobDetail.quick.newFollowup': 'Nuevo seguimiento',
+    'newClientModal.title': 'Agregar un cliente nuevo',
+    'newClientModal.sub': 'Se vinculará a este trabajo y se guardará en tu lista de Clientes.',
+    'newClientModal.type': 'Tipo',
+    'newClientModal.name': 'Nombre',
+    'newClientModal.namePlaceholder': 'Residencia Anderson',
+    'newClientModal.companyContact': 'Nombre de contacto',
+    'newClientModal.companyContactPlaceholder': 'Raj Patel',
+    'newClientModal.email': 'Correo',
+    'newClientModal.phone': 'Teléfono',
+    'newClientModal.address': 'Dirección',
+    'newClientModal.cancel': 'Cancelar',
+    'newClientModal.save': 'Agregar cliente',
+    'newClientModal.nameRequired': 'Se requiere un nombre para agregar el cliente.',
+    'newClientModal.saveFailed': 'No se pudo agregar el cliente. Intenta de nuevo.',
+    'newClientModal.capReached': 'El plan gratuito tiene un tope de 5 clientes. Actualiza para agregar más.',
+    'toast.clientLinkedToJob': 'Cliente vinculado a este trabajo',
     'jobDetail.description': 'Descripción',
     'jobDetail.trade': 'Oficio',
     'jobDetail.trades': 'Oficios',
@@ -10176,6 +10514,8 @@ async function openJobDetail(jobId) {
     }
     activeJobId = jobId;
     activeJobData = jobRes.data;
+    isCreatingNewJob = false;
+    jobDetailClientPickerOpen = false;
     jobDetailQuotesCache = quotesRes.data || [];
     jobDetailFollowupsCache = followupsRes.data || [];
     renderJobDetail();
@@ -10216,12 +10556,19 @@ function renderJobDetailTradesGrid(selectedTrades) {
 function renderJobDetail() {
   if (!activeJobData) return;
   const j = activeJobData;
+  // Header title: use the description as the dominant identifier. Falls
+  // back to "New job" copy during creation, and "—" on a stripped row.
   document.getElementById('jobDetailHeaderTitle').textContent =
     isCreatingNewJob ? t('jobDetail.newHeader') : (j.description || '—');
   const deleteBtn = document.getElementById('jobDetailDeleteBtn');
   if (deleteBtn) deleteBtn.classList.toggle('hidden', isCreatingNewJob);
+  // The inline picker shows when (a) we're creating, or (b) the user
+  // explicitly hit "Change client" (gated by jobDetailClientPickerOpen).
   const clientField = document.getElementById('jobDetailClientField');
-  if (clientField) clientField.classList.toggle('hidden', !isCreatingNewJob);
+  if (clientField) {
+    const showPicker = !!isCreatingNewJob || jobDetailClientPickerOpen;
+    clientField.classList.toggle('hidden', !showPicker);
+  }
   const clientCard = document.getElementById('jobDetailClientCard');
   if (clientCard) clientCard.classList.toggle('hidden', isCreatingNewJob);
   const jobArchLbl = document.getElementById('jobDetailArchiveBtnLabel');
@@ -10245,9 +10592,165 @@ function renderJobDetail() {
   document.getElementById('jobDetailAmount').value = (j.amount != null) ? j.amount : '';
   document.getElementById('jobDetailStatus').value = j.status || 'quoted';
   document.getElementById('jobDetailNotes').value = j.notes || '';
+  renderJobDetailHero();
+  renderJobDetailStats();
+  renderJobDetailQuickActions();
   renderJobDetailClient();
   renderJobDetailQuotes();
   renderJobDetailFollowups();
+}
+
+// Hero: status pill (color-coded), trades summary, dates sub-line.
+function renderJobDetailHero() {
+  const j = activeJobData;
+  if (!j) return;
+  const pill = document.getElementById('jobDetailStatusPill');
+  const tradesEl = document.getElementById('jobDetailTradesSummary');
+  const subEl = document.getElementById('jobDetailHeroSub');
+  // Status pill: matches the Jobs list chip palette for visual continuity.
+  if (pill) {
+    const s = j.status || 'quoted';
+    const labelKey = {
+      quoted: 'status.Quoted',
+      in_progress: 'status.In Progress',
+      complete: 'status.Complete',
+      paid: 'status.Paid',
+    }[s] || 'status.Quoted';
+    pill.textContent = t(labelKey);
+    pill.classList.remove(
+      'job-detail-status-pill--quoted',
+      'job-detail-status-pill--in_progress',
+      'job-detail-status-pill--complete',
+      'job-detail-status-pill--paid'
+    );
+    pill.classList.add('job-detail-status-pill--' + s);
+  }
+  // Trades summary: compact inline list to right of pill.
+  if (tradesEl) {
+    const arr = jobTradesOf(j);
+    tradesEl.textContent = arr.length ? formatJobTradesDisplay(arr) : '';
+  }
+  // Sub-line: "Created Aug 4 · Updated 3d ago" (or "New job" in creation).
+  if (subEl) {
+    if (isCreatingNewJob) {
+      subEl.textContent = t('jobDetail.heroSub.new');
+    } else {
+      const parts = [];
+      if (j.created_at) {
+        try {
+          const d = new Date(j.created_at);
+          const lang = (document.documentElement.lang === 'es') ? 'es-ES' : 'en-US';
+          const dateStr = d.toLocaleDateString(lang, { month: 'short', day: 'numeric', year: 'numeric' });
+          parts.push(t('jobDetail.heroSub.created', { date: dateStr }));
+        } catch (e) { /* ignore */ }
+      }
+      if (j.updated_at) {
+        parts.push(t('jobDetail.heroSub.updated', { when: formatRelativeDate(j.updated_at) }));
+      }
+      subEl.textContent = parts.join(' · ');
+    }
+  }
+}
+
+// Stat tiles. Math derives from activeJobData + the related caches.
+function renderJobDetailStats() {
+  const j = activeJobData;
+  if (!j) return;
+  const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  const amt = parseFloat(j.amount) || 0;
+  setText('jobStatAmountVal', fmt(amt));
+  const statusKey = {
+    quoted: 'status.Quoted',
+    in_progress: 'status.In Progress',
+    complete: 'status.Complete',
+    paid: 'status.Paid',
+  }[j.status || 'quoted'] || 'status.Quoted';
+  setText('jobStatAmountSub', t('jobDetail.stat.amountSub.status', { label: t(statusKey) }));
+
+  const quotes = jobDetailQuotesCache || [];
+  const quotesTotal = quotes.reduce((s, q) => s + (parseFloat(q.total) || 0), 0);
+  setText('jobStatQuotesVal', String(quotes.length));
+  if (quotes.length === 0) {
+    setText('jobStatQuotesSub', t('jobDetail.stat.quotesSub.zero'));
+  } else {
+    const k = quotes.length === 1 ? 'jobDetail.stat.quotesSub.one' : 'jobDetail.stat.quotesSub.many';
+    setText('jobStatQuotesSub', t(k, { amount: fmt(quotesTotal) }));
+  }
+
+  const followups = jobDetailFollowupsCache || [];
+  setText('jobStatFollowupsVal', String(followups.length));
+  if (followups.length === 0) setText('jobStatFollowupsSub', t('jobDetail.stat.followupsSub.zero'));
+  else if (followups.length === 1) setText('jobStatFollowupsSub', t('jobDetail.stat.followupsSub.one'));
+  else setText('jobStatFollowupsSub', t('jobDetail.stat.followupsSub.many', { count: followups.length }));
+
+  // Days active. If the job is paid we show "paid X ago" instead of a count.
+  if (j.status === 'paid' && j.updated_at) {
+    setText('jobStatDaysVal', '✓');
+    setText('jobStatDaysSub', t('jobDetail.stat.daysSub.paid', { when: formatRelativeDate(j.updated_at) }));
+  } else if (j.created_at) {
+    const ms = Date.now() - new Date(j.created_at).getTime();
+    const days = Math.max(0, Math.floor(ms / 86400000));
+    setText('jobStatDaysVal', String(days));
+    try {
+      const d = new Date(j.created_at);
+      const lang = (document.documentElement.lang === 'es') ? 'es-ES' : 'en-US';
+      const dateStr = d.toLocaleDateString(lang, { month: 'short', day: 'numeric' });
+      setText('jobStatDaysSub', t('jobDetail.stat.daysSub.created', { date: dateStr }));
+    } catch (e) {
+      setText('jobStatDaysSub', '');
+    }
+  } else {
+    setText('jobStatDaysVal', '0');
+    setText('jobStatDaysSub', '');
+  }
+}
+
+// Quick-action toolbar. Buttons render conditionally:
+//   - Open client (only when a linked client exists)
+//   - + New Quote / + New Follow-up (always available when persisted)
+// Hidden entirely while creating a new job (nothing to act on yet).
+function renderJobDetailQuickActions() {
+  const wrap = document.getElementById('jobDetailQuickActions');
+  if (!wrap) return;
+  const j = activeJobData;
+  if (!j || isCreatingNewJob) { wrap.innerHTML = ''; return; }
+
+  const btns = [];
+  // Open client (if linked + cache hit)
+  const clientId = j.client_id || null;
+  const client = clientId && Array.isArray(clientsLookupCache)
+    ? clientsLookupCache.find(c => c.id === clientId)
+    : null;
+  if (client) {
+    btns.push(`<button type="button" class="quick-action-btn" data-qa="openClient">
+                 <span class="quick-action-btn-icon" aria-hidden="true">👤</span>
+                 ${escapeHtml(t('jobDetail.quick.openClient'))}
+               </button>`);
+  }
+  btns.push(`<button type="button" class="quick-action-btn quick-action-btn--primary" data-qa="newQuote">
+               <span class="quick-action-btn-icon" aria-hidden="true">📋</span>
+               ${escapeHtml(t('jobDetail.quick.newQuote'))}
+             </button>`);
+  btns.push(`<button type="button" class="quick-action-btn" data-qa="newFollowup">
+               <span class="quick-action-btn-icon" aria-hidden="true">📬</span>
+               ${escapeHtml(t('jobDetail.quick.newFollowup'))}
+             </button>`);
+  wrap.innerHTML = btns.join('');
+
+  const qa = (key, fn) => {
+    const el = wrap.querySelector(`[data-qa="${key}"]`);
+    if (el) el.onclick = fn;
+  };
+  if (client) {
+    qa('openClient', () => {
+      clearTimeout(jobsSaveTimer);
+      if (activeJobId) saveJobEdits().catch(e => console.warn('flush save:', e));
+      switchView('clients');
+      openClientDetail(client.id);
+    });
+  }
+  qa('newQuote', launchNewQuoteForActiveJob);
+  qa('newFollowup', launchNewFollowupForActiveJob);
 }
 
 function renderJobDetailClient() {
@@ -10568,6 +11071,7 @@ async function enterNewJobMode(seed) {
   isCreatingNewJob = true;
   activeJobId = null;
   selectedClientIdForJob = seed.client_id || null;
+  jobDetailClientPickerOpen = false;
 
   activeJobData = {
     client_id: seed.client_id || null,
@@ -10969,6 +11473,10 @@ let jobDetailFollowupsCache = [];
 let jobsSaveTimer = null;
 let isCreatingNewJob = false;
 let selectedClientIdForJob = null;
+// When true, the "Change client" picker is open on the job-detail view,
+// so the inline datalist input stays visible alongside the linked-client
+// card. Toggled by the Change/Cancel buttons; cleared on any re-open.
+let jobDetailClientPickerOpen = false;
 let quotesSaveTimer = null;       // Debounce timer for inline edits
 let clientsSubView = 'list';      // 'list' | 'detail' — detail is built in 2-D.3
 let clientsCache = [];            // Most recent fetch from the server,
@@ -11347,6 +11855,24 @@ function init() {
   if (jobNewQuoteBtn) jobNewQuoteBtn.onclick = launchNewQuoteForActiveJob;
   const jobNewFollowupBtn = document.getElementById('jobDetailNewFollowupBtn');
   if (jobNewFollowupBtn) jobNewFollowupBtn.onclick = launchNewFollowupForActiveJob;
+  // Client-card affordances on the job-detail view:
+  //   - "Change": toggles the inline datalist picker. On exact-name match
+  //     the job's client_id updates immediately.
+  //   - "+ New Client": opens the new-client modal (insert + link).
+  const changeBtn = document.getElementById('jobDetailChangeClientBtn');
+  if (changeBtn) changeBtn.onclick = toggleJobDetailClientPicker;
+  const newClientBtn = document.getElementById('jobDetailNewClientBtn');
+  if (newClientBtn) newClientBtn.onclick = openNewClientModal;
+  // Wire the picker input to commit-on-match. The datalist suggests
+  // existing clients; when the user lands on a value that exactly
+  // matches a cached client (case-insensitive), set + save.
+  const pickerInput = document.getElementById('jobDetailClientInput');
+  if (pickerInput) {
+    pickerInput.addEventListener('change', commitJobDetailClientPicker);
+    pickerInput.addEventListener('blur', commitJobDetailClientPicker);
+  }
+  // New-client modal wiring
+  bindNewClientModal();
   const clientDetailDeleteBtn = document.getElementById('clientDetailDeleteBtn');
   if (clientDetailDeleteBtn) clientDetailDeleteBtn.onclick = () => {
     if (activeClientId && !isCreatingNewClient) {
@@ -18864,6 +19390,186 @@ function launchNewFollowupForActiveJob() {
     if (amtInput) amtInput.value = String(jobAmount);
   }
   selectedJobIdForFollowup = job.id;
+}
+
+// === Job-detail: Change-client picker + New-Client modal ===
+
+// Toggle the inline datalist picker on/off. While open, the user can
+// type a known client's name; on exact-name match (datalist suggestion
+// or matching cache entry) the job's client_id updates via commit.
+function toggleJobDetailClientPicker() {
+  if (!activeJobData || isCreatingNewJob) return;
+  jobDetailClientPickerOpen = !jobDetailClientPickerOpen;
+  const field = document.getElementById('jobDetailClientField');
+  const input = document.getElementById('jobDetailClientInput');
+  if (!field || !input) return;
+  field.classList.toggle('hidden', !jobDetailClientPickerOpen);
+  if (jobDetailClientPickerOpen) {
+    // Pre-fill with current client name for an in-place edit experience.
+    const current = activeJobData.client_id && Array.isArray(clientsLookupCache)
+      ? clientsLookupCache.find(c => c.id === activeJobData.client_id)
+      : null;
+    input.value = current ? (current.name || '') : '';
+    setTimeout(() => input.focus(), 50);
+  } else {
+    input.value = '';
+  }
+}
+
+// Commit a picker change: if the input value matches an existing cached
+// client (case-insensitive), set the job's client_id and persist. If it
+// doesn't match, leave state untouched (the modal is the path for new
+// clients — this picker is for *existing*-client selection only).
+async function commitJobDetailClientPicker() {
+  if (!jobDetailClientPickerOpen || !activeJobData) return;
+  const input = document.getElementById('jobDetailClientInput');
+  if (!input) return;
+  const typed = (input.value || '').trim();
+  if (!typed) return;
+  const match = (clientsLookupCache || []).find(c =>
+    (c.name || '').toLowerCase() === typed.toLowerCase()
+  );
+  if (!match || match.id === activeJobData.client_id) return;
+  // Update the job row immediately so the link is visible without a
+  // full save round-trip. Bypass the form's autosave path for speed.
+  try {
+    const { error } = await sb.from('jobs')
+      .update({ client_id: match.id })
+      .eq('id', activeJobData.id);
+    if (error) { console.warn('change client failed:', error); return; }
+    activeJobData.client_id = match.id;
+    jobDetailClientPickerOpen = false;
+    renderJobDetail();
+    showToast(t('toast.clientLinkedToJob'), false);
+  } catch (e) {
+    console.warn('change client threw:', e);
+  }
+}
+
+// Open the "+ New Client" modal. Resets all fields so each opening is
+// a clean slate.
+function openNewClientModal() {
+  if (!activeJobData || isCreatingNewJob) return;
+  const backdrop = document.getElementById('newClientBackdrop');
+  if (!backdrop) return;
+  ['newClientName', 'newClientContactName', 'newClientEmail', 'newClientPhone', 'newClientAddr']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  // Reset type to person
+  document.querySelectorAll('#newClientType button').forEach(b =>
+    b.classList.toggle('active', b.dataset.type === 'person'));
+  document.getElementById('newClientCompanyContactField').classList.add('hidden');
+  const err = document.getElementById('newClientError');
+  if (err) { err.textContent = ''; err.classList.add('hidden'); }
+  backdrop.classList.remove('hidden');
+  backdrop.classList.add('visible');
+  setTimeout(() => {
+    const name = document.getElementById('newClientName');
+    if (name) name.focus();
+  }, 130);
+}
+
+function closeNewClientModal() {
+  const backdrop = document.getElementById('newClientBackdrop');
+  if (!backdrop) return;
+  backdrop.classList.remove('visible');
+  setTimeout(() => backdrop.classList.add('hidden'), 130);
+}
+
+function bindNewClientModal() {
+  const cancel = document.getElementById('newClientCancelBtn');
+  if (cancel) cancel.onclick = closeNewClientModal;
+  const save = document.getElementById('newClientSaveBtn');
+  if (save) save.onclick = saveNewClientFromJob;
+  // Click outside the card closes (matches other modals).
+  const backdrop = document.getElementById('newClientBackdrop');
+  if (backdrop) backdrop.onclick = (e) => {
+    if (e.target === backdrop) closeNewClientModal();
+  };
+  // Type toggle inside the modal
+  document.querySelectorAll('#newClientType button').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('#newClientType button').forEach(b => b.classList.toggle('active', b === btn));
+      const isCompany = btn.dataset.type === 'company';
+      document.getElementById('newClientCompanyContactField').classList.toggle('hidden', !isCompany);
+    };
+  });
+}
+
+// Insert a new client, link to active job, refresh the lookup cache and
+// re-render the job detail. Honors the free-tier 5-client cap.
+async function saveNewClientFromJob() {
+  if (!activeJobData || isCreatingNewJob) return;
+  const err = document.getElementById('newClientError');
+  const showErr = (key) => {
+    if (err) { err.textContent = t(key); err.classList.remove('hidden'); }
+  };
+  const name = (document.getElementById('newClientName').value || '').trim();
+  if (!name) { showErr('newClientModal.nameRequired'); return; }
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session || !session.access_token) { showErr('newClientModal.saveFailed'); return; }
+
+  const saveBtn = document.getElementById('newClientSaveBtn');
+  if (saveBtn) saveBtn.disabled = true;
+  try {
+    // Free-tier client cap. Fail open on RPC error.
+    try {
+      const { data: cap } = await sb.rpc('can_create_client');
+      if (cap && cap.allowed === false) {
+        showErr('newClientModal.capReached');
+        return;
+      }
+    } catch (e) { /* fail open */ }
+
+    const typeBtn = document.querySelector('#newClientType button.active');
+    const type = typeBtn ? typeBtn.dataset.type : 'person';
+    const payload = {
+      user_id: session.user.id,
+      name: name,
+      type: type,
+      status: 'lead',
+      email: (document.getElementById('newClientEmail').value || '').trim() || null,
+      phone: (document.getElementById('newClientPhone').value || '').trim() || null,
+      addr: (document.getElementById('newClientAddr').value || '').trim() || null,
+      contact_name: type === 'company'
+        ? ((document.getElementById('newClientContactName').value || '').trim() || null)
+        : null,
+    };
+    const { data: newClient, error: cErr } = await sb
+      .from('clients')
+      .insert(payload)
+      .select('*')
+      .single();
+    if (cErr || !newClient) {
+      console.warn('new-client insert failed:', cErr);
+      showErr('newClientModal.saveFailed');
+      return;
+    }
+
+    // Link to active job
+    const { error: linkErr } = await sb.from('jobs')
+      .update({ client_id: newClient.id })
+      .eq('id', activeJobData.id);
+    if (linkErr) {
+      console.warn('job<->client link failed:', linkErr);
+      // Client was created but not linked — close anyway, the user can
+      // pick them from "Change" if needed.
+    }
+
+    activeJobData.client_id = newClient.id;
+    // Refresh lookup BEFORE re-rendering so renderJobDetailClient can
+    // find the newly-inserted client and show the linked-client row.
+    await refreshClientsLookupCache().catch(e => console.warn('lookup refresh:', e));
+    closeNewClientModal();
+    jobDetailClientPickerOpen = false;
+    renderJobDetail();
+    showToast(t('toast.clientLinkedToJob'), false);
+  } catch (e) {
+    console.warn('saveNewClientFromJob threw:', e);
+    showErr('newClientModal.saveFailed');
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
+  }
 }
 
 // Placeholder for jobs — Jobs view doesn't exist yet (Sprint 2-E).
