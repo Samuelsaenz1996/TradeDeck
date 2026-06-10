@@ -831,6 +831,378 @@
     margin-bottom: 14px;
   }
 
+  /* === Settings → reusable hero header for every content card === */
+  .settings-hero {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line-2);
+  }
+  .settings-hero-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .settings-hero-text {
+    flex: 1;
+    min-width: 0;
+    padding-top: 2px;
+  }
+  .settings-hero-text .card-title { margin-bottom: 4px; }
+  .settings-hero-text .card-sub { margin-bottom: 0; line-height: 1.5; }
+  /* Help text style — used in every card's input rows for guidance copy. */
+  .settings-help {
+    color: var(--ink-3);
+    font-size: 11.5px;
+    display: block;
+    margin-top: 6px;
+    line-height: 1.45;
+  }
+
+  /* Plan & Usage tier badge — visual cue for Free vs Pro state. */
+  .plan-tier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+  .plan-tier-badge.is-free {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--ink-2);
+  }
+  .plan-tier-badge.is-pro {
+    background: var(--ink);
+    color: #FFFFFF;
+    border: 1px solid var(--ink);
+  }
+  .plan-tier-badge.is-pro::before { content: '★'; color: var(--gold); }
+
+  /* Activity stats: add a soft icon column inside each tile. */
+  .profile-stat-icon {
+    font-size: 18px;
+    margin-bottom: 6px;
+    color: var(--ink-3);
+  }
+
+  /* Account sub-row tweaks: render email + member-since as a compact info grid. */
+  .account-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    /* No bottom border — the next .account-section already provides its own top border. */
+  }
+  .account-info-cell {
+    background: var(--surface-2);
+    border: 1px solid var(--line-2);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+  }
+  .account-info-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-3);
+    margin-bottom: 4px;
+  }
+  .account-info-value {
+    font-size: 14px;
+    color: var(--ink);
+    font-weight: 500;
+    word-break: break-word;
+  }
+
+  /* === Jobs teaser (free-tier preview of the Jobs view) === */
+  .jobs-teaser-hero-card {
+    position: relative;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    overflow: hidden;
+  }
+  .jobs-teaser-badge {
+    display: inline-block;
+    background: var(--ink);
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 5px 10px;
+    border-radius: 999px;
+    margin-bottom: 16px;
+  }
+  .jobs-teaser-hero {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+  .jobs-teaser-hero-icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, var(--accent-soft) 0%, #fff 100%);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .jobs-teaser-hero-text {
+    flex: 1;
+    min-width: 0;
+    padding-top: 4px;
+  }
+  .jobs-teaser-title {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+  .jobs-teaser-body {
+    color: var(--ink-2);
+    font-size: 14.5px;
+    line-height: 1.6;
+    margin-bottom: 0;
+    max-width: 600px;
+  }
+  .jobs-teaser-cta-top,
+  .jobs-teaser-cta-bottom {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 15px;
+  }
+
+  /* Feature grid */
+  .jobs-teaser-features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 22px;
+  }
+  .jobs-teaser-feature {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .jobs-teaser-feature-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--surface-2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .jobs-teaser-feature-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 3px;
+    line-height: 1.35;
+  }
+  .jobs-teaser-feature-sub {
+    font-size: 12.5px;
+    color: var(--ink-3);
+    line-height: 1.5;
+  }
+
+  /* Sample job list rows */
+  .jobs-teaser-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .jobs-teaser-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--surface-2);
+    border: 1px solid var(--line-2);
+    border-radius: var(--radius-sm);
+  }
+  .jobs-teaser-row-main {
+    flex: 1;
+    min-width: 0;
+  }
+  .jobs-teaser-row-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 3px;
+    line-height: 1.35;
+  }
+  .jobs-teaser-row-meta {
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+  .jobs-teaser-row-amount {
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 14px;
+    white-space: nowrap;
+  }
+  .jobs-teaser-pill {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 5px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .jobs-teaser-pill--progress {
+    background: rgba(184, 115, 31, 0.14);
+    color: var(--warn);
+  }
+  .jobs-teaser-pill--awaiting {
+    background: rgba(196, 90, 26, 0.14);
+    color: var(--accent);
+  }
+  .jobs-teaser-pill--paid {
+    background: rgba(47, 122, 77, 0.14);
+    color: var(--good);
+  }
+
+  /* Bottom CTA card */
+  .jobs-teaser-cta-card {
+    text-align: center;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+  }
+  .jobs-teaser-cta-title {
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .jobs-teaser-cta-sub {
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.55;
+    margin-bottom: 18px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  @media (max-width: 600px) {
+    .jobs-teaser-title { font-size: 22px; }
+    .jobs-teaser-hero-icon { width: 56px; height: 56px; font-size: 30px; }
+    .jobs-teaser-features { grid-template-columns: 1fr; }
+    .jobs-teaser-row {
+      flex-wrap: wrap;
+      gap: 8px 14px;
+    }
+    .jobs-teaser-row-main { width: 100%; }
+  }
+
+  /* === Stripe-setup nudge modal (shown before sending an invoice when
+         the user is Pro but hasn't connected Stripe Connect yet) === */
+  .stripe-setup-hero {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+  }
+  .stripe-setup-hero-icon {
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(135deg, var(--accent-soft) 0%, #fff 100%);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .stripe-setup-hero-text {
+    flex: 1;
+    min-width: 0;
+    padding-top: 2px;
+  }
+  .stripe-setup-hero-text .modal-title { margin-bottom: 6px; }
+  .stripe-setup-sub {
+    font-size: 13.5px;
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+  .stripe-setup-benefits {
+    background: var(--surface-2);
+    border: 1px solid var(--line-2);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-bottom: 16px;
+  }
+  .stripe-setup-benefit {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.5;
+    padding: 4px 0;
+  }
+  .stripe-setup-benefit-icon {
+    color: var(--good);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  /* "Don't show this again" checkbox row — soft, low-attention, separate
+     from the main action area so it doesn't fight the primary CTA. */
+  .stripe-setup-dontshow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--line-2);
+    border-radius: var(--radius-sm);
+    font-size: 12.5px;
+    color: var(--ink-3);
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.12s, color 0.12s;
+  }
+  .stripe-setup-dontshow:hover {
+    border-color: var(--line);
+    color: var(--ink-2);
+  }
+  .stripe-setup-dontshow input {
+    margin: 0;
+    cursor: pointer;
+  }
+  /* Stack buttons on mobile so the long "Send without pay link" label
+     never gets crammed next to the primary action. */
+  @media (max-width: 480px) {
+    .stripe-setup-actions { flex-direction: column-reverse; align-items: stretch; }
+    .stripe-setup-actions .modal-btn { width: 100%; }
+  }
+
   /* === Settings → "Get paid" (Stripe Connect) card === */
   .getpaid-card {
     /* Slight overall lift since this card is doing more work than its neighbors. */
@@ -4105,36 +4477,138 @@
         </div>
 
         <div id="jobsTeaserSub" class="hidden">
-          <div style="margin-bottom: 20px;">
-            <h2 style="font-family: var(--display); font-weight: 600; font-size: 22px; letter-spacing: -0.01em; margin-bottom: 8px;" data-i18n="jobs.teaser.title">Track jobs from quote to paid</h2>
-            <p style="color: var(--ink-2); font-size: 14px; line-height: 1.55; max-width: 640px; margin-bottom: 6px;" data-i18n="jobs.teaser.body">Jobs link your quotes to the work and the invoice that follows. Track each job's status — quoted, in progress, complete, paid — and see per-job stats at a glance.</p>
-            <p style="color: var(--ink-3); font-size: 12px; font-style: italic; margin: 0;" data-i18n="jobs.teaser.sampleNote">Sample data</p>
+          <!-- Hero -->
+          <div class="card jobs-teaser-hero-card">
+            <div class="jobs-teaser-badge" data-i18n="jobs.teaser.badge">⭐ Pro feature</div>
+            <div class="jobs-teaser-hero">
+              <div class="jobs-teaser-hero-icon" aria-hidden="true">🧰</div>
+              <div class="jobs-teaser-hero-text">
+                <h2 class="jobs-teaser-title" data-i18n="jobs.teaser.title">Track every job from quote to paid</h2>
+                <p class="jobs-teaser-body" data-i18n="jobs.teaser.body">Jobs are how serious contractors keep work organized. Every quote you accept becomes a job — track its status, link the invoice that follows, and see exactly where each job stands at a glance.</p>
+              </div>
+            </div>
+            <button id="jobsTeaserUpgradeBtn" type="button" class="btn-primary jobs-teaser-cta-top">
+              ⭐ <span data-i18n="jobs.teaser.cta">Upgrade to Pro to unlock Jobs</span>
+            </button>
           </div>
-          <div class="field-row cols-4">
-            <div class="stat-card">
-              <div class="stat-card-title" data-i18n="jobs.openQuotes">Open quotes</div>
-              <div class="stat-card-value">4</div>
-              <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$12,400</div>
+
+          <!-- What Jobs do for you -->
+          <div class="card">
+            <div class="settings-hero">
+              <div class="settings-hero-icon" aria-hidden="true">🎯</div>
+              <div class="settings-hero-text">
+                <div class="card-title" data-i18n="jobs.teaser.whatTitle">What Jobs gives you</div>
+                <div class="card-sub" data-i18n="jobs.teaser.whatSub">Four things you can't get with quotes alone — the workflow that turns "did I send that invoice?" into "everything's tracked."</div>
+              </div>
             </div>
-            <div class="stat-card">
-              <div class="stat-card-title" data-i18n="jobs.inProgress">In progress</div>
-              <div class="stat-card-value">2</div>
-              <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$8,750</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-title" data-i18n="jobs.awaiting">Awaiting payment</div>
-              <div class="stat-card-value">3</div>
-              <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$15,200</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-title" data-i18n="jobs.completed">Completed this month</div>
-              <div class="stat-card-value">7</div>
-              <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$32,100</div>
+            <div class="jobs-teaser-features">
+              <div class="jobs-teaser-feature">
+                <div class="jobs-teaser-feature-icon" aria-hidden="true">🔗</div>
+                <div class="jobs-teaser-feature-text">
+                  <div class="jobs-teaser-feature-title" data-i18n="jobs.teaser.feat1.title">Quote → Job → Invoice, linked</div>
+                  <div class="jobs-teaser-feature-sub" data-i18n="jobs.teaser.feat1.sub">When you generate a quote, a job is created automatically. The invoice you send later is linked too — one timeline per project.</div>
+                </div>
+              </div>
+              <div class="jobs-teaser-feature">
+                <div class="jobs-teaser-feature-icon" aria-hidden="true">📊</div>
+                <div class="jobs-teaser-feature-text">
+                  <div class="jobs-teaser-feature-title" data-i18n="jobs.teaser.feat2.title">Pipeline at a glance</div>
+                  <div class="jobs-teaser-feature-sub" data-i18n="jobs.teaser.feat2.sub">See open quotes, jobs in progress, work awaiting payment, and completed work — broken out by count and dollar value.</div>
+                </div>
+              </div>
+              <div class="jobs-teaser-feature">
+                <div class="jobs-teaser-feature-icon" aria-hidden="true">🎯</div>
+                <div class="jobs-teaser-feature-text">
+                  <div class="jobs-teaser-feature-title" data-i18n="jobs.teaser.feat3.title">Status that updates itself</div>
+                  <div class="jobs-teaser-feature-sub" data-i18n="jobs.teaser.feat3.sub">Quoted → In progress → Complete → Paid. The status flips automatically when you accept payment or mark work done.</div>
+                </div>
+              </div>
+              <div class="jobs-teaser-feature">
+                <div class="jobs-teaser-feature-icon" aria-hidden="true">📝</div>
+                <div class="jobs-teaser-feature-text">
+                  <div class="jobs-teaser-feature-title" data-i18n="jobs.teaser.feat4.title">Notes per job</div>
+                  <div class="jobs-teaser-feature-sub" data-i18n="jobs.teaser.feat4.sub">Track materials waiting on delivery, change orders, photos you took on site — anything you need to remember about a job.</div>
+                </div>
+              </div>
             </div>
           </div>
-          <div style="text-align: center; margin-top: 28px;">
-            <button id="jobsTeaserUpgradeBtn" type="button" class="btn-primary">
-              ⭐ <span data-i18n="jobs.teaser.cta">Upgrade to Pro</span>
+
+          <!-- Sample dashboard preview -->
+          <div class="card">
+            <div class="settings-hero">
+              <div class="settings-hero-icon" aria-hidden="true">📈</div>
+              <div class="settings-hero-text">
+                <div class="card-title" data-i18n="jobs.teaser.dashTitle">What your dashboard would look like</div>
+                <div class="card-sub" data-i18n="jobs.teaser.dashSub">Sample data — these are the numbers a busy contractor would see at the top of their Jobs tab.</div>
+              </div>
+            </div>
+            <div class="field-row cols-4">
+              <div class="stat-card">
+                <div class="stat-card-title" data-i18n="jobs.openQuotes">Open quotes</div>
+                <div class="stat-card-value">4</div>
+                <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$12,400</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-card-title" data-i18n="jobs.inProgress">In progress</div>
+                <div class="stat-card-value">2</div>
+                <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$8,750</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-card-title" data-i18n="jobs.awaiting">Awaiting payment</div>
+                <div class="stat-card-value">3</div>
+                <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$15,200</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-card-title" data-i18n="jobs.completed">Completed this month</div>
+                <div class="stat-card-value">7</div>
+                <div style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$32,100</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sample job list preview -->
+          <div class="card">
+            <div class="settings-hero">
+              <div class="settings-hero-icon" aria-hidden="true">📋</div>
+              <div class="settings-hero-text">
+                <div class="card-title" data-i18n="jobs.teaser.listTitle">A typical job list</div>
+                <div class="card-sub" data-i18n="jobs.teaser.listSub">Sample data — this is what your job list would look like with a few jobs in flight.</div>
+              </div>
+            </div>
+            <div class="jobs-teaser-list">
+              <div class="jobs-teaser-row">
+                <div class="jobs-teaser-row-main">
+                  <div class="jobs-teaser-row-title" data-i18n="jobs.teaser.row1.title">Kitchen plumbing rough-in — Anderson residence</div>
+                  <div class="jobs-teaser-row-meta" data-i18n="jobs.teaser.row1.meta">Plumbing · Started 3 days ago</div>
+                </div>
+                <div class="jobs-teaser-row-amount">$4,200</div>
+                <div class="jobs-teaser-pill jobs-teaser-pill--progress" data-i18n="status.In Progress">In progress</div>
+              </div>
+              <div class="jobs-teaser-row">
+                <div class="jobs-teaser-row-main">
+                  <div class="jobs-teaser-row-title" data-i18n="jobs.teaser.row2.title">Bathroom retile — Garcia family</div>
+                  <div class="jobs-teaser-row-meta" data-i18n="jobs.teaser.row2.meta">Flooring · Invoice sent yesterday</div>
+                </div>
+                <div class="jobs-teaser-row-amount">$3,850</div>
+                <div class="jobs-teaser-pill jobs-teaser-pill--awaiting" data-i18n="jobs.teaser.row2.pill">Awaiting payment</div>
+              </div>
+              <div class="jobs-teaser-row">
+                <div class="jobs-teaser-row-main">
+                  <div class="jobs-teaser-row-title" data-i18n="jobs.teaser.row3.title">Deck stain &amp; seal — Patel home</div>
+                  <div class="jobs-teaser-row-meta" data-i18n="jobs.teaser.row3.meta">General · Completed last week</div>
+                </div>
+                <div class="jobs-teaser-row-amount">$1,950</div>
+                <div class="jobs-teaser-pill jobs-teaser-pill--paid" data-i18n="status.Paid">Paid</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Final CTA -->
+          <div class="card jobs-teaser-cta-card">
+            <div class="jobs-teaser-cta-title" data-i18n="jobs.teaser.ctaTitle">Ready to track your work like this?</div>
+            <div class="jobs-teaser-cta-sub" data-i18n="jobs.teaser.ctaSub">Upgrade to Pro for unlimited jobs, unlimited quotes, online payments, and more.</div>
+            <button id="jobsTeaserUpgradeBtn2" type="button" class="btn-primary jobs-teaser-cta-bottom">
+              ⭐ <span data-i18n="jobs.teaser.cta">Upgrade to Pro to unlock Jobs</span>
             </button>
           </div>
         </div>
@@ -4412,8 +4886,13 @@
         </div>
 
         <div class="card">
-          <div class="card-title" data-i18n="profile.personal.title">Personal info</div>
-          <div class="card-sub" data-i18n="profile.personal.sub">Your name and contact info.</div>
+          <div class="settings-hero">
+            <div class="settings-hero-icon" aria-hidden="true">👤</div>
+            <div class="settings-hero-text">
+              <div class="card-title" data-i18n="profile.personal.title">Personal info</div>
+              <div class="card-sub" data-i18n="profile.personal.sub">Your name appears on the sign-off of every quote and follow-up you send. Phone is optional — include it if you want customers to text or call you directly.</div>
+            </div>
+          </div>
           <div class="field-row cols-2">
             <div class="field">
               <label class="label" for="profileFirstName" data-i18n="profile.personal.firstName">First name</label>
@@ -4427,12 +4906,18 @@
           <div class="field">
             <label class="label" for="profilePhone" data-i18n="profile.personal.phone">Phone</label>
             <input type="tel" class="input" id="profilePhone" maxlength="40" autocomplete="tel" />
+            <small class="settings-help" data-i18n="profile.personal.phoneHelp">Optional. Shown under your name on quotes so customers can reach you directly.</small>
           </div>
         </div>
 
         <div class="card">
-          <div class="card-title" data-i18n="profile.business.title">Business</div>
-          <div class="card-sub" data-i18n="profile.business.sub">Appears on the quotes you send to customers.</div>
+          <div class="settings-hero">
+            <div class="settings-hero-icon" aria-hidden="true">🏢</div>
+            <div class="settings-hero-text">
+              <div class="card-title" data-i18n="profile.business.title">Your business</div>
+              <div class="card-sub" data-i18n="profile.business.sub">Company name, address, license, logo, and brand color — these appear on every quote and invoice you send. Setting these up once makes every document look professional.</div>
+            </div>
+          </div>
           <div class="field">
             <label class="label" for="profileCompanyName" data-i18n="profile.business.companyName">Company name</label>
             <input type="text" class="input" id="profileCompanyName" maxlength="120" autocomplete="organization" />
@@ -4444,6 +4929,7 @@
           <div class="field">
             <label class="label" for="profileLicenseNumber" data-i18n="profile.business.license">License number (optional)</label>
             <input type="text" class="input" id="profileLicenseNumber" maxlength="60" />
+            <small class="settings-help" data-i18n="profile.business.licenseHelp">Some states require contractor license numbers on quotes. Leave blank if not applicable.</small>
           </div>
           <div class="field">
             <label class="label" data-i18n="profile.business.logo">Logo</label>
@@ -4453,7 +4939,7 @@
               <button type="button" class="btn-secondary" id="profileLogoUploadBtn" data-i18n="profile.logo.upload">Upload logo</button>
               <button type="button" class="btn-secondary btn-danger hidden" id="profileLogoRemoveBtn" data-i18n="profile.logo.remove">Remove</button>
             </div>
-            <small style="color: var(--ink-3); font-size: 11px; display:block; margin-top:6px;" data-i18n="profile.business.logoHelp">PNG or JPG, max 2MB. Appears on the quotes you send.</small>
+            <small class="settings-help" data-i18n="profile.business.logoHelp">PNG or JPG, max 2MB. A square or wide logo works best — it appears in the header of every quote and invoice.</small>
           </div>
           <div class="field">
             <label class="label" data-i18n="profile.business.brandColor">Brand color</label>
@@ -4462,7 +4948,7 @@
               <label for="profileBrandColorEnabled" data-i18n="profile.brand.enable">Use a custom brand color</label>
               <input type="color" id="profileBrandColor" value="#C45A1A" disabled />
             </div>
-            <small style="color: var(--ink-3); font-size: 11px; display:block; margin-top:6px;" data-i18n="profile.brand.help">Applied to the accent bar at the top of your quotes. Leave off to use the default.</small>
+            <small class="settings-help" data-i18n="profile.brand.help">Applied to the accent bar at the top of your quotes — pick a color that matches your logo. Leave off to use the default MyTradeDeck accent.</small>
           </div>
         </div>
 
@@ -4532,16 +5018,22 @@
         </div>
 
         <div class="card">
-          <div class="card-title" data-i18n="profile.defaults.title">Workflow defaults</div>
-          <div class="card-sub" data-i18n="profile.defaults.sub">Pre-filled when you create a new quote. You can still change them per quote.</div>
+          <div class="settings-hero">
+            <div class="settings-hero-icon" aria-hidden="true">⚙️</div>
+            <div class="settings-hero-text">
+              <div class="card-title" data-i18n="profile.defaults.title">Quote defaults</div>
+              <div class="card-sub" data-i18n="profile.defaults.sub">Save time on every quote — set the deposit and warranty values you use most often, and we'll pre-fill them. You can still change them per quote.</div>
+            </div>
+          </div>
           <div class="field">
             <label class="label" for="profileDefaultDeposit" data-i18n="profile.defaults.deposit">Default deposit (%)</label>
             <input type="number" class="input" id="profileDefaultDeposit" min="0" max="100" step="1" style="max-width: 160px;" />
+            <small class="settings-help" data-i18n="profile.defaults.depositHelp">Most contractors charge 25–50% upfront, due before work starts. Set 0 to disable deposits.</small>
           </div>
           <div class="field">
             <label class="label" for="profileDefaultWarranty" data-i18n="profile.defaults.warranty">Default warranty</label>
             <textarea class="textarea" id="profileDefaultWarranty" maxlength="500" placeholder="e.g. 1-year workmanship warranty. Manufacturer warranty applies to materials."></textarea>
-            <small style="color: var(--ink-3); font-size: 11px; display: block; margin-top: 4px;" data-i18n="profile.defaults.warrantyHelp">Saved per language — switch the app language to set the other version. Leave blank to let the AI generate one.</small>
+            <small class="settings-help" data-i18n="profile.defaults.warrantyHelp">Saved per language — switch the app language to set the other version. Leave blank to let the AI generate one tailored to each trade.</small>
           </div>
         </div>
 
@@ -4552,7 +5044,13 @@
         </div>
 
         <div class="card">
-          <div class="card-title" data-i18n="profile.usage.title">Plan & Usage</div>
+          <div class="settings-hero">
+            <div class="settings-hero-icon" aria-hidden="true">📊</div>
+            <div class="settings-hero-text">
+              <div class="card-title" data-i18n="profile.usage.title">Plan &amp; usage</div>
+              <div class="card-sub" data-i18n="profile.usage.sub">Your current plan and quota. Upgrade any time to unlock unlimited quotes, jobs tracking, online payments, and more.</div>
+            </div>
+          </div>
           <div class="profile-plan-name" id="profilePlanName">—</div>
           <div class="profile-progress">
             <div class="profile-progress-bar"><div class="profile-progress-fill" id="profileProgressFill"></div></div>
@@ -4567,21 +5065,31 @@
         </div>
 
         <div class="card">
-          <div class="card-title" data-i18n="profile.stats.title">Activity</div>
+          <div class="settings-hero">
+            <div class="settings-hero-icon" aria-hidden="true">📈</div>
+            <div class="settings-hero-text">
+              <div class="card-title" data-i18n="profile.stats.title">Activity</div>
+              <div class="card-sub" data-i18n="profile.stats.sub">A running snapshot of your work in MyTradeDeck — clients added, jobs tracked, quotes generated, and follow-ups sent.</div>
+            </div>
+          </div>
           <div class="profile-stats-grid">
             <div class="profile-stat">
+              <div class="profile-stat-icon" aria-hidden="true">👥</div>
               <div class="profile-stat-value" id="profileStatClients">0</div>
               <div class="profile-stat-label" data-i18n="profile.stats.clients">Clients</div>
             </div>
             <div class="profile-stat">
+              <div class="profile-stat-icon" aria-hidden="true">🧰</div>
               <div class="profile-stat-value" id="profileStatJobs">0</div>
               <div class="profile-stat-label" data-i18n="profile.stats.jobs">Jobs</div>
             </div>
             <div class="profile-stat">
+              <div class="profile-stat-icon" aria-hidden="true">📄</div>
               <div class="profile-stat-value" id="profileStatQuotes">0</div>
               <div class="profile-stat-label" data-i18n="profile.stats.quotes">Quotes</div>
             </div>
             <div class="profile-stat">
+              <div class="profile-stat-icon" aria-hidden="true">✉️</div>
               <div class="profile-stat-value" id="profileStatFollowups">0</div>
               <div class="profile-stat-label" data-i18n="profile.stats.followups">Follow-ups</div>
             </div>
@@ -4589,14 +5097,22 @@
         </div>
 
         <div class="card">
-          <div class="card-title" data-i18n="profile.account.title">Account</div>
-          <div class="profile-account-row">
-            <span data-i18n="profile.account.email">Email</span>
-            <span id="profileAccountEmail">—</span>
+          <div class="settings-hero">
+            <div class="settings-hero-icon" aria-hidden="true">🔐</div>
+            <div class="settings-hero-text">
+              <div class="card-title" data-i18n="profile.account.title">Account &amp; security</div>
+              <div class="card-sub" data-i18n="profile.account.sub">Manage your sign-in details and what happens to your data. Changing your password or email here takes effect immediately.</div>
+            </div>
           </div>
-          <div class="profile-account-row">
-            <span data-i18n="profile.account.memberSince">Member since</span>
-            <span id="profileMemberSince">—</span>
+          <div class="account-info-grid">
+            <div class="account-info-cell">
+              <div class="account-info-label" data-i18n="profile.account.email">Email</div>
+              <div class="account-info-value" id="profileAccountEmail">—</div>
+            </div>
+            <div class="account-info-cell">
+              <div class="account-info-label" data-i18n="profile.account.memberSince">Member since</div>
+              <div class="account-info-value" id="profileMemberSince">—</div>
+            </div>
           </div>
 
           <div class="account-section">
@@ -4886,6 +5402,40 @@
     <div class="modal-actions">
       <button id="deleteAccountCancel" type="button" class="modal-btn modal-btn-cancel" data-i18n="modal.cancel">Cancel</button>
       <button id="deleteAccountConfirm" type="button" class="modal-btn modal-btn-danger" disabled data-i18n="account.delete.modalConfirm">Delete my account</button>
+    </div>
+  </div>
+</div>
+
+<div id="stripeSetupBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="stripeSetupTitle">
+  <div class="modal-card">
+    <div class="stripe-setup-hero">
+      <div class="stripe-setup-hero-icon" aria-hidden="true">💳</div>
+      <div class="stripe-setup-hero-text">
+        <div class="modal-title" id="stripeSetupTitle" data-i18n="stripeSetup.title">Set up online payments first?</div>
+        <div class="stripe-setup-sub" data-i18n="stripeSetup.sub">Your customer can pay this invoice with a card in 30 seconds — but only if you've connected Stripe. Right now this invoice will go out without a pay link.</div>
+      </div>
+    </div>
+    <div class="stripe-setup-benefits">
+      <div class="stripe-setup-benefit">
+        <span class="stripe-setup-benefit-icon" aria-hidden="true">✓</span>
+        <span data-i18n="stripeSetup.benefit1">A pay link is included automatically every time you email or text an invoice</span>
+      </div>
+      <div class="stripe-setup-benefit">
+        <span class="stripe-setup-benefit-icon" aria-hidden="true">✓</span>
+        <span data-i18n="stripeSetup.benefit2">Invoices flip to "paid" the moment the customer pays — no manual reconciliation</span>
+      </div>
+      <div class="stripe-setup-benefit">
+        <span class="stripe-setup-benefit-icon" aria-hidden="true">✓</span>
+        <span data-i18n="stripeSetup.benefit3">Money lands in your own Stripe account, usually within 2 business days</span>
+      </div>
+    </div>
+    <label class="stripe-setup-dontshow">
+      <input type="checkbox" id="stripeSetupDontShow" />
+      <span data-i18n="stripeSetup.dontShow">Don't show this again</span>
+    </label>
+    <div class="modal-actions stripe-setup-actions">
+      <button id="stripeSetupSendAnywayBtn" type="button" class="modal-btn modal-btn-cancel" data-i18n="stripeSetup.sendAnyway">Send without pay link</button>
+      <button id="stripeSetupConnectBtn" type="button" class="modal-btn modal-btn-primary" data-i18n="stripeSetup.connect">Set up Stripe</button>
     </div>
   </div>
 </div>
@@ -5620,10 +6170,34 @@ const I18N = {
     'jobs.inProgress': 'In progress',
     'jobs.awaiting': 'Awaiting payment',
     'jobs.completed': 'Completed this month',
-    'jobs.teaser.title': 'Track jobs from quote to paid',
-    'jobs.teaser.body': "Jobs link your quotes to the work and the invoice that follows. Track each job's status — quoted, in progress, complete, paid — and see per-job stats at a glance.",
-    'jobs.teaser.cta': 'Upgrade to Pro',
+    'jobs.teaser.badge': '⭐ Pro feature',
+    'jobs.teaser.title': 'Track every job from quote to paid',
+    'jobs.teaser.body': 'Jobs are how serious contractors keep work organized. Every quote you accept becomes a job — track its status, link the invoice that follows, and see exactly where each job stands at a glance.',
+    'jobs.teaser.cta': 'Upgrade to Pro to unlock Jobs',
     'jobs.teaser.sampleNote': 'Sample data',
+    'jobs.teaser.whatTitle': 'What Jobs gives you',
+    'jobs.teaser.whatSub': "Four things you can't get with quotes alone — the workflow that turns \"did I send that invoice?\" into \"everything's tracked.\"",
+    'jobs.teaser.feat1.title': 'Quote → Job → Invoice, linked',
+    'jobs.teaser.feat1.sub': 'When you generate a quote, a job is created automatically. The invoice you send later is linked too — one timeline per project.',
+    'jobs.teaser.feat2.title': 'Pipeline at a glance',
+    'jobs.teaser.feat2.sub': 'See open quotes, jobs in progress, work awaiting payment, and completed work — broken out by count and dollar value.',
+    'jobs.teaser.feat3.title': 'Status that updates itself',
+    'jobs.teaser.feat3.sub': 'Quoted → In progress → Complete → Paid. The status flips automatically when you accept payment or mark work done.',
+    'jobs.teaser.feat4.title': 'Notes per job',
+    'jobs.teaser.feat4.sub': 'Track materials waiting on delivery, change orders, photos you took on site — anything you need to remember about a job.',
+    'jobs.teaser.dashTitle': 'What your dashboard would look like',
+    'jobs.teaser.dashSub': 'Sample data — these are the numbers a busy contractor would see at the top of their Jobs tab.',
+    'jobs.teaser.listTitle': 'A typical job list',
+    'jobs.teaser.listSub': 'Sample data — this is what your job list would look like with a few jobs in flight.',
+    'jobs.teaser.row1.title': 'Kitchen plumbing rough-in — Anderson residence',
+    'jobs.teaser.row1.meta': 'Plumbing · Started 3 days ago',
+    'jobs.teaser.row2.title': 'Bathroom retile — Garcia family',
+    'jobs.teaser.row2.meta': 'Flooring · Invoice sent yesterday',
+    'jobs.teaser.row2.pill': 'Awaiting payment',
+    'jobs.teaser.row3.title': 'Deck stain & seal — Patel home',
+    'jobs.teaser.row3.meta': 'General · Completed last week',
+    'jobs.teaser.ctaTitle': 'Ready to track your work like this?',
+    'jobs.teaser.ctaSub': 'Upgrade to Pro for unlimited jobs, unlimited quotes, online payments, and more.',
     'jobs.col.job': 'Job',
     'jobs.col.client': 'Client',
     'jobs.col.trade': 'Trade',
@@ -5901,17 +6475,19 @@ const I18N = {
     'profile.save.failed': 'Could not save profile',
     'profile.save.depositInvalid': 'Deposit must be between 0 and 100',
     'profile.personal.title': 'Personal info',
-    'profile.personal.sub': 'Your name and contact info.',
+    'profile.personal.sub': "Your name appears on the sign-off of every quote and follow-up you send. Phone is optional — include it if you want customers to text or call you directly.",
+    'profile.personal.phoneHelp': 'Optional. Shown under your name on quotes so customers can reach you directly.',
     'profile.personal.firstName': 'First name',
     'profile.personal.lastName': 'Last name',
     'profile.personal.phone': 'Phone',
-    'profile.business.title': 'Business',
-    'profile.business.sub': 'Appears on the quotes you send to customers.',
+    'profile.business.title': 'Your business',
+    'profile.business.sub': 'Company name, address, license, logo, and brand color — these appear on every quote and invoice you send. Setting these up once makes every document look professional.',
+    'profile.business.licenseHelp': 'Some states require contractor license numbers on quotes. Leave blank if not applicable.',
     'profile.business.companyName': 'Company name',
     'profile.business.address': 'Business address',
     'profile.business.license': 'License number (optional)',
     'profile.business.logo': 'Logo',
-    'profile.business.logoHelp': 'PNG or JPG, max 2MB. Appears on the quotes you send.',
+    'profile.business.logoHelp': 'PNG or JPG, max 2MB. A square or wide logo works best — it appears in the header of every quote and invoice.',
     'profile.logo.upload': 'Upload logo',
     'profile.logo.replace': 'Replace logo',
     'profile.logo.remove': 'Remove',
@@ -5923,7 +6499,15 @@ const I18N = {
     'profile.logo.removeFailed': 'Could not remove logo',
     'profile.business.brandColor': 'Brand color',
     'profile.brand.enable': 'Use a custom brand color',
-    'profile.brand.help': 'Applied to the accent bar at the top of your quotes. Leave off to use the default.',
+    'profile.brand.help': 'Applied to the accent bar at the top of your quotes — pick a color that matches your logo. Leave off to use the default MyTradeDeck accent.',
+    'stripeSetup.title': 'Set up online payments first?',
+    'stripeSetup.sub': "Your customer can pay this invoice with a card in 30 seconds — but only if you've connected Stripe. Right now this invoice will go out without a pay link.",
+    'stripeSetup.benefit1': 'A pay link is included automatically every time you email or text an invoice',
+    'stripeSetup.benefit2': "Invoices flip to \"paid\" the moment the customer pays — no manual reconciliation",
+    'stripeSetup.benefit3': 'Money lands in your own Stripe account, usually within 2 business days',
+    'stripeSetup.dontShow': "Don't show this again",
+    'stripeSetup.sendAnyway': 'Send without pay link',
+    'stripeSetup.connect': 'Set up Stripe',
     'connect.cardTitle': 'Get paid online',
     'connect.cardSub': "Connect Stripe and start accepting card payments directly from your invoices — money lands in your account, not ours.",
     'connect.feat1.title': 'Money goes directly to you',
@@ -5963,11 +6547,14 @@ const I18N = {
     'toast.payLinkError': 'Could not create payment link. Please try again.',
     'pay.paidOn': 'Paid on {date}',
     'pay.paidOnline': 'Paid online',
-    'profile.defaults.title': 'Workflow defaults',
-    'profile.defaults.sub': 'Pre-filled when you create a new quote. You can still change them per quote.',
+    'profile.defaults.title': 'Quote defaults',
+    'profile.defaults.sub': "Save time on every quote — set the deposit and warranty values you use most often, and we'll pre-fill them. You can still change them per quote.",
+    'profile.defaults.depositHelp': 'Most contractors charge 25–50% upfront, due before work starts. Set 0 to disable deposits.',
     'profile.defaults.deposit': 'Default deposit (%)',
     'profile.defaults.warranty': 'Default warranty',
-    'profile.defaults.warrantyHelp': 'Saved per language — switch the app language to set the other version. Leave blank to let the AI generate one.',
+    'profile.defaults.warrantyHelp': 'Saved per language — switch the app language to set the other version. Leave blank to let the AI generate one tailored to each trade.',
+    'profile.usage.sub': 'Your current plan and quota. Upgrade any time to unlock unlimited quotes, jobs tracking, online payments, and more.',
+    'profile.stats.sub': 'A running snapshot of your work in MyTradeDeck — clients added, jobs tracked, quotes generated, and follow-ups sent.',
     'profile.plan.free': 'Free',
     'profile.plan.pro': 'Pro',
     'profile.plan.freeName': 'Free plan',
@@ -5981,7 +6568,8 @@ const I18N = {
     'profile.stats.jobs': 'Jobs',
     'profile.stats.quotes': 'Quotes',
     'profile.stats.followups': 'Follow-ups',
-    'profile.account.title': 'Account',
+    'profile.account.title': 'Account & security',
+    'profile.account.sub': 'Manage your sign-in details and what happens to your data. Changing your password or email here takes effect immediately.',
     'profile.account.email': 'Email',
     'profile.account.memberSince': 'Member since',
   },
@@ -6580,10 +7168,34 @@ const I18N = {
     'jobs.inProgress': 'En proceso',
     'jobs.awaiting': 'Esperando pago',
     'jobs.completed': 'Completados este mes',
-    'jobs.teaser.title': 'Lleva tus trabajos desde la cotización hasta el pago',
-    'jobs.teaser.body': 'Los trabajos conectan tus cotizaciones con la obra y la factura. Sigue el estado de cada trabajo — cotizado, en proceso, completado, pagado — y mira las estadísticas de cada trabajo de un vistazo.',
-    'jobs.teaser.cta': 'Mejora a Pro',
+    'jobs.teaser.badge': '⭐ Función Pro',
+    'jobs.teaser.title': 'Lleva cada trabajo desde la cotización hasta el pago',
+    'jobs.teaser.body': 'Los trabajos son la forma en que los contratistas serios mantienen la obra organizada. Cada cotización aceptada se convierte en un trabajo — sigue su estado, conecta la factura que sigue y mira exactamente dónde está cada trabajo de un vistazo.',
+    'jobs.teaser.cta': 'Mejora a Pro para desbloquear Trabajos',
     'jobs.teaser.sampleNote': 'Datos de muestra',
+    'jobs.teaser.whatTitle': 'Lo que te da Trabajos',
+    'jobs.teaser.whatSub': 'Cuatro cosas que no consigues solo con cotizaciones — el flujo que convierte "¿envié esa factura?" en "todo está bajo control."',
+    'jobs.teaser.feat1.title': 'Cotización → Trabajo → Factura, conectados',
+    'jobs.teaser.feat1.sub': 'Cuando generas una cotización, se crea un trabajo automáticamente. La factura que envías después también queda conectada — una sola línea de tiempo por proyecto.',
+    'jobs.teaser.feat2.title': 'Tu pipeline de un vistazo',
+    'jobs.teaser.feat2.sub': 'Mira cotizaciones abiertas, trabajos en proceso, obras esperando pago y trabajos completados — desglosado por cantidad y monto.',
+    'jobs.teaser.feat3.title': 'Estado que se actualiza solo',
+    'jobs.teaser.feat3.sub': 'Cotizado → En proceso → Completado → Pagado. El estado cambia automáticamente cuando aceptas el pago o marcas la obra como hecha.',
+    'jobs.teaser.feat4.title': 'Notas por trabajo',
+    'jobs.teaser.feat4.sub': 'Anota materiales esperando entrega, cambios de orden, fotos que tomaste en la obra — cualquier cosa que necesites recordar de un trabajo.',
+    'jobs.teaser.dashTitle': 'Cómo se vería tu dashboard',
+    'jobs.teaser.dashSub': 'Datos de muestra — estos son los números que un contratista ocupado vería al inicio de su pestaña de Trabajos.',
+    'jobs.teaser.listTitle': 'Una lista típica de trabajos',
+    'jobs.teaser.listSub': 'Datos de muestra — así se vería tu lista de trabajos con algunos proyectos en curso.',
+    'jobs.teaser.row1.title': 'Plomería de cocina (rough-in) — Residencia Anderson',
+    'jobs.teaser.row1.meta': 'Plomería · Iniciado hace 3 días',
+    'jobs.teaser.row2.title': 'Retejido de baño — Familia García',
+    'jobs.teaser.row2.meta': 'Pisos · Factura enviada ayer',
+    'jobs.teaser.row2.pill': 'Esperando pago',
+    'jobs.teaser.row3.title': 'Tinte y sellado de terraza — Hogar Patel',
+    'jobs.teaser.row3.meta': 'General · Completado la semana pasada',
+    'jobs.teaser.ctaTitle': '¿Listo para seguir tu trabajo así?',
+    'jobs.teaser.ctaSub': 'Mejora a Pro para tener trabajos ilimitados, cotizaciones ilimitadas, pagos en línea y más.',
     'jobs.col.job': 'Trabajo',
     'jobs.col.client': 'Cliente',
     'jobs.col.trade': 'Oficio',
@@ -6861,17 +7473,19 @@ const I18N = {
     'profile.save.failed': 'No se pudo guardar el perfil',
     'profile.save.depositInvalid': 'El depósito debe estar entre 0 y 100',
     'profile.personal.title': 'Información personal',
-    'profile.personal.sub': 'Tu nombre e información de contacto.',
+    'profile.personal.sub': 'Tu nombre aparece en la firma de cada cotización y seguimiento que envías. El teléfono es opcional — agrégalo si quieres que los clientes te puedan llamar o enviar mensajes directamente.',
+    'profile.personal.phoneHelp': 'Opcional. Aparece debajo de tu nombre en las cotizaciones para que los clientes te contacten directamente.',
     'profile.personal.firstName': 'Nombre',
     'profile.personal.lastName': 'Apellido',
     'profile.personal.phone': 'Teléfono',
-    'profile.business.title': 'Negocio',
-    'profile.business.sub': 'Aparece en las cotizaciones que envías a tus clientes.',
+    'profile.business.title': 'Tu negocio',
+    'profile.business.sub': 'Nombre, dirección, licencia, logo y color de marca — aparecen en cada cotización y factura que envías. Configúralos una vez y cada documento se verá profesional.',
+    'profile.business.licenseHelp': 'Algunos estados requieren el número de licencia del contratista en las cotizaciones. Déjalo en blanco si no aplica.',
     'profile.business.companyName': 'Nombre de la empresa',
     'profile.business.address': 'Dirección del negocio',
     'profile.business.license': 'Número de licencia (opcional)',
     'profile.business.logo': 'Logotipo',
-    'profile.business.logoHelp': 'PNG o JPG, máx 2MB. Aparece en las cotizaciones que envías.',
+    'profile.business.logoHelp': 'PNG o JPG, máx 2MB. Un logo cuadrado o ancho funciona mejor — aparece en el encabezado de cada cotización y factura.',
     'profile.logo.upload': 'Subir logotipo',
     'profile.logo.replace': 'Cambiar logotipo',
     'profile.logo.remove': 'Quitar',
@@ -6883,7 +7497,15 @@ const I18N = {
     'profile.logo.removeFailed': 'No se pudo eliminar el logotipo',
     'profile.business.brandColor': 'Color de marca',
     'profile.brand.enable': 'Usar un color de marca personalizado',
-    'profile.brand.help': 'Se aplica a la barra superior de tus cotizaciones. Déjalo desactivado para usar el predeterminado.',
+    'profile.brand.help': 'Se aplica a la barra superior de tus cotizaciones — elige un color que combine con tu logo. Déjalo desactivado para usar el acento predeterminado de MyTradeDeck.',
+    'stripeSetup.title': '¿Configurar pagos en línea primero?',
+    'stripeSetup.sub': 'Tu cliente puede pagar esta factura con tarjeta en 30 segundos — pero solo si tienes Stripe conectado. Ahora mismo esta factura se enviará sin enlace de pago.',
+    'stripeSetup.benefit1': 'El enlace de pago se incluye automáticamente cada vez que envías una factura por correo o mensaje',
+    'stripeSetup.benefit2': 'Las facturas se marcan como "pagadas" en el instante que el cliente paga — sin conciliación manual',
+    'stripeSetup.benefit3': 'El dinero llega a tu propia cuenta de Stripe, normalmente en 2 días hábiles',
+    'stripeSetup.dontShow': 'No mostrar esto otra vez',
+    'stripeSetup.sendAnyway': 'Enviar sin enlace de pago',
+    'stripeSetup.connect': 'Configurar Stripe',
     'connect.cardTitle': 'Cobra en línea',
     'connect.cardSub': 'Conecta Stripe y empieza a aceptar pagos con tarjeta directamente desde tus facturas — el dinero llega a tu cuenta, no a la nuestra.',
     'connect.feat1.title': 'El dinero llega directamente a ti',
@@ -6924,10 +7546,13 @@ const I18N = {
     'pay.paidOn': 'Pagado el {date}',
     'pay.paidOnline': 'Pagado en línea',
     'profile.defaults.title': 'Valores predeterminados',
-    'profile.defaults.sub': 'Se completan automáticamente al crear una cotización. Puedes cambiarlos en cada cotización.',
+    'profile.defaults.sub': 'Ahorra tiempo en cada cotización — establece los valores de depósito y garantía que usas más seguido y los completamos automáticamente. Puedes cambiarlos en cada cotización.',
+    'profile.defaults.depositHelp': 'La mayoría de los contratistas cobra 25–50% por adelantado, antes de empezar el trabajo. Pon 0 para desactivar los depósitos.',
     'profile.defaults.deposit': 'Depósito predeterminado (%)',
     'profile.defaults.warranty': 'Garantía predeterminada',
-    'profile.defaults.warrantyHelp': 'Se guarda por idioma — cambia el idioma de la app para definir la otra versión. Déjalo en blanco para que la IA genere una.',
+    'profile.defaults.warrantyHelp': 'Se guarda por idioma — cambia el idioma de la app para definir la otra versión. Déjalo en blanco para que la IA genere una adaptada a cada oficio.',
+    'profile.usage.sub': 'Tu plan actual y tu cuota. Mejora cuando quieras para desbloquear cotizaciones ilimitadas, seguimiento de trabajos, pagos en línea y más.',
+    'profile.stats.sub': 'Un resumen en vivo de tu trabajo en MyTradeDeck — clientes agregados, trabajos registrados, cotizaciones generadas y seguimientos enviados.',
     'profile.plan.free': 'Gratis',
     'profile.plan.pro': 'Pro',
     'profile.plan.freeName': 'Plan gratis',
@@ -6941,7 +7566,8 @@ const I18N = {
     'profile.stats.jobs': 'Trabajos',
     'profile.stats.quotes': 'Cotizaciones',
     'profile.stats.followups': 'Seguimientos',
-    'profile.account.title': 'Cuenta',
+    'profile.account.title': 'Cuenta y seguridad',
+    'profile.account.sub': 'Administra tus datos de inicio de sesión y lo que pasa con tu información. Los cambios de contraseña o correo se aplican de inmediato.',
     'profile.account.email': 'Correo',
     'profile.account.memberSince': 'Miembro desde',
   },
@@ -8575,6 +9201,8 @@ function init() {
   if (jobsNewBtn) jobsNewBtn.onclick = () => enterNewJobMode({});
   const jobsTeaserUpgrade = document.getElementById('jobsTeaserUpgradeBtn');
   if (jobsTeaserUpgrade) jobsTeaserUpgrade.onclick = openUpgradeModal;
+  const jobsTeaserUpgrade2 = document.getElementById('jobsTeaserUpgradeBtn2');
+  if (jobsTeaserUpgrade2) jobsTeaserUpgrade2.onclick = openUpgradeModal;
   const jobsBackBtn = document.getElementById('jobsBackBtn');
   if (jobsBackBtn) jobsBackBtn.onclick = () => {
     clearTimeout(jobsSaveTimer);
@@ -12986,9 +13614,88 @@ async function downloadInvoicePdf() {
   showToast(t('toast.pdfReady'));
 }
 
+// One-shot gate: when a Pro user with no Stripe Connect setup tries to
+// send an invoice, surface a friendly nudge explaining what they're
+// missing. Returns a promise that resolves to true if the caller should
+// proceed with the send (charges enabled, user dismissed "don't show
+// again" previously, or user explicitly clicked "Send anyway"); false if
+// the user picked "Set up Stripe" (we kick them into onboarding and
+// don't want the caller to also fire its send flow).
+function maybePromptStripeSetup() {
+  return new Promise(resolve => {
+    const p = profileCache || {};
+    // Already connected → no nudge.
+    if (p.stripe_charges_enabled) { resolve(true); return; }
+    // User opted out previously. Don't pester them every time they send.
+    if (localStorage.getItem('tdHideStripeSetupNudge') === '1') {
+      resolve(true);
+      return;
+    }
+    const backdrop = document.getElementById('stripeSetupBackdrop');
+    const sendBtn = document.getElementById('stripeSetupSendAnywayBtn');
+    const connectBtn = document.getElementById('stripeSetupConnectBtn');
+    const dontShow = document.getElementById('stripeSetupDontShow');
+    if (!backdrop || !sendBtn || !connectBtn || !dontShow) {
+      // Defensive: if the modal wiring is broken, default to current
+      // behavior (proceed with send) so we never silently block.
+      resolve(true);
+      return;
+    }
+    dontShow.checked = false; // always reset on open
+    backdrop.classList.remove('hidden');
+    requestAnimationFrame(() => backdrop.classList.add('visible'));
+    setTimeout(() => { try { connectBtn.focus(); } catch (e) {} }, 50);
+
+    function cleanup() {
+      backdrop.classList.remove('visible');
+      setTimeout(() => backdrop.classList.add('hidden'), 130);
+      sendBtn.onclick = null;
+      connectBtn.onclick = null;
+      backdrop.onclick = null;
+      document.removeEventListener('keydown', onKey, true);
+    }
+    function onKey(e) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        cleanup();
+        // Escape = cancel = don't send. The user didn't make a choice.
+        resolve(false);
+      }
+    }
+    document.addEventListener('keydown', onKey, true);
+
+    sendBtn.onclick = () => {
+      // Only persist "don't show again" on the "send anyway" path. If the
+      // user picks Set up Stripe but bails on onboarding, they likely
+      // DO want the reminder next time.
+      if (dontShow.checked) {
+        try { localStorage.setItem('tdHideStripeSetupNudge', '1'); } catch (e) {}
+      }
+      cleanup();
+      resolve(true);
+    };
+    connectBtn.onclick = () => {
+      cleanup();
+      resolve(false);
+      // Kick into the Connect onboarding flow on the next tick so the
+      // modal teardown animation doesn't fight the redirect.
+      setTimeout(() => {
+        if (typeof startConnectOnboarding === 'function') startConnectOnboarding();
+      }, 50);
+    };
+    backdrop.onclick = (e) => {
+      if (e.target === backdrop) {
+        cleanup();
+        resolve(false);
+      }
+    };
+  });
+}
+
 async function sendInvoiceEmail() {
   if (!requireVerifiedEmail()) return;
   if (!requirePro()) return;
+  if (!(await maybePromptStripeSetup())) return;
   showToast(t('toast.pdfGenerating'));
   const blob = await generateInvoicePdfBlob();
   if (!blob) { showToast(t('toast.pdfFailed'), true); return; }
@@ -13016,6 +13723,7 @@ async function sendInvoiceEmail() {
 async function sendInvoiceText() {
   if (!requireVerifiedEmail()) return;
   if (!requirePro()) return;
+  if (!(await maybePromptStripeSetup())) return;
   showToast(t('toast.pdfGenerating'));
   const blob = await generateInvoicePdfBlob();
   if (!blob) { showToast(t('toast.pdfFailed'), true); return; }
