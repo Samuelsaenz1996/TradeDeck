@@ -12035,6 +12035,112 @@ window.__testClientCap = function () {
   return passed === results.length;
 };
 
+// Quote-cap UX gate: free users at quota should be bounced to the
+// upgrade modal at the New Quote entry point, not after filling out
+// the form. Mirrors __testClientCap.
+window.__testQuoteCap = function () {
+  const results = [];
+  const assert = (name, cond) => results.push({ name, pass: !!cond });
+
+  const savedProfile = profileCache;
+  const savedQuoteUsed = quoteUsed;
+  const savedSelected = selectedClientIdForQuote;
+  const savedActiveData = activeClientData;
+  const realOpenUpgrade = openUpgradeModal;
+  const realSwitchView = switchView;
+  const realSwitchSub = switchQuotesSubView;
+  const realClearForm = clearForm;
+  let upgradeOpened = 0;
+  let viewSwitched = 0;
+  let subSwitched = 0;
+  openUpgradeModal = function () { upgradeOpened++; };
+  switchView = function () { viewSwitched++; };
+  switchQuotesSubView = function () { subSwitched++; };
+  clearForm = function () { /* swallow */ };
+
+  try {
+    // free + at cap → modal, no compose
+    upgradeOpened = 0; subSwitched = 0;
+    profileCache = { plan: 'free' };
+    quoteUsed = 3;
+    enterComposeMode();
+    assert('free at cap: opens upgrade modal once', upgradeOpened === 1);
+    assert('free at cap: does NOT enter compose', subSwitched === 0);
+
+    // free + under cap → compose
+    upgradeOpened = 0; subSwitched = 0;
+    profileCache = { plan: 'free' };
+    quoteUsed = 2;
+    enterComposeMode();
+    assert('free under cap: no modal', upgradeOpened === 0);
+    assert('free under cap: enters compose', subSwitched === 1);
+
+    // pro + arbitrary count → compose
+    upgradeOpened = 0; subSwitched = 0;
+    profileCache = { plan: 'pro' };
+    quoteUsed = 999;
+    enterComposeMode();
+    assert('pro: no modal', upgradeOpened === 0);
+    assert('pro: enters compose', subSwitched === 1);
+
+    // null profile (mid-load) → treat as free, defer to cached counter
+    upgradeOpened = 0; subSwitched = 0;
+    profileCache = null;
+    quoteUsed = 0;
+    enterComposeMode();
+    assert('null profile + 0 used: no modal', upgradeOpened === 0);
+    assert('null profile + 0 used: enters compose', subSwitched === 1);
+
+    upgradeOpened = 0; subSwitched = 0;
+    profileCache = null;
+    quoteUsed = 5;
+    enterComposeMode();
+    assert('null profile + over cap: opens modal', upgradeOpened === 1);
+    assert('null profile + over cap: no compose', subSwitched === 0);
+
+    // launchNewQuoteForActiveClient: free at cap → modal, no view switch
+    upgradeOpened = 0; viewSwitched = 0; subSwitched = 0;
+    profileCache = { plan: 'free' };
+    quoteUsed = 3;
+    activeClientData = { id: 'fake', name: 'Test' };
+    launchNewQuoteForActiveClient();
+    assert('client-detail entry, free at cap: modal opens', upgradeOpened === 1);
+    assert('client-detail entry, free at cap: does NOT switch view', viewSwitched === 0);
+
+    // launchNewQuoteForActiveClient: pro → switches view + composes
+    upgradeOpened = 0; viewSwitched = 0; subSwitched = 0;
+    profileCache = { plan: 'pro' };
+    quoteUsed = 100;
+    activeClientData = { id: 'fake', name: 'Test' };
+    launchNewQuoteForActiveClient();
+    assert('client-detail entry, pro: no modal', upgradeOpened === 0);
+    assert('client-detail entry, pro: switches view', viewSwitched === 1);
+
+    assert(
+      'enterComposeMode source includes free-cap precheck',
+      enterComposeMode.toString().indexOf('quoteUsed >= 3') !== -1
+    );
+    assert(
+      'launchNewQuoteForActiveClient source includes free-cap precheck',
+      launchNewQuoteForActiveClient.toString().indexOf('quoteUsed >= 3') !== -1
+    );
+  } finally {
+    openUpgradeModal = realOpenUpgrade;
+    switchView = realSwitchView;
+    switchQuotesSubView = realSwitchSub;
+    clearForm = realClearForm;
+    profileCache = savedProfile;
+    quoteUsed = savedQuoteUsed;
+    selectedClientIdForQuote = savedSelected;
+    activeClientData = savedActiveData;
+  }
+
+  const passed = results.filter(r => r.pass).length;
+  results.forEach(r => console.log((r.pass ? 'PASS' : 'FAIL') + ' — ' + r.name));
+  console.log(`__testQuoteCap: ${passed}/${results.length} passed`);
+  return passed === results.length;
+};
+
 // Browser-console self-test harness for the Drywall subtotal math. Pure
 // computation — does not touch the DOM, so it can run before the panel is
 // rendered. Asserts all 9 scope x unit combos plus the empty-input fallback.
@@ -15607,7 +15713,18 @@ function switchQuotesSubView(view) {
 }
 
 // "+ New Quote" entry: clean slate, then switch to compose mode.
+// Mirrors the client-cap UX in enterNewClientMode — bounce free users
+// at their quota to the upgrade modal BEFORE they invest effort filling
+// out the form. Uses the cached quoteUsed counter to avoid an extra
+// round-trip; consume_quote_credit at Generate time stays as the
+// authoritative server gate, so cap evasion via a stale cache still
+// fails safe.
 function enterComposeMode() {
+  const isFreePlan = !profileCache || !profileCache.plan || profileCache.plan === 'free';
+  if (isFreePlan && quoteUsed >= 3) {
+    openUpgradeModal();
+    return;
+  }
   // Clean break from any previously-viewed quote so future autosaves
   // don't accidentally write to the old row
   currentQuote = null;
@@ -16583,6 +16700,14 @@ function clientDisplayNameForForm(client) {
 // directly (skips name lookup).
 function launchNewQuoteForActiveClient() {
   if (!activeClientData) return;
+  // Free-cap precheck BEFORE switchView so the user isn't yanked off
+  // the Clients view just to see the upgrade modal. Mirrors the gate
+  // in enterComposeMode.
+  const isFreePlan = !profileCache || !profileCache.plan || profileCache.plan === 'free';
+  if (isFreePlan && quoteUsed >= 3) {
+    openUpgradeModal();
+    return;
+  }
   const client = activeClientData;
   clearTimeout(clientsSaveTimer);
   if (activeClientId) {
