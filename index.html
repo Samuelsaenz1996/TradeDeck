@@ -1623,6 +1623,100 @@
   .invoice-chip--active:not(.is-active) .invoice-chip-count { color: #1D9E75; background: rgba(29,158,117,0.12); }
   .invoice-chip--past:not(.is-active) .invoice-chip-count   { color: #8A8F9C; background: rgba(138,143,156,0.16); }
 
+  /* === Quotes view: hero + chip tints (rest of styling reuses
+        .invoice-chip + .invoice-toolbar + .invoices-empty) === */
+  .quotes-hero-card {
+    position: relative;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    overflow: hidden;
+  }
+  .quotes-hero {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .quotes-hero-icon {
+    width: 64px;
+    height: 64px;
+    /* Warm parchment tint — evokes "quote = document about to be signed". */
+    background: linear-gradient(135deg, #FBF1DE 0%, #fff 100%);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .quotes-hero-text {
+    flex: 1;
+    min-width: 0;
+    padding-top: 4px;
+  }
+  .quotes-hero-title {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    margin: 0 0 10px;
+    line-height: 1.2;
+  }
+  .quotes-hero-body {
+    color: var(--ink-2);
+    font-size: 14.5px;
+    line-height: 1.55;
+    margin: 0;
+    max-width: 600px;
+  }
+  @media (max-width: 540px) {
+    .quotes-hero-title { font-size: 22px; }
+    .quotes-hero-icon { width: 56px; height: 56px; font-size: 30px; }
+  }
+
+  /* Quote status chip tints — distinct palette so quote statuses don't
+     visually echo invoice/client statuses. The 5 pipeline stages. */
+  .invoice-chip--draft.is-active    { background: #5A5F6C; border-color: #5A5F6C; }
+  .invoice-chip--sent.is-active     { background: #B8731F; border-color: #B8731F; }
+  .invoice-chip--accepted.is-active { background: #1D9E75; border-color: #1D9E75; }
+  .invoice-chip--declined.is-active { background: #B33A2A; border-color: #B33A2A; }
+  .invoice-chip--invoiced.is-active { background: #4862A5; border-color: #4862A5; }
+  .invoice-chip--draft:not(.is-active) .invoice-chip-count    { color: #5A5F6C; background: rgba(90,95,108,0.14); }
+  .invoice-chip--sent:not(.is-active) .invoice-chip-count     { color: #B8731F; background: rgba(184,115,31,0.12); }
+  .invoice-chip--accepted:not(.is-active) .invoice-chip-count { color: #1D9E75; background: rgba(29,158,117,0.12); }
+  .invoice-chip--declined:not(.is-active) .invoice-chip-count { color: #B33A2A; background: rgba(179,58,42,0.12); }
+  .invoice-chip--invoiced:not(.is-active) .invoice-chip-count { color: #4862A5; background: rgba(72,98,165,0.12); }
+
+  /* Tiny client-initial avatar for quote rows (mirrors invoice rows) */
+  .quote-row-client {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  .quote-row-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--ink-2);
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+  .quote-row-client-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  @media (max-width: 540px) {
+    .quote-row-avatar { display: none; } /* save horizontal room on phones */
+  }
+
   /* === Client detail view: hero + quick actions + stats === */
   .client-detail-hero-card {
     background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
@@ -3629,10 +3723,47 @@
       </div>
 
       <div id="quotesListSub">
+        <!-- Hero -->
+        <div class="card quotes-hero-card">
+          <div class="quotes-hero">
+            <div class="quotes-hero-icon" aria-hidden="true">📋</div>
+            <div class="quotes-hero-text">
+              <h2 class="quotes-hero-title" data-i18n="quotes.heroTitle">My quotes</h2>
+              <p class="quotes-hero-body" data-i18n="quotes.heroSub">Every quote you've drafted, sent, accepted, or invoiced — track your pipeline and reopen any quote in a click.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter chips + toolbar -->
         <div class="card">
-          <div class="card-title" data-i18n="quotes.history.title">My quotes</div>
-          <div class="card-sub" data-i18n="quotes.history.sub">All your saved quotes. Click any row to open and edit.</div>
-          <div style="margin-bottom: 16px;">
+          <div class="invoice-filter-chips" id="quoteFilterChips" role="tablist" aria-label="Filter by status">
+            <button type="button" class="invoice-chip is-active" data-filter="all" role="tab" aria-selected="true">
+              <span class="invoice-chip-label" data-i18n="quotes.filter.all">All</span>
+              <span class="invoice-chip-count" id="quoteCountAll">0</span>
+            </button>
+            <button type="button" class="invoice-chip invoice-chip--draft" data-filter="draft" role="tab" aria-selected="false">
+              <span class="invoice-chip-label" data-i18n="quotes.filter.draft">Draft</span>
+              <span class="invoice-chip-count" id="quoteCountDraft">0</span>
+            </button>
+            <button type="button" class="invoice-chip invoice-chip--sent" data-filter="sent" role="tab" aria-selected="false">
+              <span class="invoice-chip-label" data-i18n="quotes.filter.sent">Sent</span>
+              <span class="invoice-chip-count" id="quoteCountSent">0</span>
+            </button>
+            <button type="button" class="invoice-chip invoice-chip--accepted" data-filter="accepted" role="tab" aria-selected="false">
+              <span class="invoice-chip-label" data-i18n="quotes.filter.accepted">Accepted</span>
+              <span class="invoice-chip-count" id="quoteCountAccepted">0</span>
+            </button>
+            <button type="button" class="invoice-chip invoice-chip--declined" data-filter="declined" role="tab" aria-selected="false">
+              <span class="invoice-chip-label" data-i18n="quotes.filter.declined">Declined</span>
+              <span class="invoice-chip-count" id="quoteCountDeclined">0</span>
+            </button>
+            <button type="button" class="invoice-chip invoice-chip--invoiced" data-filter="invoiced" role="tab" aria-selected="false">
+              <span class="invoice-chip-label" data-i18n="quotes.filter.invoiced">Invoiced</span>
+              <span class="invoice-chip-count" id="quoteCountInvoiced">0</span>
+            </button>
+          </div>
+
+          <div class="invoice-toolbar">
             <div class="pricing-toggle" id="archiveTabsQuotes" role="group" aria-label="Archive filter">
               <button data-arch="active" class="active" type="button">
                 <span data-i18n="archive.tab.active">Active</span>
@@ -3641,17 +3772,18 @@
                 <span data-i18n="archive.tab.archived">Archived</span>
               </button>
             </div>
+            <input type="search" class="input invoice-search-input" id="quotesSearchInput"
+                   data-i18n-placeholder="quotes.history.searchPlaceholder"
+                   placeholder="Search by client name..." />
           </div>
-          <input type="search" class="input" id="quotesSearchInput"
-                 data-i18n-placeholder="quotes.history.searchPlaceholder"
-                 placeholder="Search by client name..."
-                 style="max-width: 360px; margin-bottom: 16px;" />
-          <div id="quotesListEmpty" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
-            <div style="font-size: 48px; margin-bottom: 12px;">📋</div>
-            <p style="margin-bottom: 16px;" data-i18n="quotes.history.empty">
+
+          <div id="quotesListEmpty" class="hidden invoices-empty">
+            <div class="invoices-empty-icon" id="quotesEmptyIcon">📋</div>
+            <p class="invoices-empty-title" id="quotesEmptyTitle" data-i18n="quotes.history.empty">
               No quotes yet. Generate one to see it here.
             </p>
-            <button class="btn-primary" id="quotesEmptyCTA" type="button">
+            <p class="invoices-empty-sub hidden" id="quotesEmptySub"></p>
+            <button class="btn-primary" id="quotesEmptyCTA" type="button" style="margin-top: 16px;">
               + <span data-i18n="quotes.history.emptyCTA">Generate your first quote</span>
             </button>
           </div>
@@ -7533,6 +7665,26 @@ const I18N = {
     'quotes.tab.history': '📋 My quotes',
     'quotes.history.title': 'My quotes',
     'quotes.history.sub': 'All your saved quotes. Click any row to open and edit.',
+    'quotes.heroTitle': 'My quotes',
+    'quotes.heroSub': "Every quote you've drafted, sent, accepted, or invoiced — track your pipeline and reopen any quote in a click.",
+    'quotes.filter.all': 'All',
+    'quotes.filter.draft': 'Draft',
+    'quotes.filter.sent': 'Sent',
+    'quotes.filter.accepted': 'Accepted',
+    'quotes.filter.declined': 'Declined',
+    'quotes.filter.invoiced': 'Invoiced',
+    'quotes.empty.draft.title': '📝 No drafts',
+    'quotes.empty.draft.sub': "You're all caught up — every quote you've started has been sent or finalized.",
+    'quotes.empty.sent.title': '📤 Nothing waiting',
+    'quotes.empty.sent.sub': 'Sent quotes show up here so you can follow up if a customer goes quiet.',
+    'quotes.empty.accepted.title': '✅ No accepted quotes yet',
+    'quotes.empty.accepted.sub': 'When a customer says yes, mark the quote Accepted and it lands here.',
+    'quotes.empty.declined.title': '👀 No declined quotes',
+    'quotes.empty.declined.sub': 'Quotes that customers passed on show up here so you can reflect on what worked and what didn’t.',
+    'quotes.empty.invoiced.title': '💼 No invoiced quotes yet',
+    'quotes.empty.invoiced.sub': 'Convert an accepted quote into an invoice and it lands here automatically.',
+    'quotes.empty.search.title': 'No matches',
+    'quotes.empty.search.sub': 'Try a different client name.',
     'quotes.history.searchPlaceholder': 'Search by client name...',
     'quotes.history.empty': 'No quotes yet. Generate one to see it here.',
     'quotes.history.emptyCTA': 'Generate your first quote',
@@ -8638,6 +8790,26 @@ const I18N = {
     'quotes.tab.history': '📋 Mis cotizaciones',
     'quotes.history.title': 'Mis cotizaciones',
     'quotes.history.sub': 'Todas tus cotizaciones guardadas. Haz clic en una fila para abrir y editar.',
+    'quotes.heroTitle': 'Mis cotizaciones',
+    'quotes.heroSub': 'Cada cotización que has redactado, enviado, aceptado o facturado — sigue tu pipeline y reabre cualquier cotización en un clic.',
+    'quotes.filter.all': 'Todas',
+    'quotes.filter.draft': 'Borradores',
+    'quotes.filter.sent': 'Enviadas',
+    'quotes.filter.accepted': 'Aceptadas',
+    'quotes.filter.declined': 'Rechazadas',
+    'quotes.filter.invoiced': 'Facturadas',
+    'quotes.empty.draft.title': '📝 Sin borradores',
+    'quotes.empty.draft.sub': 'Estás al día — cada cotización que empezaste ha sido enviada o finalizada.',
+    'quotes.empty.sent.title': '📤 Nada esperando',
+    'quotes.empty.sent.sub': 'Las cotizaciones enviadas aparecen aquí para que les des seguimiento si un cliente se queda callado.',
+    'quotes.empty.accepted.title': '✅ Aún no hay cotizaciones aceptadas',
+    'quotes.empty.accepted.sub': 'Cuando un cliente diga sí, marca la cotización como Aceptada y aparecerá aquí.',
+    'quotes.empty.declined.title': '👀 No hay cotizaciones rechazadas',
+    'quotes.empty.declined.sub': 'Las cotizaciones que los clientes rechazaron aparecen aquí para que reflexiones sobre lo que funcionó y lo que no.',
+    'quotes.empty.invoiced.title': '💼 Aún no hay cotizaciones facturadas',
+    'quotes.empty.invoiced.sub': 'Convierte una cotización aceptada en una factura y aparecerá aquí automáticamente.',
+    'quotes.empty.search.title': 'Sin resultados',
+    'quotes.empty.search.sub': 'Prueba con otro nombre de cliente.',
     'quotes.history.searchPlaceholder': 'Buscar por nombre del cliente...',
     'quotes.history.empty': 'No hay cotizaciones todavía. Genera una para verla aquí.',
     'quotes.history.emptyCTA': 'Genera tu primera cotización',
@@ -10276,6 +10448,9 @@ let viewingArchivedClients = false;
 let clientStatusFilter = 'all';
 let viewingArchivedJobs = false;
 let viewingArchivedQuotes = false;
+// Quotes view: chip-driven status filter. 'all' is the entry default.
+// Orthogonal to viewingArchivedQuotes — both filters apply together.
+let quoteStatusFilter = 'all';
 let viewingArchivedFollowups = false;
 let viewingArchivedInvoices = false;
 // Invoices view: chip-driven status filter. 'all' is the entry default.
@@ -10780,6 +10955,25 @@ function init() {
     clearBulkSelection('quotes');
     loadSavedQuotes();
   });
+
+  // Quotes view: status filter chips. Client-side filter on the cached
+  // 50-row savedQuotesCache; same pattern as Invoices/Clients chips.
+  const quoteChipsWrap = document.getElementById('quoteFilterChips');
+  if (quoteChipsWrap) {
+    quoteChipsWrap.querySelectorAll('.invoice-chip').forEach(chip => {
+      chip.onclick = () => {
+        const filter = chip.dataset.filter || 'all';
+        quoteStatusFilter = filter;
+        quoteChipsWrap.querySelectorAll('.invoice-chip').forEach(c => {
+          const on = c === chip;
+          c.classList.toggle('is-active', on);
+          c.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        clearBulkSelection('quotes');
+        renderQuotesList();
+      };
+    });
+  }
   bindArchiveTabs('archiveTabsFollowups', (archived) => {
     viewingArchivedFollowups = archived;
     clearBulkSelection('followups');
@@ -18506,7 +18700,7 @@ async function loadSavedQuotes() {
   renderQuotesList();
 }
 
-// Render the list using the current search filter
+// Render the list using the current search + status-chip filter
 function renderQuotesList() {
   const tbody = document.getElementById('quotesListBody');
   const table = document.getElementById('quotesListTable');
@@ -18514,23 +18708,40 @@ function renderQuotesList() {
   const searchEl = document.getElementById('quotesSearchInput');
   const q = (searchEl ? searchEl.value : '').trim().toLowerCase();
 
-  const filtered = savedQuotesCache.filter(quote => {
+  // Stage 1: apply search (the archive-scope filter happens server-side
+  // in loadSavedQuotes(), so savedQuotesCache is already correct for
+  // active-vs-archived). Chip counts are derived from this set.
+  const searchFiltered = savedQuotesCache.filter(quote => {
     if (!q) return true;
     return (quote.client_name || '').toLowerCase().includes(q);
+  });
+
+  // Chip counts — show how many quotes per status would be visible if
+  // you clicked that chip, narrowed by archive scope + search.
+  const counts = { all: searchFiltered.length, draft: 0, sent: 0, accepted: 0, declined: 0, invoiced: 0 };
+  searchFiltered.forEach(quote => {
+    const s = quote.status || 'draft';
+    if (counts[s] != null) counts[s]++;
+  });
+  const setCount = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = String(n); };
+  setCount('quoteCountAll', counts.all);
+  setCount('quoteCountDraft', counts.draft);
+  setCount('quoteCountSent', counts.sent);
+  setCount('quoteCountAccepted', counts.accepted);
+  setCount('quoteCountDeclined', counts.declined);
+  setCount('quoteCountInvoiced', counts.invoiced);
+
+  // Stage 2: apply status-chip filter on top of search.
+  const filtered = searchFiltered.filter(quote => {
+    if (quoteStatusFilter === 'all') return true;
+    return (quote.status || 'draft') === quoteStatusFilter;
   });
 
   if (filtered.length === 0) {
     tbody.innerHTML = '';
     table.classList.add('hidden');
     empty.classList.remove('hidden');
-    const emptyMsg2 = empty.querySelector('p');
-    if (emptyMsg2) {
-      const key = viewingArchivedQuotes ? 'quotes.history.emptyArchived' : 'quotes.history.empty';
-      emptyMsg2.setAttribute('data-i18n', key);
-      emptyMsg2.textContent = t(key);
-    }
-    const cta = document.getElementById('quotesEmptyCTA');
-    if (cta) cta.classList.toggle('hidden', viewingArchivedQuotes);
+    showQuotesEmptyState(q);
     return;
   }
   table.classList.remove('hidden');
@@ -18546,6 +18757,7 @@ function renderQuotesList() {
 
   tbody.innerHTML = filtered.map(quote => {
     const clientName = quote.client_name || t('quotes.history.noClient');
+    const initial = (clientName.trim().charAt(0) || '?').toUpperCase();
     const trades = (quote.trades || []).map(name => {
       const tr = TRADES.find(td => td.name === name);
       return tr ? `${tr.emoji} ${tradeDisplay(name)}` : tradeDisplay(name);
@@ -18553,12 +18765,17 @@ function renderQuotesList() {
     const totalDisp = fmt(parseFloat(quote.total) || 0);
     const statusKey = (quote.status || 'draft');
     const date = formatRelativeDate(quote.created_at);
+    const clientCell = `
+      <span class="quote-row-client">
+        <span class="quote-row-avatar" aria-hidden="true">${escapeHtml(initial)}</span>
+        <strong class="quote-row-client-name">${escapeHtml(clientName)}</strong>
+      </span>`;
     return `
       <tr class="quotes-list-row" data-quote-id="${quote.id}" style="cursor:pointer;">
         <td class="bulk-cb-col" onclick="event.stopPropagation()">
           <input type="checkbox" class="bulk-row-cb" data-id="${quote.id}" />
         </td>
-        <td><strong>${escapeHtml(clientName)}</strong></td>
+        <td>${clientCell}</td>
         <td>${escapeHtml(trades) || '—'}</td>
         <td class="amt-col">${totalDisp}</td>
         <td><select class="status-select status-${statusKey}"
@@ -18600,6 +18817,75 @@ function renderQuotesList() {
     });
   });
   reapplyBulkSelection('quotes');
+}
+
+// Empty-state messaging tuned to *why* the quotes list is empty.
+// Priority cascade mirrors showInvoiceEmptyState / showClientEmptyState:
+//   1. Search active + no matches → "no matches"
+//   2. Archived tab → "No archived quotes"
+//   3. Chip is draft/sent/accepted/declined/invoiced → contextual nudge
+//   4. Otherwise → first-run "Generate your first quote" CTA (preserved)
+function showQuotesEmptyState(searchQuery) {
+  const titleEl = document.getElementById('quotesEmptyTitle');
+  const subEl = document.getElementById('quotesEmptySub');
+  const iconEl = document.getElementById('quotesEmptyIcon');
+  const cta = document.getElementById('quotesEmptyCTA');
+  if (!titleEl) return;
+
+  let icon = '📋';
+  let titleKey = 'quotes.history.empty';
+  let subKey = null;
+  let showCta = false;
+
+  if (searchQuery) {
+    icon = '🔍';
+    titleKey = 'quotes.empty.search.title';
+    subKey = 'quotes.empty.search.sub';
+  } else if (viewingArchivedQuotes) {
+    icon = '📦';
+    titleKey = 'quotes.history.emptyArchived';
+    subKey = null;
+  } else if (quoteStatusFilter === 'draft') {
+    icon = '📝';
+    titleKey = 'quotes.empty.draft.title';
+    subKey = 'quotes.empty.draft.sub';
+  } else if (quoteStatusFilter === 'sent') {
+    icon = '📤';
+    titleKey = 'quotes.empty.sent.title';
+    subKey = 'quotes.empty.sent.sub';
+  } else if (quoteStatusFilter === 'accepted') {
+    icon = '✅';
+    titleKey = 'quotes.empty.accepted.title';
+    subKey = 'quotes.empty.accepted.sub';
+  } else if (quoteStatusFilter === 'declined') {
+    icon = '👀';
+    titleKey = 'quotes.empty.declined.title';
+    subKey = 'quotes.empty.declined.sub';
+  } else if (quoteStatusFilter === 'invoiced') {
+    icon = '💼';
+    titleKey = 'quotes.empty.invoiced.title';
+    subKey = 'quotes.empty.invoiced.sub';
+  } else {
+    // First-run: show the "Generate your first quote" CTA so the user
+    // has a clear next step.
+    showCta = true;
+  }
+
+  if (iconEl) iconEl.textContent = icon;
+  titleEl.setAttribute('data-i18n', titleKey);
+  titleEl.textContent = t(titleKey);
+  if (subEl) {
+    if (subKey) {
+      subEl.classList.remove('hidden');
+      subEl.setAttribute('data-i18n', subKey);
+      subEl.textContent = t(subKey);
+    } else {
+      subEl.classList.add('hidden');
+      subEl.removeAttribute('data-i18n');
+      subEl.textContent = '';
+    }
+  }
+  if (cta) cta.classList.toggle('hidden', !showCta);
 }
 
 // Open a saved quote: fetch full payload, restore state, switch subview.
