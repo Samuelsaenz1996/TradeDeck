@@ -1554,6 +1554,193 @@
     .payments-hero-icon { width: 56px; height: 56px; font-size: 30px; }
   }
 
+  /* === Invoices view: hero + filter chips + toolbar === */
+  .invoices-hero-card {
+    position: relative;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    overflow: hidden;
+  }
+  .invoices-hero {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .invoices-hero-icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #FBE8D6 0%, #fff 100%);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .invoices-hero-text {
+    flex: 1;
+    min-width: 0;
+    padding-top: 4px;
+  }
+  .invoices-hero-title {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    margin: 0 0 10px;
+    line-height: 1.2;
+  }
+  .invoices-hero-body {
+    color: var(--ink-2);
+    font-size: 14.5px;
+    line-height: 1.55;
+    margin: 0;
+    max-width: 600px;
+  }
+
+  /* Filter chips row */
+  .invoice-filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .invoice-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px 9px 12px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-2);
+    transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+  }
+  .invoice-chip:hover {
+    background: var(--surface-2);
+    transform: translateY(-1px);
+  }
+  .invoice-chip-label { line-height: 1; }
+  .invoice-chip-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 20px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--ink-3);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  /* Active state — selected chip darkens and inverts count badge */
+  .invoice-chip.is-active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
+  .invoice-chip.is-active .invoice-chip-count {
+    background: rgba(255,255,255,0.22);
+    color: #fff;
+  }
+  /* Status tints (only when active they "color up"; muted at rest) */
+  .invoice-chip--unpaid.is-active {
+    background: #B8731F;
+    border-color: #B8731F;
+  }
+  .invoice-chip--overdue.is-active {
+    background: #B33A2A;
+    border-color: #B33A2A;
+  }
+  .invoice-chip--paid.is-active {
+    background: #1D9E75;
+    border-color: #1D9E75;
+  }
+  /* Dot-color indicator on the count badge at rest, so users can scan
+     the chips and see what each row means without clicking. */
+  .invoice-chip--unpaid:not(.is-active) .invoice-chip-count  { color: #B8731F; background: rgba(184,115,31,0.12); }
+  .invoice-chip--overdue:not(.is-active) .invoice-chip-count { color: #B33A2A; background: rgba(179,58,42,0.12); }
+  .invoice-chip--paid:not(.is-active) .invoice-chip-count    { color: #1D9E75; background: rgba(29,158,117,0.12); }
+
+  /* Toolbar: archive toggle + search inline */
+  .invoice-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .invoice-search-input {
+    flex: 1;
+    min-width: 220px;
+    max-width: 360px;
+  }
+
+  /* Empty state with personality */
+  .invoices-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--ink-3);
+  }
+  .invoices-empty-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    line-height: 1;
+  }
+  .invoices-empty-title {
+    margin: 0 0 6px;
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .invoices-empty-sub {
+    margin: 0;
+    font-size: 13px;
+    color: var(--ink-3);
+  }
+
+  /* Tiny client-initial avatar inside the invoices table */
+  .invoice-row-client {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  .invoice-row-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--ink-2);
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+  .invoice-row-client-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 540px) {
+    .invoices-hero-title { font-size: 22px; }
+    .invoices-hero-icon { width: 56px; height: 56px; font-size: 30px; }
+    .invoice-toolbar { flex-direction: column; align-items: stretch; }
+    .invoice-search-input { max-width: 100%; }
+    .invoice-row-avatar { display: none; } /* save horizontal room on phones */
+  }
+
   /* === Settings → "Get paid" (Stripe Connect) card === */
   .getpaid-card {
     /* Slight overall lift since this card is doing more work than its neighbors. */
@@ -5665,10 +5852,39 @@
 
         <!-- List sub-view -->
         <div id="invoicesListSub" class="hidden">
+          <!-- Hero -->
+          <div class="card invoices-hero-card">
+            <div class="invoices-hero">
+              <div class="invoices-hero-icon" aria-hidden="true">🧾</div>
+              <div class="invoices-hero-text">
+                <h2 class="invoices-hero-title" data-i18n="invoices.heroTitle">Invoices</h2>
+                <p class="invoices-hero-body" data-i18n="invoices.heroSub">Every invoice you've created — track status, follow up on what's owed, and find any document in a click.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter chips + toolbar -->
           <div class="card">
-            <div class="card-title" data-i18n="invoices.title">Invoices</div>
-            <div class="card-sub" data-i18n="invoices.sub">Every invoice created from your quotes. Click a row to open it.</div>
-            <div style="margin-bottom: 16px;">
+            <div class="invoice-filter-chips" id="invoiceFilterChips" role="tablist" aria-label="Filter by status">
+              <button type="button" class="invoice-chip is-active" data-filter="all" role="tab" aria-selected="true">
+                <span class="invoice-chip-label" data-i18n="invoices.filter.all">All</span>
+                <span class="invoice-chip-count" id="invoiceCountAll">0</span>
+              </button>
+              <button type="button" class="invoice-chip invoice-chip--unpaid" data-filter="unpaid" role="tab" aria-selected="false">
+                <span class="invoice-chip-label" data-i18n="invoices.filter.unpaid">Unpaid</span>
+                <span class="invoice-chip-count" id="invoiceCountUnpaid">0</span>
+              </button>
+              <button type="button" class="invoice-chip invoice-chip--overdue" data-filter="overdue" role="tab" aria-selected="false">
+                <span class="invoice-chip-label" data-i18n="invoices.filter.overdue">Overdue</span>
+                <span class="invoice-chip-count" id="invoiceCountOverdue">0</span>
+              </button>
+              <button type="button" class="invoice-chip invoice-chip--paid" data-filter="paid" role="tab" aria-selected="false">
+                <span class="invoice-chip-label" data-i18n="invoices.filter.paid">Paid</span>
+                <span class="invoice-chip-count" id="invoiceCountPaid">0</span>
+              </button>
+            </div>
+
+            <div class="invoice-toolbar">
               <div class="pricing-toggle" id="archiveTabsInvoices" role="group" aria-label="Archive filter">
                 <button data-arch="active" class="active" type="button">
                   <span data-i18n="archive.tab.active">Active</span>
@@ -5677,14 +5893,15 @@
                   <span data-i18n="archive.tab.archived">Archived</span>
                 </button>
               </div>
+              <input type="search" class="input invoice-search-input" id="invoicesSearchInput"
+                     data-i18n-placeholder="invoices.searchPlaceholder"
+                     placeholder="Search by client or invoice #..." />
             </div>
-            <input type="search" class="input" id="invoicesSearchInput"
-                   data-i18n-placeholder="invoices.searchPlaceholder"
-                   placeholder="Search by client or invoice #..."
-                   style="max-width: 360px; margin-bottom: 16px;" />
-            <div id="invoicesListEmpty" class="hidden" style="text-align:center; padding:40px 20px; color:var(--ink-3);">
-              <div style="font-size:48px; margin-bottom:12px;">🧾</div>
-              <p data-i18n="invoices.empty">No invoices yet. Convert an accepted quote to create one.</p>
+
+            <div id="invoicesListEmpty" class="hidden invoices-empty">
+              <div class="invoices-empty-icon" id="invoicesEmptyIcon">🧾</div>
+              <p class="invoices-empty-title" id="invoicesEmptyTitle" data-i18n="invoices.empty">No invoices yet. Convert an accepted quote to create one.</p>
+              <p class="invoices-empty-sub hidden" id="invoicesEmptySub"></p>
             </div>
             <div id="invoicesListLoading" class="hidden" style="text-align:center; padding:40px 20px; color:var(--ink-3);">
               <span data-i18n="invoices.loading">Loading...</span>
@@ -6534,9 +6751,24 @@ const I18N = {
     'invoices.viewTitleHtml': '<em>Invoices</em>',
     'invoices.title': 'Invoices',
     'invoices.sub': 'Every invoice created from your quotes. Click a row to open it.',
+    'invoices.heroTitle': 'Invoices',
+    'invoices.heroSub': "Every invoice you’ve created — track status, follow up on what’s owed, and find any document in a click.",
+    'invoices.filter.all': 'All',
+    'invoices.filter.unpaid': 'Unpaid',
+    'invoices.filter.overdue': 'Overdue',
+    'invoices.filter.paid': 'Paid',
     'invoices.searchPlaceholder': 'Search by client or invoice #...',
     'invoices.empty': 'No invoices yet. Convert an accepted quote to create one.',
     'invoices.emptyArchived': 'No archived invoices.',
+    'invoices.empty.unpaid.title': '📭 Nothing unpaid right now',
+    'invoices.empty.unpaid.sub': 'Every active invoice has been paid in full. Nice.',
+    'invoices.empty.overdue.title': '🎉 No overdue invoices — nice work',
+    'invoices.empty.overdue.sub': 'Every active invoice is either paid or still within its due date.',
+    'invoices.empty.paid.title': 'No paid invoices yet',
+    'invoices.empty.paid.sub': 'Once an invoice is paid, it lands here.',
+    'invoices.empty.search.title': 'No matches',
+    'invoices.empty.search.sub': 'Try a different client name or invoice number.',
+    'invoices.empty.checkArchived': 'Looking for something older? Check the Archived tab.',
     'invoices.loading': 'Loading...',
     'invoices.col.number': 'Invoice #',
     'invoices.col.client': 'Client',
@@ -7572,6 +7804,21 @@ const I18N = {
     'nav.invoices': 'Facturas',
     'invoices.viewTitleHtml': '<em>Facturas</em>',
     'invoices.title': 'Facturas',
+    'invoices.heroTitle': 'Facturas',
+    'invoices.heroSub': 'Cada factura que has creado — sigue su estado, da seguimiento a lo pendiente y encuentra cualquier documento en un clic.',
+    'invoices.filter.all': 'Todas',
+    'invoices.filter.unpaid': 'Sin pagar',
+    'invoices.filter.overdue': 'Vencidas',
+    'invoices.filter.paid': 'Pagadas',
+    'invoices.empty.unpaid.title': '📭 Nada pendiente ahora',
+    'invoices.empty.unpaid.sub': 'Todas tus facturas activas están pagadas por completo. Excelente.',
+    'invoices.empty.overdue.title': '🎉 No hay facturas vencidas — buen trabajo',
+    'invoices.empty.overdue.sub': 'Todas tus facturas activas están pagadas o aún dentro de su fecha de vencimiento.',
+    'invoices.empty.paid.title': 'Aún no hay facturas pagadas',
+    'invoices.empty.paid.sub': 'Cuando una factura se pague, aparecerá aquí.',
+    'invoices.empty.search.title': 'Sin resultados',
+    'invoices.empty.search.sub': 'Prueba con otro nombre de cliente o número de factura.',
+    'invoices.empty.checkArchived': '¿Buscas algo más antiguo? Revisa la pestaña Archivadas.',
     'invoices.sub': 'Todas las facturas creadas desde tus cotizaciones. Haz clic en una fila para abrir.',
     'invoices.searchPlaceholder': 'Buscar por cliente o # de factura...',
     'invoices.empty': 'No hay facturas todavía. Convierte una cotización aceptada para crear una.',
@@ -9599,6 +9846,9 @@ let viewingArchivedJobs = false;
 let viewingArchivedQuotes = false;
 let viewingArchivedFollowups = false;
 let viewingArchivedInvoices = false;
+// Invoices view: chip-driven status filter. 'all' is the entry default.
+// Orthogonal to viewingArchivedInvoices — both filters apply together.
+let invoiceStatusFilter = 'all';
 let profileCache = null;
 let profileWarrantyDraft = { en: '', es: '' };
 
@@ -10088,6 +10338,25 @@ function init() {
     viewingArchivedInvoices = archived;
     loadInvoices();
   });
+
+  // Invoices view: status filter chips. Updates state + active class +
+  // aria-selected, then re-renders. The data is already cached so this
+  // is purely a client-side filter (no fetch).
+  const invoiceChipsWrap = document.getElementById('invoiceFilterChips');
+  if (invoiceChipsWrap) {
+    invoiceChipsWrap.querySelectorAll('.invoice-chip').forEach(chip => {
+      chip.onclick = () => {
+        const filter = chip.dataset.filter || 'all';
+        invoiceStatusFilter = filter;
+        invoiceChipsWrap.querySelectorAll('.invoice-chip').forEach(c => {
+          const on = c === chip;
+          c.classList.toggle('is-active', on);
+          c.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        renderInvoicesList();
+      };
+    });
+  }
 
   // Wire bulk-selection UI for all four list entities
   Object.keys(BULK).forEach(entity => {
@@ -14050,20 +14319,48 @@ function renderInvoicesList() {
   const searchEl = document.getElementById('invoicesSearchInput');
   const q = (searchEl ? searchEl.value : '').trim().toLowerCase();
 
-  const filtered = savedInvoicesCache.filter(inv => {
+  // --- Chip counts derive from the full cache (current archive scope),
+  // BEFORE the status-chip filter, so each chip shows how many invoices
+  // would be visible if you clicked it. Search narrows the counts too,
+  // so "Unpaid (2)" while searching means "2 unpaid match your search."
+  const searchFiltered = savedInvoicesCache.filter(inv => {
     if (!q) return true;
     const name = (inv.client_name || '').toLowerCase();
     const num = ('inv-' + (inv.invoice_number != null ? inv.invoice_number : '')).toLowerCase();
     return name.includes(q) || num.includes(q);
+  });
+  const counts = { all: searchFiltered.length, unpaid: 0, overdue: 0, paid: 0 };
+  searchFiltered.forEach(inv => {
+    const eff = invoiceEffectiveStatus(inv);
+    if (eff === 'overdue') counts.overdue++;
+    else if (eff === 'paid') counts.paid++;
+    else counts.unpaid++; // unpaid + partial both land here
+  });
+  const setCount = (id, n) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = String(n);
+  };
+  setCount('invoiceCountAll', counts.all);
+  setCount('invoiceCountUnpaid', counts.unpaid);
+  setCount('invoiceCountOverdue', counts.overdue);
+  setCount('invoiceCountPaid', counts.paid);
+
+  // Apply the status chip filter on top of the search-filtered set.
+  const filtered = searchFiltered.filter(inv => {
+    if (invoiceStatusFilter === 'all') return true;
+    const eff = invoiceEffectiveStatus(inv);
+    if (invoiceStatusFilter === 'overdue') return eff === 'overdue';
+    if (invoiceStatusFilter === 'paid') return eff === 'paid';
+    // 'unpaid' bucket includes both partial and unpaid (the chip says
+    // "anything still owed money on") — matches the chip's count above.
+    return eff !== 'paid' && eff !== 'overdue';
   });
 
   if (filtered.length === 0) {
     tbody.innerHTML = '';
     table.classList.add('hidden');
     empty.classList.remove('hidden');
-    const p = empty.querySelector('p');
-    const key = viewingArchivedInvoices ? 'invoices.emptyArchived' : 'invoices.empty';
-    if (p) { p.setAttribute('data-i18n', key); p.textContent = t(key); }
+    showInvoiceEmptyState(q);
     return;
   }
   table.classList.remove('hidden');
@@ -14071,13 +14368,20 @@ function renderInvoicesList() {
 
   tbody.innerHTML = filtered.map(inv => {
     const number = '#INV-' + (inv.invoice_number != null ? inv.invoice_number : '----');
-    const client = escapeHtml(inv.client_name || '—');
+    const rawName = inv.client_name || '—';
+    const initial = (rawName.trim().charAt(0) || '?').toUpperCase();
+    const client = `
+      <span class="invoice-row-client">
+        <span class="invoice-row-avatar" aria-hidden="true">${escapeHtml(initial)}</span>
+        <span class="invoice-row-client-name">${escapeHtml(rawName)}</span>
+      </span>`;
     const totalDisp = fmt(parseFloat(inv.total) || 0);
     const eff = invoiceEffectiveStatus(inv);
     const pill = `<span class="status-pill status-${eff}">${escapeHtml(invoiceStatusLabel(eff))}</span>`;
     const date = formatRelativeDate(inv.created_at);
+    const rowCls = eff === 'overdue' ? 'invoices-list-row overdue-row' : 'invoices-list-row';
     return `
-      <tr class="invoices-list-row" data-invoice-id="${inv.id}" style="cursor:pointer;">
+      <tr class="${rowCls}" data-invoice-id="${inv.id}" style="cursor:pointer;">
         <td><strong>${escapeHtml(number)}</strong></td>
         <td>${client}</td>
         <td class="amt-col">${totalDisp}</td>
@@ -14089,6 +14393,57 @@ function renderInvoicesList() {
   tbody.querySelectorAll('.invoices-list-row').forEach(row => {
     row.onclick = () => openInvoice(row.dataset.invoiceId);
   });
+}
+
+// Empty-state messaging tuned to *why* the list is empty. The cascade:
+//   1. Search query active + no matches → "no matches, try a different name"
+//   2. Archive tab is "Archived" → "No archived invoices"
+//   3. Status chip is unpaid/overdue/paid → celebratory or muted per filter
+//   4. Otherwise → first-run "no invoices yet" guidance
+// Falls back gracefully if an i18n key is missing.
+function showInvoiceEmptyState(searchQuery) {
+  const titleEl = document.getElementById('invoicesEmptyTitle');
+  const subEl = document.getElementById('invoicesEmptySub');
+  const iconEl = document.getElementById('invoicesEmptyIcon');
+  if (!titleEl) return;
+  let icon = '🧾';
+  let titleKey = 'invoices.empty';
+  let subKey = null;
+  if (searchQuery) {
+    icon = '🔍';
+    titleKey = 'invoices.empty.search.title';
+    subKey = 'invoices.empty.search.sub';
+  } else if (viewingArchivedInvoices) {
+    icon = '📦';
+    titleKey = 'invoices.emptyArchived';
+    subKey = null;
+  } else if (invoiceStatusFilter === 'unpaid') {
+    icon = '✅';
+    titleKey = 'invoices.empty.unpaid.title';
+    subKey = 'invoices.empty.unpaid.sub';
+  } else if (invoiceStatusFilter === 'overdue') {
+    icon = '🎉';
+    titleKey = 'invoices.empty.overdue.title';
+    subKey = 'invoices.empty.overdue.sub';
+  } else if (invoiceStatusFilter === 'paid') {
+    icon = '💼';
+    titleKey = 'invoices.empty.paid.title';
+    subKey = 'invoices.empty.paid.sub';
+  }
+  if (iconEl) iconEl.textContent = icon;
+  titleEl.setAttribute('data-i18n', titleKey);
+  titleEl.textContent = t(titleKey);
+  if (subEl) {
+    if (subKey) {
+      subEl.classList.remove('hidden');
+      subEl.setAttribute('data-i18n', subKey);
+      subEl.textContent = t(subKey);
+    } else {
+      subEl.classList.add('hidden');
+      subEl.removeAttribute('data-i18n');
+      subEl.textContent = '';
+    }
+  }
 }
 
 function invoiceEffectiveStatus(inv) {
