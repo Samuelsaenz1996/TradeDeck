@@ -526,7 +526,58 @@
     margin-bottom: 24px;
     min-height: 40px;
   }
+  /* Collapse the view-header entirely when its only contents are the
+     hidden back button + the spacer. Saves ~64px of vertical waste on
+     list views now that + New buttons have moved into the chip toolbar. */
+  .view-header:not(:has(> :not(.hidden):not(.view-header-spacer))) {
+    display: none;
+  }
   .view-header-spacer { flex: 1; }
+
+  /* Chip-toolbar row with a right-aligned primary action button.
+     Used by Clients, Quotes, Followups, Jobs to put + New X right
+     where the user's already looking. */
+  .chip-toolbar-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+  .chip-toolbar-row > .invoice-filter-chips {
+    flex: 1;
+    min-width: 0;
+    margin-bottom: 0;
+  }
+  .chip-toolbar-action {
+    flex-shrink: 0;
+    padding: 9px 18px !important;
+    font-size: 13.5px !important;
+    line-height: 1.2;
+    align-self: center;
+  }
+  @media (max-width: 600px) {
+    .chip-toolbar-action {
+      width: 100%;
+      order: 2;
+      padding: 11px 18px !important;
+    }
+  }
+  /* Jobs uses a different list structure (title + pricing-toggle +
+     timeline-pills, not chips). Reuse chip-toolbar-action for the
+     button styling but place it next to the card title. */
+  .jobs-toolbar-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .jobs-toolbar-row .card-title { margin-bottom: 0; }
+  @media (max-width: 600px) {
+    .jobs-toolbar-row { flex-direction: column; align-items: stretch; }
+  }
   .btn-ghost {
     background: transparent;
     border: 1px solid var(--line);
@@ -1686,6 +1737,63 @@
   .invoice-chip--accepted:not(.is-active) .invoice-chip-count { color: #1D9E75; background: rgba(29,158,117,0.12); }
   .invoice-chip--declined:not(.is-active) .invoice-chip-count { color: #B33A2A; background: rgba(179,58,42,0.12); }
   .invoice-chip--invoiced:not(.is-active) .invoice-chip-count { color: #4862A5; background: rgba(72,98,165,0.12); }
+
+  /* === Follow-ups view: hero + chip tints === */
+  .followups-hero-card {
+    position: relative;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    overflow: hidden;
+  }
+  .followups-hero {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .followups-hero-icon {
+    width: 64px;
+    height: 64px;
+    /* Soft mint tint — evokes "conversation/check-in". */
+    background: linear-gradient(135deg, #DCEFE2 0%, #fff 100%);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .followups-hero-text {
+    flex: 1;
+    min-width: 0;
+    padding-top: 4px;
+  }
+  .followups-hero-title {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    margin: 0 0 10px;
+    line-height: 1.2;
+  }
+  .followups-hero-body {
+    color: var(--ink-2);
+    font-size: 14.5px;
+    line-height: 1.55;
+    margin: 0;
+    max-width: 600px;
+  }
+  @media (max-width: 540px) {
+    .followups-hero-title { font-size: 22px; }
+    .followups-hero-icon { width: 56px; height: 56px; font-size: 30px; }
+  }
+
+  /* Follow-ups chip tints — purpose-based (Quote-stage vs Invoice-stage).
+     Distinct palette so they don't echo quote-status colors. */
+  .invoice-chip--fu-quote.is-active   { background: #6F4FA0; border-color: #6F4FA0; }
+  .invoice-chip--fu-invoice.is-active { background: #1F7A7E; border-color: #1F7A7E; }
+  .invoice-chip--fu-quote:not(.is-active) .invoice-chip-count   { color: #6F4FA0; background: rgba(111,79,160,0.12); }
+  .invoice-chip--fu-invoice:not(.is-active) .invoice-chip-count { color: #1F7A7E; background: rgba(31,122,126,0.12); }
 
   /* Tiny client-initial avatar for quote rows (mirrors invoice rows) */
   .quote-row-client {
@@ -3717,9 +3825,6 @@
           ← <span data-i18n="quotes.backToList">My quotes</span>
         </button>
         <div class="view-header-spacer"></div>
-        <button id="quotesNewBtn" type="button" class="btn-primary">
-          + <span data-i18n="quotes.newButton">New Quote</span>
-        </button>
       </div>
 
       <div id="quotesListSub">
@@ -3736,30 +3841,35 @@
 
         <!-- Filter chips + toolbar -->
         <div class="card">
-          <div class="invoice-filter-chips" id="quoteFilterChips" role="tablist" aria-label="Filter by status">
-            <button type="button" class="invoice-chip is-active" data-filter="all" role="tab" aria-selected="true">
-              <span class="invoice-chip-label" data-i18n="quotes.filter.all">All</span>
-              <span class="invoice-chip-count" id="quoteCountAll">0</span>
-            </button>
-            <button type="button" class="invoice-chip invoice-chip--draft" data-filter="draft" role="tab" aria-selected="false">
-              <span class="invoice-chip-label" data-i18n="quotes.filter.draft">Draft</span>
-              <span class="invoice-chip-count" id="quoteCountDraft">0</span>
-            </button>
-            <button type="button" class="invoice-chip invoice-chip--sent" data-filter="sent" role="tab" aria-selected="false">
-              <span class="invoice-chip-label" data-i18n="quotes.filter.sent">Sent</span>
-              <span class="invoice-chip-count" id="quoteCountSent">0</span>
-            </button>
-            <button type="button" class="invoice-chip invoice-chip--accepted" data-filter="accepted" role="tab" aria-selected="false">
-              <span class="invoice-chip-label" data-i18n="quotes.filter.accepted">Accepted</span>
-              <span class="invoice-chip-count" id="quoteCountAccepted">0</span>
-            </button>
-            <button type="button" class="invoice-chip invoice-chip--declined" data-filter="declined" role="tab" aria-selected="false">
-              <span class="invoice-chip-label" data-i18n="quotes.filter.declined">Declined</span>
-              <span class="invoice-chip-count" id="quoteCountDeclined">0</span>
-            </button>
-            <button type="button" class="invoice-chip invoice-chip--invoiced" data-filter="invoiced" role="tab" aria-selected="false">
-              <span class="invoice-chip-label" data-i18n="quotes.filter.invoiced">Invoiced</span>
-              <span class="invoice-chip-count" id="quoteCountInvoiced">0</span>
+          <div class="chip-toolbar-row">
+            <div class="invoice-filter-chips" id="quoteFilterChips" role="tablist" aria-label="Filter by status">
+              <button type="button" class="invoice-chip is-active" data-filter="all" role="tab" aria-selected="true">
+                <span class="invoice-chip-label" data-i18n="quotes.filter.all">All</span>
+                <span class="invoice-chip-count" id="quoteCountAll">0</span>
+              </button>
+              <button type="button" class="invoice-chip invoice-chip--draft" data-filter="draft" role="tab" aria-selected="false">
+                <span class="invoice-chip-label" data-i18n="quotes.filter.draft">Draft</span>
+                <span class="invoice-chip-count" id="quoteCountDraft">0</span>
+              </button>
+              <button type="button" class="invoice-chip invoice-chip--sent" data-filter="sent" role="tab" aria-selected="false">
+                <span class="invoice-chip-label" data-i18n="quotes.filter.sent">Sent</span>
+                <span class="invoice-chip-count" id="quoteCountSent">0</span>
+              </button>
+              <button type="button" class="invoice-chip invoice-chip--accepted" data-filter="accepted" role="tab" aria-selected="false">
+                <span class="invoice-chip-label" data-i18n="quotes.filter.accepted">Accepted</span>
+                <span class="invoice-chip-count" id="quoteCountAccepted">0</span>
+              </button>
+              <button type="button" class="invoice-chip invoice-chip--declined" data-filter="declined" role="tab" aria-selected="false">
+                <span class="invoice-chip-label" data-i18n="quotes.filter.declined">Declined</span>
+                <span class="invoice-chip-count" id="quoteCountDeclined">0</span>
+              </button>
+              <button type="button" class="invoice-chip invoice-chip--invoiced" data-filter="invoiced" role="tab" aria-selected="false">
+                <span class="invoice-chip-label" data-i18n="quotes.filter.invoiced">Invoiced</span>
+                <span class="invoice-chip-count" id="quoteCountInvoiced">0</span>
+              </button>
+            </div>
+            <button id="quotesNewBtn" type="button" class="btn-primary chip-toolbar-action">
+              + <span data-i18n="quotes.newButton">New Quote</span>
             </button>
           </div>
 
@@ -4960,16 +5070,43 @@
             ← <span data-i18n="followups.backToList">My follow-ups</span>
           </button>
           <div class="view-header-spacer"></div>
-          <button id="followupsNewBtn" type="button" class="btn-primary">
-            + <span data-i18n="followups.newButton">New Follow-up</span>
-          </button>
         </div>
 
         <div id="followupsListSub">
+          <!-- Hero -->
+          <div class="card followups-hero-card">
+            <div class="followups-hero">
+              <div class="followups-hero-icon" aria-hidden="true">💬</div>
+              <div class="followups-hero-text">
+                <h2 class="followups-hero-title" data-i18n="followups.heroTitle">Follow-ups</h2>
+                <p class="followups-hero-body" data-i18n="followups.heroSub">Every check-in and reminder you've drafted — keep quote and invoice conversations moving without dropping the ball.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter chips + toolbar -->
           <div class="card">
-            <div class="card-title" data-i18n="followups.history.title">My follow-ups</div>
-            <div class="card-sub" data-i18n="followups.history.sub">All your saved follow-ups. Click any row to open and edit.</div>
-            <div style="margin-bottom: 16px;">
+            <div class="chip-toolbar-row">
+              <div class="invoice-filter-chips" id="followupFilterChips" role="tablist" aria-label="Filter by purpose">
+                <button type="button" class="invoice-chip is-active" data-filter="all" role="tab" aria-selected="true">
+                  <span class="invoice-chip-label" data-i18n="followups.filter.all">All</span>
+                  <span class="invoice-chip-count" id="followupCountAll">0</span>
+                </button>
+                <button type="button" class="invoice-chip invoice-chip--fu-quote" data-filter="quote" role="tab" aria-selected="false">
+                  <span class="invoice-chip-label" data-i18n="followups.filter.quote">Quote follow-ups</span>
+                  <span class="invoice-chip-count" id="followupCountQuote">0</span>
+                </button>
+                <button type="button" class="invoice-chip invoice-chip--fu-invoice" data-filter="invoice" role="tab" aria-selected="false">
+                  <span class="invoice-chip-label" data-i18n="followups.filter.invoice">Invoice follow-ups</span>
+                  <span class="invoice-chip-count" id="followupCountInvoice">0</span>
+                </button>
+              </div>
+              <button id="followupsNewBtn" type="button" class="btn-primary chip-toolbar-action">
+                + <span data-i18n="followups.newButton">New Follow-up</span>
+              </button>
+            </div>
+
+            <div class="invoice-toolbar">
               <div class="pricing-toggle" id="archiveTabsFollowups" role="group" aria-label="Archive filter">
                 <button data-arch="active" class="active" type="button">
                   <span data-i18n="archive.tab.active">Active</span>
@@ -4978,17 +5115,18 @@
                   <span data-i18n="archive.tab.archived">Archived</span>
                 </button>
               </div>
+              <input type="search" class="input invoice-search-input" id="followupsSearchInput"
+                     data-i18n-placeholder="followups.history.searchPlaceholder"
+                     placeholder="Search by customer name..." />
             </div>
-            <input type="search" class="input" id="followupsSearchInput"
-                   data-i18n-placeholder="followups.history.searchPlaceholder"
-                   placeholder="Search by customer name..."
-                   style="max-width: 360px; margin-bottom: 16px;" />
-            <div id="followupsListEmpty" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
-              <div style="font-size: 48px; margin-bottom: 12px;">💬</div>
-              <p style="margin-bottom: 16px;" data-i18n="followups.history.empty">
+
+            <div id="followupsListEmpty" class="hidden invoices-empty">
+              <div class="invoices-empty-icon" id="followupsEmptyIcon">💬</div>
+              <p class="invoices-empty-title" id="followupsEmptyTitle" data-i18n="followups.history.empty">
                 No follow-ups yet. Generate one to see it here.
               </p>
-              <button class="btn-primary" id="followupsEmptyCTA" type="button">
+              <p class="invoices-empty-sub hidden" id="followupsEmptySub"></p>
+              <button class="btn-primary" id="followupsEmptyCTA" type="button" style="margin-top: 16px;">
                 + <span data-i18n="followups.history.emptyCTA">Generate your first follow-up</span>
               </button>
             </div>
@@ -5142,9 +5280,6 @@
             ← <span data-i18n="clients.backToList">Clients</span>
           </button>
           <div class="view-header-spacer"></div>
-          <button id="clientsNewBtn" type="button" class="btn-primary">
-            + <span data-i18n="clients.newButton">New Client</span>
-          </button>
         </div>
 
         <div id="clientsListSub">
@@ -5161,22 +5296,27 @@
 
           <!-- Filter chips + toolbar -->
           <div class="card">
-            <div class="invoice-filter-chips" id="clientFilterChips" role="tablist" aria-label="Filter by status">
-              <button type="button" class="invoice-chip is-active" data-filter="all" role="tab" aria-selected="true">
-                <span class="invoice-chip-label" data-i18n="clients.filter.all">All</span>
-                <span class="invoice-chip-count" id="clientCountAll">0</span>
-              </button>
-              <button type="button" class="invoice-chip invoice-chip--lead" data-filter="lead" role="tab" aria-selected="false">
-                <span class="invoice-chip-label" data-i18n="clients.filter.lead">Leads</span>
-                <span class="invoice-chip-count" id="clientCountLead">0</span>
-              </button>
-              <button type="button" class="invoice-chip invoice-chip--active" data-filter="active" role="tab" aria-selected="false">
-                <span class="invoice-chip-label" data-i18n="clients.filter.active">Active</span>
-                <span class="invoice-chip-count" id="clientCountActive">0</span>
-              </button>
-              <button type="button" class="invoice-chip invoice-chip--past" data-filter="past" role="tab" aria-selected="false">
-                <span class="invoice-chip-label" data-i18n="clients.filter.past">Past</span>
-                <span class="invoice-chip-count" id="clientCountPast">0</span>
+            <div class="chip-toolbar-row">
+              <div class="invoice-filter-chips" id="clientFilterChips" role="tablist" aria-label="Filter by status">
+                <button type="button" class="invoice-chip is-active" data-filter="all" role="tab" aria-selected="true">
+                  <span class="invoice-chip-label" data-i18n="clients.filter.all">All</span>
+                  <span class="invoice-chip-count" id="clientCountAll">0</span>
+                </button>
+                <button type="button" class="invoice-chip invoice-chip--lead" data-filter="lead" role="tab" aria-selected="false">
+                  <span class="invoice-chip-label" data-i18n="clients.filter.lead">Leads</span>
+                  <span class="invoice-chip-count" id="clientCountLead">0</span>
+                </button>
+                <button type="button" class="invoice-chip invoice-chip--active" data-filter="active" role="tab" aria-selected="false">
+                  <span class="invoice-chip-label" data-i18n="clients.filter.active">Active</span>
+                  <span class="invoice-chip-count" id="clientCountActive">0</span>
+                </button>
+                <button type="button" class="invoice-chip invoice-chip--past" data-filter="past" role="tab" aria-selected="false">
+                  <span class="invoice-chip-label" data-i18n="clients.filter.past">Past</span>
+                  <span class="invoice-chip-count" id="clientCountPast">0</span>
+                </button>
+              </div>
+              <button id="clientsNewBtn" type="button" class="btn-primary chip-toolbar-action">
+                + <span data-i18n="clients.newButton">New Client</span>
               </button>
             </div>
 
@@ -5488,9 +5628,6 @@
             ← <span data-i18n="jobs.backToList">Jobs</span>
           </button>
           <div class="view-header-spacer"></div>
-          <button id="jobsNewBtn" type="button" class="btn-primary">
-            + <span data-i18n="jobs.newButton">New Job</span>
-          </button>
         </div>
 
         <div id="jobsTeaserSub" class="hidden">
@@ -5640,7 +5777,12 @@
 
         <div id="jobsListSub">
           <div class="card">
-            <div class="card-title" data-i18n="jobs.title">Jobs</div>
+            <div class="jobs-toolbar-row">
+              <div class="card-title" data-i18n="jobs.title">Jobs</div>
+              <button id="jobsNewBtn" type="button" class="btn-primary chip-toolbar-action">
+                + <span data-i18n="jobs.newButton">New Job</span>
+              </button>
+            </div>
             <div class="field">
               <div class="pricing-toggle" id="archiveTabsJobs" role="group" aria-label="Archive filter">
                 <button data-arch="active" class="active" type="button">
@@ -7341,6 +7483,17 @@ const I18N = {
     'followups.newButton': 'New Follow-up',
     'followups.history.title': 'My follow-ups',
     'followups.history.sub': 'All your saved follow-ups. Click any row to open and edit.',
+    'followups.heroTitle': 'Follow-ups',
+    'followups.heroSub': "Every check-in and reminder you've drafted — keep quote and invoice conversations moving without dropping the ball.",
+    'followups.filter.all': 'All',
+    'followups.filter.quote': 'Quote follow-ups',
+    'followups.filter.invoice': 'Invoice follow-ups',
+    'followups.empty.quote.title': '📋 No quote follow-ups',
+    'followups.empty.quote.sub': "Follow-ups tied to a quote — check-ins, reminders, declined-quote nudges — show up here once you've drafted them.",
+    'followups.empty.invoice.title': '🧾 No invoice follow-ups',
+    'followups.empty.invoice.sub': 'Payment reminders, overdue notices, and thank-yous land here once drafted.',
+    'followups.empty.search.title': 'No matches',
+    'followups.empty.search.sub': 'Try a different customer name.',
     'followups.history.searchPlaceholder': 'Search by customer name...',
     'followups.history.empty': 'No follow-ups yet. Generate one to see it here.',
     'followups.history.emptyCTA': 'Generate your first follow-up',
@@ -8466,6 +8619,17 @@ const I18N = {
     'followups.newButton': 'Nuevo seguimiento',
     'followups.history.title': 'Mis seguimientos',
     'followups.history.sub': 'Todos tus seguimientos guardados. Haz clic en una fila para abrir y editar.',
+    'followups.heroTitle': 'Seguimientos',
+    'followups.heroSub': 'Cada recordatorio que has redactado — mantén las conversaciones de cotizaciones y facturas en movimiento sin que se te escape ninguna.',
+    'followups.filter.all': 'Todos',
+    'followups.filter.quote': 'De cotizaciones',
+    'followups.filter.invoice': 'De facturas',
+    'followups.empty.quote.title': '📋 No hay seguimientos de cotizaciones',
+    'followups.empty.quote.sub': 'Los seguimientos sobre cotizaciones — recordatorios, mensajes de "aún pensando", avisos de rechazo — aparecen aquí cuando los redactas.',
+    'followups.empty.invoice.title': '🧾 No hay seguimientos de facturas',
+    'followups.empty.invoice.sub': 'Recordatorios de pago, avisos de vencimiento y agradecimientos aparecen aquí cuando los redactas.',
+    'followups.empty.search.title': 'Sin resultados',
+    'followups.empty.search.sub': 'Prueba con otro nombre de cliente.',
     'followups.history.searchPlaceholder': 'Buscar por nombre del cliente...',
     'followups.history.empty': 'Aún no hay seguimientos. Genera uno para verlo aquí.',
     'followups.history.emptyCTA': 'Genera tu primer seguimiento',
@@ -10452,6 +10616,9 @@ let viewingArchivedQuotes = false;
 // Orthogonal to viewingArchivedQuotes — both filters apply together.
 let quoteStatusFilter = 'all';
 let viewingArchivedFollowups = false;
+// Follow-ups view: chip-driven purpose filter ('all' / 'quote' / 'invoice').
+// Maps each row's `scenario` string against FOLLOWUP_SCENARIOS sets.
+let followupPurposeFilter = 'all';
 let viewingArchivedInvoices = false;
 // Invoices view: chip-driven status filter. 'all' is the entry default.
 // Orthogonal to viewingArchivedInvoices — both filters apply together.
@@ -10979,6 +11146,24 @@ function init() {
     clearBulkSelection('followups');
     loadSavedFollowups();
   });
+
+  // Follow-ups view: purpose filter chips.
+  const followupChipsWrap = document.getElementById('followupFilterChips');
+  if (followupChipsWrap) {
+    followupChipsWrap.querySelectorAll('.invoice-chip').forEach(chip => {
+      chip.onclick = () => {
+        const filter = chip.dataset.filter || 'all';
+        followupPurposeFilter = filter;
+        followupChipsWrap.querySelectorAll('.invoice-chip').forEach(c => {
+          const on = c === chip;
+          c.classList.toggle('is-active', on);
+          c.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        clearBulkSelection('followups');
+        renderFollowupsList();
+      };
+    });
+  }
   bindArchiveTabs('archiveTabsInvoices', (archived) => {
     viewingArchivedInvoices = archived;
     loadInvoices();
@@ -16822,23 +17007,42 @@ function renderFollowupsList() {
   const searchEl = document.getElementById('followupsSearchInput');
   const q = (searchEl ? searchEl.value : '').trim().toLowerCase();
 
-  const filtered = savedFollowupsCache.filter(f => {
+  // Pre-compute the scenario → purpose mapping once. Lookup is by scenario
+  // string against the FOLLOWUP_SCENARIOS sets defined earlier.
+  const quoteScenarios = new Set((FOLLOWUP_SCENARIOS.quote || []).map(s => s.value));
+  const invoiceScenarios = new Set((FOLLOWUP_SCENARIOS.invoice || []).map(s => s.value));
+  const purposeOf = (f) => {
+    if (!f || !f.scenario) return 'quote'; // unknown → bucket with quote (the default)
+    if (invoiceScenarios.has(f.scenario)) return 'invoice';
+    if (quoteScenarios.has(f.scenario)) return 'quote';
+    return 'quote'; // freeform scenario → default to quote bucket
+  };
+
+  // Stage 1: search filter (archive scope is server-side via loadSavedFollowups)
+  const searchFiltered = savedFollowupsCache.filter(f => {
     if (!q) return true;
     return (f.customer_name || '').toLowerCase().includes(q);
+  });
+
+  // Chip counts derive from the search-filtered set
+  const counts = { all: searchFiltered.length, quote: 0, invoice: 0 };
+  searchFiltered.forEach(f => { counts[purposeOf(f)]++; });
+  const setCount = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = String(n); };
+  setCount('followupCountAll', counts.all);
+  setCount('followupCountQuote', counts.quote);
+  setCount('followupCountInvoice', counts.invoice);
+
+  // Stage 2: apply purpose-chip filter
+  const filtered = searchFiltered.filter(f => {
+    if (followupPurposeFilter === 'all') return true;
+    return purposeOf(f) === followupPurposeFilter;
   });
 
   if (filtered.length === 0) {
     tbody.innerHTML = '';
     table.classList.add('hidden');
     empty.classList.remove('hidden');
-    const emptyMsg3 = empty.querySelector('p');
-    if (emptyMsg3) {
-      const key = viewingArchivedFollowups ? 'followups.history.emptyArchived' : 'followups.history.empty';
-      emptyMsg3.setAttribute('data-i18n', key);
-      emptyMsg3.textContent = t(key);
-    }
-    const ctaF = document.getElementById('followupsEmptyCTA');
-    if (ctaF) ctaF.classList.toggle('hidden', viewingArchivedFollowups);
+    showFollowupsEmptyState(q);
     return;
   }
   table.classList.remove('hidden');
@@ -16846,17 +17050,23 @@ function renderFollowupsList() {
 
   tbody.innerHTML = filtered.map(f => {
     const customer = f.customer_name || t('followups.history.noCustomer');
+    const initial = (customer.trim().charAt(0) || '?').toUpperCase();
     const scenario = f.scenario || '—';
     const channel = f.channel === 'text'
       ? t('followup.channels.text')
       : t('followup.channels.email');
     const date = formatRelativeDate(f.created_at);
+    const customerCell = `
+      <span class="quote-row-client">
+        <span class="quote-row-avatar" aria-hidden="true">${escapeHtml(initial)}</span>
+        <strong class="quote-row-client-name">${escapeHtml(customer)}</strong>
+      </span>`;
     return `
       <tr class="followups-list-row" data-followup-id="${f.id}" style="cursor:pointer;">
         <td class="bulk-cb-col" onclick="event.stopPropagation()">
           <input type="checkbox" class="bulk-row-cb" data-id="${f.id}" />
         </td>
-        <td><strong>${escapeHtml(customer)}</strong></td>
+        <td>${customerCell}</td>
         <td>${escapeHtml(scenario)}</td>
         <td>${escapeHtml(channel)}</td>
         <td>${date}</td>
@@ -16881,6 +17091,58 @@ function renderFollowupsList() {
     });
   });
   reapplyBulkSelection('followups');
+}
+
+// Empty-state messaging for follow-ups list. Same priority cascade as
+// Invoices/Clients/Quotes — search > archive > chip > first-run.
+function showFollowupsEmptyState(searchQuery) {
+  const titleEl = document.getElementById('followupsEmptyTitle');
+  const subEl = document.getElementById('followupsEmptySub');
+  const iconEl = document.getElementById('followupsEmptyIcon');
+  const cta = document.getElementById('followupsEmptyCTA');
+  if (!titleEl) return;
+
+  let icon = '💬';
+  let titleKey = 'followups.history.empty';
+  let subKey = null;
+  let showCta = false;
+
+  if (searchQuery) {
+    icon = '🔍';
+    titleKey = 'followups.empty.search.title';
+    subKey = 'followups.empty.search.sub';
+  } else if (viewingArchivedFollowups) {
+    icon = '📦';
+    titleKey = 'followups.history.emptyArchived';
+    subKey = null;
+  } else if (followupPurposeFilter === 'quote') {
+    icon = '📋';
+    titleKey = 'followups.empty.quote.title';
+    subKey = 'followups.empty.quote.sub';
+  } else if (followupPurposeFilter === 'invoice') {
+    icon = '🧾';
+    titleKey = 'followups.empty.invoice.title';
+    subKey = 'followups.empty.invoice.sub';
+  } else {
+    // First-run: show "Generate your first follow-up" CTA
+    showCta = true;
+  }
+
+  if (iconEl) iconEl.textContent = icon;
+  titleEl.setAttribute('data-i18n', titleKey);
+  titleEl.textContent = t(titleKey);
+  if (subEl) {
+    if (subKey) {
+      subEl.classList.remove('hidden');
+      subEl.setAttribute('data-i18n', subKey);
+      subEl.textContent = t(subKey);
+    } else {
+      subEl.classList.add('hidden');
+      subEl.removeAttribute('data-i18n');
+      subEl.textContent = '';
+    }
+  }
+  if (cta) cta.classList.toggle('hidden', !showCta);
 }
 
 async function openSavedFollowup(followupId) {
