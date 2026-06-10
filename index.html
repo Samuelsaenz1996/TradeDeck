@@ -830,6 +830,137 @@
     line-height: 1.5;
     margin-bottom: 14px;
   }
+
+  /* === Settings → "Get paid" (Stripe Connect) card === */
+  .getpaid-card {
+    /* Slight overall lift since this card is doing more work than its neighbors. */
+    padding: 22px;
+  }
+  .getpaid-hero {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+  }
+  .getpaid-hero-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, var(--accent-soft) 0%, #fff 100%);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .getpaid-hero-text {
+    flex: 1;
+    min-width: 0;
+    padding-top: 2px;
+  }
+  .getpaid-hero-text .card-title { margin-bottom: 4px; }
+  .getpaid-hero-text .card-sub { margin-bottom: 0; }
+  /* Status indicator — pill that fits the card aesthetic. JS still owns
+     textContent and the inline color (var(--good) when connected). */
+  .getpaid-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-2);
+    margin-bottom: 14px;
+  }
+  .getpaid-actions {
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .getpaid-actions .btn-primary:empty { display: none; }
+  /* Feature grid — 2 columns on desktop, single column on mobile. */
+  .getpaid-features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 18px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line-2);
+    margin-bottom: 20px;
+  }
+  .getpaid-feature {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .getpaid-feature-icon {
+    font-size: 18px;
+    line-height: 1.2;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .getpaid-feature-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 2px;
+    line-height: 1.35;
+  }
+  .getpaid-feature-sub {
+    font-size: 12px;
+    color: var(--ink-3);
+    line-height: 1.5;
+  }
+  /* Fees block — visually distinct so users see "no monthly cost" clearly. */
+  .getpaid-fees {
+    background: var(--surface-2);
+    border: 1px solid var(--line-2);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+  }
+  .getpaid-fees-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-3);
+    margin-bottom: 10px;
+  }
+  .getpaid-fees-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    padding: 5px 0;
+    font-size: 12.5px;
+    line-height: 1.4;
+  }
+  .getpaid-fees-row + .getpaid-fees-row {
+    border-top: 1px dashed var(--line);
+  }
+  .getpaid-fees-label {
+    color: var(--ink-2);
+    font-weight: 500;
+  }
+  .getpaid-fees-value {
+    color: var(--ink);
+    font-weight: 600;
+    text-align: right;
+  }
+  .getpaid-fees-value.getpaid-fees-free {
+    color: var(--good);
+  }
+  @media (max-width: 600px) {
+    .getpaid-card { padding: 18px; }
+    .getpaid-features { grid-template-columns: 1fr; }
+    .getpaid-hero-icon { width: 48px; height: 48px; font-size: 26px; }
+  }
+
   /* Password field with inline Show/Hide toggle on the right. */
   .password-field {
     position: relative;
@@ -4335,13 +4466,69 @@
           </div>
         </div>
 
-        <div class="card">
-          <div class="card-title" data-i18n="connect.cardTitle">Get paid</div>
-          <div class="card-sub" data-i18n="connect.cardSub">Connect Stripe so clients can pay your invoices online.</div>
-          <div id="connectStatusLine" style="margin-bottom:12px;">—</div>
-          <button id="connectBtn" type="button" class="btn-primary"></button>
-          <a id="connectManageLink" class="auth-link hidden" href="https://dashboard.stripe.com"
-             target="_blank" rel="noopener" data-i18n="connect.manage">Manage on Stripe</a>
+        <div class="card getpaid-card">
+          <div class="getpaid-hero">
+            <div class="getpaid-hero-icon" aria-hidden="true">💳</div>
+            <div class="getpaid-hero-text">
+              <div class="card-title" data-i18n="connect.cardTitle">Get paid online</div>
+              <div class="card-sub" data-i18n="connect.cardSub">Connect Stripe and start accepting card payments directly from your invoices — money lands in your account, not ours.</div>
+            </div>
+          </div>
+
+          <div id="connectStatusLine" class="getpaid-status">—</div>
+
+          <div class="getpaid-actions">
+            <button id="connectBtn" type="button" class="btn-primary"></button>
+            <a id="connectManageLink" class="auth-link hidden" href="https://dashboard.stripe.com"
+               target="_blank" rel="noopener" data-i18n="connect.manage">Manage on Stripe</a>
+          </div>
+
+          <div class="getpaid-features">
+            <div class="getpaid-feature">
+              <div class="getpaid-feature-icon" aria-hidden="true">💰</div>
+              <div class="getpaid-feature-text">
+                <div class="getpaid-feature-title" data-i18n="connect.feat1.title">Money goes directly to you</div>
+                <div class="getpaid-feature-sub" data-i18n="connect.feat1.sub">You're the merchant of record. Funds land in your own Stripe account, not ours.</div>
+              </div>
+            </div>
+            <div class="getpaid-feature">
+              <div class="getpaid-feature-icon" aria-hidden="true">📲</div>
+              <div class="getpaid-feature-text">
+                <div class="getpaid-feature-title" data-i18n="connect.feat2.title">One tap to pay</div>
+                <div class="getpaid-feature-sub" data-i18n="connect.feat2.sub">Send the invoice by email or text — your customer taps the link and pays in under 30 seconds.</div>
+              </div>
+            </div>
+            <div class="getpaid-feature">
+              <div class="getpaid-feature-icon" aria-hidden="true">✨</div>
+              <div class="getpaid-feature-text">
+                <div class="getpaid-feature-title" data-i18n="connect.feat3.title">Invoices auto-mark paid</div>
+                <div class="getpaid-feature-sub" data-i18n="connect.feat3.sub">When the customer pays, the invoice flips to paid automatically. No reconciliation, no chasing.</div>
+              </div>
+            </div>
+            <div class="getpaid-feature">
+              <div class="getpaid-feature-icon" aria-hidden="true">🔒</div>
+              <div class="getpaid-feature-text">
+                <div class="getpaid-feature-title" data-i18n="connect.feat4.title">Secure Stripe-hosted checkout</div>
+                <div class="getpaid-feature-sub" data-i18n="connect.feat4.sub">Card details never touch our servers. Stripe handles PCI compliance for you.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="getpaid-fees">
+            <div class="getpaid-fees-title" data-i18n="connect.fees.title">Transparent pricing — pay nothing until you get paid</div>
+            <div class="getpaid-fees-row">
+              <span class="getpaid-fees-label" data-i18n="connect.fees.platformLabel">MyTradeDeck fee</span>
+              <span class="getpaid-fees-value" data-i18n="connect.fees.platformValue">1% of invoice (capped at $25)</span>
+            </div>
+            <div class="getpaid-fees-row">
+              <span class="getpaid-fees-label" data-i18n="connect.fees.stripeLabel">Stripe processing</span>
+              <span class="getpaid-fees-value" data-i18n="connect.fees.stripeValue">~2.9% + 30¢ per transaction</span>
+            </div>
+            <div class="getpaid-fees-row">
+              <span class="getpaid-fees-label" data-i18n="connect.fees.monthlyLabel">Monthly cost</span>
+              <span class="getpaid-fees-value getpaid-fees-free" data-i18n="connect.fees.monthlyValue">$0 — fees only when you collect</span>
+            </div>
+          </div>
         </div>
 
         <div class="card">
@@ -5737,8 +5924,23 @@ const I18N = {
     'profile.business.brandColor': 'Brand color',
     'profile.brand.enable': 'Use a custom brand color',
     'profile.brand.help': 'Applied to the accent bar at the top of your quotes. Leave off to use the default.',
-    'connect.cardTitle': 'Get paid',
-    'connect.cardSub': 'Connect Stripe so clients can pay your invoices online.',
+    'connect.cardTitle': 'Get paid online',
+    'connect.cardSub': "Connect Stripe and start accepting card payments directly from your invoices — money lands in your account, not ours.",
+    'connect.feat1.title': 'Money goes directly to you',
+    'connect.feat1.sub': "You're the merchant of record. Funds land in your own Stripe account, not ours.",
+    'connect.feat2.title': 'One tap to pay',
+    'connect.feat2.sub': 'Send the invoice by email or text — your customer taps the link and pays in under 30 seconds.',
+    'connect.feat3.title': 'Invoices auto-mark paid',
+    'connect.feat3.sub': 'When the customer pays, the invoice flips to paid automatically. No reconciliation, no chasing.',
+    'connect.feat4.title': 'Secure Stripe-hosted checkout',
+    'connect.feat4.sub': "Card details never touch our servers. Stripe handles PCI compliance for you.",
+    'connect.fees.title': 'Transparent pricing — pay nothing until you get paid',
+    'connect.fees.platformLabel': 'MyTradeDeck fee',
+    'connect.fees.platformValue': '1% of invoice (capped at $25)',
+    'connect.fees.stripeLabel': 'Stripe processing',
+    'connect.fees.stripeValue': '~2.9% + 30¢ per transaction',
+    'connect.fees.monthlyLabel': 'Monthly cost',
+    'connect.fees.monthlyValue': '$0 — fees only when you collect',
     'connect.statusNotConnected': 'Not connected yet.',
     'connect.statusIncomplete': 'Setup started — finish onboarding to accept payments.',
     'connect.statusConnected': '✓ Connected — you can accept online payments.',
@@ -6683,7 +6885,22 @@ const I18N = {
     'profile.brand.enable': 'Usar un color de marca personalizado',
     'profile.brand.help': 'Se aplica a la barra superior de tus cotizaciones. Déjalo desactivado para usar el predeterminado.',
     'connect.cardTitle': 'Cobra en línea',
-    'connect.cardSub': 'Conecta Stripe para que tus clientes paguen tus facturas en línea.',
+    'connect.cardSub': 'Conecta Stripe y empieza a aceptar pagos con tarjeta directamente desde tus facturas — el dinero llega a tu cuenta, no a la nuestra.',
+    'connect.feat1.title': 'El dinero llega directamente a ti',
+    'connect.feat1.sub': 'Tú eres el comerciante registrado. Los fondos llegan a tu propia cuenta de Stripe, no a la nuestra.',
+    'connect.feat2.title': 'Un toque para pagar',
+    'connect.feat2.sub': 'Envía la factura por correo o mensaje — tu cliente toca el enlace y paga en menos de 30 segundos.',
+    'connect.feat3.title': 'Las facturas se marcan como pagadas automáticamente',
+    'connect.feat3.sub': 'Cuando el cliente paga, la factura se marca como pagada al instante. Sin conciliaciones, sin perseguir pagos.',
+    'connect.feat4.title': 'Pago seguro alojado por Stripe',
+    'connect.feat4.sub': 'Los datos de la tarjeta nunca pasan por nuestros servidores. Stripe se encarga del cumplimiento PCI por ti.',
+    'connect.fees.title': 'Precios transparentes — no pagas nada hasta que cobras',
+    'connect.fees.platformLabel': 'Comisión MyTradeDeck',
+    'connect.fees.platformValue': '1% de la factura (máx. $25)',
+    'connect.fees.stripeLabel': 'Procesamiento Stripe',
+    'connect.fees.stripeValue': '~2.9% + 30¢ por transacción',
+    'connect.fees.monthlyLabel': 'Costo mensual',
+    'connect.fees.monthlyValue': '$0 — solo pagas cuando cobras',
     'connect.statusNotConnected': 'Aún no conectado.',
     'connect.statusIncomplete': 'Configuración iniciada — termina el registro para aceptar pagos.',
     'connect.statusConnected': '✓ Conectado — puedes aceptar pagos en línea.',
