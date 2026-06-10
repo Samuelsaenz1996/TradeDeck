@@ -6102,7 +6102,16 @@
           </div>
 
           <div class="card">
-            <div class="card-title" data-i18n="jobDetail.quotesTitle">Quotes for this job</div>
+            <div class="settings-hero with-action">
+              <div class="settings-hero-icon" aria-hidden="true">📋</div>
+              <div class="settings-hero-text">
+                <div class="card-title" data-i18n="jobDetail.quotesTitle">Quotes for this job</div>
+                <div class="card-sub" data-i18n="jobDetail.quotesCardSub">Quotes attached to this job. Generate a new one and it'll link here automatically.</div>
+              </div>
+              <button class="btn-primary card-title-action" id="jobDetailNewQuoteBtn" type="button">
+                + <span data-i18n="jobDetail.newQuote">New Quote</span>
+              </button>
+            </div>
             <div id="jobDetailQuotesEmpty" class="hidden"
                  style="text-align: center; padding: 24px; color: var(--ink-3);">
               <span data-i18n="jobDetail.noQuotes">No quotes attached to this job yet.</span>
@@ -6121,7 +6130,16 @@
           </div>
 
           <div class="card">
-            <div class="card-title" data-i18n="jobDetail.followupsTitle">Follow-ups for this job</div>
+            <div class="settings-hero with-action">
+              <div class="settings-hero-icon" aria-hidden="true">📬</div>
+              <div class="settings-hero-text">
+                <div class="card-title" data-i18n="jobDetail.followupsTitle">Follow-ups for this job</div>
+                <div class="card-sub" data-i18n="jobDetail.followupsCardSub">Reminders and check-ins for this job — drafted ones land here.</div>
+              </div>
+              <button class="btn-primary card-title-action" id="jobDetailNewFollowupBtn" type="button">
+                + <span data-i18n="jobDetail.newFollowup">New Follow-up</span>
+              </button>
+            </div>
             <div id="jobDetailFollowupsEmpty" class="hidden"
                  style="text-align: center; padding: 24px; color: var(--ink-3);">
               <span data-i18n="jobDetail.noFollowups">No follow-ups attached to this job yet.</span>
@@ -7883,8 +7901,12 @@ const I18N = {
     'jobDetail.clientTitle': 'Client',
     'jobDetail.noClient': '(no client)',
     'jobDetail.quotesTitle': 'Quotes for this job',
+    'jobDetail.quotesCardSub': "Quotes attached to this job. Generate a new one and it'll link here automatically.",
     'jobDetail.noQuotes': 'No quotes attached to this job yet.',
+    'jobDetail.newQuote': 'New Quote',
     'jobDetail.followupsTitle': 'Follow-ups for this job',
+    'jobDetail.followupsCardSub': 'Reminders and check-ins for this job — drafted ones land here.',
+    'jobDetail.newFollowup': 'New Follow-up',
     'jobDetail.noFollowups': 'No follow-ups attached to this job yet.',
     'quote.createJob': '🔧 Create job',
     'quote.viewJob': '→ View job',
@@ -9034,8 +9056,12 @@ const I18N = {
     'jobDetail.clientTitle': 'Cliente',
     'jobDetail.noClient': '(sin cliente)',
     'jobDetail.quotesTitle': 'Cotizaciones de este trabajo',
+    'jobDetail.quotesCardSub': 'Cotizaciones vinculadas a este trabajo. Genera una nueva y se enlazará aquí automáticamente.',
     'jobDetail.noQuotes': 'Aún no hay cotizaciones para este trabajo.',
+    'jobDetail.newQuote': 'Nueva cotización',
     'jobDetail.followupsTitle': 'Seguimientos de este trabajo',
+    'jobDetail.followupsCardSub': 'Recordatorios y seguimientos para este trabajo — los que redactes aparecerán aquí.',
+    'jobDetail.newFollowup': 'Nuevo seguimiento',
     'jobDetail.noFollowups': 'Aún no hay seguimientos para este trabajo.',
     'quote.createJob': '🔧 Crear trabajo',
     'quote.viewJob': '→ Ver trabajo',
@@ -10206,6 +10232,12 @@ function renderJobDetail() {
   }
   const jobArchBtn2 = document.getElementById('jobDetailArchiveBtn');
   if (jobArchBtn2) jobArchBtn2.classList.toggle('hidden', !!isCreatingNewJob);
+  // "+ New Quote" / "+ New Follow-up" require a saved job to link to.
+  // Hide them during new-job creation; show once the row is persisted.
+  const jobNewQuoteBtn = document.getElementById('jobDetailNewQuoteBtn');
+  if (jobNewQuoteBtn) jobNewQuoteBtn.classList.toggle('hidden', !!isCreatingNewJob);
+  const jobNewFollowupBtn = document.getElementById('jobDetailNewFollowupBtn');
+  if (jobNewFollowupBtn) jobNewFollowupBtn.classList.toggle('hidden', !!isCreatingNewJob);
   document.getElementById('jobDetailDescription').value = j.description || '';
   // Multi-trade pill grid (replaces the old <select id="jobDetailTrade">).
   // Backward-compat: if row only has legacy `trade`, jobTradesOf wraps it.
@@ -10955,6 +10987,12 @@ let clientDetailInvoicesCache = [];   // For the per-client "Outstanding" stat t
 let clientsLookupCache = [];          // All clients for autocomplete
 let selectedClientIdForQuote = null;  // Captured at form-fill time
 let selectedClientIdForFollowup = null;
+// When a user clicks "+ New Quote" or "+ New Follow-up" from inside a
+// job's detail page, we stash the job_id here so the next compose-and-
+// generate cycle links the new record back to that job. Cleared after
+// persist or on any non-job entry to compose (e.g., top-bar New Quote).
+let selectedJobIdForQuote = null;
+let selectedJobIdForFollowup = null;
 let isCreatingNewClient = false;  // True between "+ New Client" click
                                   // and the first successful insert
 let viewingArchivedClients = false;
@@ -11302,6 +11340,13 @@ function init() {
       deleteSavedJob(activeJobId);
     }
   };
+  // "+ New Quote" and "+ New Follow-up" buttons inside the job-detail
+  // related-cards. Both pre-fill from the job's client + stash the
+  // job_id so the newly-created record links back to this job.
+  const jobNewQuoteBtn = document.getElementById('jobDetailNewQuoteBtn');
+  if (jobNewQuoteBtn) jobNewQuoteBtn.onclick = launchNewQuoteForActiveJob;
+  const jobNewFollowupBtn = document.getElementById('jobDetailNewFollowupBtn');
+  if (jobNewFollowupBtn) jobNewFollowupBtn.onclick = launchNewFollowupForActiveJob;
   const clientDetailDeleteBtn = document.getElementById('clientDetailDeleteBtn');
   if (clientDetailDeleteBtn) clientDetailDeleteBtn.onclick = () => {
     if (activeClientId && !isCreatingNewClient) {
@@ -17182,6 +17227,10 @@ async function persistGeneratedQuote() {
       }
     }
 
+    // job_id: if the user reached compose from a job's "+ New Quote"
+    // button, persist that link so the quote attaches to the job
+    // immediately. Cleared on entry to compose from any non-job path.
+    const linkedJobId = selectedJobIdForQuote || null;
     const { data: newQuote, error: qErr } = await sb
       .from('quotes')
       .insert({
@@ -17192,6 +17241,7 @@ async function persistGeneratedQuote() {
         total: isFinite(total) ? total : 0,
         trades: trades,
         status: 'draft',
+        job_id: linkedJobId,
         payload: currentQuote,
       })
       .select('id')
@@ -17204,7 +17254,10 @@ async function persistGeneratedQuote() {
     if (!newQuote || !newQuote.id) return;
 
     currentQuote.id = newQuote.id;
-    currentQuote.job_id = null;
+    currentQuote.job_id = linkedJobId;
+    // Single-use: clear after persist so the next compose doesn't
+    // accidentally re-attach to the same job.
+    selectedJobIdForQuote = null;
   } catch (e) {
     console.warn('persistGeneratedQuote threw:', e);
   }
@@ -17236,12 +17289,16 @@ async function persistGeneratedFollowup() {
       if (existing && existing.id) clientId = existing.id;
     }
 
+    // job_id: same pattern as persistGeneratedQuote — if the user got
+    // here via a job's "+ New Follow-up" button, attach to that job.
+    const linkedJobId = selectedJobIdForFollowup || null;
     const { data: newFollowup, error: fErr } = await sb
       .from('followups')
       .insert({
         user_id: userId,
         client_id: clientId,
         quote_id: (followupSource === 'quote' && followupPickedRecord) ? followupPickedRecord.id : null,
+        job_id: linkedJobId,
         customer_name: customerName || null,
         channel: followupChannel === 'Text' ? 'text' : 'email',
         scenario: followupScenario || null,
@@ -17257,6 +17314,7 @@ async function persistGeneratedFollowup() {
     if (newFollowup && newFollowup.id) {
       currentFollowup.id = newFollowup.id;
     }
+    selectedJobIdForFollowup = null;
   } catch (e) {
     console.warn('persistGeneratedFollowup threw:', e);
   }
@@ -17313,6 +17371,7 @@ function enterFollowupComposeMode() {
   const pickerChosen = document.getElementById('followupPickerChosen');
   if (pickerChosen) pickerChosen.classList.add('hidden');
   selectedClientIdForFollowup = null;
+  selectedJobIdForFollowup = null;
   switchFollowupsSubView('compose');
 }
 
@@ -17649,8 +17708,9 @@ function enterComposeMode() {
   if (wrap) wrap.classList.remove('visible');
   // Silently clear all form fields so + New Quote always starts fresh
   clearForm(true);
-  // Form is now empty → no client is selected
+  // Form is now empty → no client / job is selected
   selectedClientIdForQuote = null;
+  selectedJobIdForQuote = null;
   switchQuotesSubView('compose');
 }
 
@@ -18739,6 +18799,71 @@ function launchNewFollowupForActiveClient() {
     if (amtInput) amtInput.value = String(recent.total);
   }
   selectedClientIdForFollowup = client.id;
+}
+
+// Launch "+ New Quote" from inside a job's detail view. Pre-fills the
+// quote's client name + address from the job's linked client (looked up
+// via clientsLookupCache) and stashes the job_id so the persisted quote
+// row gets job_id set. Honors the same free-tier 3-quote precheck the
+// client-context launcher uses, so a capped free user sees the upgrade
+// modal without being yanked off the Jobs view.
+function launchNewQuoteForActiveJob() {
+  if (!activeJobData) return;
+  const isFreePlan = !profileCache || !profileCache.plan || profileCache.plan === 'free';
+  if (isFreePlan && quoteUsed >= 3) {
+    openUpgradeModal();
+    return;
+  }
+  const job = activeJobData;
+  clearTimeout(jobsSaveTimer);
+  if (activeJobId) {
+    saveJobEdits().catch(e => console.warn('flush save failed:', e));
+  }
+  switchView('quotes');
+  enterComposeMode();
+  // Resolve the client for pre-fill. Job has client_id; the lookup cache
+  // is populated on startup. Fail-soft: if the client isn't in cache
+  // (rare race), the form opens blank and the user can type the name.
+  const client = (job.client_id && Array.isArray(clientsLookupCache))
+    ? clientsLookupCache.find(c => c.id === job.client_id)
+    : null;
+  if (client) {
+    const nameInput = document.getElementById('clientName');
+    const addrInput = document.getElementById('clientAddr');
+    if (nameInput) nameInput.value = clientDisplayNameForForm(client);
+    if (addrInput) addrInput.value = client.addr || '';
+    selectedClientIdForQuote = client.id;
+  }
+  selectedJobIdForQuote = job.id;
+}
+
+// Launch "+ New Follow-up" from inside a job's detail view. Same idea:
+// pre-fill customer name, link follow-up to job_id at persist time.
+function launchNewFollowupForActiveJob() {
+  if (!activeJobData) return;
+  const job = activeJobData;
+  clearTimeout(jobsSaveTimer);
+  if (activeJobId) {
+    saveJobEdits().catch(e => console.warn('flush save failed:', e));
+  }
+  switchView('followups');
+  enterFollowupComposeMode();
+  const client = (job.client_id && Array.isArray(clientsLookupCache))
+    ? clientsLookupCache.find(c => c.id === job.client_id)
+    : null;
+  if (client) {
+    const nameInput = document.getElementById('followupCustomerName');
+    if (nameInput) nameInput.value = clientDisplayNameForForm(client);
+    selectedClientIdForFollowup = client.id;
+  }
+  // Pre-fill the follow-up's quote amount from the job's amount, since
+  // job amount is usually the most relevant figure when nudging payment.
+  const jobAmount = parseFloat(job.amount);
+  if (isFinite(jobAmount) && jobAmount > 0) {
+    const amtInput = document.getElementById('followupQuoteAmount');
+    if (amtInput) amtInput.value = String(jobAmount);
+  }
+  selectedJobIdForFollowup = job.id;
 }
 
 // Placeholder for jobs — Jobs view doesn't exist yet (Sprint 2-E).
