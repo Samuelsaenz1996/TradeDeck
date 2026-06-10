@@ -152,28 +152,6 @@
     text-transform: uppercase;
   }
 
-  .info-banner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 12px 14px;
-    margin-bottom: 20px;
-    border-radius: var(--radius-sm);
-    background: var(--accent-soft);
-    color: var(--accent-ink);
-    border: 1px solid rgba(196, 90, 26, 0.18);
-    font-size: 13px;
-  }
-  .info-banner button {
-    background: transparent;
-    border: none;
-    color: var(--accent-ink);
-    font-size: 18px;
-    line-height: 1;
-    cursor: pointer;
-    padding: 0;
-  }
   .stat-card {
     background: var(--surface);
     border: 1px solid var(--line);
@@ -1468,6 +1446,114 @@
     .stripe-setup-actions .modal-btn { width: 100%; }
   }
 
+  /* === Payments view: hero, upgraded stat cards === */
+  .payments-hero-card {
+    position: relative;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    overflow: hidden;
+  }
+  .payments-hero {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .payments-hero-icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #DCEFE2 0%, #fff 100%);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .payments-hero-text {
+    flex: 1;
+    min-width: 0;
+    padding-top: 4px;
+  }
+  .payments-hero-title {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    margin: 0 0 10px;
+    line-height: 1.2;
+  }
+  .payments-hero-body {
+    color: var(--ink-2);
+    font-size: 14.5px;
+    line-height: 1.55;
+    margin: 0;
+    max-width: 600px;
+  }
+  .payments-hero-range {
+    flex-shrink: 0;
+    padding-top: 4px;
+  }
+  .payments-hero-range .status-select {
+    font-weight: 600;
+  }
+
+  /* Upgraded stat cards (used by Payments view) */
+  .stat-card-fancy {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .stat-card-fancy:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  .stat-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .stat-card-header .stat-card-title {
+    margin-bottom: 0;
+  }
+  .stat-card-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+  }
+  .stat-card-icon--invoiced  { background: linear-gradient(135deg, #EEF2FF 0%, #fff 100%); }
+  .stat-card-icon--received  { background: linear-gradient(135deg, #DCEFE2 0%, #fff 100%); }
+  .stat-card-icon--outstanding { background: linear-gradient(135deg, #FBE8D6 0%, #fff 100%); }
+  .stat-card-icon--overdue   { background: linear-gradient(135deg, #FADCD6 0%, #fff 100%); }
+  .stat-card-value--good { color: #1D9E75; }
+  .stat-card-value--warn { color: #B8731F; }
+  .stat-card-value--bad  { color: #B33A2A; }
+  .stat-card-sub {
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 720px) {
+    .payments-hero { flex-wrap: wrap; }
+    .payments-hero-range { width: 100%; padding-top: 8px; }
+    .payments-hero-range .status-select { width: 100%; }
+  }
+  @media (max-width: 540px) {
+    .payments-hero-title { font-size: 22px; }
+    .payments-hero-icon { width: 56px; height: 56px; font-size: 30px; }
+  }
+
   /* === Settings → "Get paid" (Stripe Connect) card === */
   .getpaid-card {
     /* Slight overall lift since this card is doing more work than its neighbors. */
@@ -1555,42 +1641,63 @@
   }
   /* Fees block — visually distinct so users see "no monthly cost" clearly. */
   .getpaid-fees {
+    /* Outer container: the section header + 3 fee tiles laid out as
+       a grid. Container fills the card width but no longer leaves the
+       content cramped on the left — the 3 tiles distribute across. */
     background: var(--surface-2);
     border: 1px solid var(--line-2);
     border-radius: var(--radius-sm);
-    padding: 14px 16px;
+    padding: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
   }
   .getpaid-fees-title {
+    /* Spans the full row above the tiles. */
+    grid-column: 1 / -1;
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--ink-3);
-    margin-bottom: 10px;
+    margin: 0 0 4px;
   }
   .getpaid-fees-row {
+    /* Each fee is now a vertical mini-tile: small uppercase label on
+       top, prominent value below. Each tile gets its own surface +
+       border so the eye reads them as 3 distinct pricing components,
+       not a list. */
     display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 10px;
-    padding: 5px 0;
-    font-size: 12.5px;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
     line-height: 1.4;
   }
-  .getpaid-fees-row + .getpaid-fees-row {
-    border-top: 1px dashed var(--line);
-  }
   .getpaid-fees-label {
-    color: var(--ink-2);
-    font-weight: 500;
+    color: var(--ink-3);
+    font-weight: 700;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
   .getpaid-fees-value {
     color: var(--ink);
     font-weight: 600;
-    text-align: right;
+    font-size: 13px;
   }
   .getpaid-fees-value.getpaid-fees-free {
+    /* The "$0 — fees only when you collect" line gets the green pop
+       since "$0 monthly" is the strongest selling point of the table. */
     color: var(--good);
+  }
+  @media (max-width: 720px) {
+    .getpaid-fees {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
   }
   @media (max-width: 600px) {
     .getpaid-card { padding: 18px; }
@@ -5081,40 +5188,138 @@
       </div>
 
       <div id="paymentsView" class="hidden">
-        <div class="info-banner" id="paymentsPreviewBanner">
-          <span data-i18n="preview.banner">👀 Preview — this section is a mockup with sample data. Fully working version coming soon.</span>
-          <button onclick="this.closest('.info-banner').style.display='none'">×</button>
+        <!-- Hero card -->
+        <div class="card payments-hero-card">
+          <div class="payments-hero">
+            <div class="payments-hero-icon" aria-hidden="true">💵</div>
+            <div class="payments-hero-text">
+              <h2 class="payments-hero-title" data-i18n="payments.heroTitle">Payments at a glance</h2>
+              <p class="payments-hero-body" data-i18n="payments.heroSub">Track every dollar invoiced, collected, and outstanding — across all your clients, in real time.</p>
+            </div>
+            <div class="payments-hero-range">
+              <select class="status-select" id="paymentsRangeSelect" aria-label="Range">
+                <option value="7d"  data-i18n="payments.range.7d">Last 7 days</option>
+                <option value="30d" data-i18n="payments.range.30d">Last 30 days</option>
+                <option value="90d" data-i18n="payments.range.90d">Last 90 days</option>
+                <option value="12m" data-i18n="payments.range.12m">Last 12 months</option>
+                <option value="all" data-i18n="payments.range.all" selected>All time</option>
+              </select>
+            </div>
+          </div>
         </div>
-        <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
-          <select class="status-select" id="paymentsRangeSelect" style="font-weight:600;">
-            <option value="7d"  data-i18n="payments.range.7d">Last 7 days</option>
-            <option value="30d" data-i18n="payments.range.30d">Last 30 days</option>
-            <option value="90d" data-i18n="payments.range.90d">Last 90 days</option>
-            <option value="12m" data-i18n="payments.range.12m">Last 12 months</option>
-            <option value="all" data-i18n="payments.range.all" selected>All time</option>
-          </select>
-        </div>
+
+        <!-- Stat cards -->
         <div class="field-row cols-4">
-          <div class="stat-card">
-            <div class="stat-card-title" data-i18n="payments.totalInvoiced">Total invoiced</div>
+          <div class="stat-card stat-card-fancy">
+            <div class="stat-card-header">
+              <div class="stat-card-icon stat-card-icon--invoiced" aria-hidden="true">💸</div>
+              <div class="stat-card-title" data-i18n="payments.totalInvoiced">Total invoiced</div>
+            </div>
             <div class="stat-card-value">$0.00</div>
+            <div class="stat-card-sub" id="paymentsInvoicedSub">—</div>
           </div>
-          <div class="stat-card">
-            <div class="stat-card-title" data-i18n="payments.totalReceived">Total received</div>
-            <div class="stat-card-value">$0.00</div>
+          <div class="stat-card stat-card-fancy">
+            <div class="stat-card-header">
+              <div class="stat-card-icon stat-card-icon--received" aria-hidden="true">✅</div>
+              <div class="stat-card-title" data-i18n="payments.totalReceived">Total received</div>
+            </div>
+            <div class="stat-card-value stat-card-value--good">$0.00</div>
+            <div class="stat-card-sub" id="paymentsReceivedSub">—</div>
           </div>
-          <div class="stat-card">
-            <div class="stat-card-title" data-i18n="payments.outstanding">Outstanding</div>
-            <div class="stat-card-value">$0.00</div>
+          <div class="stat-card stat-card-fancy">
+            <div class="stat-card-header">
+              <div class="stat-card-icon stat-card-icon--outstanding" aria-hidden="true">⏳</div>
+              <div class="stat-card-title" data-i18n="payments.outstanding">Outstanding</div>
+            </div>
+            <div class="stat-card-value stat-card-value--warn">$0.00</div>
+            <div class="stat-card-sub" id="paymentsOutstandingSub">—</div>
           </div>
-          <div class="stat-card">
-            <div class="stat-card-title" data-i18n="payments.overdue">Overdue</div>
-            <div class="stat-card-value">$0.00</div>
+          <div class="stat-card stat-card-fancy">
+            <div class="stat-card-header">
+              <div class="stat-card-icon stat-card-icon--overdue" aria-hidden="true">⚠️</div>
+              <div class="stat-card-title" data-i18n="payments.overdue">Overdue</div>
+            </div>
+            <div class="stat-card-value stat-card-value--bad">$0.00</div>
+            <div class="stat-card-sub" id="paymentsOverdueSub">—</div>
           </div>
         </div>
         <div id="paymentsPeriodNote" class="hidden" style="font-size:12px; color:var(--ink-3); margin:-8px 0 12px;"></div>
+
+        <!-- Get Paid card (only when not Stripe-connected) -->
+        <div class="card getpaid-card hidden" id="paymentsGetPaidCard">
+          <div class="getpaid-hero">
+            <div class="getpaid-hero-icon" aria-hidden="true">💳</div>
+            <div class="getpaid-hero-text">
+              <div class="card-title" data-i18n="connect.cardTitle">Get paid online</div>
+              <div class="card-sub" data-i18n="connect.cardSub">Connect Stripe and start accepting card payments directly from your invoices — money lands in your account, not ours.</div>
+            </div>
+          </div>
+
+          <div id="connectStatusLinePayments" class="getpaid-status connect-status-line">—</div>
+
+          <div class="getpaid-actions">
+            <button id="connectBtnPayments" type="button" class="btn-primary connect-cta-btn"></button>
+            <a id="connectManageLinkPayments" class="auth-link connect-manage-link hidden" href="https://dashboard.stripe.com"
+               target="_blank" rel="noopener" data-i18n="connect.manage">Manage on Stripe</a>
+          </div>
+
+          <div class="getpaid-features">
+            <div class="getpaid-feature">
+              <div class="getpaid-feature-icon" aria-hidden="true">💰</div>
+              <div class="getpaid-feature-text">
+                <div class="getpaid-feature-title" data-i18n="connect.feat1.title">Money goes directly to you</div>
+                <div class="getpaid-feature-sub" data-i18n="connect.feat1.sub">You're the merchant of record. Funds land in your own Stripe account, not ours.</div>
+              </div>
+            </div>
+            <div class="getpaid-feature">
+              <div class="getpaid-feature-icon" aria-hidden="true">📲</div>
+              <div class="getpaid-feature-text">
+                <div class="getpaid-feature-title" data-i18n="connect.feat2.title">One tap to pay</div>
+                <div class="getpaid-feature-sub" data-i18n="connect.feat2.sub">Send the invoice by email or text — your customer taps the link and pays in under 30 seconds.</div>
+              </div>
+            </div>
+            <div class="getpaid-feature">
+              <div class="getpaid-feature-icon" aria-hidden="true">✨</div>
+              <div class="getpaid-feature-text">
+                <div class="getpaid-feature-title" data-i18n="connect.feat3.title">Invoices auto-mark paid</div>
+                <div class="getpaid-feature-sub" data-i18n="connect.feat3.sub">When the customer pays, the invoice flips to paid automatically. No reconciliation, no chasing.</div>
+              </div>
+            </div>
+            <div class="getpaid-feature">
+              <div class="getpaid-feature-icon" aria-hidden="true">🔒</div>
+              <div class="getpaid-feature-text">
+                <div class="getpaid-feature-title" data-i18n="connect.feat4.title">Secure Stripe-hosted checkout</div>
+                <div class="getpaid-feature-sub" data-i18n="connect.feat4.sub">Card details never touch our servers. Stripe handles PCI compliance for you.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="getpaid-fees">
+            <div class="getpaid-fees-title" data-i18n="connect.fees.title">Transparent pricing — pay nothing until you get paid</div>
+            <div class="getpaid-fees-row">
+              <span class="getpaid-fees-label" data-i18n="connect.fees.platformLabel">MyTradeDeck fee</span>
+              <span class="getpaid-fees-value" data-i18n="connect.fees.platformValue">1% of invoice (capped at $25)</span>
+            </div>
+            <div class="getpaid-fees-row">
+              <span class="getpaid-fees-label" data-i18n="connect.fees.stripeLabel">Stripe processing</span>
+              <span class="getpaid-fees-value" data-i18n="connect.fees.stripeValue">~2.9% + 30¢ per transaction</span>
+            </div>
+            <div class="getpaid-fees-row">
+              <span class="getpaid-fees-label" data-i18n="connect.fees.monthlyLabel">Monthly cost</span>
+              <span class="getpaid-fees-value getpaid-fees-free" data-i18n="connect.fees.monthlyValue">$0 — fees only when you collect</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Collected vs outstanding -->
         <div class="card">
-          <div class="stat-card-title" style="margin-bottom: 14px;" data-i18n="payments.splitTitle">Collected vs outstanding</div>
+          <div class="settings-hero">
+            <div class="settings-hero-icon" aria-hidden="true">📊</div>
+            <div class="settings-hero-text">
+              <div class="card-title" data-i18n="payments.splitTitle">Collected vs outstanding</div>
+              <div class="card-sub" data-i18n="payments.splitSub">Where every dollar you've invoiced stands right now — paid, awaiting payment, or past due.</div>
+            </div>
+          </div>
           <div id="paymentsSplitEmpty" class="hidden" style="color: var(--ink-3); font-size: 13px; padding: 8px 0;" data-i18n="payments.splitEmpty">No invoices yet. Convert a quote to an invoice to track payments here.</div>
           <div id="paymentsSplitWrap">
             <div style="display:flex; height:28px; border-radius:8px; overflow:hidden; margin-bottom:12px;">
@@ -5129,7 +5334,16 @@
             </div>
           </div>
         </div>
+
+        <!-- Recent invoices -->
         <div class="card">
+          <div class="settings-hero">
+            <div class="settings-hero-icon" aria-hidden="true">📋</div>
+            <div class="settings-hero-text">
+              <div class="card-title" data-i18n="payments.tableTitle">Recent invoices</div>
+              <div class="card-sub" data-i18n="payments.tableSub">Click any row to open the invoice. Overdue invoices are highlighted in red.</div>
+            </div>
+          </div>
           <table class="line-table" id="paymentsTable">
             <thead>
               <tr>
@@ -5234,11 +5448,11 @@
             </div>
           </div>
 
-          <div id="connectStatusLine" class="getpaid-status">—</div>
+          <div id="connectStatusLine" class="getpaid-status connect-status-line">—</div>
 
           <div class="getpaid-actions">
-            <button id="connectBtn" type="button" class="btn-primary"></button>
-            <a id="connectManageLink" class="auth-link hidden" href="https://dashboard.stripe.com"
+            <button id="connectBtn" type="button" class="btn-primary connect-cta-btn"></button>
+            <a id="connectManageLink" class="auth-link connect-manage-link hidden" href="https://dashboard.stripe.com"
                target="_blank" rel="noopener" data-i18n="connect.manage">Manage on Stripe</a>
           </div>
 
@@ -6470,7 +6684,6 @@ const I18N = {
     'followup.charCountSplit': '{n} / 160 chars — may split into multiple texts',
     'followup.metaPrefix': 'Follow-up · {channel}',
     // Preview banner shared
-    'preview.banner': '👀 Preview — this section is a mockup with sample data. Fully working version coming soon.',
     // Clients
     'clients.title': 'Clients',
     'clients.search': 'Search clients...',
@@ -6636,8 +6849,25 @@ const I18N = {
     'payments.range.12m': 'Last 12 months',
     'payments.range.all': 'All time',
     'payments.overdue': 'Overdue',
+    'payments.heroTitle': 'Payments at a glance',
+    'payments.heroSub': 'Track every dollar invoiced, collected, and outstanding — across all your clients, in real time.',
     'payments.splitTitle': 'Collected vs outstanding',
+    'payments.splitSub': 'Where every dollar you’ve invoiced stands right now — paid, awaiting payment, or past due.',
     'payments.splitEmpty': 'No invoices yet. Convert a quote to an invoice to track payments here.',
+    'payments.tableTitle': 'Recent invoices',
+    'payments.tableSub': 'Click any row to open the invoice. Overdue invoices are highlighted in red.',
+    'payments.subInvoiced.zero': 'No invoices yet',
+    'payments.subInvoiced.one': 'from 1 invoice',
+    'payments.subInvoiced.many': 'from {count} invoices',
+    'payments.subReceived.zero': 'Nothing collected yet',
+    'payments.subReceived.one': '1 invoice paid in full',
+    'payments.subReceived.many': '{count} invoices paid',
+    'payments.subOutstanding.zero': 'All caught up',
+    'payments.subOutstanding.one': '1 invoice awaiting payment',
+    'payments.subOutstanding.many': '{count} invoices awaiting payment',
+    'payments.subOverdue.zero': 'No overdue invoices',
+    'payments.subOverdue.one': '1 invoice past due',
+    'payments.subOverdue.many': '{count} invoices past due',
     'payments.legendCollected': 'Collected',
     'payments.legendOutstanding': 'Outstanding',
     'payments.legendOverdue': 'Overdue',
@@ -7493,7 +7723,6 @@ const I18N = {
     'followup.charCountSplit': '{n} / 160 caracteres — puede dividirse en varios mensajes',
     'followup.metaPrefix': 'Seguimiento · {channel}',
     // Preview banner shared
-    'preview.banner': '👀 Vista previa — esta sección es una maqueta con datos de ejemplo. Próximamente versión completa.',
     // Clients
     'clients.title': 'Clientes',
     'clients.search': 'Buscar clientes...',
@@ -7659,8 +7888,25 @@ const I18N = {
     'payments.range.12m': 'Últimos 12 meses',
     'payments.range.all': 'Todo el tiempo',
     'payments.overdue': 'Vencido',
+    'payments.heroTitle': 'Pagos de un vistazo',
+    'payments.heroSub': 'Sigue cada dólar facturado, cobrado y pendiente — de todos tus clientes, en tiempo real.',
     'payments.splitTitle': 'Cobrado vs pendiente',
+    'payments.splitSub': 'Dónde está cada dólar que has facturado en este momento — pagado, esperando pago o vencido.',
     'payments.splitEmpty': 'No hay facturas todavía. Convierte una cotización en factura para ver los pagos aquí.',
+    'payments.tableTitle': 'Facturas recientes',
+    'payments.tableSub': 'Haz clic en cualquier fila para abrir la factura. Las facturas vencidas se resaltan en rojo.',
+    'payments.subInvoiced.zero': 'Aún no hay facturas',
+    'payments.subInvoiced.one': 'de 1 factura',
+    'payments.subInvoiced.many': 'de {count} facturas',
+    'payments.subReceived.zero': 'Aún no se ha cobrado nada',
+    'payments.subReceived.one': '1 factura pagada en su totalidad',
+    'payments.subReceived.many': '{count} facturas pagadas',
+    'payments.subOutstanding.zero': 'Al día',
+    'payments.subOutstanding.one': '1 factura esperando pago',
+    'payments.subOutstanding.many': '{count} facturas esperando pago',
+    'payments.subOverdue.zero': 'No hay facturas vencidas',
+    'payments.subOverdue.one': '1 factura vencida',
+    'payments.subOverdue.many': '{count} facturas vencidas',
     'payments.legendCollected': 'Cobrado',
     'payments.legendOutstanding': 'Pendiente',
     'payments.legendOverdue': 'Vencido',
@@ -9083,8 +9329,10 @@ function derivePaymentsData(invoices, range) {
 function renderPaymentsView() {
   const data = derivePaymentsData(savedInvoicesCache, paymentsRange);
 
-  const banner = document.getElementById('paymentsPreviewBanner');
-  if (banner) banner.style.display = 'none';
+  // The Get-Paid card visibility is driven entirely by renderConnectCard().
+  // Calling it here keeps the Payments view in sync if the user lands
+  // here before Settings has rendered the Connect status the first time.
+  if (typeof renderConnectCard === 'function') renderConnectCard();
 
   // Period-scoped cards (1 & 2). When a range is active, suffix the label.
   const rangeShort = { '7d':'7d', '30d':'30d', '90d':'90d', '12m':'12m', 'all':'' }[paymentsRange] || '';
@@ -9097,13 +9345,43 @@ function renderPaymentsView() {
   const setCardValue = (i18nKey, value) => {
     const titleEl = document.querySelector('#paymentsView .stat-card-title[data-i18n="' + i18nKey + '"]');
     if (!titleEl) return;
-    const valEl = titleEl.parentElement.querySelector('.stat-card-value');
+    // The new .stat-card-fancy layout wraps the title in a .stat-card-header
+    // div, so the value lives at the card root level — two .parentElement
+    // hops away. Fall back to one hop for the legacy flat layout in case
+    // markup ever reverts.
+    const card = titleEl.closest('.stat-card');
+    const valEl = card ? card.querySelector('.stat-card-value') : null;
     if (valEl) valEl.textContent = value;
   };
   setCardValue('payments.totalInvoiced', fmt(data.periodInvoiced));
   setCardValue('payments.totalReceived', fmt(data.periodCollected));
   setCardValue('payments.outstanding', fmt(data.outstanding));
   setCardValue('payments.overdue', fmt(data.overdue));
+
+  // Per-card sub-lines — count of invoices in each bucket. Gives the
+  // numbers context (a $0 outstanding with 0 invoices means "all caught
+  // up", not "you haven't started yet"). Uses zero/one/many plural keys.
+  const subPlural = (base, count) => {
+    if (count === 0) return t(base + '.zero');
+    if (count === 1) return t(base + '.one');
+    return t(base + '.many', { count });
+  };
+  const allRows = data.rows || [];
+  const invoicedCount = allRows.length;
+  const receivedCount = allRows.filter(inv => (parseFloat(inv.amount_paid) || 0) > 0).length;
+  const outstandingCount = allRows.filter(inv => {
+    const bal = (parseFloat(inv.total) || 0) - (parseFloat(inv.amount_paid) || 0);
+    return bal > 0.005;
+  }).length;
+  const overdueCount = allRows.filter(inv => invoiceEffectiveStatus(inv) === 'overdue').length;
+  const subInvoiced = document.getElementById('paymentsInvoicedSub');
+  const subReceived = document.getElementById('paymentsReceivedSub');
+  const subOutstanding = document.getElementById('paymentsOutstandingSub');
+  const subOverdue = document.getElementById('paymentsOverdueSub');
+  if (subInvoiced) subInvoiced.textContent = subPlural('payments.subInvoiced', invoicedCount);
+  if (subReceived) subReceived.textContent = subPlural('payments.subReceived', receivedCount);
+  if (subOutstanding) subOutstanding.textContent = subPlural('payments.subOutstanding', outstandingCount);
+  if (subOverdue) subOverdue.textContent = subPlural('payments.subOverdue', overdueCount);
 
   const noteEl = document.getElementById('paymentsPeriodNote');
   if (noteEl) {
@@ -9680,6 +9958,9 @@ function init() {
   bindProWelcomeModal();
   const connectBtn = document.getElementById('connectBtn');
   if (connectBtn) connectBtn.onclick = startConnectOnboarding;
+  // Payments-view connect CTA — same handler as the Settings one.
+  const connectBtnPayments = document.getElementById('connectBtnPayments');
+  if (connectBtnPayments) connectBtnPayments.onclick = startConnectOnboarding;
   // Invoice "Set up Stripe" button — kicks straight into Connect
   // onboarding (no detour through Settings).
   const invoicePayConnect = document.getElementById('invoicePayConnectBtn');
@@ -14903,8 +15184,12 @@ function handleCheckoutReturn() {
 // ============================================================================
 async function startConnectOnboarding() {
   if (!requirePro()) return;
-  const btn = document.getElementById('connectBtn');
-  if (btn) { btn.disabled = true; btn.textContent = t('connect.redirecting'); }
+  // Disable every Connect button on the page (Settings + Payments share
+  // the .connect-cta-btn class) so neither can be double-clicked during
+  // the redirect window. renderConnectCard() in the finally restores
+  // them all in one shot.
+  const btns = document.querySelectorAll('.connect-cta-btn');
+  btns.forEach(b => { b.disabled = true; b.textContent = t('connect.redirecting'); });
   try {
     const { data: { session } } = await sb.auth.getSession();
     if (!session || !session.access_token) { showToast(t('toast.connectError'), true); return; }
@@ -14919,7 +15204,8 @@ async function startConnectOnboarding() {
     console.warn('startConnectOnboarding:', e);
     showToast(t('toast.connectError'), true);
   } finally {
-    if (btn) { btn.disabled = false; renderConnectCard(); }
+    btns.forEach(b => { b.disabled = false; });
+    renderConnectCard();
   }
 }
 
@@ -14946,40 +15232,56 @@ async function refreshConnectStatus() {
 }
 
 function renderConnectCard() {
-  const line = document.getElementById('connectStatusLine');
-  const btn = document.getElementById('connectBtn');
-  const manage = document.getElementById('connectManageLink');
-  if (!line || !btn) return;
+  // Two cards now bind to the connect state: the Settings Get-Paid card
+  // and the Payments Get-Paid card (shown only when not connected). Both
+  // expose their elements via shared classes (.connect-status-line,
+  // .connect-cta-btn, .connect-manage-link), so updating one path keeps
+  // both in sync without duplicating logic.
+  const lines = document.querySelectorAll('.connect-status-line');
+  const btns = document.querySelectorAll('.connect-cta-btn');
+  const manages = document.querySelectorAll('.connect-manage-link');
+  if (!lines.length || !btns.length) return;
   const p = profileCache || {};
   const isFree = profileCache && (!profileCache.plan || profileCache.plan === 'free');
+
+  // Payments-view Get-Paid card visibility: hide entirely once Stripe is
+  // fully connected so the Payments dashboard doesn't carry redundant
+  // upsell clutter for the happy-path user.
+  const paymentsCard = document.getElementById('paymentsGetPaidCard');
+  const fullyConnected = !!(p.stripe_account_id && p.stripe_charges_enabled && p.stripe_details_submitted);
+  if (paymentsCard) paymentsCard.classList.toggle('hidden', fullyConnected);
+
+  const setLine = (text, color) => lines.forEach(el => {
+    el.textContent = text;
+    el.style.color = color || '';
+  });
+  const setBtn = (text, hidden) => btns.forEach(el => {
+    if (text != null) el.textContent = text;
+    el.classList.toggle('hidden', !!hidden);
+  });
+  const setManage = (hidden) => manages.forEach(el => el.classList.toggle('hidden', !!hidden));
+
   if (isFree && !p.stripe_account_id) {
     // (0) Free user, not yet connected — upsell. Clicking flows to
     // startConnectOnboarding which immediately requirePro()-bounces.
-    line.textContent = t('connect.proOnly');
-    line.style.color = '';
-    btn.textContent = t('connect.upgradeCta');
-    btn.classList.remove('hidden');
-    if (manage) manage.classList.add('hidden');
+    setLine(t('connect.proOnly'), '');
+    setBtn(t('connect.upgradeCta'), false);
+    setManage(true);
   } else if (!p.stripe_account_id) {
     // (a) Not connected
-    line.textContent = t('connect.statusNotConnected');
-    line.style.color = '';
-    btn.textContent = t('connect.btnConnect');
-    btn.classList.remove('hidden');
-    if (manage) manage.classList.add('hidden');
+    setLine(t('connect.statusNotConnected'), '');
+    setBtn(t('connect.btnConnect'), false);
+    setManage(true);
   } else if (!p.stripe_charges_enabled || !p.stripe_details_submitted) {
     // (b) Started but not finished
-    line.textContent = t('connect.statusIncomplete');
-    line.style.color = '';
-    btn.textContent = t('connect.btnFinish');
-    btn.classList.remove('hidden');
-    if (manage) manage.classList.add('hidden');
+    setLine(t('connect.statusIncomplete'), '');
+    setBtn(t('connect.btnFinish'), false);
+    setManage(true);
   } else {
     // (c) Fully connected — charges enabled
-    line.textContent = t('connect.statusConnected');
-    line.style.color = 'var(--good)';
-    btn.classList.add('hidden');
-    if (manage) manage.classList.remove('hidden');
+    setLine(t('connect.statusConnected'), 'var(--good)');
+    setBtn(null, true);
+    setManage(false);
   }
 }
 
