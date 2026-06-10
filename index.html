@@ -1554,6 +1554,217 @@
     .payments-hero-icon { width: 56px; height: 56px; font-size: 30px; }
   }
 
+  /* === Clients view: hero (reuses .invoice-chip + .invoice-toolbar + .invoices-empty for the rest) === */
+  .clients-hero-card {
+    position: relative;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    overflow: hidden;
+  }
+  .clients-hero {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .clients-hero-icon {
+    width: 64px;
+    height: 64px;
+    /* Soft blue-ish tint so each hero in the app has its own palette
+       (Payments green-cream, Invoices warm-cream, Clients cool-cream). */
+    background: linear-gradient(135deg, #E4EBF8 0%, #fff 100%);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .clients-hero-text {
+    flex: 1;
+    min-width: 0;
+    padding-top: 4px;
+  }
+  .clients-hero-title {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    margin: 0 0 10px;
+    line-height: 1.2;
+  }
+  .clients-hero-body {
+    color: var(--ink-2);
+    font-size: 14.5px;
+    line-height: 1.55;
+    margin: 0;
+    max-width: 600px;
+  }
+  @media (max-width: 540px) {
+    .clients-hero-title { font-size: 22px; }
+    .clients-hero-icon { width: 56px; height: 56px; font-size: 30px; }
+  }
+
+  /* Client status chip tints — different palette from invoice chips so
+     "Active" (clients) and "Unpaid" (invoices) don't share visual weight. */
+  .invoice-chip--lead.is-active {
+    background: #4862A5;
+    border-color: #4862A5;
+  }
+  .invoice-chip--active.is-active {
+    background: #1D9E75;
+    border-color: #1D9E75;
+  }
+  .invoice-chip--past.is-active {
+    background: #8A8F9C;
+    border-color: #8A8F9C;
+  }
+  .invoice-chip--lead:not(.is-active) .invoice-chip-count   { color: #4862A5; background: rgba(72,98,165,0.12); }
+  .invoice-chip--active:not(.is-active) .invoice-chip-count { color: #1D9E75; background: rgba(29,158,117,0.12); }
+  .invoice-chip--past:not(.is-active) .invoice-chip-count   { color: #8A8F9C; background: rgba(138,143,156,0.16); }
+
+  /* === Client detail view: hero + quick actions + stats === */
+  .client-detail-hero-card {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    overflow: hidden;
+  }
+  .client-detail-hero {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+  }
+  .client-detail-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #E4EBF8 0%, #fff 100%);
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--display);
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--ink);
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .client-detail-hero-text {
+    flex: 1;
+    min-width: 0;
+    padding-top: 2px;
+  }
+  .client-detail-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 6px;
+    line-height: 1;
+  }
+  .client-detail-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--ink-2);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .client-detail-status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .client-detail-status-pill--lead   { background: rgba(72,98,165,0.14); color: #4862A5; }
+  .client-detail-status-pill--active { background: rgba(29,158,117,0.14); color: #1D9E75; }
+  .client-detail-status-pill--past   { background: rgba(138,143,156,0.18); color: #5A5F6C; }
+  .client-detail-hero-name {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+  .client-detail-hero-sub {
+    color: var(--ink-3);
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* Quick-action toolbar */
+  .client-detail-quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 18px;
+  }
+  .client-detail-quick-actions:empty { display: none; }
+  .quick-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s, box-shadow 0.15s;
+  }
+  .quick-action-btn:hover {
+    background: var(--surface-2);
+    border-color: var(--ink-3);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+  .quick-action-btn-icon { font-size: 14px; line-height: 1; }
+  .quick-action-btn--primary {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
+  .quick-action-btn--primary:hover {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
+
+  /* Settings-hero variant with an action button on the right (used by
+     the Quotes / Jobs / Follow-ups card headers inside client detail). */
+  .settings-hero.with-action {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .settings-hero.with-action .settings-hero-text { flex: 1; min-width: 0; }
+  .settings-hero.with-action .card-title-action { flex-shrink: 0; align-self: center; }
+
+  @media (max-width: 640px) {
+    .client-detail-hero { flex-direction: column; gap: 14px; }
+    .client-detail-avatar { width: 60px; height: 60px; font-size: 26px; }
+    .client-detail-hero-name { font-size: 22px; }
+    .settings-hero.with-action { flex-direction: column; }
+    .settings-hero.with-action .card-title-action { align-self: stretch; width: 100%; }
+  }
+
   /* === Invoices view: hero + filter chips + toolbar === */
   .invoices-hero-card {
     position: relative;
@@ -4805,10 +5016,39 @@
         </div>
 
         <div id="clientsListSub">
+          <!-- Hero -->
+          <div class="card clients-hero-card">
+            <div class="clients-hero">
+              <div class="clients-hero-icon" aria-hidden="true">👥</div>
+              <div class="clients-hero-text">
+                <h2 class="clients-hero-title" data-i18n="clients.heroTitle">Clients</h2>
+                <p class="clients-hero-body" data-i18n="clients.heroSub">Every customer you've quoted — track relationships, see who's a lead vs. active, and find anyone in a click.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter chips + toolbar -->
           <div class="card">
-            <div class="card-title" data-i18n="clients.title">Clients</div>
-            <div class="card-sub" data-i18n="clients.sub">Everyone you've quoted. Click any row to open and edit.</div>
-            <div style="margin-bottom: 16px;">
+            <div class="invoice-filter-chips" id="clientFilterChips" role="tablist" aria-label="Filter by status">
+              <button type="button" class="invoice-chip is-active" data-filter="all" role="tab" aria-selected="true">
+                <span class="invoice-chip-label" data-i18n="clients.filter.all">All</span>
+                <span class="invoice-chip-count" id="clientCountAll">0</span>
+              </button>
+              <button type="button" class="invoice-chip invoice-chip--lead" data-filter="lead" role="tab" aria-selected="false">
+                <span class="invoice-chip-label" data-i18n="clients.filter.lead">Leads</span>
+                <span class="invoice-chip-count" id="clientCountLead">0</span>
+              </button>
+              <button type="button" class="invoice-chip invoice-chip--active" data-filter="active" role="tab" aria-selected="false">
+                <span class="invoice-chip-label" data-i18n="clients.filter.active">Active</span>
+                <span class="invoice-chip-count" id="clientCountActive">0</span>
+              </button>
+              <button type="button" class="invoice-chip invoice-chip--past" data-filter="past" role="tab" aria-selected="false">
+                <span class="invoice-chip-label" data-i18n="clients.filter.past">Past</span>
+                <span class="invoice-chip-count" id="clientCountPast">0</span>
+              </button>
+            </div>
+
+            <div class="invoice-toolbar">
               <div class="pricing-toggle" id="archiveTabsClients" role="group" aria-label="Archive filter">
                 <button data-arch="active" class="active" type="button">
                   <span data-i18n="archive.tab.active">Active</span>
@@ -4817,16 +5057,17 @@
                   <span data-i18n="archive.tab.archived">Archived</span>
                 </button>
               </div>
+              <input type="search" class="input invoice-search-input" id="clientsSearchInput"
+                     data-i18n-placeholder="clients.searchPlaceholder"
+                     placeholder="Search by name..." />
             </div>
-            <input type="search" class="input" id="clientsSearchInput"
-                   data-i18n-placeholder="clients.searchPlaceholder"
-                   placeholder="Search by name..."
-                   style="max-width: 360px; margin-bottom: 16px;" />
-            <div id="clientsListEmpty" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
-              <div style="font-size: 48px; margin-bottom: 12px;">👥</div>
-              <p style="margin-bottom: 16px;" data-i18n="clients.empty">
+
+            <div id="clientsListEmpty" class="hidden invoices-empty">
+              <div class="invoices-empty-icon" id="clientsEmptyIcon">👥</div>
+              <p class="invoices-empty-title" id="clientsEmptyTitle" data-i18n="clients.empty">
                 No clients yet. Generate a quote with a client name and they'll appear here automatically.
               </p>
+              <p class="invoices-empty-sub hidden" id="clientsEmptySub"></p>
             </div>
             <div id="clientsListLoading" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
               <span data-i18n="clients.loading">Loading...</span>
@@ -4861,12 +5102,71 @@
         </div>
 
         <div id="clientsDetailSub" class="hidden">
-          <div class="card">
-            <div class="card-title">
-              <span id="clientDetailHeaderName">—</span>
+          <!-- Hero card -->
+          <div class="card client-detail-hero-card">
+            <div class="client-detail-hero">
+              <div class="client-detail-avatar" id="clientDetailAvatar" aria-hidden="true">?</div>
+              <div class="client-detail-hero-text">
+                <div class="client-detail-hero-meta" id="clientDetailHeroMeta">
+                  <span class="client-detail-type-badge" id="clientDetailTypeBadge">—</span>
+                  <span class="client-detail-status-pill" id="clientDetailStatusPill">—</span>
+                </div>
+                <h2 class="client-detail-hero-name">
+                  <span id="clientDetailHeaderName">—</span>
+                </h2>
+                <p class="client-detail-hero-sub" id="clientDetailHeroSub">—</p>
+              </div>
             </div>
-            <div class="card-sub" data-i18n="clientDetail.sub">
-              Update info, view related quotes and jobs. Changes save automatically.
+
+            <!-- Quick action toolbar — buttons hide themselves if the
+                 underlying data is missing (e.g., no phone → no Call). -->
+            <div class="client-detail-quick-actions" id="clientDetailQuickActions"></div>
+          </div>
+
+          <!-- Stat tiles -->
+          <div class="field-row cols-4">
+            <div class="stat-card stat-card-fancy">
+              <div class="stat-card-header">
+                <div class="stat-card-icon stat-card-icon--received" aria-hidden="true">💰</div>
+                <div class="stat-card-title" data-i18n="clientDetail.stat.revenue">Lifetime revenue</div>
+              </div>
+              <div class="stat-card-value stat-card-value--good" id="clientStatRevenueVal">$0.00</div>
+              <div class="stat-card-sub" id="clientStatRevenueSub">—</div>
+            </div>
+            <div class="stat-card stat-card-fancy">
+              <div class="stat-card-header">
+                <div class="stat-card-icon stat-card-icon--invoiced" aria-hidden="true">📋</div>
+                <div class="stat-card-title" data-i18n="clientDetail.stat.quotes">Quotes</div>
+              </div>
+              <div class="stat-card-value" id="clientStatQuotesVal">0</div>
+              <div class="stat-card-sub" id="clientStatQuotesSub">—</div>
+            </div>
+            <div class="stat-card stat-card-fancy">
+              <div class="stat-card-header">
+                <div class="stat-card-icon stat-card-icon--invoiced" aria-hidden="true">🧰</div>
+                <div class="stat-card-title" data-i18n="clientDetail.stat.jobs">Jobs</div>
+              </div>
+              <div class="stat-card-value" id="clientStatJobsVal">0</div>
+              <div class="stat-card-sub" id="clientStatJobsSub">—</div>
+            </div>
+            <div class="stat-card stat-card-fancy">
+              <div class="stat-card-header">
+                <div class="stat-card-icon stat-card-icon--outstanding" aria-hidden="true">⏳</div>
+                <div class="stat-card-title" data-i18n="clientDetail.stat.outstanding">Outstanding</div>
+              </div>
+              <div class="stat-card-value stat-card-value--warn" id="clientStatOutstandingVal">$0.00</div>
+              <div class="stat-card-sub" id="clientStatOutstandingSub">—</div>
+            </div>
+          </div>
+
+          <!-- Contact info card -->
+          <div class="card">
+            <div class="settings-hero">
+              <div class="settings-hero-icon" aria-hidden="true">📇</div>
+              <div class="settings-hero-text">
+                <div class="card-title" data-i18n="clientDetail.contactCardTitle">Contact details</div>
+                <div class="card-sub" data-i18n="clientDetail.contactCardSub">Update this client's info. Changes save automatically — no need to hit Save.</div>
+              </div>
             </div>
 
             <div class="field">
@@ -4927,32 +5227,48 @@
               <label class="label" data-i18n="clientDetail.address">Address</label>
               <input type="text" class="input" id="clientDetailAddr" />
             </div>
+          </div>
 
-            <div class="field">
-              <label class="label" data-i18n="clientDetail.notes">Notes</label>
+          <!-- Notes card -->
+          <div class="card">
+            <div class="settings-hero">
+              <div class="settings-hero-icon" aria-hidden="true">📝</div>
+              <div class="settings-hero-text">
+                <div class="card-title" data-i18n="clientDetail.notesCardTitle">Notes</div>
+                <div class="card-sub" data-i18n="clientDetail.notesCardSub">Anything you want to remember — budget, schedule, who referred them, gate codes, dog names.</div>
+              </div>
+            </div>
+            <div class="field" style="margin-bottom: 0;">
               <textarea class="textarea" id="clientDetailNotes"
                         data-i18n-placeholder="clientDetail.notesPlaceholder"
-                        placeholder="Anything to remember — budget, preferences, schedule notes..."></textarea>
-            </div>
-
-            <div class="field" style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
-              <button id="clientDetailDeleteBtn" type="button" class="btn-secondary btn-danger">
-                🗑 <span data-i18n="clientDetail.delete">Delete client</span>
-              </button>
-              <div style="display: flex; gap: 12px;">
-                <button id="clientDetailArchiveBtn" type="button" class="btn-secondary">
-                  📦 <span id="clientDetailArchiveBtnLabel" data-i18n="archive.button.archive">Archive</span>
-                </button>
-                <button id="clientDetailSaveBtn" type="button" class="btn-primary">
-                  💾 <span data-i18n="clientDetail.save">Save</span>
-                </button>
-              </div>
+                        placeholder="Anything to remember — budget, preferences, schedule notes..."
+                        style="min-height: 110px;"></textarea>
             </div>
           </div>
 
+          <!-- Action bar -->
+          <div class="field" style="margin: 8px 0 24px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <button id="clientDetailDeleteBtn" type="button" class="btn-secondary btn-danger">
+              🗑 <span data-i18n="clientDetail.delete">Delete client</span>
+            </button>
+            <div style="display: flex; gap: 12px;">
+              <button id="clientDetailArchiveBtn" type="button" class="btn-secondary">
+                📦 <span id="clientDetailArchiveBtnLabel" data-i18n="archive.button.archive">Archive</span>
+              </button>
+              <button id="clientDetailSaveBtn" type="button" class="btn-primary">
+                💾 <span data-i18n="clientDetail.save">Save</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quotes card -->
           <div class="card">
-            <div class="card-title with-action">
-              <span data-i18n="clientDetail.quotesTitle">Quotes for this client</span>
+            <div class="settings-hero with-action">
+              <div class="settings-hero-icon" aria-hidden="true">📋</div>
+              <div class="settings-hero-text">
+                <div class="card-title" data-i18n="clientDetail.quotesTitle">Quotes for this client</div>
+                <div class="card-sub" data-i18n="clientDetail.quotesCardSub">Every quote you've sent. Click any row to open it.</div>
+              </div>
               <button class="btn-primary card-title-action" id="clientDetailNewQuoteBtn" type="button">
                 + <span data-i18n="clientDetail.newQuote">New Quote</span>
               </button>
@@ -4974,9 +5290,14 @@
             </table>
           </div>
 
+          <!-- Jobs card -->
           <div class="card">
-            <div class="card-title with-action">
-              <span data-i18n="clientDetail.jobsTitle">Jobs for this client</span>
+            <div class="settings-hero with-action">
+              <div class="settings-hero-icon" aria-hidden="true">🧰</div>
+              <div class="settings-hero-text">
+                <div class="card-title" data-i18n="clientDetail.jobsTitle">Jobs for this client</div>
+                <div class="card-sub" data-i18n="clientDetail.jobsCardSub">Tracked work for this client — open, in progress, complete, paid.</div>
+              </div>
               <button class="btn-primary card-title-action" id="clientDetailNewJobBtn" type="button">
                 + <span data-i18n="clientDetail.newJob">New Job</span>
               </button>
@@ -4999,9 +5320,14 @@
             </table>
           </div>
 
+          <!-- Follow-ups card -->
           <div class="card">
-            <div class="card-title with-action">
-              <span data-i18n="clientDetail.followupsTitle">Follow-ups for this client</span>
+            <div class="settings-hero with-action">
+              <div class="settings-hero-icon" aria-hidden="true">📬</div>
+              <div class="settings-hero-text">
+                <div class="card-title" data-i18n="clientDetail.followupsTitle">Follow-ups for this client</div>
+                <div class="card-sub" data-i18n="clientDetail.followupsCardSub">Check-ins and reminders you've drafted or sent.</div>
+              </div>
               <button class="btn-primary card-title-action" id="clientDetailNewFollowupBtn" type="button">
                 + <span data-i18n="clientDetail.newFollowup">New Follow-up</span>
               </button>
@@ -6933,6 +7259,20 @@ const I18N = {
     'clients.backToList': 'Clients',
     'clients.newButton': 'New Client',
     'clients.sub': "Everyone you've quoted. Click any row to open and edit.",
+    'clients.heroTitle': 'Clients',
+    'clients.heroSub': "Every customer you've quoted — track relationships, see who's a lead vs. active, and find anyone in a click.",
+    'clients.filter.all': 'All',
+    'clients.filter.lead': 'Leads',
+    'clients.filter.active': 'Active',
+    'clients.filter.past': 'Past',
+    'clients.empty.lead.title': '🌱 No leads yet',
+    'clients.empty.lead.sub': 'New customers come in as leads. Quote someone to add your first lead.',
+    'clients.empty.active.title': '✋ No active customers right now',
+    'clients.empty.active.sub': "When a client has work in progress, mark them Active and they'll show up here.",
+    'clients.empty.past.title': '📦 No past clients yet',
+    'clients.empty.past.sub': 'Mark a client as Past when a project wraps — keeps your active list focused.',
+    'clients.empty.search.title': 'No matches',
+    'clients.empty.search.sub': 'Try a different name, email, or phone number.',
     'clients.searchPlaceholder': 'Search by name...',
     'clients.empty': "No clients yet. Generate a quote with a client name and they'll appear here automatically.",
     'clients.loading': 'Loading...',
@@ -6941,6 +7281,43 @@ const I18N = {
     'clients.iconPerson': '👤',
     'clients.iconCompany': '🏢',
     'clientDetail.sub': 'Update info, view related quotes and jobs. Changes save automatically.',
+    'clientDetail.contactCardTitle': 'Contact details',
+    'clientDetail.contactCardSub': "Update this client's info. Changes save automatically — no need to hit Save.",
+    'clientDetail.notesCardTitle': 'Notes',
+    'clientDetail.notesCardSub': 'Anything you want to remember — budget, schedule, who referred them, gate codes, dog names.',
+    'clientDetail.quotesCardSub': "Every quote you've sent. Click any row to open it.",
+    'clientDetail.jobsCardSub': 'Tracked work for this client — open, in progress, complete, paid.',
+    'clientDetail.followupsCardSub': "Check-ins and reminders you've drafted or sent.",
+    'clientDetail.stat.revenue': 'Lifetime revenue',
+    'clientDetail.stat.revenueSub.zero': 'No paid work yet',
+    'clientDetail.stat.revenueSub.one': 'Across 1 paid job',
+    'clientDetail.stat.revenueSub.many': 'Across {count} paid jobs',
+    'clientDetail.stat.quotes': 'Quotes',
+    'clientDetail.stat.quotesSub.zero': 'No quotes sent yet',
+    'clientDetail.stat.quotesSub.one': '{amount} quoted total',
+    'clientDetail.stat.quotesSub.many': '{amount} quoted total',
+    'clientDetail.stat.jobs': 'Jobs',
+    'clientDetail.stat.jobsSub.zero': 'No jobs yet',
+    'clientDetail.stat.jobsSub.one': '1 still open',
+    'clientDetail.stat.jobsSub.many': '{count} still open',
+    'clientDetail.stat.jobsSub.allDone': 'All closed out',
+    'clientDetail.stat.outstanding': 'Outstanding',
+    'clientDetail.stat.outstandingSub.zero': 'Nothing owed',
+    'clientDetail.stat.outstandingSub.one': '1 invoice awaiting payment',
+    'clientDetail.stat.outstandingSub.many': '{count} invoices awaiting payment',
+    'clientDetail.stat.outstandingSub.overdue': '⚠️ {count} overdue',
+    'clientDetail.heroMeta.person': 'Person',
+    'clientDetail.heroMeta.company': 'Company',
+    'clientDetail.heroSub.new': 'New client — fill in the details below to get started.',
+    'clientDetail.heroSub.since': 'Client since {date}',
+    'clientDetail.heroSub.lastActivity': 'Last activity {when}',
+    'clientDetail.quick.email': 'Email',
+    'clientDetail.quick.call': 'Call',
+    'clientDetail.quick.text': 'Text',
+    'clientDetail.quick.map': 'Map',
+    'clientDetail.quick.newQuote': 'New quote',
+    'clientDetail.quick.newFollowup': 'New follow-up',
+    'clientDetail.quick.newJob': 'New job',
     'clientDetail.type': 'Type',
     'clientDetail.typePerson': 'Person',
     'clientDetail.typeCompany': 'Company',
@@ -7987,6 +8364,20 @@ const I18N = {
     'clients.backToList': 'Clientes',
     'clients.newButton': 'Nuevo cliente',
     'clients.sub': 'Todos los clientes a quienes les has cotizado. Haz clic en una fila para abrir y editar.',
+    'clients.heroTitle': 'Clientes',
+    'clients.heroSub': 'Cada cliente al que has cotizado — sigue las relaciones, ve quién es prospecto o activo, y encuentra a cualquiera en un clic.',
+    'clients.filter.all': 'Todos',
+    'clients.filter.lead': 'Prospectos',
+    'clients.filter.active': 'Activos',
+    'clients.filter.past': 'Anteriores',
+    'clients.empty.lead.title': '🌱 Aún no hay prospectos',
+    'clients.empty.lead.sub': 'Los nuevos clientes empiezan como prospectos. Cotiza a alguien para agregar tu primer prospecto.',
+    'clients.empty.active.title': '✋ No hay clientes activos ahora',
+    'clients.empty.active.sub': 'Cuando un cliente tenga trabajo en progreso, márcalo como Activo y aparecerá aquí.',
+    'clients.empty.past.title': '📦 Aún no hay clientes anteriores',
+    'clients.empty.past.sub': 'Marca a un cliente como Anterior cuando termine un proyecto — mantiene tu lista activa enfocada.',
+    'clients.empty.search.title': 'Sin resultados',
+    'clients.empty.search.sub': 'Prueba con otro nombre, correo o teléfono.',
     'clients.searchPlaceholder': 'Buscar por nombre...',
     'clients.empty': 'Aún no hay clientes. Genera una cotización con un nombre de cliente y aparecerá aquí automáticamente.',
     'clients.loading': 'Cargando...',
@@ -7995,6 +8386,43 @@ const I18N = {
     'clients.iconPerson': '👤',
     'clients.iconCompany': '🏢',
     'clientDetail.sub': 'Actualiza datos, mira cotizaciones y trabajos relacionados. Los cambios se guardan automáticamente.',
+    'clientDetail.contactCardTitle': 'Datos de contacto',
+    'clientDetail.contactCardSub': 'Actualiza la información de este cliente. Los cambios se guardan automáticamente — no necesitas presionar Guardar.',
+    'clientDetail.notesCardTitle': 'Notas',
+    'clientDetail.notesCardSub': 'Cualquier cosa que quieras recordar — presupuesto, horario, quién lo refirió, códigos de portón, nombres de mascotas.',
+    'clientDetail.quotesCardSub': 'Cada cotización que has enviado. Haz clic en una fila para abrirla.',
+    'clientDetail.jobsCardSub': 'Trabajos rastreados para este cliente — abiertos, en progreso, completados, pagados.',
+    'clientDetail.followupsCardSub': 'Seguimientos y recordatorios que has redactado o enviado.',
+    'clientDetail.stat.revenue': 'Ingresos totales',
+    'clientDetail.stat.revenueSub.zero': 'Aún no hay trabajo pagado',
+    'clientDetail.stat.revenueSub.one': 'De 1 trabajo pagado',
+    'clientDetail.stat.revenueSub.many': 'De {count} trabajos pagados',
+    'clientDetail.stat.quotes': 'Cotizaciones',
+    'clientDetail.stat.quotesSub.zero': 'Aún no hay cotizaciones',
+    'clientDetail.stat.quotesSub.one': '{amount} cotizado en total',
+    'clientDetail.stat.quotesSub.many': '{amount} cotizado en total',
+    'clientDetail.stat.jobs': 'Trabajos',
+    'clientDetail.stat.jobsSub.zero': 'Aún no hay trabajos',
+    'clientDetail.stat.jobsSub.one': '1 aún abierto',
+    'clientDetail.stat.jobsSub.many': '{count} aún abiertos',
+    'clientDetail.stat.jobsSub.allDone': 'Todos cerrados',
+    'clientDetail.stat.outstanding': 'Pendiente',
+    'clientDetail.stat.outstandingSub.zero': 'Nada por cobrar',
+    'clientDetail.stat.outstandingSub.one': '1 factura esperando pago',
+    'clientDetail.stat.outstandingSub.many': '{count} facturas esperando pago',
+    'clientDetail.stat.outstandingSub.overdue': '⚠️ {count} vencidas',
+    'clientDetail.heroMeta.person': 'Persona',
+    'clientDetail.heroMeta.company': 'Empresa',
+    'clientDetail.heroSub.new': 'Cliente nuevo — completa los datos abajo para comenzar.',
+    'clientDetail.heroSub.since': 'Cliente desde {date}',
+    'clientDetail.heroSub.lastActivity': 'Última actividad {when}',
+    'clientDetail.quick.email': 'Email',
+    'clientDetail.quick.call': 'Llamar',
+    'clientDetail.quick.text': 'Texto',
+    'clientDetail.quick.map': 'Mapa',
+    'clientDetail.quick.newQuote': 'Nueva cotización',
+    'clientDetail.quick.newFollowup': 'Nuevo seguimiento',
+    'clientDetail.quick.newJob': 'Nuevo trabajo',
     'clientDetail.type': 'Tipo',
     'clientDetail.typePerson': 'Persona',
     'clientDetail.typeCompany': 'Empresa',
@@ -9836,12 +10264,16 @@ let followupsSubView = 'list';        // 'list' | 'compose' | 'view'
 let savedFollowupsCache = [];
 let followupsSaveTimer = null;
 let clientDetailFollowupsCache = [];  // For the third card on client detail
+let clientDetailInvoicesCache = [];   // For the per-client "Outstanding" stat tile
 let clientsLookupCache = [];          // All clients for autocomplete
 let selectedClientIdForQuote = null;  // Captured at form-fill time
 let selectedClientIdForFollowup = null;
 let isCreatingNewClient = false;  // True between "+ New Client" click
                                   // and the first successful insert
 let viewingArchivedClients = false;
+// Clients view: chip-driven status filter. 'all' is the entry default.
+// Orthogonal to viewingArchivedClients — both filters apply together.
+let clientStatusFilter = 'all';
 let viewingArchivedJobs = false;
 let viewingArchivedQuotes = false;
 let viewingArchivedFollowups = false;
@@ -10319,6 +10751,25 @@ function init() {
     clearBulkSelection('clients');
     loadClients();
   });
+
+  // Clients view: status filter chips (same pattern as Invoices).
+  // Client-side filter; data is already cached in clientsCache.
+  const clientChipsWrap = document.getElementById('clientFilterChips');
+  if (clientChipsWrap) {
+    clientChipsWrap.querySelectorAll('.invoice-chip').forEach(chip => {
+      chip.onclick = () => {
+        const filter = chip.dataset.filter || 'all';
+        clientStatusFilter = filter;
+        clientChipsWrap.querySelectorAll('.invoice-chip').forEach(c => {
+          const on = c === chip;
+          c.classList.toggle('is-active', on);
+          c.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        clearBulkSelection('clients');
+        renderClientsList();
+      };
+    });
+  }
   bindArchiveTabs('archiveTabsJobs', (archived) => {
     viewingArchivedJobs = archived;
     clearBulkSelection('jobs');
@@ -17120,7 +17571,7 @@ async function loadClients() {
   renderClientsDatalist();
 }
 
-// Render the list using the current search filter
+// Render the list using the current search + status-chip filter
 function renderClientsList() {
   const tbody = document.getElementById('clientsListBody');
   const table = document.getElementById('clientsListTable');
@@ -17128,7 +17579,8 @@ function renderClientsList() {
   const searchEl = document.getElementById('clientsSearchInput');
   const q = (searchEl ? searchEl.value : '').trim().toLowerCase();
 
-  const filtered = clientsCache.filter(c => {
+  // Stage 1: apply archive + search. This is the base set the chips count.
+  const baseSet = clientsCache.filter(c => {
     const isArchived = !!c.archived_at;
     if (viewingArchivedClients && !isArchived) return false;
     if (!viewingArchivedClients && isArchived) return false;
@@ -17142,16 +17594,36 @@ function renderClientsList() {
     return hay.includes(q);
   });
 
+  // Chip counts derive from baseSet — so each chip shows how many would
+  // be visible if you clicked it, narrowed by archive + search but NOT
+  // by the chip itself. "Active (3)" while searching = "3 active clients
+  // match your search."
+  const counts = { all: baseSet.length, lead: 0, active: 0, past: 0 };
+  baseSet.forEach(c => {
+    const s = c.status || 'lead';
+    if (s === 'lead' || s === 'active' || s === 'past') counts[s]++;
+  });
+  const setCount = (id, n) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = String(n);
+  };
+  setCount('clientCountAll', counts.all);
+  setCount('clientCountLead', counts.lead);
+  setCount('clientCountActive', counts.active);
+  setCount('clientCountPast', counts.past);
+
+  // Stage 2: apply the status-chip filter on top of baseSet.
+  const filtered = baseSet.filter(c => {
+    if (clientStatusFilter === 'all') return true;
+    const s = c.status || 'lead';
+    return s === clientStatusFilter;
+  });
+
   if (filtered.length === 0) {
     tbody.innerHTML = '';
     table.classList.add('hidden');
     empty.classList.remove('hidden');
-    const emptyMsg = empty.querySelector('p');
-    if (emptyMsg) {
-      const key = viewingArchivedClients ? 'clients.emptyArchived' : 'clients.empty';
-      emptyMsg.setAttribute('data-i18n', key);
-      emptyMsg.textContent = t(key);
-    }
+    showClientEmptyState(q);
     return;
   }
   table.classList.remove('hidden');
@@ -17215,6 +17687,57 @@ function renderClientsList() {
   reapplyBulkSelection('clients');
 }
 
+// Empty-state messaging tuned to *why* the clients list is empty.
+// Priority cascade mirrors showInvoiceEmptyState:
+//   1. Search active + no matches → "no matches, try different terms"
+//   2. Archived tab → "No archived clients"
+//   3. Chip is lead/active/past → contextual nudge per filter
+//   4. Otherwise → first-run "no clients yet" guidance
+function showClientEmptyState(searchQuery) {
+  const titleEl = document.getElementById('clientsEmptyTitle');
+  const subEl = document.getElementById('clientsEmptySub');
+  const iconEl = document.getElementById('clientsEmptyIcon');
+  if (!titleEl) return;
+  let icon = '👥';
+  let titleKey = 'clients.empty';
+  let subKey = null;
+  if (searchQuery) {
+    icon = '🔍';
+    titleKey = 'clients.empty.search.title';
+    subKey = 'clients.empty.search.sub';
+  } else if (viewingArchivedClients) {
+    icon = '📦';
+    titleKey = 'clients.emptyArchived';
+    subKey = null;
+  } else if (clientStatusFilter === 'lead') {
+    icon = '🌱';
+    titleKey = 'clients.empty.lead.title';
+    subKey = 'clients.empty.lead.sub';
+  } else if (clientStatusFilter === 'active') {
+    icon = '✋';
+    titleKey = 'clients.empty.active.title';
+    subKey = 'clients.empty.active.sub';
+  } else if (clientStatusFilter === 'past') {
+    icon = '📦';
+    titleKey = 'clients.empty.past.title';
+    subKey = 'clients.empty.past.sub';
+  }
+  if (iconEl) iconEl.textContent = icon;
+  titleEl.setAttribute('data-i18n', titleKey);
+  titleEl.textContent = t(titleKey);
+  if (subEl) {
+    if (subKey) {
+      subEl.classList.remove('hidden');
+      subEl.setAttribute('data-i18n', subKey);
+      subEl.textContent = t(subKey);
+    } else {
+      subEl.classList.add('hidden');
+      subEl.removeAttribute('data-i18n');
+      subEl.textContent = '';
+    }
+  }
+}
+
 // Switch among clients subview modes. Currently only 'list' is
 // implemented; 'detail' arrives in Sprint 2-D.3.
 function switchClientsSubView(view) {
@@ -17267,6 +17790,7 @@ async function enterNewClientMode() {
   clientDetailQuotesCache = [];
   clientDetailJobsCache = [];
   clientDetailFollowupsCache = [];
+  clientDetailInvoicesCache = [];
 
   // Blank the detail form fields
   document.getElementById('clientDetailHeaderName').textContent =
@@ -17304,7 +17828,7 @@ async function enterNewClientMode() {
 async function openClientDetail(clientId) {
   if (!clientId) return;
   try {
-    const [clientRes, quotesRes, jobsRes, followupsRes] = await Promise.all([
+    const [clientRes, quotesRes, jobsRes, followupsRes, invoicesRes] = await Promise.all([
       sb.from('clients').select('*').eq('id', clientId).single(),
       sb.from('quotes')
         .select('id, total, trades, status, created_at, archived_at')
@@ -17318,6 +17842,12 @@ async function openClientDetail(clientId) {
         .select('id, scenario, channel, created_at, archived_at')
         .eq('client_id', clientId)
         .order('created_at', { ascending: false }),
+      // Per-client invoices for the "Outstanding" stat tile. We only
+      // pull the columns derivePaymentsData-style math needs — small
+      // payload even for clients with dozens of invoices.
+      sb.from('invoices')
+        .select('id, total, amount_paid, status, due_date, archived_at')
+        .eq('client_id', clientId),
     ]);
     if (clientRes.error || !clientRes.data) {
       showToast(t('toast.clientLoadFailed'), true);
@@ -17329,6 +17859,7 @@ async function openClientDetail(clientId) {
     clientDetailQuotesCache = quotesRes.data || [];
     clientDetailJobsCache = jobsRes.data || [];
     clientDetailFollowupsCache = followupsRes.data || [];
+    clientDetailInvoicesCache = invoicesRes && !invoicesRes.error ? (invoicesRes.data || []) : [];
     renderClientDetail();
     switchClientsSubView('detail');
   } catch (e) {
@@ -17414,7 +17945,8 @@ function launchNewJobForActiveClient() {
 }
 
 // Populate every form field from activeClientData, set type toggle,
-// re-render related lists. Called on open + after each save.
+// re-render related lists, render hero + stats + quick actions.
+// Called on open + after each save.
 function renderClientDetail() {
   if (!activeClientData) return;
   const c = activeClientData;
@@ -17438,9 +17970,191 @@ function renderClientDetail() {
   if (clientArchBtn2) clientArchBtn2.classList.toggle('hidden', !!isCreatingNewClient);
   const cDeleteBtn = document.getElementById('clientDetailDeleteBtn');
   if (cDeleteBtn) cDeleteBtn.classList.toggle('hidden', !!isCreatingNewClient);
+  renderClientDetailHero();
+  renderClientDetailStats();
+  renderClientDetailQuickActions();
   renderClientDetailQuotes();
   renderClientDetailJobs();
   renderClientDetailFollowups();
+}
+
+// Hero card: avatar, type badge, status pill, "since" + "last activity"
+// sub-line. Avatar uses the first initial of the client name, or a fallback
+// icon if name is empty (new-client mode).
+function renderClientDetailHero() {
+  const c = activeClientData;
+  if (!c) return;
+  const avatarEl = document.getElementById('clientDetailAvatar');
+  const typeBadge = document.getElementById('clientDetailTypeBadge');
+  const statusPill = document.getElementById('clientDetailStatusPill');
+  const subEl = document.getElementById('clientDetailHeroSub');
+
+  // Avatar: first initial of name, or person/company icon for new clients
+  if (avatarEl) {
+    const rawName = (c.name || '').trim();
+    if (rawName) {
+      avatarEl.textContent = rawName.charAt(0).toUpperCase();
+      avatarEl.style.fontFamily = '';
+    } else {
+      avatarEl.textContent = c.type === 'company' ? '🏢' : '👤';
+      avatarEl.style.fontFamily = "'Segoe UI Emoji', 'Apple Color Emoji', sans-serif";
+    }
+  }
+
+  // Type badge
+  if (typeBadge) {
+    const isCompany = c.type === 'company';
+    const icon = isCompany ? '🏢' : '👤';
+    const label = t(isCompany ? 'clientDetail.heroMeta.company' : 'clientDetail.heroMeta.person');
+    typeBadge.textContent = `${icon} ${label}`;
+  }
+
+  // Status pill
+  if (statusPill) {
+    const s = c.status || 'lead';
+    const labelKey = { lead: 'status.Lead', active: 'status.Active', past: 'status.Past' }[s] || 'status.Lead';
+    statusPill.textContent = t(labelKey);
+    statusPill.classList.remove('client-detail-status-pill--lead', 'client-detail-status-pill--active', 'client-detail-status-pill--past');
+    statusPill.classList.add('client-detail-status-pill--' + s);
+  }
+
+  // Sub-line: "Client since Aug 2024 · Last activity 3 days ago"
+  if (subEl) {
+    if (isCreatingNewClient) {
+      subEl.textContent = t('clientDetail.heroSub.new');
+    } else {
+      const parts = [];
+      if (c.created_at) {
+        try {
+          const d = new Date(c.created_at);
+          const lang = (document.documentElement.lang === 'es') ? 'es' : 'en';
+          const dateStr = d.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', {
+            month: 'short', year: 'numeric',
+          });
+          parts.push(t('clientDetail.heroSub.since', { date: dateStr }));
+        } catch (e) { /* ignore */ }
+      }
+      // last_activity_at lives on the cached row from loadClients(); the
+      // openClientDetail fetch (clients.* eq id) doesn't compute it, so
+      // we cross-reference clientsCache when available.
+      const cacheHit = (clientsCache || []).find(r => r.id === c.id);
+      const lastTs = cacheHit && cacheHit.last_activity_at;
+      if (lastTs) {
+        parts.push(t('clientDetail.heroSub.lastActivity', { when: formatRelativeDate(lastTs) }));
+      }
+      subEl.textContent = parts.join(' · ') || '';
+    }
+  }
+}
+
+// Stat tiles. Numbers are derived from the four caches loaded by
+// openClientDetail (quotes, jobs, invoices) plus jobs-revenue logic.
+function renderClientDetailStats() {
+  const quotes = clientDetailQuotesCache || [];
+  const jobs = clientDetailJobsCache || [];
+  const invoices = clientDetailInvoicesCache || [];
+
+  // Revenue from paid/complete jobs (matches loadClients() rollup)
+  let revenue = 0;
+  let paidJobCount = 0;
+  jobs.forEach(j => {
+    if (j.status === 'paid' || j.status === 'complete') {
+      revenue += parseFloat(j.amount) || 0;
+      paidJobCount++;
+    }
+  });
+  const quotesTotal = quotes.reduce((s, q) => s + (parseFloat(q.total) || 0), 0);
+  const openJobs = jobs.filter(j => j.status && j.status !== 'paid' && j.status !== 'complete' && !j.archived_at).length;
+
+  // Invoice math: outstanding balance + overdue count
+  let outstandingAmt = 0, outstandingCount = 0, overdueCount = 0;
+  invoices.forEach(inv => {
+    if (inv.archived_at) return;
+    const total = parseFloat(inv.total) || 0;
+    const paid = parseFloat(inv.amount_paid) || 0;
+    const bal = Math.max(0, total - paid);
+    if (bal > 0.005) {
+      outstandingAmt += bal;
+      outstandingCount++;
+      const eff = typeof invoiceEffectiveStatus === 'function' ? invoiceEffectiveStatus(inv) : null;
+      if (eff === 'overdue') overdueCount++;
+    }
+  });
+
+  // Render values
+  const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  setText('clientStatRevenueVal', fmt(revenue));
+  setText('clientStatQuotesVal', String(quotes.length));
+  setText('clientStatJobsVal', String(jobs.length));
+  setText('clientStatOutstandingVal', fmt(outstandingAmt));
+
+  // Sub-lines (with pluralization)
+  const subPlural = (base, count, vars) => {
+    if (count === 0) return t(base + '.zero');
+    if (count === 1) return t(base + '.one', vars || { count });
+    return t(base + '.many', vars || { count });
+  };
+  setText('clientStatRevenueSub', subPlural('clientDetail.stat.revenueSub', paidJobCount));
+  setText('clientStatQuotesSub', quotes.length === 0
+    ? t('clientDetail.stat.quotesSub.zero')
+    : t(quotes.length === 1 ? 'clientDetail.stat.quotesSub.one' : 'clientDetail.stat.quotesSub.many', { amount: fmt(quotesTotal) }));
+  setText('clientStatJobsSub', jobs.length === 0
+    ? t('clientDetail.stat.jobsSub.zero')
+    : (openJobs === 0 ? t('clientDetail.stat.jobsSub.allDone') : subPlural('clientDetail.stat.jobsSub', openJobs)));
+  // Outstanding: overdue takes priority — flag with red emphasis
+  setText('clientStatOutstandingSub', outstandingCount === 0
+    ? t('clientDetail.stat.outstandingSub.zero')
+    : (overdueCount > 0
+       ? t('clientDetail.stat.outstandingSub.overdue', { count: overdueCount })
+       : subPlural('clientDetail.stat.outstandingSub', outstandingCount)));
+}
+
+// Quick-action toolbar — buttons only appear if their data exists, so
+// "no phone → no Call button" etc. Free + Pro share this toolbar; the
+// + New Quote / + New Follow-up handlers already enforce free-tier
+// caps in their respective launch fns, so no plan gate here.
+function renderClientDetailQuickActions() {
+  const wrap = document.getElementById('clientDetailQuickActions');
+  if (!wrap) return;
+  const c = activeClientData;
+  if (!c) { wrap.innerHTML = ''; return; }
+  // In new-client mode there's nothing to act on yet
+  if (isCreatingNewClient) { wrap.innerHTML = ''; return; }
+
+  const btns = [];
+  const email = (c.email || '').trim();
+  const phone = (c.phone || '').trim();
+  const addr = (c.addr || '').trim();
+  const telPlain = phone.replace(/[^\d+]/g, '');
+
+  if (email) {
+    btns.push(`<a class="quick-action-btn" href="mailto:${encodeURIComponent(email)}"><span class="quick-action-btn-icon" aria-hidden="true">📧</span>${escapeHtml(t('clientDetail.quick.email'))}</a>`);
+  }
+  if (telPlain) {
+    btns.push(`<a class="quick-action-btn" href="tel:${escapeHtml(telPlain)}"><span class="quick-action-btn-icon" aria-hidden="true">📞</span>${escapeHtml(t('clientDetail.quick.call'))}</a>`);
+    btns.push(`<a class="quick-action-btn" href="sms:${escapeHtml(telPlain)}"><span class="quick-action-btn-icon" aria-hidden="true">💬</span>${escapeHtml(t('clientDetail.quick.text'))}</a>`);
+  }
+  if (addr) {
+    const mapUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(addr);
+    btns.push(`<a class="quick-action-btn" href="${escapeHtml(mapUrl)}" target="_blank" rel="noopener"><span class="quick-action-btn-icon" aria-hidden="true">🗺️</span>${escapeHtml(t('clientDetail.quick.map'))}</a>`);
+  }
+  // Primary actions — always available on a saved client
+  btns.push(`<button type="button" class="quick-action-btn quick-action-btn--primary" data-qa="newQuote"><span class="quick-action-btn-icon" aria-hidden="true">📋</span>${escapeHtml(t('clientDetail.quick.newQuote'))}</button>`);
+  btns.push(`<button type="button" class="quick-action-btn" data-qa="newFollowup"><span class="quick-action-btn-icon" aria-hidden="true">📬</span>${escapeHtml(t('clientDetail.quick.newFollowup'))}</button>`);
+  btns.push(`<button type="button" class="quick-action-btn" data-qa="newJob"><span class="quick-action-btn-icon" aria-hidden="true">🧰</span>${escapeHtml(t('clientDetail.quick.newJob'))}</button>`);
+
+  wrap.innerHTML = btns.join('');
+
+  // Wire the three [data-qa] buttons. The existing card-level
+  // "+ New X" buttons remain functional too — these are just a faster
+  // path that sits in the hero.
+  const qa = (key, fn) => {
+    const el = wrap.querySelector(`[data-qa="${key}"]`);
+    if (el) el.onclick = fn;
+  };
+  qa('newQuote', launchNewQuoteForActiveClient);
+  qa('newFollowup', launchNewFollowupForActiveClient);
+  qa('newJob', launchNewJobForActiveClient);
 }
 
 // Swap which fields are visible based on type. Also swaps the Name
