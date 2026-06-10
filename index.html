@@ -926,6 +926,237 @@
     word-break: break-word;
   }
 
+  /* === Invoice "Get paid online" section — Stripe-not-yet-connected card === */
+  .invoice-pay-connect {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px;
+  }
+  .invoice-pay-connect-hero {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+  .invoice-pay-connect-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--accent-soft) 0%, #fff 100%);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .invoice-pay-connect-text {
+    flex: 1;
+    min-width: 0;
+    padding-top: 2px;
+  }
+  .invoice-pay-connect-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+  .invoice-pay-connect-sub {
+    font-size: 13.5px;
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+  .invoice-pay-connect-benefits {
+    background: var(--surface-2);
+    border: 1px solid var(--line-2);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-bottom: 16px;
+  }
+  .invoice-pay-connect-benefit {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.5;
+    padding: 4px 0;
+  }
+  .invoice-pay-connect-check {
+    color: var(--good);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .invoice-pay-connect-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    /* No top padding — the benefits block above already has bottom margin. */
+  }
+  .invoice-pay-connect-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px 24px;
+    min-width: 200px;
+    justify-content: center;
+    font-size: 14.5px;
+    box-shadow: var(--shadow-sm);
+  }
+  .invoice-pay-connect-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  .invoice-pay-connect-btn-icon {
+    font-size: 16px;
+    line-height: 1;
+  }
+  .invoice-pay-connect-cta-help {
+    font-size: 11.5px;
+    color: var(--ink-3);
+    line-height: 1.4;
+  }
+  /* Narrow screens: stretch the button so it's easier to tap. */
+  @media (max-width: 540px) {
+    .invoice-pay-connect-btn {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+
+  /* === Invoice "Already paid" badge === */
+  .invoice-pay-paid-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: rgba(47, 122, 77, 0.10);
+    border: 1px solid rgba(47, 122, 77, 0.30);
+    border-radius: 999px;
+    color: var(--good);
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+  .invoice-pay-paid-icon {
+    width: 18px;
+    height: 18px;
+    background: var(--good);
+    color: #FFFFFF;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  /* === Pro welcome modal (fires after a successful upgrade) === */
+  .pro-welcome-card {
+    padding: 28px;
+  }
+  .pro-welcome-hero {
+    text-align: center;
+    margin-bottom: 22px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--line-2);
+  }
+  .pro-welcome-hero-icon {
+    font-size: 56px;
+    line-height: 1;
+    margin-bottom: 14px;
+  }
+  .pro-welcome-title {
+    font-family: var(--display);
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+    color: var(--ink);
+  }
+  .pro-welcome-sub {
+    font-size: 14.5px;
+    color: var(--ink-2);
+    line-height: 1.55;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+  .pro-welcome-features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 22px;
+    margin-bottom: 22px;
+  }
+  .pro-welcome-feature {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .pro-welcome-feature-icon {
+    width: 38px;
+    height: 38px;
+    background: var(--surface-2);
+    border: 1px solid var(--line-2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .pro-welcome-feature-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 3px;
+    line-height: 1.35;
+  }
+  .pro-welcome-feature-sub {
+    font-size: 12.5px;
+    color: var(--ink-3);
+    line-height: 1.5;
+  }
+  /* Conditional next-step nudge (shown only when stripe_charges_enabled=false) */
+  .pro-welcome-next-step {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    background: linear-gradient(135deg, var(--accent-soft) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--accent-soft);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    margin-bottom: 20px;
+  }
+  .pro-welcome-next-step-icon {
+    color: var(--accent);
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .pro-welcome-next-step-text {
+    font-size: 13.5px;
+    color: var(--ink-2);
+    font-weight: 500;
+    line-height: 1.45;
+  }
+  .pro-welcome-actions {
+    justify-content: stretch;
+  }
+  .pro-welcome-actions .modal-btn {
+    flex: 1;
+  }
+  @media (max-width: 600px) {
+    .pro-welcome-features { grid-template-columns: 1fr; }
+    .pro-welcome-title { font-size: 24px; }
+    .pro-welcome-hero-icon { font-size: 48px; }
+    .pro-welcome-card { padding: 22px; }
+    .pro-welcome-actions { flex-direction: column-reverse; }
+  }
+
   /* === Jobs teaser (free-tier preview of the Jobs view) === */
   .jobs-teaser-hero-card {
     position: relative;
@@ -5260,10 +5491,47 @@
               </div>
 
               <div id="invoicePayOnline" style="margin-top:14px; border-top:1px solid var(--line); padding-top:14px;">
-                <div class="label" style="margin-bottom:8px;" data-i18n="pay.sectionTitle">Get paid online</div>
-                <div id="invoicePayConnectPrompt" class="hidden" style="color:var(--ink-3); font-size:13px;" data-i18n="pay.connectPrompt">Connect Stripe in your Profile to accept online payments.</div>
-                <div id="invoicePayPaid" class="hidden" style="color:var(--good); font-size:13px;" data-i18n="pay.alreadyPaid">This invoice is paid.</div>
+                <!-- State 0: not yet connected to Stripe — educational card + direct setup CTA -->
+                <div id="invoicePayConnectPrompt" class="hidden invoice-pay-connect">
+                  <div class="invoice-pay-connect-hero">
+                    <div class="invoice-pay-connect-icon" aria-hidden="true">💳</div>
+                    <div class="invoice-pay-connect-text">
+                      <div class="invoice-pay-connect-title" data-i18n="pay.connectCardTitle">Let customers pay this invoice online</div>
+                      <div class="invoice-pay-connect-sub" data-i18n="pay.connectCardSub">Connect your Stripe account once — every invoice you send afterwards includes a secure pay link, and your customer can tap and pay with a card in under 30 seconds.</div>
+                    </div>
+                  </div>
+                  <div class="invoice-pay-connect-benefits">
+                    <div class="invoice-pay-connect-benefit">
+                      <span class="invoice-pay-connect-check" aria-hidden="true">✓</span>
+                      <span data-i18n="pay.connectCardB1">Pay link auto-attached every time you email or text the invoice</span>
+                    </div>
+                    <div class="invoice-pay-connect-benefit">
+                      <span class="invoice-pay-connect-check" aria-hidden="true">✓</span>
+                      <span data-i18n="pay.connectCardB2">Invoice flips to "paid" the moment the customer pays — no manual reconciliation</span>
+                    </div>
+                    <div class="invoice-pay-connect-benefit">
+                      <span class="invoice-pay-connect-check" aria-hidden="true">✓</span>
+                      <span data-i18n="pay.connectCardB3">Money lands in your own Stripe account, usually within 2 business days</span>
+                    </div>
+                  </div>
+                  <div class="invoice-pay-connect-cta">
+                    <button id="invoicePayConnectBtn" type="button" class="btn-primary invoice-pay-connect-btn">
+                      <span class="invoice-pay-connect-btn-icon" aria-hidden="true">⚡</span>
+                      <span data-i18n="pay.connectCardBtn">Set up Stripe</span>
+                    </button>
+                    <div class="invoice-pay-connect-cta-help" data-i18n="pay.connectCardBtnHelp">Takes about 5 minutes</div>
+                  </div>
+                </div>
+
+                <!-- State 1: invoice already paid — visual badge -->
+                <div id="invoicePayPaid" class="hidden invoice-pay-paid-badge">
+                  <span class="invoice-pay-paid-icon" aria-hidden="true">✓</span>
+                  <span data-i18n="pay.alreadyPaid">This invoice is paid</span>
+                </div>
+
+                <!-- State 2: Stripe connected — mint / show the pay link -->
                 <div id="invoicePayActive" class="hidden">
+                  <div class="label" style="margin-bottom:8px;" data-i18n="pay.sectionTitle">Get paid online</div>
                   <button id="invoicePayLinkBtn" type="button" class="btn-secondary" data-i18n="pay.createLink">Create payment link</button>
                   <div id="invoicePayLinkWrap" class="hidden" style="margin-top:10px;">
                     <div style="display:flex; gap:8px; align-items:center;">
@@ -5402,6 +5670,71 @@
     <div class="modal-actions">
       <button id="deleteAccountCancel" type="button" class="modal-btn modal-btn-cancel" data-i18n="modal.cancel">Cancel</button>
       <button id="deleteAccountConfirm" type="button" class="modal-btn modal-btn-danger" disabled data-i18n="account.delete.modalConfirm">Delete my account</button>
+    </div>
+  </div>
+</div>
+
+<div id="proWelcomeBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="proWelcomeTitle">
+  <div class="modal-card modal-card-wide pro-welcome-card">
+    <div class="pro-welcome-hero">
+      <div class="pro-welcome-hero-icon" aria-hidden="true">🎉</div>
+      <div class="modal-title pro-welcome-title" id="proWelcomeTitle" data-i18n="proWelcome.title">Welcome to Pro!</div>
+      <div class="pro-welcome-sub" data-i18n="proWelcome.sub">You're all set up. Here's everything you just unlocked.</div>
+    </div>
+
+    <div class="pro-welcome-features">
+      <div class="pro-welcome-feature">
+        <div class="pro-welcome-feature-icon" aria-hidden="true">∞</div>
+        <div class="pro-welcome-feature-text">
+          <div class="pro-welcome-feature-title" data-i18n="proWelcome.feat1.title">Unlimited quotes</div>
+          <div class="pro-welcome-feature-sub" data-i18n="proWelcome.feat1.sub">Generate as many AI-drafted quotes as your business needs. No monthly cap, no walls mid-job.</div>
+        </div>
+      </div>
+      <div class="pro-welcome-feature">
+        <div class="pro-welcome-feature-icon" aria-hidden="true">👥</div>
+        <div class="pro-welcome-feature-text">
+          <div class="pro-welcome-feature-title" data-i18n="proWelcome.feat2.title">Unlimited clients</div>
+          <div class="pro-welcome-feature-sub" data-i18n="proWelcome.feat2.sub">Add every customer to your CRM. Keep contact info, job history, and notes organized in one place.</div>
+        </div>
+      </div>
+      <div class="pro-welcome-feature">
+        <div class="pro-welcome-feature-icon" aria-hidden="true">🧰</div>
+        <div class="pro-welcome-feature-text">
+          <div class="pro-welcome-feature-title" data-i18n="proWelcome.feat3.title">Jobs tracking</div>
+          <div class="pro-welcome-feature-sub" data-i18n="proWelcome.feat3.sub">Every quote becomes a job. Watch each one move from quoted to in-progress to paid, with pipeline totals at a glance.</div>
+        </div>
+      </div>
+      <div class="pro-welcome-feature">
+        <div class="pro-welcome-feature-icon" aria-hidden="true">💳</div>
+        <div class="pro-welcome-feature-text">
+          <div class="pro-welcome-feature-title" data-i18n="proWelcome.feat4.title">Online payments</div>
+          <div class="pro-welcome-feature-sub" data-i18n="proWelcome.feat4.sub">Connect Stripe and every invoice you send carries a pay link — your customer taps, pays, and the invoice flips to "paid" automatically.</div>
+        </div>
+      </div>
+      <div class="pro-welcome-feature">
+        <div class="pro-welcome-feature-icon" aria-hidden="true">📨</div>
+        <div class="pro-welcome-feature-text">
+          <div class="pro-welcome-feature-title" data-i18n="proWelcome.feat5.title">Premium exports</div>
+          <div class="pro-welcome-feature-sub" data-i18n="proWelcome.feat5.sub">Download or send quotes, invoices, and AI follow-ups in PDF, email, or text — no friction between drafting and closing.</div>
+        </div>
+      </div>
+      <div class="pro-welcome-feature">
+        <div class="pro-welcome-feature-icon" aria-hidden="true">🎨</div>
+        <div class="pro-welcome-feature-text">
+          <div class="pro-welcome-feature-title" data-i18n="proWelcome.feat6.title">Your brand on every doc</div>
+          <div class="pro-welcome-feature-sub" data-i18n="proWelcome.feat6.sub">Logo, brand color, license number, and business address — automatically applied to every quote and invoice.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="proWelcomeNextStep" class="pro-welcome-next-step hidden">
+      <div class="pro-welcome-next-step-icon" aria-hidden="true">→</div>
+      <div class="pro-welcome-next-step-text" data-i18n="proWelcome.nextStep">One more step to unlock card payments: connect Stripe. Takes about 5 minutes.</div>
+    </div>
+
+    <div class="modal-actions pro-welcome-actions">
+      <button id="proWelcomeCloseBtn" type="button" class="modal-btn modal-btn-cancel" data-i18n="proWelcome.close">Get started</button>
+      <button id="proWelcomeConnectBtn" type="button" class="modal-btn modal-btn-primary hidden" data-i18n="proWelcome.connect">Set up online payments</button>
     </div>
   </div>
 </div>
@@ -6500,6 +6833,30 @@ const I18N = {
     'profile.business.brandColor': 'Brand color',
     'profile.brand.enable': 'Use a custom brand color',
     'profile.brand.help': 'Applied to the accent bar at the top of your quotes — pick a color that matches your logo. Leave off to use the default MyTradeDeck accent.',
+    'pay.connectCardTitle': 'Let customers pay this invoice online',
+    'pay.connectCardSub': 'Connect your Stripe account once — every invoice you send afterwards includes a secure pay link, and your customer can tap and pay with a card in under 30 seconds.',
+    'pay.connectCardB1': 'Pay link auto-attached every time you email or text the invoice',
+    'pay.connectCardB2': "Invoice flips to \"paid\" the moment the customer pays — no manual reconciliation",
+    'pay.connectCardB3': 'Money lands in your own Stripe account, usually within 2 business days',
+    'pay.connectCardBtn': 'Set up Stripe',
+    'pay.connectCardBtnHelp': 'Takes about 5 minutes',
+    'proWelcome.title': 'Welcome to Pro!',
+    'proWelcome.sub': "You're all set up. Here's everything you just unlocked.",
+    'proWelcome.feat1.title': 'Unlimited quotes',
+    'proWelcome.feat1.sub': 'Generate as many AI-drafted quotes as your business needs. No monthly cap, no walls mid-job.',
+    'proWelcome.feat2.title': 'Unlimited clients',
+    'proWelcome.feat2.sub': 'Add every customer to your CRM. Keep contact info, job history, and notes organized in one place.',
+    'proWelcome.feat3.title': 'Jobs tracking',
+    'proWelcome.feat3.sub': 'Every quote becomes a job. Watch each one move from quoted to in-progress to paid, with pipeline totals at a glance.',
+    'proWelcome.feat4.title': 'Online payments',
+    'proWelcome.feat4.sub': "Connect Stripe and every invoice you send carries a pay link — your customer taps, pays, and the invoice flips to \"paid\" automatically.",
+    'proWelcome.feat5.title': 'Premium exports',
+    'proWelcome.feat5.sub': 'Download or send quotes, invoices, and AI follow-ups in PDF, email, or text — no friction between drafting and closing.',
+    'proWelcome.feat6.title': 'Your brand on every doc',
+    'proWelcome.feat6.sub': 'Logo, brand color, license number, and business address — automatically applied to every quote and invoice.',
+    'proWelcome.nextStep': 'One more step to unlock card payments: connect Stripe. Takes about 5 minutes.',
+    'proWelcome.close': 'Get started',
+    'proWelcome.connect': 'Set up online payments',
     'stripeSetup.title': 'Set up online payments first?',
     'stripeSetup.sub': "Your customer can pay this invoice with a card in 30 seconds — but only if you've connected Stripe. Right now this invoice will go out without a pay link.",
     'stripeSetup.benefit1': 'A pay link is included automatically every time you email or text an invoice',
@@ -7498,6 +7855,30 @@ const I18N = {
     'profile.business.brandColor': 'Color de marca',
     'profile.brand.enable': 'Usar un color de marca personalizado',
     'profile.brand.help': 'Se aplica a la barra superior de tus cotizaciones — elige un color que combine con tu logo. Déjalo desactivado para usar el acento predeterminado de MyTradeDeck.',
+    'pay.connectCardTitle': 'Permite que tus clientes paguen esta factura en línea',
+    'pay.connectCardSub': 'Conecta tu cuenta de Stripe una sola vez — cada factura que envíes después incluirá un enlace de pago seguro, y tu cliente podrá tocarlo y pagar con tarjeta en menos de 30 segundos.',
+    'pay.connectCardB1': 'Enlace de pago añadido automáticamente cada vez que envías la factura por correo o mensaje',
+    'pay.connectCardB2': 'La factura se marca como "pagada" en el instante que el cliente paga — sin conciliación manual',
+    'pay.connectCardB3': 'El dinero llega a tu propia cuenta de Stripe, normalmente en 2 días hábiles',
+    'pay.connectCardBtn': 'Configurar Stripe',
+    'pay.connectCardBtnHelp': 'Toma unos 5 minutos',
+    'proWelcome.title': '¡Bienvenido a Pro!',
+    'proWelcome.sub': 'Todo listo. Esto es todo lo que acabas de desbloquear.',
+    'proWelcome.feat1.title': 'Cotizaciones ilimitadas',
+    'proWelcome.feat1.sub': 'Genera todas las cotizaciones con IA que tu negocio necesite. Sin límite mensual, sin topes a mitad de trabajo.',
+    'proWelcome.feat2.title': 'Clientes ilimitados',
+    'proWelcome.feat2.sub': 'Agrega todos los clientes a tu CRM. Mantén su información de contacto, historial de trabajos y notas organizadas en un solo lugar.',
+    'proWelcome.feat3.title': 'Seguimiento de trabajos',
+    'proWelcome.feat3.sub': 'Cada cotización se convierte en un trabajo. Mira cómo cada uno avanza de cotizado a en proceso a pagado, con totales del pipeline a la vista.',
+    'proWelcome.feat4.title': 'Pagos en línea',
+    'proWelcome.feat4.sub': 'Conecta Stripe y cada factura que envíes incluye un enlace de pago — tu cliente toca, paga, y la factura se marca como "pagada" automáticamente.',
+    'proWelcome.feat5.title': 'Exportaciones premium',
+    'proWelcome.feat5.sub': 'Descarga o envía cotizaciones, facturas y seguimientos con IA en PDF, correo o mensaje — sin fricción entre redactar y cerrar.',
+    'proWelcome.feat6.title': 'Tu marca en cada documento',
+    'proWelcome.feat6.sub': 'Logo, color de marca, número de licencia y dirección de negocio — aplicados automáticamente a cada cotización y factura.',
+    'proWelcome.nextStep': 'Un paso más para desbloquear los pagos con tarjeta: conecta Stripe. Toma unos 5 minutos.',
+    'proWelcome.close': 'Empezar',
+    'proWelcome.connect': 'Configurar pagos en línea',
     'stripeSetup.title': '¿Configurar pagos en línea primero?',
     'stripeSetup.sub': 'Tu cliente puede pagar esta factura con tarjeta en 30 segundos — pero solo si tienes Stripe conectado. Ahora mismo esta factura se enviará sin enlace de pago.',
     'stripeSetup.benefit1': 'El enlace de pago se incluye automáticamente cada vez que envías una factura por correo o mensaje',
@@ -9252,8 +9633,13 @@ function init() {
   const mgBtn = document.getElementById('profileManageSubBtn');
   if (mgBtn) mgBtn.onclick = openBillingPortal;
   bindAccountActions();
+  bindProWelcomeModal();
   const connectBtn = document.getElementById('connectBtn');
   if (connectBtn) connectBtn.onclick = startConnectOnboarding;
+  // Invoice "Set up Stripe" button — kicks straight into Connect
+  // onboarding (no detour through Settings).
+  const invoicePayConnect = document.getElementById('invoicePayConnectBtn');
+  if (invoicePayConnect) invoicePayConnect.onclick = startConnectOnboarding;
   // Upgrade modal wiring: interval toggle, cancel, continue, backdrop dismiss.
   document.querySelectorAll('#upgradeIntervalToggle button').forEach(b => {
     b.onclick = () => {
@@ -13614,6 +14000,65 @@ async function downloadInvoicePdf() {
   showToast(t('toast.pdfReady'));
 }
 
+// Pro welcome modal — fires once after a successful upgrade redirect.
+// Conditional next-step: if the user upgraded specifically to accept
+// payments but hasn't done Connect onboarding yet (the most common case),
+// surface "Set up online payments" as the primary action. Otherwise the
+// modal is a pure celebration with "Get started" as the single CTA.
+function openProWelcomeModal() {
+  const backdrop = document.getElementById('proWelcomeBackdrop');
+  if (!backdrop) return;
+  const closeBtn = document.getElementById('proWelcomeCloseBtn');
+  const connectBtn = document.getElementById('proWelcomeConnectBtn');
+  const nextStep = document.getElementById('proWelcomeNextStep');
+
+  const p = profileCache || {};
+  // We may arrive here before profileCache has refreshed post-upgrade. In
+  // that case we err on the side of showing the Connect CTA — they JUST
+  // upgraded, so the Stripe-not-connected state is the high-probability
+  // one and the worst outcome is a slightly-redundant CTA for the few who
+  // already had Connect set up.
+  const needsStripe = !p.stripe_charges_enabled;
+  if (connectBtn) connectBtn.classList.toggle('hidden', !needsStripe);
+  if (nextStep) nextStep.classList.toggle('hidden', !needsStripe);
+
+  backdrop.classList.remove('hidden');
+  requestAnimationFrame(() => backdrop.classList.add('visible'));
+  setTimeout(() => {
+    try { (needsStripe ? connectBtn : closeBtn).focus(); } catch (e) {}
+  }, 60);
+}
+
+function closeProWelcomeModal() {
+  const backdrop = document.getElementById('proWelcomeBackdrop');
+  if (!backdrop) return;
+  backdrop.classList.remove('visible');
+  setTimeout(() => backdrop.classList.add('hidden'), 130);
+}
+
+function bindProWelcomeModal() {
+  const backdrop = document.getElementById('proWelcomeBackdrop');
+  const closeBtn = document.getElementById('proWelcomeCloseBtn');
+  const connectBtn = document.getElementById('proWelcomeConnectBtn');
+  if (!backdrop || !closeBtn || !connectBtn) return;
+  closeBtn.addEventListener('click', closeProWelcomeModal);
+  connectBtn.addEventListener('click', () => {
+    closeProWelcomeModal();
+    // Kick into Connect onboarding on the next tick so the modal teardown
+    // doesn't fight the redirect away from this page.
+    setTimeout(() => {
+      if (typeof startConnectOnboarding === 'function') startConnectOnboarding();
+    }, 80);
+  });
+  backdrop.addEventListener('click', (e) => {
+    if (e.target === backdrop) closeProWelcomeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (backdrop.classList.contains('hidden')) return;
+    if (e.key === 'Escape') { e.preventDefault(); closeProWelcomeModal(); }
+  });
+}
+
 // One-shot gate: when a Pro user with no Stripe Connect setup tries to
 // send an invoice, surface a friendly nudge explaining what they're
 // missing. Returns a promise that resolves to true if the caller should
@@ -14282,11 +14727,18 @@ function handleCheckoutReturn() {
   const checkout = params.get('checkout');
   const portal = params.get('portal');
   if (checkout === 'success') {
-    showToast(t('upgrade.checkoutSuccess'), false);
+    // Refresh profile first so the welcome modal can render the right CTA
+    // (Connect setup nudge vs plain "Get started") based on the user's
+    // actual stripe_charges_enabled state. If refresh fails for any
+    // reason, still open the modal — defensive default is to show the
+    // Connect nudge anyway, which is the worst-case redundant CTA.
     loadProfileCache().then(() => {
       if (typeof updateUsageDisplay === 'function') updateUsageDisplay();
       if (typeof currentView !== 'undefined' && currentView === 'profile') loadProfileData();
-    }).catch(() => {});
+      openProWelcomeModal();
+    }).catch(() => {
+      openProWelcomeModal();
+    });
     if (typeof refreshQuoteUsedFromServer === 'function') refreshQuoteUsedFromServer();
   } else if (checkout === 'cancel') {
     showToast(t('upgrade.checkoutCanceled'), false);
