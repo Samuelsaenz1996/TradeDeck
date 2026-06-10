@@ -1738,6 +1738,128 @@
   .invoice-chip--declined:not(.is-active) .invoice-chip-count { color: #B33A2A; background: rgba(179,58,42,0.12); }
   .invoice-chip--invoiced:not(.is-active) .invoice-chip-count { color: #4862A5; background: rgba(72,98,165,0.12); }
 
+  /* === Jobs view: hero + chip tints (rest reuses shared chip/toolbar/empty styles) === */
+  .jobs-hero-card {
+    position: relative;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    overflow: hidden;
+  }
+  .jobs-hero {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .jobs-hero-icon {
+    width: 64px;
+    height: 64px;
+    /* Warm orange tint — evokes "active work, hammer time". */
+    background: linear-gradient(135deg, #FBE8D6 0%, #fff 100%);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .jobs-hero-text {
+    flex: 1;
+    min-width: 0;
+    padding-top: 4px;
+  }
+  .jobs-hero-title {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    margin: 0 0 10px;
+    line-height: 1.2;
+  }
+  .jobs-hero-body {
+    color: var(--ink-2);
+    font-size: 14.5px;
+    line-height: 1.55;
+    margin: 0;
+    max-width: 600px;
+  }
+  @media (max-width: 540px) {
+    .jobs-hero-title { font-size: 22px; }
+    .jobs-hero-icon { width: 56px; height: 56px; font-size: 30px; }
+  }
+
+  /* Job chip tints for the two statuses not covered elsewhere:
+     in-progress (amber) and complete-awaiting-payment (indigo). */
+  .invoice-chip--job-progress.is-active { background: #B8731F; border-color: #B8731F; }
+  .invoice-chip--job-complete.is-active { background: #4862A5; border-color: #4862A5; }
+  .invoice-chip--job-progress:not(.is-active) .invoice-chip-count { color: #B8731F; background: rgba(184,115,31,0.12); }
+  .invoice-chip--job-complete:not(.is-active) .invoice-chip-count { color: #4862A5; background: rgba(72,98,165,0.12); }
+
+  /* Multi-trade pill picker on the job-detail form. Same visual
+     language as the trade chips elsewhere but tuned for tap-to-toggle. */
+  .job-trades-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .job-trade-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--ink-2);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+    user-select: none;
+  }
+  .job-trade-pill:hover {
+    background: var(--surface-2);
+    transform: translateY(-1px);
+  }
+  .job-trade-pill.is-selected {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
+  .job-trade-pill-emoji { font-size: 14px; line-height: 1; }
+
+  /* Tiny client-initial avatar for job rows */
+  .job-row-client {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  .job-row-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--ink-2);
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+  .job-row-client-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  @media (max-width: 540px) {
+    .job-row-avatar { display: none; }
+  }
+
   /* === Follow-ups view: hero + chip tints === */
   .followups-hero-card {
     position: relative;
@@ -5776,14 +5898,84 @@
         </div>
 
         <div id="jobsListSub">
+          <!-- Hero -->
+          <div class="card jobs-hero-card">
+            <div class="jobs-hero">
+              <div class="jobs-hero-icon" aria-hidden="true">🧰</div>
+              <div class="jobs-hero-text">
+                <h2 class="jobs-hero-title" data-i18n="jobs.heroTitle">Jobs</h2>
+                <p class="jobs-hero-body" data-i18n="jobs.heroSub">Every tracked job from quote to paid — see where work stands at a glance, find any job in a click.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stat tiles -->
+          <div class="field-row cols-4">
+            <div class="stat-card stat-card-fancy">
+              <div class="stat-card-header">
+                <div class="stat-card-icon stat-card-icon--invoiced" aria-hidden="true">📋</div>
+                <div class="stat-card-title" data-i18n="jobs.openQuotes">Open quotes</div>
+              </div>
+              <div class="stat-card-value" id="jobsStatOpenCount">0</div>
+              <div class="stat-card-sub" id="jobsStatOpenAmt">$0.00</div>
+            </div>
+            <div class="stat-card stat-card-fancy">
+              <div class="stat-card-header">
+                <div class="stat-card-icon stat-card-icon--outstanding" aria-hidden="true">🔨</div>
+                <div class="stat-card-title" data-i18n="jobs.inProgress">In progress</div>
+              </div>
+              <div class="stat-card-value stat-card-value--warn" id="jobsStatInProgressCount">0</div>
+              <div class="stat-card-sub" id="jobsStatInProgressAmt">$0.00</div>
+            </div>
+            <div class="stat-card stat-card-fancy">
+              <div class="stat-card-header">
+                <div class="stat-card-icon stat-card-icon--outstanding" aria-hidden="true">⏳</div>
+                <div class="stat-card-title" data-i18n="jobs.awaiting">Awaiting payment</div>
+              </div>
+              <div class="stat-card-value stat-card-value--warn" id="jobsStatAwaitingCount">0</div>
+              <div class="stat-card-sub" id="jobsStatAwaitingAmt">$0.00</div>
+            </div>
+            <div class="stat-card stat-card-fancy">
+              <div class="stat-card-header">
+                <div class="stat-card-icon stat-card-icon--received" aria-hidden="true">✅</div>
+                <div class="stat-card-title" data-i18n="jobs.completed">Completed this month</div>
+              </div>
+              <div class="stat-card-value stat-card-value--good" id="jobsStatCompletedCount">0</div>
+              <div class="stat-card-sub" id="jobsStatCompletedAmt">$0.00</div>
+            </div>
+          </div>
+
+          <!-- Filter chips + toolbar -->
           <div class="card">
-            <div class="jobs-toolbar-row">
-              <div class="card-title" data-i18n="jobs.title">Jobs</div>
+            <div class="chip-toolbar-row">
+              <div class="invoice-filter-chips" id="jobFilterPills" role="tablist" aria-label="Filter by status">
+                <button type="button" class="invoice-chip is-active" data-filter="all" role="tab" aria-selected="true">
+                  <span class="invoice-chip-label" data-i18n="jobs.filter.all">All</span>
+                  <span class="invoice-chip-count" id="jobCountAll">0</span>
+                </button>
+                <button type="button" class="invoice-chip invoice-chip--draft" data-filter="quoted" role="tab" aria-selected="false">
+                  <span class="invoice-chip-label" data-i18n="jobs.filter.quoted">Quoted</span>
+                  <span class="invoice-chip-count" id="jobCountQuoted">0</span>
+                </button>
+                <button type="button" class="invoice-chip invoice-chip--job-progress" data-filter="in_progress" role="tab" aria-selected="false">
+                  <span class="invoice-chip-label" data-i18n="jobs.filter.inProgress">In Progress</span>
+                  <span class="invoice-chip-count" id="jobCountInProgress">0</span>
+                </button>
+                <button type="button" class="invoice-chip invoice-chip--job-complete" data-filter="complete" role="tab" aria-selected="false">
+                  <span class="invoice-chip-label" data-i18n="jobs.filter.complete">Complete</span>
+                  <span class="invoice-chip-count" id="jobCountComplete">0</span>
+                </button>
+                <button type="button" class="invoice-chip invoice-chip--accepted" data-filter="paid" role="tab" aria-selected="false">
+                  <span class="invoice-chip-label" data-i18n="jobs.filter.paid">Paid</span>
+                  <span class="invoice-chip-count" id="jobCountPaid">0</span>
+                </button>
+              </div>
               <button id="jobsNewBtn" type="button" class="btn-primary chip-toolbar-action">
                 + <span data-i18n="jobs.newButton">New Job</span>
               </button>
             </div>
-            <div class="field">
+
+            <div class="invoice-toolbar">
               <div class="pricing-toggle" id="archiveTabsJobs" role="group" aria-label="Archive filter">
                 <button data-arch="active" class="active" type="button">
                   <span data-i18n="archive.tab.active">Active</span>
@@ -5792,45 +5984,17 @@
                   <span data-i18n="archive.tab.archived">Archived</span>
                 </button>
               </div>
+              <input type="search" class="input invoice-search-input" id="jobsSearchInput"
+                     data-i18n-placeholder="jobs.searchPlaceholder"
+                     placeholder="Search by job, client, or trade..." />
             </div>
-            <div class="field">
-              <div class="timeline-pills" id="jobFilterPills">
-                <button class="active" data-filter="all" data-i18n="jobs.filter.all">All</button>
-                <button data-filter="quoted" data-i18n="jobs.filter.quoted">Quoted</button>
-                <button data-filter="in_progress" data-i18n="jobs.filter.inProgress">In Progress</button>
-                <button data-filter="complete" data-i18n="jobs.filter.complete">Complete</button>
-                <button data-filter="paid" data-i18n="jobs.filter.paid">Paid</button>
-              </div>
-            </div>
-          </div>
-          <div class="field-row cols-4">
-            <div class="stat-card">
-              <div class="stat-card-title" data-i18n="jobs.openQuotes">Open quotes</div>
-              <div class="stat-card-value" id="jobsStatOpenCount">0</div>
-              <div id="jobsStatOpenAmt" style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$0.00</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-title" data-i18n="jobs.inProgress">In progress</div>
-              <div class="stat-card-value" id="jobsStatInProgressCount">0</div>
-              <div id="jobsStatInProgressAmt" style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$0.00</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-title" data-i18n="jobs.awaiting">Awaiting payment</div>
-              <div class="stat-card-value" id="jobsStatAwaitingCount">0</div>
-              <div id="jobsStatAwaitingAmt" style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$0.00</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-title" data-i18n="jobs.completed">Completed this month</div>
-              <div class="stat-card-value" id="jobsStatCompletedCount">0</div>
-              <div id="jobsStatCompletedAmt" style="color: var(--ink-3); font-size: 12px; margin-top: 8px;">$0.00</div>
-            </div>
-          </div>
-          <div class="card">
-            <div id="jobsListEmpty" class="hidden" style="text-align: center; padding: 40px 20px; color: var(--ink-3);">
-              <div style="font-size: 48px; margin-bottom: 12px;">🧰</div>
-              <p id="jobsEmptyMessage" style="margin-bottom: 0;" data-i18n="jobs.empty">
+
+            <div id="jobsListEmpty" class="hidden invoices-empty">
+              <div class="invoices-empty-icon" id="jobsEmptyIcon">🧰</div>
+              <p class="invoices-empty-title" id="jobsEmptyMessage" data-i18n="jobs.empty">
                 No jobs yet. Generate a quote and it will appear here automatically.
               </p>
+              <p class="invoices-empty-sub hidden" id="jobsEmptySub"></p>
             </div>
             <div class="bulk-bar hidden" id="bulkBarJobs">
               <button class="bulk-clear" id="bulkClearJobs" type="button" aria-label="Clear selection">✕</button>
@@ -5882,11 +6046,13 @@
               <textarea class="textarea" id="jobDetailDescription"></textarea>
             </div>
 
-            <div class="field-row cols-3">
-              <div>
-                <label class="label" data-i18n="jobDetail.trade">Trade</label>
-                <select class="select" id="jobDetailTrade"></select>
-              </div>
+            <div class="field">
+              <label class="label" data-i18n="jobDetail.trades">Trades</label>
+              <div class="job-trades-grid" id="jobDetailTradesGrid" role="group" aria-label="Trades for this job"></div>
+              <small class="settings-help" data-i18n="jobDetail.tradesHelp">Tap any trade to add or remove it. A job can cover multiple trades.</small>
+            </div>
+
+            <div class="field-row cols-2">
               <div>
                 <label class="label" data-i18n="jobDetail.amount">Amount ($)</label>
                 <input type="number" class="input" id="jobDetailAmount" min="0" step="0.01" />
@@ -7642,6 +7808,19 @@ const I18N = {
     'toast.clientSaveFailed': 'Could not save client changes',
     // Jobs
     'jobs.title': 'Jobs',
+    'jobs.heroTitle': 'Jobs',
+    'jobs.heroSub': 'Every tracked job from quote to paid — see where work stands at a glance, find any job in a click.',
+    'jobs.searchPlaceholder': 'Search by job, client, or trade...',
+    'jobs.empty.quoted.title': '📋 No open quotes right now',
+    'jobs.empty.quoted.sub': "Accepted quotes that haven't been started yet land here. Mark a job In Progress to move it forward.",
+    'jobs.empty.inProgress.title': '🔨 Nothing in progress',
+    'jobs.empty.inProgress.sub': "Once you start a job, mark it In Progress and it'll show up here.",
+    'jobs.empty.complete.title': '✅ Nothing awaiting payment',
+    'jobs.empty.complete.sub': "Completed jobs waiting on an invoice or final payment land here so you know what to collect on.",
+    'jobs.empty.paid.title': '💼 No paid jobs yet',
+    'jobs.empty.paid.sub': 'When a job is fully paid, it lands here as a completed-and-collected record.',
+    'jobs.empty.search.title': 'No matches',
+    'jobs.empty.search.sub': 'Try a different job description, client name, or trade.',
     'jobs.add': '+ New job',
     'jobs.filter.all': 'All',
     'jobs.filter.quoted': 'Quoted',
@@ -7694,6 +7873,8 @@ const I18N = {
     'jobDetail.sub': 'Update info, status, and related work. Changes save automatically.',
     'jobDetail.description': 'Description',
     'jobDetail.trade': 'Trade',
+    'jobDetail.trades': 'Trades',
+    'jobDetail.tradesHelp': 'Tap any trade to add or remove it. A job can cover multiple trades.',
     'jobDetail.amount': 'Amount ($)',
     'jobDetail.status': 'Status',
     'jobDetail.notes': 'Notes',
@@ -8778,6 +8959,19 @@ const I18N = {
     'toast.clientSaveFailed': 'No se pudieron guardar los cambios',
     // Jobs
     'jobs.title': 'Trabajos',
+    'jobs.heroTitle': 'Trabajos',
+    'jobs.heroSub': 'Cada trabajo rastreado desde la cotización hasta el pago — ve dónde está el trabajo de un vistazo y encuentra cualquier trabajo en un clic.',
+    'jobs.searchPlaceholder': 'Buscar por trabajo, cliente u oficio...',
+    'jobs.empty.quoted.title': '📋 No hay cotizaciones abiertas',
+    'jobs.empty.quoted.sub': 'Las cotizaciones aceptadas que aún no se han comenzado aparecen aquí. Marca un trabajo En Progreso para avanzarlo.',
+    'jobs.empty.inProgress.title': '🔨 Nada en progreso',
+    'jobs.empty.inProgress.sub': 'Cuando empieces un trabajo, márcalo En Progreso y aparecerá aquí.',
+    'jobs.empty.complete.title': '✅ Nada esperando pago',
+    'jobs.empty.complete.sub': 'Los trabajos completados esperando factura o pago final aparecen aquí para que sepas qué cobrar.',
+    'jobs.empty.paid.title': '💼 Aún no hay trabajos pagados',
+    'jobs.empty.paid.sub': 'Cuando un trabajo está pagado por completo, aparece aquí como un registro completado y cobrado.',
+    'jobs.empty.search.title': 'Sin resultados',
+    'jobs.empty.search.sub': 'Prueba con otra descripción de trabajo, nombre de cliente u oficio.',
     'jobs.add': '+ Nuevo trabajo',
     'jobs.filter.all': 'Todos',
     'jobs.filter.quoted': 'Cotizado',
@@ -8830,6 +9024,8 @@ const I18N = {
     'jobDetail.sub': 'Actualiza datos, estado y trabajos relacionados. Los cambios se guardan automáticamente.',
     'jobDetail.description': 'Descripción',
     'jobDetail.trade': 'Oficio',
+    'jobDetail.trades': 'Oficios',
+    'jobDetail.tradesHelp': 'Toca cualquier oficio para agregarlo o quitarlo. Un trabajo puede cubrir varios oficios.',
     'jobDetail.amount': 'Monto ($)',
     'jobDetail.status': 'Estado',
     'jobDetail.notes': 'Notas',
@@ -9591,6 +9787,25 @@ function getTradeEmoji(trade) {
   return (TRADES.find(t => t.name === trade) || {}).emoji || '';
 }
 
+// Canonical trades array for a job row. Prefers the new `trades` array;
+// falls back to the legacy singular `trade` so rows that haven't been
+// re-saved post-migration still display correctly. Always returns a real
+// array (never null/undefined) so callers can map/join without checks.
+function jobTradesOf(j) {
+  if (!j) return [];
+  if (Array.isArray(j.trades) && j.trades.length) return j.trades.filter(Boolean);
+  if (j.trade) return [j.trade];
+  return [];
+}
+
+// Format an array of trade names for display in tables / chips.
+// Empty → "—". Joined with " · " to match how quotes render trades.
+function formatJobTradesDisplay(trades) {
+  const arr = Array.isArray(trades) ? trades : [];
+  if (!arr.length) return '—';
+  return arr.map(name => `${getTradeEmoji(name)} ${tradeDisplay(name)}`.trim()).join(' · ');
+}
+
 function tradeDisplay(name) {
   return tdLang === 'es' ? (TRADE_LABELS_ES[name] || name) : name;
 }
@@ -9613,7 +9828,7 @@ async function loadJobs() {
     const clientNameById = {};
     clientsLookupCache.forEach(c => { clientNameById[c.id] = c.name; });
     let q = sb.from('jobs')
-      .select('id, client_id, quote_id, description, trade, amount, status, created_at, updated_at, archived_at')
+      .select('id, client_id, quote_id, description, trade, trades, amount, status, created_at, updated_at, archived_at')
       .order('created_at', { ascending: false })
       .limit(500);
     q = viewingArchivedJobs
@@ -9679,22 +9894,48 @@ function renderJobsList() {
   const body = document.getElementById('jobsTableBody');
   const table = document.getElementById('jobsListTable');
   const empty = document.getElementById('jobsListEmpty');
-  const msgEl = document.getElementById('jobsEmptyMessage');
-  const filtered = jobsCache.filter(j => {
+  const searchEl = document.getElementById('jobsSearchInput');
+  const q = (searchEl ? searchEl.value : '').trim().toLowerCase();
+
+  // Stage 1: search filter (archive scope is server-side via loadJobs).
+  // Trades haystack: include every trade name on multi-trade jobs so
+  // searching "Plumbing" finds jobs where it's any of N trades, not
+  // just the first.
+  const searchFiltered = jobsCache.filter(j => {
+    if (!q) return true;
+    const hay = [
+      j.description || '',
+      j.client_name || '',
+      jobTradesOf(j).join(' '),
+    ].join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+
+  // Chip counts derive from the search-filtered set — counts shrink to
+  // match an active search so the chips remain accurate as scan UI.
+  const counts = { all: searchFiltered.length, quoted: 0, in_progress: 0, complete: 0, paid: 0 };
+  searchFiltered.forEach(j => {
+    const s = j.status || 'quoted';
+    if (counts[s] != null) counts[s]++;
+  });
+  const setCount = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = String(n); };
+  setCount('jobCountAll', counts.all);
+  setCount('jobCountQuoted', counts.quoted);
+  setCount('jobCountInProgress', counts.in_progress);
+  setCount('jobCountComplete', counts.complete);
+  setCount('jobCountPaid', counts.paid);
+
+  // Stage 2: apply status-chip filter on top.
+  const filtered = searchFiltered.filter(j => {
     if (jobsFilter === 'all') return true;
     return j.status === jobsFilter;
   });
+
   if (filtered.length === 0) {
     body.innerHTML = '';
     table.classList.add('hidden');
     empty.classList.remove('hidden');
-    if (msgEl) {
-      const key = viewingArchivedJobs
-        ? 'jobs.emptyArchived'
-        : (jobsFilter === 'all' ? 'jobs.empty' : 'jobs.emptyFilter');
-      msgEl.setAttribute('data-i18n', key);
-      msgEl.textContent = t(key);
-    }
+    showJobsEmptyState(q);
     return;
   }
   table.classList.remove('hidden');
@@ -9708,7 +9949,13 @@ function renderJobsList() {
   body.innerHTML = filtered.map(j => {
     const desc = j.description || '—';
     const client = j.client_name || '—';
-    const tradeStr = j.trade ? `${getTradeEmoji(j.trade)} ${tradeDisplay(j.trade)}` : '—';
+    const initial = (client.trim().charAt(0) || '?').toUpperCase();
+    const clientCell = `
+      <span class="job-row-client">
+        <span class="job-row-avatar" aria-hidden="true">${escapeHtml(initial)}</span>
+        <span class="job-row-client-name">${escapeHtml(client)}</span>
+      </span>`;
+    const tradeStr = formatJobTradesDisplay(jobTradesOf(j));
     const amt = fmt(parseFloat(j.amount) || 0);
     const statusKey = j.status || 'quoted';
     const statusCss = statusKey.replace(/_/g, '-');
@@ -9719,7 +9966,7 @@ function renderJobsList() {
           <input type="checkbox" class="bulk-row-cb" data-id="${j.id}" />
         </td>
         <td>${escapeHtml(desc)}</td>
-        <td>${escapeHtml(client)}</td>
+        <td>${clientCell}</td>
         <td>${escapeHtml(tradeStr)}</td>
         <td class="amt-col">${amt}</td>
         <td><select class="status-select status-${statusCss}"
@@ -9761,15 +10008,84 @@ function renderJobsList() {
   reapplyBulkSelection('jobs');
 }
 
+// Empty-state messaging for jobs list. Priority cascade matches the
+// other tabs: search > archive > chip > first-run.
+function showJobsEmptyState(searchQuery) {
+  const titleEl = document.getElementById('jobsEmptyMessage');
+  const subEl = document.getElementById('jobsEmptySub');
+  const iconEl = document.getElementById('jobsEmptyIcon');
+  if (!titleEl) return;
+
+  let icon = '🧰';
+  let titleKey = 'jobs.empty';
+  let subKey = null;
+
+  if (searchQuery) {
+    icon = '🔍';
+    titleKey = 'jobs.empty.search.title';
+    subKey = 'jobs.empty.search.sub';
+  } else if (viewingArchivedJobs) {
+    icon = '📦';
+    titleKey = 'jobs.emptyArchived';
+    subKey = null;
+  } else if (jobsFilter === 'quoted') {
+    icon = '📋';
+    titleKey = 'jobs.empty.quoted.title';
+    subKey = 'jobs.empty.quoted.sub';
+  } else if (jobsFilter === 'in_progress') {
+    icon = '🔨';
+    titleKey = 'jobs.empty.inProgress.title';
+    subKey = 'jobs.empty.inProgress.sub';
+  } else if (jobsFilter === 'complete') {
+    icon = '✅';
+    titleKey = 'jobs.empty.complete.title';
+    subKey = 'jobs.empty.complete.sub';
+  } else if (jobsFilter === 'paid') {
+    icon = '💼';
+    titleKey = 'jobs.empty.paid.title';
+    subKey = 'jobs.empty.paid.sub';
+  }
+  // 'all' filter with no jobs → first-run "No jobs yet" (default keys).
+
+  if (iconEl) iconEl.textContent = icon;
+  titleEl.setAttribute('data-i18n', titleKey);
+  titleEl.textContent = t(titleKey);
+  if (subEl) {
+    if (subKey) {
+      subEl.classList.remove('hidden');
+      subEl.setAttribute('data-i18n', subKey);
+      subEl.textContent = t(subKey);
+    } else {
+      subEl.classList.add('hidden');
+      subEl.removeAttribute('data-i18n');
+      subEl.textContent = '';
+    }
+  }
+}
+
 function bindJobsFilterPills() {
-  document.querySelectorAll('#jobFilterPills button').forEach(btn => {
+  // Jobs now uses the shared .invoice-filter-chips pattern (with counts).
+  // Active state is `.is-active`; chips also reset aria-selected.
+  const wrap = document.getElementById('jobFilterPills');
+  if (!wrap) return;
+  wrap.querySelectorAll('.invoice-chip').forEach(btn => {
     btn.onclick = () => {
-      document.querySelectorAll('#jobFilterPills button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+      wrap.querySelectorAll('.invoice-chip').forEach(b => {
+        const on = b === btn;
+        b.classList.toggle('is-active', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
       jobsFilter = btn.dataset.filter || 'all';
+      clearBulkSelection('jobs');
       renderJobsList();
     };
   });
+  // Search input wires to renderJobsList — debounce-free for snappiness.
+  const searchEl = document.getElementById('jobsSearchInput');
+  if (searchEl && !searchEl.dataset.bound) {
+    searchEl.addEventListener('input', renderJobsList);
+    searchEl.dataset.bound = '1';
+  }
 }
 
 // Pure helper for the Jobs gate. Free → 'teaser'; Pro/Team → 'real'.
@@ -9844,18 +10160,35 @@ async function openJobDetail(jobId) {
   }
 }
 
-function renderJobDetailTradeOptions() {
-  const sel = document.getElementById('jobDetailTrade');
-  if (!sel) return;
-  const current = sel.value;
-  sel.innerHTML = '<option value="">—</option>' +
-    TRADES.map(td => `<option value="${td.name}">${td.emoji} ${tradeDisplay(td.name)}</option>`).join('');
-  if (current) sel.value = current;
+// Renders the multi-trade pill grid in the job-detail form.
+// Each pill toggles its `.is-selected` state on click and schedules
+// a debounced save (same path as every other field on this form).
+function renderJobDetailTradesGrid(selectedTrades) {
+  const grid = document.getElementById('jobDetailTradesGrid');
+  if (!grid) return;
+  const selected = new Set((selectedTrades || []).filter(Boolean));
+  grid.innerHTML = TRADES.map(td => {
+    const isOn = selected.has(td.name);
+    return `<button type="button"
+              class="job-trade-pill${isOn ? ' is-selected' : ''}"
+              data-trade="${escapeHtml(td.name)}"
+              aria-pressed="${isOn ? 'true' : 'false'}">
+              <span class="job-trade-pill-emoji" aria-hidden="true">${td.emoji}</span>
+              <span>${escapeHtml(tradeDisplay(td.name))}</span>
+            </button>`;
+  }).join('');
+  grid.querySelectorAll('.job-trade-pill').forEach(pill => {
+    pill.onclick = () => {
+      const on = !pill.classList.contains('is-selected');
+      pill.classList.toggle('is-selected', on);
+      pill.setAttribute('aria-pressed', on ? 'true' : 'false');
+      if (typeof scheduleJobSave === 'function') scheduleJobSave();
+    };
+  });
 }
 
 function renderJobDetail() {
   if (!activeJobData) return;
-  renderJobDetailTradeOptions();
   const j = activeJobData;
   document.getElementById('jobDetailHeaderTitle').textContent =
     isCreatingNewJob ? t('jobDetail.newHeader') : (j.description || '—');
@@ -9874,7 +10207,9 @@ function renderJobDetail() {
   const jobArchBtn2 = document.getElementById('jobDetailArchiveBtn');
   if (jobArchBtn2) jobArchBtn2.classList.toggle('hidden', !!isCreatingNewJob);
   document.getElementById('jobDetailDescription').value = j.description || '';
-  document.getElementById('jobDetailTrade').value = j.trade || '';
+  // Multi-trade pill grid (replaces the old <select id="jobDetailTrade">).
+  // Backward-compat: if row only has legacy `trade`, jobTradesOf wraps it.
+  renderJobDetailTradesGrid(jobTradesOf(j));
   document.getElementById('jobDetailAmount').value = (j.amount != null) ? j.amount : '';
   document.getElementById('jobDetailStatus').value = j.status || 'quoted';
   document.getElementById('jobDetailNotes').value = j.notes || '';
@@ -10010,14 +10345,25 @@ async function saveJobEdits() {
 
   try {
     const desc = document.getElementById('jobDetailDescription').value.trim();
-    const trade = document.getElementById('jobDetailTrade').value;
+    // Multi-trade pill grid: read selected pills off the DOM. Falls back
+    // to activeJobData.trades if the grid hasn't been rendered yet.
+    const tradesFromGrid = Array.from(
+      document.querySelectorAll('#jobDetailTradesGrid .job-trade-pill.is-selected')
+    ).map(p => p.dataset.trade).filter(Boolean);
+    const tradesArr = tradesFromGrid.length
+      ? tradesFromGrid
+      : (Array.isArray(activeJobData && activeJobData.trades) ? activeJobData.trades.filter(Boolean) : []);
     const amountRaw = parseFloat(document.getElementById('jobDetailAmount').value);
     const status = document.getElementById('jobDetailStatus').value;
     const notes = document.getElementById('jobDetailNotes').value.trim();
 
     const payload = {
       description: desc || null,
-      trade: trade || null,
+      // Write both columns: `trades` is the new source of truth, `trade`
+      // (singular legacy) stays in sync via the first selection so any
+      // unmigrated read paths keep working. We can drop `trade` later.
+      trades: tradesArr,
+      trade: tradesArr[0] || null,
       amount: isFinite(amountRaw) ? amountRaw : 0,
       status: status || 'quoted',
       notes: notes || null,
@@ -10196,6 +10542,7 @@ async function enterNewJobMode(seed) {
     quote_id: seed.quote_id || null,
     description: seed.description || null,
     trade: seed.trade || null,
+    trades: Array.isArray(seed.trades) ? seed.trades.filter(Boolean) : (seed.trade ? [seed.trade] : []),
     amount: seed.amount || 0,
     status: seed.status || 'quoted',
     notes: seed.notes || null,
@@ -10252,11 +10599,15 @@ async function createJobFromCurrentQuote() {
       }
     }
 
+    const quoteTrades = Array.isArray(quoteRow.trades) ? quoteRow.trades.filter(Boolean) : [];
     await enterNewJobMode({
       client_id: quoteRow.client_id,
       quote_id: quoteRow.id,
       description: desc || null,
-      trade: (quoteRow.trades || [])[0] || null,
+      // Multi-trade jobs: carry the full array from the source quote.
+      // `trade` (singular legacy column) stays in sync via the first entry.
+      trades: quoteTrades,
+      trade: quoteTrades[0] || null,
       amount: parseFloat(quoteRow.total) || 0,
       status: 'quoted',
       sourceQuoteForCard: {
@@ -10961,11 +11312,13 @@ function init() {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', scheduleJobSave);
   });
-  ['jobDetailTrade', 'jobDetailStatus'].forEach(id => {
+  // Status is still a <select>; the trades picker is now a pill grid
+  // and wires its own click handlers to scheduleJobSave inside
+  // renderJobDetailTradesGrid (called by renderJobDetail).
+  ['jobDetailStatus'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('change', scheduleJobSave);
   });
-  renderJobDetailTradeOptions();
   updateUsageDisplay();
   bindBilingualEditableSync();
   // Upgrade buttons open the Stripe upgrade modal (sidebar + profile card).
@@ -18291,7 +18644,7 @@ async function openClientDetail(clientId) {
         .eq('client_id', clientId)
         .order('created_at', { ascending: false }),
       sb.from('jobs')
-        .select('id, quote_id, description, trade, amount, status, created_at, archived_at')
+        .select('id, quote_id, description, trade, trades, amount, status, created_at, archived_at')
         .eq('client_id', clientId)
         .order('created_at', { ascending: false }),
       sb.from('followups')
@@ -18849,9 +19202,7 @@ function renderClientDetailJobs() {
   table.classList.remove('hidden');
   empty.classList.add('hidden');
   tbody.innerHTML = jobs.map(j => {
-    const tradeStr = j.trade
-      ? `${getTradeEmoji(j.trade)} ${tradeDisplay(j.trade)}`
-      : '—';
+    const tradeStr = formatJobTradesDisplay(jobTradesOf(j));
     const statusKey = j.status || 'quoted';
     const hasQuote = !!j.quote_id;
     return `
