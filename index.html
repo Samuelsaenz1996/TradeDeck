@@ -1214,11 +1214,38 @@
     margin-bottom: 0;
     max-width: 600px;
   }
+  .jobs-teaser-cta-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
   .jobs-teaser-cta-top,
   .jobs-teaser-cta-bottom {
-    width: 100%;
-    padding: 14px 20px;
-    font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px 26px;
+    min-width: 220px;
+    justify-content: center;
+    font-size: 14.5px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .jobs-teaser-cta-top:hover,
+  .jobs-teaser-cta-bottom:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  .jobs-teaser-cta-icon {
+    font-size: 16px;
+    line-height: 1;
+  }
+  .jobs-teaser-cta-help {
+    font-size: 11.5px;
+    color: var(--ink-3);
+    line-height: 1.4;
+    text-align: center;
   }
 
   /* Feature grid */
@@ -1346,6 +1373,13 @@
       gap: 8px 14px;
     }
     .jobs-teaser-row-main { width: 100%; }
+  }
+  @media (max-width: 540px) {
+    .jobs-teaser-cta-top,
+    .jobs-teaser-cta-bottom {
+      width: 100%;
+      min-width: 0;
+    }
   }
 
   /* === Stripe-setup nudge modal (shown before sending an invoice when
@@ -4718,9 +4752,13 @@
                 <p class="jobs-teaser-body" data-i18n="jobs.teaser.body">Jobs are how serious contractors keep work organized. Every quote you accept becomes a job — track its status, link the invoice that follows, and see exactly where each job stands at a glance.</p>
               </div>
             </div>
-            <button id="jobsTeaserUpgradeBtn" type="button" class="btn-primary jobs-teaser-cta-top">
-              ⭐ <span data-i18n="jobs.teaser.cta">Upgrade to Pro to unlock Jobs</span>
-            </button>
+            <div class="jobs-teaser-cta-wrap">
+              <button id="jobsTeaserUpgradeBtn" type="button" class="btn-primary jobs-teaser-cta-top">
+                <span class="jobs-teaser-cta-icon" aria-hidden="true">⭐</span>
+                <span data-i18n="jobs.teaser.cta">Upgrade to Pro</span>
+              </button>
+              <div class="jobs-teaser-cta-help" data-i18n="jobs.teaser.ctaHelp">Cancel anytime</div>
+            </div>
           </div>
 
           <!-- What Jobs do for you -->
@@ -4838,9 +4876,13 @@
           <div class="card jobs-teaser-cta-card">
             <div class="jobs-teaser-cta-title" data-i18n="jobs.teaser.ctaTitle">Ready to track your work like this?</div>
             <div class="jobs-teaser-cta-sub" data-i18n="jobs.teaser.ctaSub">Upgrade to Pro for unlimited jobs, unlimited quotes, online payments, and more.</div>
-            <button id="jobsTeaserUpgradeBtn2" type="button" class="btn-primary jobs-teaser-cta-bottom">
-              ⭐ <span data-i18n="jobs.teaser.cta">Upgrade to Pro to unlock Jobs</span>
-            </button>
+            <div class="jobs-teaser-cta-wrap">
+              <button id="jobsTeaserUpgradeBtn2" type="button" class="btn-primary jobs-teaser-cta-bottom">
+                <span class="jobs-teaser-cta-icon" aria-hidden="true">⭐</span>
+                <span data-i18n="jobs.teaser.cta">Upgrade to Pro</span>
+              </button>
+              <div class="jobs-teaser-cta-help" data-i18n="jobs.teaser.ctaHelp">Cancel anytime</div>
+            </div>
           </div>
         </div>
 
@@ -6506,7 +6548,8 @@ const I18N = {
     'jobs.teaser.badge': '⭐ Pro feature',
     'jobs.teaser.title': 'Track every job from quote to paid',
     'jobs.teaser.body': 'Jobs are how serious contractors keep work organized. Every quote you accept becomes a job — track its status, link the invoice that follows, and see exactly where each job stands at a glance.',
-    'jobs.teaser.cta': 'Upgrade to Pro to unlock Jobs',
+    'jobs.teaser.cta': 'Upgrade to Pro',
+    'jobs.teaser.ctaHelp': 'Cancel anytime',
     'jobs.teaser.sampleNote': 'Sample data',
     'jobs.teaser.whatTitle': 'What Jobs gives you',
     'jobs.teaser.whatSub': "Four things you can't get with quotes alone — the workflow that turns \"did I send that invoice?\" into \"everything's tracked.\"",
@@ -7528,7 +7571,8 @@ const I18N = {
     'jobs.teaser.badge': '⭐ Función Pro',
     'jobs.teaser.title': 'Lleva cada trabajo desde la cotización hasta el pago',
     'jobs.teaser.body': 'Los trabajos son la forma en que los contratistas serios mantienen la obra organizada. Cada cotización aceptada se convierte en un trabajo — sigue su estado, conecta la factura que sigue y mira exactamente dónde está cada trabajo de un vistazo.',
-    'jobs.teaser.cta': 'Mejora a Pro para desbloquear Trabajos',
+    'jobs.teaser.cta': 'Mejora a Pro',
+    'jobs.teaser.ctaHelp': 'Cancela cuando quieras',
     'jobs.teaser.sampleNote': 'Datos de muestra',
     'jobs.teaser.whatTitle': 'Lo que te da Trabajos',
     'jobs.teaser.whatSub': 'Cuatro cosas que no consigues solo con cotizaciones — el flujo que convierte "¿envié esa factura?" en "todo está bajo control."',
