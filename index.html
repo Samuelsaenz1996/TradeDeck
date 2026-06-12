@@ -14757,6 +14757,12 @@ async function generateQuote() {
     renderQuote(parsed);
 
     document.getElementById('quoteWrap').classList.add('visible');
+    // Pin the document's static labels (Scope of work, Warranty, trade
+    // names, timeline, etc.) to the quote's actual CONTENT language, not
+    // the UI language. Without this, a Spanish UI + English-output quote
+    // would put English AI content under Spanish labels. applyQuoteContentLang
+    // checks the .visible class, so it runs AFTER the add() above.
+    applyQuoteContentLang();
     document.getElementById('quoteWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
     showToast(t('toast.quoteDrafted'));
     completeProgress('generateProgress');
@@ -20364,6 +20370,10 @@ async function openSavedQuote(quoteId) {
     renderTradeTabs();
     renderQuote(currentQuote);
     document.getElementById('quoteWrap').classList.add('visible');
+    // Same as generateQuote — pin the document labels to the saved
+    // quote's content language so reopened English-only quotes don't
+    // show Spanish labels (or vice versa) under a different UI language.
+    applyQuoteContentLang();
 
     switchQuotesSubView('view');
 
