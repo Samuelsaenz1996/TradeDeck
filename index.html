@@ -2636,8 +2636,40 @@
     flex-wrap: wrap;
     gap: 10px;
   }
-  .quote-actions-bar .left { display: flex; gap: 10px; align-items: center; }
+  .quote-actions-bar .left { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   .quote-actions-bar .right { display: flex; gap: 8px; }
+
+  /* Local EN/ES toggle for bilingual quotes. Lets the user flip the
+     quote document language without touching the global UI. Hidden
+     by default; refreshQuoteViewLangToggle() reveals it for quotes
+     that have both languages populated. */
+  .quote-view-lang-toggle {
+    display: inline-flex;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 2px;
+    gap: 0;
+  }
+  .quote-view-lang-toggle button {
+    appearance: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px 12px;
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--ink-3);
+    border-radius: 999px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .quote-view-lang-toggle button:hover { color: var(--ink); }
+  .quote-view-lang-toggle button.active {
+    background: var(--ink);
+    color: #fff;
+  }
   .status-chip {
     display: inline-flex;
     align-items: center;
@@ -5177,6 +5209,12 @@
         <div class="quote-actions-bar">
           <div class="left">
             <div class="status-chip" data-i18n="quote.draftChip">Draft</div>
+            <div class="quote-view-lang-toggle hidden" id="quoteViewLangToggle"
+                 role="group" data-i18n-aria="quote.viewLang.aria"
+                 aria-label="View this quote in">
+              <button type="button" data-vlang="en" data-i18n="lang.short.en">EN</button>
+              <button type="button" data-vlang="es" data-i18n="lang.short.es">ES</button>
+            </div>
             <span class="topbar-meta" id="quoteMetaLine"></span>
           </div>
           <div class="right">
@@ -7762,6 +7800,9 @@ const I18N = {
     'actions.regenerate': 'Regenerate',
     'quoteLang.both': 'English + Spanish',
     'lang.english': 'English',
+    'lang.short.en': 'EN',
+    'lang.short.es': 'ES',
+    'quote.viewLang.aria': 'View this quote in',
     'lang.spanish': 'Spanish',
     'quoteLang.label': 'Generate in',
     'form.tradePricing': 'Pricing for trade',
@@ -8962,6 +9003,9 @@ const I18N = {
     'actions.regenerate': 'Volver a generar',
     'quoteLang.both': 'Inglés + Español',
     'lang.english': 'Inglés',
+    'lang.short.en': 'EN',
+    'lang.short.es': 'ES',
+    'quote.viewLang.aria': 'Ver esta cotización en',
     'lang.spanish': 'Español',
     'quoteLang.label': 'Generar en',
     'form.tradePricing': 'Precio por oficio',
@@ -9873,6 +9917,39 @@ function pickLang(field, fallback) {
   return String(field);
 }
 
+// === Per-quote view-language override ===
+// Lets the user flip the open quote between EN / ES via a local toggle
+// near the quote, without touching the global UI language. Null means
+// "no override active" — the quote follows quoteContentLang() (which
+// falls back to tdLang only when the quote is genuinely bilingual).
+//
+// Scope: this override lives only for the currently-open quote. Opening
+// a different saved quote or generating a new one resets it to null.
+let quoteViewLangOverride = null;
+
+// Resolved view language for the open quote. Used by all quote-side
+// rendering paths and by the bilingual edit write-backs.
+function quoteViewLang() {
+  if (quoteViewLangOverride === 'en' || quoteViewLangOverride === 'es') {
+    return quoteViewLangOverride;
+  }
+  return quoteContentLang();
+}
+
+// pickLang variant used inside the quote document. Identical to pickLang
+// except it consults quoteViewLang() instead of tdLang, so a user who
+// flipped the local toggle to "ES" sees Spanish content even with an
+// English UI (and vice versa).
+function pickQuoteLang(field, fallback) {
+  if (field == null) return fallback || '';
+  if (typeof field === 'string') return field;
+  if (typeof field === 'object') {
+    const lang = quoteViewLang();
+    return field[lang] || field.en || field.es || fallback || '';
+  }
+  return String(field);
+}
+
 function quoteContentLang() {
   if (!currentQuote || !currentQuote.scope || typeof currentQuote.scope !== 'object') return tdLang;
   const hasEn = (currentQuote.scope.en || '').trim().length > 0;
@@ -9896,7 +9973,11 @@ let invoiceReturnTo = 'quote';   // 'quote' | 'list'
 function applyQuoteContentLang() {
   const wrap = document.getElementById('quoteWrap');
   if (!wrap || !wrap.classList.contains('visible') || !currentQuote) return;
-  const lang = quoteContentLang();
+  // quoteViewLang() respects the local EN/ES override first, then falls
+  // back to quoteContentLang() (which itself falls back to tdLang only
+  // when the quote is bilingual). So a user who clicked "ES" on the
+  // local toggle gets Spanish labels even with an English UI.
+  const lang = quoteViewLang();
   const lookup = (key) => (I18N[lang] && I18N[lang][key]) || (I18N.en && I18N.en[key]) || key;
 
   // Static data-i18n labels inside the quote document
@@ -11892,6 +11973,7 @@ function init() {
   });
   updateUsageDisplay();
   bindBilingualEditableSync();
+  bindQuoteViewLangToggle();
   // Upgrade buttons open the Stripe upgrade modal (sidebar + profile card).
   const upgradeBtn = document.getElementById('upgradeBtn');
   if (upgradeBtn) upgradeBtn.onclick = openUpgradeModal;
@@ -13441,7 +13523,10 @@ function bindBilingualEditableSync() {
       if (typeof currentQuote[key] !== 'object' || currentQuote[key] === null) {
         currentQuote[key] = { en: '', es: '' };
       }
-      currentQuote[key][tdLang] = el.textContent;
+      // Write to the slot of the CURRENTLY-VIEWED language. If the local
+      // EN/ES toggle is set to 'es' on a bilingual quote, edits land in
+      // the .es slot regardless of UI language. Mirrors what the user sees.
+      currentQuote[key][quoteViewLang()] = el.textContent;
       scheduleQuoteSave();
     });
   });
@@ -13456,7 +13541,7 @@ function bindBilingualEditableSync() {
       // and store their text directly in both languages.
       currentQuote.paymentTerms.userEdited = true;
       if (!currentQuote.paymentTerms.literal) currentQuote.paymentTerms.literal = { en: '', es: '' };
-      currentQuote.paymentTerms.literal[tdLang] = termsEl.textContent;
+      currentQuote.paymentTerms.literal[quoteViewLang()] = termsEl.textContent;
       scheduleQuoteSave();
     });
   }
@@ -13494,6 +13579,44 @@ function bindBilingualEditableSync() {
   }
 }
 
+// Show the EN/ES toggle only on bilingual quotes (both content slots
+// filled). Mark the button matching the resolved view language as active.
+// English-only or Spanish-only quotes hide the toggle entirely — there's
+// nothing to switch between.
+function refreshQuoteViewLangToggle() {
+  const toggle = document.getElementById('quoteViewLangToggle');
+  if (!toggle) return;
+  if (!currentQuote) { toggle.classList.add('hidden'); return; }
+  const hasEn = currentQuote.scope && typeof currentQuote.scope === 'object'
+    && (currentQuote.scope.en || '').trim().length > 0;
+  const hasEs = currentQuote.scope && typeof currentQuote.scope === 'object'
+    && (currentQuote.scope.es || '').trim().length > 0;
+  const isBilingual = hasEn && hasEs;
+  toggle.classList.toggle('hidden', !isBilingual);
+  if (!isBilingual) return;
+  const active = quoteViewLang();
+  toggle.querySelectorAll('button').forEach(b => {
+    b.classList.toggle('active', b.dataset.vlang === active);
+  });
+}
+
+// Wire the EN/ES buttons once at bind time. Clicking sets the override,
+// re-pins the document labels, and re-renders the AI content + line
+// items in the chosen language.
+function bindQuoteViewLangToggle() {
+  document.querySelectorAll('#quoteViewLangToggle button').forEach(btn => {
+    btn.onclick = () => {
+      const lang = btn.dataset.vlang === 'es' ? 'es' : 'en';
+      quoteViewLangOverride = lang;
+      refreshQuoteViewLangToggle();
+      // Re-render AI-generated content (scope, warranty, terms, line items)
+      // in the new language, then re-pin the static document labels too.
+      rerenderQuoteForLanguage();
+      applyQuoteContentLang();
+    };
+  });
+}
+
 function refreshQuoteLangNotice() {
   const notice = document.getElementById('quoteLangNotice');
   const text = document.getElementById('quoteLangNoticeText');
@@ -13518,14 +13641,18 @@ function refreshQuoteLangNotice() {
 function rerenderQuoteForLanguage() {
   const wrap = document.getElementById('quoteWrap');
   if (!currentQuote || !wrap || !wrap.classList.contains('visible')) return;
-  document.getElementById('quoteScope').textContent = pickLang(currentQuote.scope);
+  document.getElementById('quoteScope').textContent = pickQuoteLang(currentQuote.scope);
   // Payment terms are re-rendered from the template, not picked directly.
   renderPaymentTerms();
-  document.getElementById('quoteWarranty').textContent = pickLang(currentQuote.warranty);
+  document.getElementById('quoteWarranty').textContent = pickQuoteLang(currentQuote.warranty);
   // Full re-render also refreshes sub-header trade names in the new language
   renderLineItemsTable();
   recalcTotals();
   refreshQuoteLangNotice();
+  // Keep the local EN/ES toggle's "active" button in sync — UI language
+  // changes can affect which button reads active on a bilingual quote
+  // that has no override set.
+  refreshQuoteViewLangToggle();
 }
 
 function rerenderFollowupForLanguage() {
@@ -14639,6 +14766,10 @@ async function generateQuote() {
     showToast(t('toast.selectTradeFirst'), true);
     return;
   }
+  // Clear any view-language override held over from a previous quote.
+  // Each freshly-generated quote starts neutral so the local toggle
+  // defers to quoteContentLang() until the user explicitly clicks EN/ES.
+  quoteViewLangOverride = null;
   // Save current tab state first so the desc validation below sees fresh data
   saveActiveTradeState();
 
@@ -14763,6 +14894,8 @@ async function generateQuote() {
     // would put English AI content under Spanish labels. applyQuoteContentLang
     // checks the .visible class, so it runs AFTER the add() above.
     applyQuoteContentLang();
+    // Show the EN/ES toggle if this is a bilingual quote ("Both" picked).
+    refreshQuoteViewLangToggle();
     document.getElementById('quoteWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
     showToast(t('toast.quoteDrafted'));
     completeProgress('generateProgress');
@@ -15333,7 +15466,7 @@ function renderQuote(data) {
   clientAddrEl.textContent = clientAddr;
   applyProfileToQuoteHeader();
   document.getElementById('quoteTradeMeta').innerHTML = `<strong>${selectedTradeDisplay()}</strong><br/>${timelineLabel(timeline)}`;
-  document.getElementById('quoteScope').textContent = pickLang(data.scope);
+  document.getElementById('quoteScope').textContent = pickQuoteLang(data.scope);
   // If AI returned legacy string-shaped paymentTerms, wrap it as a literal
   // so the userEdited path can still display it sensibly.
   if (data.paymentTerms && typeof data.paymentTerms === 'object' && !data.paymentTerms.template) {
@@ -15346,10 +15479,10 @@ function renderQuote(data) {
   }
   if (data.paymentTerms && data.paymentTerms.userEdited && data.paymentTerms.literal) {
     document.getElementById('quoteTerms').textContent =
-      data.paymentTerms.literal[tdLang] || data.paymentTerms.literal.en || '';
+      data.paymentTerms.literal[quoteViewLang()] || data.paymentTerms.literal.en || '';
   }
   // renderPaymentTerms() will run from recalcTotals() below.
-  document.getElementById('quoteWarranty').textContent = pickLang(data.warranty);
+  document.getElementById('quoteWarranty').textContent = pickQuoteLang(data.warranty);
   document.getElementById('quoteMetaLine').textContent = `${selectedTradeDisplay()} · ${timelineLabel(timeline)} · ${clientName}`;
 
   // line items — render the whole table including per-trade sub-headers
@@ -15380,8 +15513,8 @@ function createLineItemRow(item, index) {
   const tr = document.createElement('tr');
   if (typeof index === 'number') tr.dataset.lineIndex = String(index);
   const safe = (s) => (s == null ? '' : String(s));
-  const nameText = item ? pickLang(item.name) : '';
-  const descText = item ? pickLang(item.desc) : '';
+  const nameText = item ? pickQuoteLang(item.name) : '';
+  const descText = item ? pickQuoteLang(item.desc) : '';
   const amt = item && typeof item.amount === 'number' ? item.amount : 0;
 
   tr.innerHTML = `
@@ -15407,8 +15540,10 @@ function createLineItemRow(item, index) {
     if (!li) return;
     if (typeof li.name !== 'object' || li.name === null) li.name = { en: '', es: '' };
     if (typeof li.desc !== 'object' || li.desc === null) li.desc = { en: '', es: '' };
-    li.name[tdLang] = nameEl.textContent;
-    li.desc[tdLang] = descEl.textContent;
+    // Write to the currently-viewed language slot (override-aware).
+    const writeLang = quoteViewLang();
+    li.name[writeLang] = nameEl.textContent;
+    li.desc[writeLang] = descEl.textContent;
     li.amount = parseAmount(amtEl.textContent);
     if (li.trade && getTradeFlatRateTarget(li.trade) !== null) {
       redistributeFlatRateTrade(li.trade, i);
@@ -15612,7 +15747,7 @@ function renderPaymentTerms() {
   const template = currentQuote.paymentTerms.template;
   if (!template || typeof template !== 'object') return;
 
-  const rawTemplate = template[tdLang] || template.en || '';
+  const rawTemplate = template[quoteViewLang()] || template.en || '';
   if (!rawTemplate) return;
 
   const subtotal = Array.from(document.querySelectorAll('#lineBody .amt-cell'))
@@ -20341,6 +20476,10 @@ function showQuotesEmptyState(searchQuery) {
 // Open a saved quote: fetch full payload, restore state, switch subview.
 async function openSavedQuote(quoteId) {
   try {
+    // Clear any view-language override from a previously-open quote.
+    // Each opened quote starts neutral; the user can flip EN/ES locally
+    // if the quote is bilingual.
+    quoteViewLangOverride = null;
     const { data, error } = await sb
       .from('quotes')
       .select('*')
@@ -20374,6 +20513,7 @@ async function openSavedQuote(quoteId) {
     // quote's content language so reopened English-only quotes don't
     // show Spanish labels (or vice versa) under a different UI language.
     applyQuoteContentLang();
+    refreshQuoteViewLangToggle();
 
     switchQuotesSubView('view');
 
