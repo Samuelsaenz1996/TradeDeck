@@ -3929,6 +3929,114 @@
       flex: 0 0 auto;
     }
   }
+
+  /* === Help / FAQ tab === */
+  .help-hero-card { margin-bottom: 16px; }
+  .help-search-input { width: 100%; margin-top: 14px; }
+  .help-chips-card { margin-bottom: 16px; padding: 16px 18px; }
+  .help-chips-card .invoice-filter-chips { margin-bottom: 0; }
+  .help-chip--start.is-active     { background: #4A6BB8; border-color: #4A6BB8; color: #fff; }
+  .help-chip--quotes.is-active    { background: #2F7A4D; border-color: #2F7A4D; color: #fff; }
+  .help-chip--invoices.is-active  { background: #B8731F; border-color: #B8731F; color: #fff; }
+  .help-chip--clients.is-active   { background: #7A4FB8; border-color: #7A4FB8; color: #fff; }
+  .help-chip--followups.is-active { background: #B33A2A; border-color: #B33A2A; color: #fff; }
+  .help-chip--jobs.is-active      { background: #1A1F2E; border-color: #1A1F2E; color: #fff; }
+  .help-chip--billing.is-active   { background: #1D9E75; border-color: #1D9E75; color: #fff; }
+  .help-chip--account.is-active   { background: #5A6068; border-color: #5A6068; color: #fff; }
+  .help-chip--start:not(.is-active) .invoice-chip-count     { color: #4A6BB8; background: rgba(74,107,184,0.12); }
+  .help-chip--quotes:not(.is-active) .invoice-chip-count    { color: #2F7A4D; background: rgba(47,122,77,0.12); }
+  .help-chip--invoices:not(.is-active) .invoice-chip-count  { color: #B8731F; background: rgba(184,115,31,0.12); }
+  .help-chip--clients:not(.is-active) .invoice-chip-count   { color: #7A4FB8; background: rgba(122,79,184,0.12); }
+  .help-chip--followups:not(.is-active) .invoice-chip-count { color: #B33A2A; background: rgba(179,58,42,0.12); }
+  .help-chip--jobs:not(.is-active) .invoice-chip-count      { color: #1A1F2E; background: rgba(26,31,46,0.10); }
+  .help-chip--billing:not(.is-active) .invoice-chip-count   { color: #1D9E75; background: rgba(29,158,117,0.12); }
+  .help-chip--account:not(.is-active) .invoice-chip-count   { color: #5A6068; background: rgba(90,96,104,0.12); }
+
+  .help-list-card { padding: 8px 18px; }
+  .help-faq-list { display: flex; flex-direction: column; }
+  .help-faq-item { border-bottom: 1px solid var(--line-2); }
+  .help-faq-item:last-child { border-bottom: none; }
+  .help-faq-q {
+    appearance: none;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 16px 4px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  .help-faq-q:hover { color: var(--ink-2); }
+  .help-faq-chev {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    color: var(--ink-3);
+    transition: transform 0.2s;
+    margin-top: 4px;
+  }
+  .help-faq-item.is-open .help-faq-chev { transform: rotate(90deg); color: var(--ink); }
+  .help-faq-q-text { flex: 1; min-width: 0; }
+  .help-faq-cat {
+    flex-shrink: 0;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    margin-top: 3px;
+  }
+  .help-faq-a {
+    display: none;
+    padding: 0 4px 18px 28px;
+    color: var(--ink-2);
+    font-size: 13.5px;
+    line-height: 1.65;
+  }
+  .help-faq-a p { margin: 0 0 10px; }
+  .help-faq-a p:last-child { margin-bottom: 0; }
+  .help-faq-a strong { color: var(--ink); }
+  .help-faq-a ol, .help-faq-a ul { margin: 0 0 10px; padding-left: 20px; }
+  .help-faq-a li { margin-bottom: 4px; }
+  .help-faq-item.is-open .help-faq-a { display: block; }
+
+  .help-support-card { margin-top: 16px; background: var(--surface-2); }
+  .help-support-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .help-support-icon {
+    width: 44px; height: 44px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .help-support-text { flex: 1; min-width: 0; }
+  .help-support-title { font-weight: 700; color: var(--ink); margin-bottom: 3px; font-size: 14.5px; }
+  .help-support-body { color: var(--ink-2); font-size: 13px; line-height: 1.45; }
+  .help-support-btn { flex-shrink: 0; text-decoration: none; }
+
+  @media (max-width: 600px) {
+    .help-faq-cat { display: none; }
+    .help-faq-q { font-size: 13.5px; padding: 14px 4px; }
+    .help-support-inner { flex-direction: column; align-items: stretch; text-align: center; }
+    .help-support-icon { align-self: center; }
+    .help-support-btn { width: 100%; text-align: center; }
+  }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -4037,6 +4145,10 @@
     <div id="navProfile" class="nav-item">
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       <span data-i18n="nav.settings">Settings</span>
+    </div>
+    <div id="navHelp" class="nav-item">
+      <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span data-i18n="nav.help">Help</span>
     </div>
     <div id="navSignOut" class="nav-item">
       <svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -7126,6 +7238,84 @@
         </div>
       </div>
 
+      <div id="helpView" class="hidden">
+        <div class="card help-hero-card">
+          <div class="settings-hero">
+            <div class="settings-hero-icon" aria-hidden="true">&#128161;</div>
+            <div class="settings-hero-text">
+              <h2 class="card-title" data-i18n="help.heroTitle">Help &amp; FAQ</h2>
+              <p class="card-sub" data-i18n="help.heroSub">Find answers fast, or reach out — we'll get you unstuck.</p>
+            </div>
+          </div>
+          <input type="search" class="input help-search-input" id="helpSearchInput"
+                 data-i18n-placeholder="help.searchPlaceholder"
+                 placeholder="Search help..." />
+        </div>
+
+        <div class="card help-chips-card">
+          <div class="invoice-filter-chips" id="helpFilterChips" role="tablist" aria-label="Filter by category">
+            <button type="button" class="invoice-chip is-active" data-helpfilter="all" role="tab" aria-selected="true">
+              <span class="invoice-chip-label" data-i18n="help.filter.all">All</span>
+              <span class="invoice-chip-count" id="helpCountAll">0</span>
+            </button>
+            <button type="button" class="invoice-chip help-chip--start" data-helpfilter="getting-started" role="tab" aria-selected="false">
+              <span class="invoice-chip-label" data-i18n="help.filter.gettingStarted">Getting started</span>
+              <span class="invoice-chip-count" id="helpCountGettingStarted">0</span>
+            </button>
+            <button type="button" class="invoice-chip help-chip--quotes" data-helpfilter="quotes" role="tab" aria-selected="false">
+              <span class="invoice-chip-label" data-i18n="help.filter.quotes">Quotes</span>
+              <span class="invoice-chip-count" id="helpCountQuotes">0</span>
+            </button>
+            <button type="button" class="invoice-chip help-chip--invoices" data-helpfilter="invoices" role="tab" aria-selected="false">
+              <span class="invoice-chip-label" data-i18n="help.filter.invoices">Invoices</span>
+              <span class="invoice-chip-count" id="helpCountInvoices">0</span>
+            </button>
+            <button type="button" class="invoice-chip help-chip--clients" data-helpfilter="clients" role="tab" aria-selected="false">
+              <span class="invoice-chip-label" data-i18n="help.filter.clients">Clients</span>
+              <span class="invoice-chip-count" id="helpCountClients">0</span>
+            </button>
+            <button type="button" class="invoice-chip help-chip--followups" data-helpfilter="followups" role="tab" aria-selected="false">
+              <span class="invoice-chip-label" data-i18n="help.filter.followups">Follow-ups</span>
+              <span class="invoice-chip-count" id="helpCountFollowups">0</span>
+            </button>
+            <button type="button" class="invoice-chip help-chip--jobs" data-helpfilter="jobs" role="tab" aria-selected="false">
+              <span class="invoice-chip-label" data-i18n="help.filter.jobs">Jobs</span>
+              <span class="invoice-chip-count" id="helpCountJobs">0</span>
+            </button>
+            <button type="button" class="invoice-chip help-chip--billing" data-helpfilter="billing" role="tab" aria-selected="false">
+              <span class="invoice-chip-label" data-i18n="help.filter.billing">Billing</span>
+              <span class="invoice-chip-count" id="helpCountBilling">0</span>
+            </button>
+            <button type="button" class="invoice-chip help-chip--account" data-helpfilter="account" role="tab" aria-selected="false">
+              <span class="invoice-chip-label" data-i18n="help.filter.account">Account</span>
+              <span class="invoice-chip-count" id="helpCountAccount">0</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card help-list-card">
+          <div id="helpFaqList" class="help-faq-list"></div>
+          <div id="helpFaqEmpty" class="hidden invoices-empty">
+            <div class="invoices-empty-icon">&#128269;</div>
+            <p class="invoices-empty-title" data-i18n="help.empty">No matches. Try a different search or category.</p>
+          </div>
+        </div>
+
+        <div class="card help-support-card">
+          <div class="help-support-inner">
+            <div class="help-support-icon" aria-hidden="true">&#128236;</div>
+            <div class="help-support-text">
+              <div class="help-support-title" data-i18n="help.support.title">Still need help?</div>
+              <div class="help-support-body" data-i18n="help.support.body">We typically reply within one business day.</div>
+            </div>
+            <a class="btn-primary help-support-btn" id="helpSupportEmailBtn"
+               href="mailto:help@mytradedeck.com?subject=MyTradeDeck%20support">
+              <span data-i18n="help.support.email">Email support</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
     </div>
   </main>
 </div>
@@ -8653,6 +8843,77 @@ const I18N = {
     'profile.account.sub': 'Manage your sign-in details and what happens to your data. Changing your password or email here takes effect immediately.',
     'profile.account.email': 'Email',
     'profile.account.memberSince': 'Member since',
+
+    // Help / FAQ tab
+    'nav.help': 'Help',
+    'topbar.helpHtml': 'Help <em>center</em>',
+    'help.heroTitle': 'Help & FAQ',
+    'help.heroSub': "Find answers fast, or reach out — we'll get you unstuck.",
+    'help.searchPlaceholder': 'Search help…',
+    'help.empty': 'No matches. Try a different search or category.',
+    'help.filter.all': 'All',
+    'help.filter.gettingStarted': 'Getting started',
+    'help.filter.quotes': 'Quotes',
+    'help.filter.invoices': 'Invoices',
+    'help.filter.clients': 'Clients',
+    'help.filter.followups': 'Follow-ups',
+    'help.filter.jobs': 'Jobs',
+    'help.filter.billing': 'Billing',
+    'help.filter.account': 'Account',
+    'help.support.title': 'Still need help?',
+    'help.support.body': 'Email us and a human will reply — usually within one business day.',
+    'help.support.email': 'Email support',
+
+    'help.faq.logo.q': 'How do I add my logo to quotes and invoices?',
+    'help.faq.logo.a': '<p>Open <strong>Settings</strong> from the sidebar, find the <strong>Branding</strong> card, and upload a PNG or JPG. Your logo appears on every quote and invoice you generate from that point on.</p><p>For best results, upload a square or wide image with a transparent background.</p>',
+
+    'help.faq.language.q': 'How do I change the language of the app?',
+    'help.faq.language.a': '<p>Use the <strong>English / Spanish</strong> toggle in the top-right of the screen. This switches the entire interface — sidebar, buttons, forms, everything.</p><p>The language you choose for the <em>app</em> is separate from the language you choose to <em>generate a quote in</em> — you can be in Spanish but still send a quote in English.</p>',
+
+    'help.faq.companyInfo.q': 'How do I change my company name, phone, or address on every document?',
+    'help.faq.companyInfo.a': '<p>Open <strong>Settings</strong> and edit the <strong>Business profile</strong> card. Your company name, contact info, address, license, and tagline are pulled into every new quote and invoice header automatically.</p>',
+
+    'help.faq.sendQuote.q': 'How do I send a quote to a client?',
+    'help.faq.sendQuote.a': '<p>After generating a quote, use the action buttons at the top of the document:</p><ol><li><strong>Email</strong> — opens your email app pre-filled with the quote attached as a PDF.</li><li><strong>Download</strong> — saves a PDF you can send any way you like (text, WhatsApp, print).</li></ol><p>Note: you need to confirm your email before sending or downloading. Look for the prompt in the sidebar if you haven\'t already.</p>',
+
+    'help.faq.mixedLanguage.q': 'I picked English but part of my quote came back in Spanish. What happened?',
+    'help.faq.mixedLanguage.a': '<p>This was a bug we fixed. Your quote document now follows the language you select in the <strong>Generate in</strong> picker on the quote form — regardless of what language the app interface is in.</p><p>If you still see this, try generating the quote again. If the problem persists, email support.</p>',
+
+    'help.faq.bilingualQuote.q': 'Can I generate one quote in both English and Spanish?',
+    'help.faq.bilingualQuote.a': '<p>Yes. On the quote form, set <strong>Generate in</strong> to <strong>Both</strong>. The quote will be filled out in both languages internally — you\'ll see an EN / ES toggle near the quote document so you (or the client) can flip between views.</p>',
+
+    'help.faq.switchQuoteLang.q': 'How do I switch the quote view between English and Spanish after generating?',
+    'help.faq.switchQuoteLang.a': '<p>If your quote was generated in <strong>Both</strong> languages, an <strong>EN / ES</strong> pill toggle appears next to the Draft chip above the quote document. Click it to flip the quote between languages.</p><p>This only changes the quote document itself — your sidebar, buttons, and the rest of the app stay in whatever language you\'re using.</p><p>If the toggle isn\'t showing, the quote was generated in only one language. Generate a new one with <strong>Generate in: Both</strong> to get the toggle.</p>',
+
+    'help.faq.editQuote.q': 'Can I edit a quote after generating it?',
+    'help.faq.editQuote.a': '<p>Yes. Click directly on the scope, warranty, payment terms, or any line item in the generated quote — they\'re editable text. Your edits save automatically and will be in any PDF you download or email.</p>',
+
+    'help.faq.invoiceFromQuote.q': 'How do I turn a quote into an invoice?',
+    'help.faq.invoiceFromQuote.a': '<p>Open the quote (from <strong>Quotes</strong> in the sidebar) and click <strong>Create invoice</strong>. The invoice is pre-filled with the client, scope, line items, and totals from the quote — adjust as needed and save.</p>',
+
+    'help.faq.recordPayment.q': 'How do I record a payment on an invoice?',
+    'help.faq.recordPayment.a': '<p>Open the invoice from <strong>Invoices</strong> in the sidebar, then click <strong>Record payment</strong>. Enter the amount, date, and method. The invoice status updates automatically — partial payments are tracked, and the invoice flips to <strong>Paid</strong> once the balance reaches zero.</p>',
+
+    'help.faq.addClient.q': 'How do I add a new client?',
+    'help.faq.addClient.a': '<p>You have three options:</p><ol><li>Open <strong>Clients</strong> in the sidebar and click <strong>+ New Client</strong>.</li><li>Generate a quote with a new client name — they\'re added automatically.</li><li>Open a job and use <strong>+ New Client</strong> from inside the client picker.</li></ol>',
+
+    'help.faq.clientStatuses.q': "What's the difference between Leads, Active, and Past clients?",
+    'help.faq.clientStatuses.a': '<p>These statuses are computed automatically from each client\'s activity:</p><ul><li><strong>Lead</strong> — you\'ve quoted them but never invoiced.</li><li><strong>Active</strong> — they have at least one unpaid invoice, or recent activity.</li><li><strong>Past</strong> — all their invoices are paid and there\'s been no recent activity.</li></ul><p>Use the chips at the top of the Clients tab to filter by status.</p>',
+
+    'help.faq.whatIsFollowup.q': 'What is a follow-up and when do I use it?',
+    'help.faq.whatIsFollowup.a': '<p>A follow-up is a short, friendly message you send to a client to nudge them — usually after sending a quote that hasn\'t come back, or after an invoice goes unpaid.</p><p>Open <strong>Follow-ups</strong> in the sidebar, click <strong>+ New Follow-up</strong>, pick the client and the purpose (Quote or Invoice), and generate. You\'ll get a polished, professional message ready to send.</p>',
+
+    'help.faq.linkToJob.q': 'How do I link a quote, follow-up, and invoice to the same job?',
+    'help.faq.linkToJob.a': '<p>Open the job from the <strong>Jobs</strong> tab. From inside the job you can:</p><ol><li>Add a new quote — it\'s automatically attached to this job.</li><li>Add a new follow-up — also attached.</li><li>Convert the quote to an invoice — the invoice inherits the same job link.</li></ol><p>Everything connected to that job shows up in one place: quotes, invoices, follow-ups, and amounts.</p>',
+
+    'help.faq.freeTierCap.q': 'What happens when I hit the free-tier limit?',
+    'help.faq.freeTierCap.a': '<p>The free plan includes 3 quotes. Once you hit the cap, the Generate button shows an upgrade prompt instead of generating. You can:</p><ul><li><strong>Upgrade to Pro</strong> ($49/month) for unlimited quotes, invoices, follow-ups, and clients.</li><li>Continue using the app to <em>view</em> existing quotes, edit clients, and send follow-ups for what you already created — but no new quotes until you upgrade.</li></ul>',
+
+    'help.faq.cancelPro.q': 'How do I cancel my Pro subscription?',
+    'help.faq.cancelPro.a': '<p>Open <strong>Settings</strong> and click <strong>Manage subscription</strong>. This opens the Stripe customer portal where you can cancel, update your payment method, or download invoices.</p><p>If you cancel, you keep Pro until the end of your current billing period.</p>',
+
+    'help.faq.deleteAccount.q': 'How do I permanently delete my account?',
+    'help.faq.deleteAccount.a': '<p>Open <strong>Settings</strong>, scroll to <strong>Account &amp; security</strong>, and use <strong>Delete account</strong>. This is permanent — your quotes, invoices, clients, follow-ups, jobs, and login are all removed and cannot be recovered.</p><p>If you have an active Pro subscription, it\'s canceled automatically as part of the deletion.</p>',
   },
   es: {
     // Sidebar
@@ -9856,6 +10117,77 @@ const I18N = {
     'profile.account.sub': 'Administra tus datos de inicio de sesión y lo que pasa con tu información. Los cambios de contraseña o correo se aplican de inmediato.',
     'profile.account.email': 'Correo',
     'profile.account.memberSince': 'Miembro desde',
+
+    // Ayuda / FAQ
+    'nav.help': 'Ayuda',
+    'topbar.helpHtml': 'Centro de <em>ayuda</em>',
+    'help.heroTitle': 'Ayuda y preguntas frecuentes',
+    'help.heroSub': 'Encuentra respuestas rápido, o escríbenos — te sacamos del apuro.',
+    'help.searchPlaceholder': 'Buscar en la ayuda…',
+    'help.empty': 'Sin resultados. Prueba con otra búsqueda o categoría.',
+    'help.filter.all': 'Todas',
+    'help.filter.gettingStarted': 'Para empezar',
+    'help.filter.quotes': 'Cotizaciones',
+    'help.filter.invoices': 'Facturas',
+    'help.filter.clients': 'Clientes',
+    'help.filter.followups': 'Seguimientos',
+    'help.filter.jobs': 'Trabajos',
+    'help.filter.billing': 'Facturación',
+    'help.filter.account': 'Cuenta',
+    'help.support.title': '¿Aún necesitas ayuda?',
+    'help.support.body': 'Escríbenos y un humano te responde — normalmente en un día hábil.',
+    'help.support.email': 'Escribir a soporte',
+
+    'help.faq.logo.q': '¿Cómo agrego mi logo a las cotizaciones y facturas?',
+    'help.faq.logo.a': '<p>Abre <strong>Ajustes</strong> en la barra lateral, busca la tarjeta de <strong>Marca</strong> y sube un PNG o JPG. Tu logo aparecerá en todas las cotizaciones y facturas que generes a partir de ese momento.</p><p>Para mejores resultados, sube una imagen cuadrada o ancha con fondo transparente.</p>',
+
+    'help.faq.language.q': '¿Cómo cambio el idioma de la aplicación?',
+    'help.faq.language.a': '<p>Usa el botón <strong>English / Spanish</strong> en la esquina superior derecha. Esto cambia toda la interfaz — barra lateral, botones, formularios, todo.</p><p>El idioma de la <em>app</em> es independiente del idioma en el que <em>generas la cotización</em> — puedes tener la app en español pero enviar una cotización en inglés.</p>',
+
+    'help.faq.companyInfo.q': '¿Cómo cambio el nombre de mi empresa, teléfono o dirección en todos los documentos?',
+    'help.faq.companyInfo.a': '<p>Abre <strong>Ajustes</strong> y edita la tarjeta de <strong>Perfil del negocio</strong>. El nombre, contacto, dirección, licencia y eslogan se cargan automáticamente en cada cotización y factura nueva.</p>',
+
+    'help.faq.sendQuote.q': '¿Cómo le envío una cotización a un cliente?',
+    'help.faq.sendQuote.a': '<p>Después de generar una cotización, usa los botones de acción arriba del documento:</p><ol><li><strong>Correo</strong> — abre tu app de correo con la cotización ya adjunta como PDF.</li><li><strong>Descargar</strong> — guarda un PDF que puedes enviar como prefieras (mensaje, WhatsApp, imprimir).</li></ol><p>Nota: necesitas confirmar tu correo para poder enviar o descargar. Busca el aviso en la barra lateral si aún no lo hiciste.</p>',
+
+    'help.faq.mixedLanguage.q': 'Elegí inglés pero parte de mi cotización salió en español. ¿Qué pasó?',
+    'help.faq.mixedLanguage.a': '<p>Era un error que ya corregimos. Tu cotización ahora respeta el idioma que selecciones en el campo <strong>Generar en</strong> del formulario — sin importar el idioma de la interfaz.</p><p>Si lo sigues viendo, intenta generar la cotización de nuevo. Si persiste, escríbele a soporte.</p>',
+
+    'help.faq.bilingualQuote.q': '¿Puedo generar una cotización en inglés y español a la vez?',
+    'help.faq.bilingualQuote.a': '<p>Sí. En el formulario, pon <strong>Generar en</strong> en <strong>Ambos</strong>. La cotización se llena en los dos idiomas internamente — verás un botón EN / ES cerca del documento para alternar entre vistas.</p>',
+
+    'help.faq.switchQuoteLang.q': '¿Cómo cambio el idioma de la cotización entre inglés y español después de generarla?',
+    'help.faq.switchQuoteLang.a': '<p>Si tu cotización se generó en <strong>Ambos</strong> idiomas, aparece un botón <strong>EN / ES</strong> junto a la etiqueta de Borrador arriba del documento. Toca para alternar entre idiomas.</p><p>Esto solo cambia el documento — la barra lateral, los botones y el resto de la app siguen en el idioma que estés usando.</p><p>Si no ves el botón, la cotización se generó en un solo idioma. Genera una nueva con <strong>Generar en: Ambos</strong> para obtener el botón.</p>',
+
+    'help.faq.editQuote.q': '¿Puedo editar una cotización después de generarla?',
+    'help.faq.editQuote.a': '<p>Sí. Toca directamente sobre el alcance, garantía, términos de pago o cualquier partida en la cotización generada — son texto editable. Tus cambios se guardan solos y aparecerán en cualquier PDF que descargues o envíes.</p>',
+
+    'help.faq.invoiceFromQuote.q': '¿Cómo convierto una cotización en una factura?',
+    'help.faq.invoiceFromQuote.a': '<p>Abre la cotización (desde <strong>Cotizaciones</strong> en la barra lateral) y toca <strong>Crear factura</strong>. La factura se llena con el cliente, alcance, partidas y totales de la cotización — ajusta lo que necesites y guarda.</p>',
+
+    'help.faq.recordPayment.q': '¿Cómo registro un pago en una factura?',
+    'help.faq.recordPayment.a': '<p>Abre la factura desde <strong>Facturas</strong> en la barra lateral y toca <strong>Registrar pago</strong>. Ingresa monto, fecha y método. El estado se actualiza solo — los pagos parciales se llevan en cuenta, y la factura pasa a <strong>Pagada</strong> cuando el saldo llega a cero.</p>',
+
+    'help.faq.addClient.q': '¿Cómo agrego un cliente nuevo?',
+    'help.faq.addClient.a': '<p>Tienes tres opciones:</p><ol><li>Abre <strong>Clientes</strong> en la barra lateral y toca <strong>+ Nuevo Cliente</strong>.</li><li>Genera una cotización con un cliente nuevo — se agrega solo.</li><li>Abre un trabajo y usa <strong>+ Nuevo Cliente</strong> dentro del selector de clientes.</li></ol>',
+
+    'help.faq.clientStatuses.q': '¿Cuál es la diferencia entre Prospectos, Activos y Antiguos?',
+    'help.faq.clientStatuses.a': '<p>Estos estados se calculan solos según la actividad de cada cliente:</p><ul><li><strong>Prospecto</strong> — le has cotizado pero nunca facturado.</li><li><strong>Activo</strong> — tiene al menos una factura sin pagar, o actividad reciente.</li><li><strong>Antiguo</strong> — todas sus facturas están pagadas y no hay actividad reciente.</li></ul><p>Usa los chips arriba de la pestaña de Clientes para filtrar por estado.</p>',
+
+    'help.faq.whatIsFollowup.q': '¿Qué es un seguimiento y cuándo lo uso?',
+    'help.faq.whatIsFollowup.a': '<p>Un seguimiento es un mensaje corto y amable para recordarle al cliente — normalmente después de mandar una cotización que no contestó, o cuando una factura no se ha pagado.</p><p>Abre <strong>Seguimientos</strong> en la barra lateral, toca <strong>+ Nuevo Seguimiento</strong>, elige al cliente y el propósito (Cotización o Factura), y genera. Tendrás un mensaje profesional listo para enviar.</p>',
+
+    'help.faq.linkToJob.q': '¿Cómo conecto una cotización, seguimiento y factura al mismo trabajo?',
+    'help.faq.linkToJob.a': '<p>Abre el trabajo desde la pestaña de <strong>Trabajos</strong>. Desde adentro del trabajo puedes:</p><ol><li>Agregar una cotización nueva — queda conectada a este trabajo automáticamente.</li><li>Agregar un seguimiento nuevo — también queda conectado.</li><li>Convertir la cotización en factura — la factura hereda la misma conexión al trabajo.</li></ol><p>Todo lo conectado a ese trabajo aparece en un solo lugar: cotizaciones, facturas, seguimientos y montos.</p>',
+
+    'help.faq.freeTierCap.q': '¿Qué pasa cuando llego al límite del plan gratis?',
+    'help.faq.freeTierCap.a': '<p>El plan gratis incluye 3 cotizaciones. Al llegar al tope, el botón Generar muestra un aviso de mejora en vez de generar. Puedes:</p><ul><li><strong>Mejorar a Pro</strong> ($49/mes) por cotizaciones, facturas, seguimientos y clientes ilimitados.</li><li>Seguir usando la app para <em>ver</em> cotizaciones, editar clientes y mandar seguimientos de lo que ya creaste — pero no podrás generar nuevas cotizaciones hasta mejorar.</li></ul>',
+
+    'help.faq.cancelPro.q': '¿Cómo cancelo mi suscripción Pro?',
+    'help.faq.cancelPro.a': '<p>Abre <strong>Ajustes</strong> y toca <strong>Administrar suscripción</strong>. Eso abre el portal de Stripe donde puedes cancelar, actualizar tu método de pago o descargar facturas.</p><p>Si cancelas, mantienes Pro hasta el final del periodo de facturación actual.</p>',
+
+    'help.faq.deleteAccount.q': '¿Cómo elimino mi cuenta para siempre?',
+    'help.faq.deleteAccount.a': '<p>Abre <strong>Ajustes</strong>, baja a <strong>Cuenta y seguridad</strong> y usa <strong>Eliminar cuenta</strong>. Esto es permanente — tus cotizaciones, facturas, clientes, seguimientos, trabajos y acceso se eliminan y no se pueden recuperar.</p><p>Si tienes una suscripción Pro activa, se cancela automáticamente como parte de la eliminación.</p>',
   },
 };
 
@@ -13029,7 +13361,10 @@ function bindNav() {
   document.getElementById('navJobs').onclick = () => { switchView('jobs'); closeDrawer(); };
   document.getElementById('navPayments').onclick = () => { switchView('payments'); closeDrawer(); };
   document.getElementById('navProfile').onclick = () => { switchView('profile'); closeDrawer(); };
+  const navHelpEl = document.getElementById('navHelp');
+  if (navHelpEl) navHelpEl.onclick = () => { switchView('help'); closeDrawer(); };
   bindDrawer();
+  bindHelp();
 }
 
 function openDrawer() {
@@ -13066,6 +13401,121 @@ function bindDrawer() {
   });
 }
 
+const HELP_FAQS = [
+  { id: 'logo',             cat: 'getting-started' },
+  { id: 'language',         cat: 'getting-started' },
+  { id: 'companyInfo',      cat: 'getting-started' },
+  { id: 'sendQuote',        cat: 'quotes' },
+  { id: 'mixedLanguage',    cat: 'quotes' },
+  { id: 'bilingualQuote',   cat: 'quotes' },
+  { id: 'switchQuoteLang',  cat: 'quotes' },
+  { id: 'editQuote',        cat: 'quotes' },
+  { id: 'invoiceFromQuote', cat: 'invoices' },
+  { id: 'recordPayment',    cat: 'invoices' },
+  { id: 'addClient',        cat: 'clients' },
+  { id: 'clientStatuses',   cat: 'clients' },
+  { id: 'whatIsFollowup',   cat: 'followups' },
+  { id: 'linkToJob',        cat: 'jobs' },
+  { id: 'freeTierCap',      cat: 'billing' },
+  { id: 'cancelPro',        cat: 'billing' },
+  { id: 'deleteAccount',    cat: 'account' },
+];
+
+const HELP_CAT_LABEL_KEY = {
+  'getting-started': 'help.filter.gettingStarted',
+  'quotes':          'help.filter.quotes',
+  'invoices':        'help.filter.invoices',
+  'clients':         'help.filter.clients',
+  'followups':       'help.filter.followups',
+  'jobs':            'help.filter.jobs',
+  'billing':         'help.filter.billing',
+  'account':         'help.filter.account',
+};
+
+let helpActiveCategory = 'all';
+let helpSearchQuery = '';
+
+function renderHelpFaqs() {
+  const listEl = document.getElementById('helpFaqList');
+  const emptyEl = document.getElementById('helpFaqEmpty');
+  if (!listEl || !emptyEl) return;
+
+  const byCat = {};
+  HELP_FAQS.forEach(f => { byCat[f.cat] = (byCat[f.cat] || 0) + 1; });
+  const setCount = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = String(n); };
+  setCount('helpCountAll', HELP_FAQS.length);
+  setCount('helpCountGettingStarted', byCat['getting-started'] || 0);
+  setCount('helpCountQuotes', byCat['quotes'] || 0);
+  setCount('helpCountInvoices', byCat['invoices'] || 0);
+  setCount('helpCountClients', byCat['clients'] || 0);
+  setCount('helpCountFollowups', byCat['followups'] || 0);
+  setCount('helpCountJobs', byCat['jobs'] || 0);
+  setCount('helpCountBilling', byCat['billing'] || 0);
+  setCount('helpCountAccount', byCat['account'] || 0);
+
+  const q = (helpSearchQuery || '').trim().toLowerCase();
+  const filtered = HELP_FAQS.filter(faq => {
+    if (helpActiveCategory !== 'all' && faq.cat !== helpActiveCategory) return false;
+    if (q) {
+      const question = t('help.faq.' + faq.id + '.q').toLowerCase();
+      const answer = t('help.faq.' + faq.id + '.a').toLowerCase();
+      if (question.indexOf(q) === -1 && answer.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+
+  listEl.innerHTML = '';
+  if (filtered.length === 0) {
+    emptyEl.classList.remove('hidden');
+    return;
+  }
+  emptyEl.classList.add('hidden');
+
+  filtered.forEach(faq => {
+    const item = document.createElement('div');
+    item.className = 'help-faq-item';
+    item.dataset.faqId = faq.id;
+    item.innerHTML =
+      '<button type="button" class="help-faq-q" aria-expanded="false">' +
+        '<svg class="help-faq-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>' +
+        '<span class="help-faq-q-text"></span>' +
+        '<span class="help-faq-cat"></span>' +
+      '</button>' +
+      '<div class="help-faq-a"></div>';
+    item.querySelector('.help-faq-q-text').textContent = t('help.faq.' + faq.id + '.q');
+    item.querySelector('.help-faq-cat').textContent = t(HELP_CAT_LABEL_KEY[faq.cat] || '');
+    item.querySelector('.help-faq-a').innerHTML = t('help.faq.' + faq.id + '.a');
+    const btn = item.querySelector('.help-faq-q');
+    btn.onclick = () => {
+      const willOpen = !item.classList.contains('is-open');
+      item.classList.toggle('is-open', willOpen);
+      btn.setAttribute('aria-expanded', String(willOpen));
+    };
+    listEl.appendChild(item);
+  });
+}
+
+function bindHelp() {
+  document.querySelectorAll('#helpFilterChips .invoice-chip').forEach(chip => {
+    chip.onclick = () => {
+      helpActiveCategory = chip.dataset.helpfilter || 'all';
+      document.querySelectorAll('#helpFilterChips .invoice-chip').forEach(c => {
+        const isActive = c === chip;
+        c.classList.toggle('is-active', isActive);
+        c.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+      renderHelpFaqs();
+    };
+  });
+  const search = document.getElementById('helpSearchInput');
+  if (search) {
+    search.addEventListener('input', () => {
+      helpSearchQuery = search.value || '';
+      renderHelpFaqs();
+    });
+  }
+}
+
 let currentView = 'quotes';
 
 const VIEW_TOPBAR = {
@@ -13076,6 +13526,7 @@ const VIEW_TOPBAR = {
   payments:  { titleHtml: 'topbar.payments',        meta: 'topbar.previewOnly' },
   profile:   { titleHtml: 'profile.title',          meta: '' },
   invoices:  { titleHtml: 'invoices.viewTitleHtml', meta: '' },
+  help:      { titleHtml: 'topbar.helpHtml',        meta: '' },
 };
 
 function refreshTopbarForCurrentView() {
@@ -13099,8 +13550,10 @@ function switchView(view) {
   document.getElementById('paymentsView').classList.toggle('hidden', view !== 'payments');
   document.getElementById('profileView').classList.toggle('hidden', view !== 'profile');
   document.getElementById('invoicesView').classList.toggle('hidden', view !== 'invoices');
+  const helpViewEl = document.getElementById('helpView');
+  if (helpViewEl) helpViewEl.classList.toggle('hidden', view !== 'help');
 
-  ['navQuotes', 'navFollowups', 'navClients', 'navJobs', 'navPayments', 'navProfile', 'navInvoices'].forEach(id => {
+  ['navQuotes', 'navFollowups', 'navClients', 'navJobs', 'navPayments', 'navProfile', 'navInvoices', 'navHelp'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('active', id === `nav${view.charAt(0).toUpperCase()}${view.slice(1)}`);
   });
@@ -13128,6 +13581,9 @@ function switchView(view) {
   }
   if (view === 'payments') {
     loadInvoices({ forceActive: true }).then(() => renderPaymentsView());
+  }
+  if (view === 'help') {
+    renderHelpFaqs();
   }
 }
 
