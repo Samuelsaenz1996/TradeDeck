@@ -3930,6 +3930,39 @@
     }
   }
 
+  /* === Pricing hints (recommendations under priced inputs) === */
+  /* Visually distinct from .settings-help (form guidance) so users read it
+     as "typical range" not "form rule." Lightbulb prefix, italic, lighter
+     color. Hidden when empty so panels without a hint don't get blank space. */
+  .pricing-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 11.5px;
+    color: var(--ink-3);
+    font-style: italic;
+    line-height: 1.45;
+  }
+  .pricing-hint:empty { display: none; }
+  .pricing-hint::before {
+    content: '\1F4A1';
+    margin-right: 5px;
+    font-style: normal;
+    opacity: 0.85;
+  }
+  /* One-line panel disclaimer above the active pricing panel. Frames every
+     hint as "typical national range — adjust for your market" so users in
+     HCOL/LCOL areas know to calibrate, not blindly trust. */
+  .pricing-hint-disclaimer {
+    font-size: 11.5px;
+    color: var(--ink-2);
+    background: var(--surface-2);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 9px 12px;
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+
   /* === Help / FAQ tab === */
   .help-hero-card { margin-bottom: 16px; }
   .help-search-input { width: 100%; margin-top: 14px; }
@@ -4336,6 +4369,10 @@
             <button data-mode="flat" data-i18n="form.flat">📋 Flat rate</button>
           </div>
 
+          <div id="pricingHintDisclaimer" class="pricing-hint-disclaimer hidden">
+            <span data-i18n="hint.disclaimer">Pricing recommendations below are typical national ranges — adjust for your market, experience, and material costs.</span>
+          </div>
+
           <div id="pricingEmptyState" class="trucking-panel" style="text-align: center; color: var(--ink-3); font-style: italic;">
             <span data-i18n="form.pricingEmpty">Select a trade to set up pricing for this job.</span>
           </div>
@@ -4350,10 +4387,12 @@
               <div>
                 <label class="label" data-i18n="hourly.rate">Hourly rate ($)</label>
                 <input type="number" class="input" id="rate" placeholder="0" min="0" />
+                <small class="pricing-hint" data-hint-id="rate"></small>
               </div>
               <div>
                 <label class="label" data-i18n="hourly.materials">Materials estimate ($)</label>
                 <input type="number" class="input" id="materials" placeholder="0" min="0" />
+                <small class="pricing-hint" data-hint-id="materials"></small>
               </div>
             </div>
           </div>
@@ -4364,6 +4403,7 @@
               <div>
                 <label class="label" data-i18n="flat.price">All-in price ($)</label>
                 <input type="number" class="input" id="flatPrice" placeholder="0" min="0" />
+                <small class="pricing-hint" data-hint-id="flatPrice"></small>
               </div>
               <div>
                 <label class="label" data-i18n="flat.includes">Includes (optional)</label>
@@ -4413,6 +4453,7 @@
                 <div>
                   <label class="label" data-i18n="trucking.rate">Rate ($)</label>
                   <input type="number" class="input" id="truckRate" placeholder="0" min="0" />
+                  <small class="pricing-hint" data-hint-id="truckRate"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="trucking.qty">Quantity</label>
@@ -4423,6 +4464,7 @@
                 <div>
                   <label class="label" data-i18n="trucking.disposal">Disposal / dump fees ($)</label>
                   <input type="number" class="input" id="disposalFee" placeholder="0" min="0" />
+                  <small class="pricing-hint" data-hint-id="disposalFee"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="trucking.materialHauled">Materials hauled (optional)</label>
@@ -4462,10 +4504,12 @@
                 <div>
                   <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
                   <input type="number" class="input" id="truckingFlatMaterial" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="truckingFlatMaterial"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
                   <input type="number" class="input" id="truckingFlatRate" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="truckingFlatRate"></small>
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -4517,6 +4561,7 @@
                 <div>
                   <label class="label" data-i18n="logistics.rate">Rate ($)</label>
                   <input type="number" class="input" id="logisticsRate" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="logisticsRate"></small>
                 </div>
                 <div>
                   <label class="label" id="logisticsQtyLabel" data-i18n="logistics.qty.pallet"># of pallets</label>
@@ -4532,6 +4577,7 @@
                   <label class="label" data-i18n="logistics.accessorial">Accessorial fees ($)</label>
                   <input type="number" class="input" id="accessorialFees" placeholder="0" min="0" step="0.01" />
                   <small style="color: var(--ink-3); font-size: 11px;" data-i18n="logistics.accessorialHelp">Lift gate, waiting time, residential delivery, hazmat handling, etc.</small>
+                  <small class="pricing-hint" data-hint-id="accessorialFees"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="logistics.handling">Special handling (optional)</label>
@@ -4571,10 +4617,12 @@
                 <div>
                   <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
                   <input type="number" class="input" id="logisticsFlatMaterial" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="logisticsFlatMaterial"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
                   <input type="number" class="input" id="logisticsFlatRate" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="logisticsFlatRate"></small>
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -4611,22 +4659,26 @@
                 <div>
                   <label class="label" data-i18n="painting.rate">Rate per sq ft per coat ($)</label>
                   <input type="number" class="input" id="paintRate" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="paintRate"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="painting.cost">Paint cost ($)</label>
                   <input type="number" class="input" id="paintCost" placeholder="0" min="0" step="0.01" />
                   <small style="color: var(--ink-3); font-size: 11px;" data-i18n="painting.costHelp">Total paint and supplies</small>
+                  <small class="pricing-hint" data-hint-id="paintCost"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="painting.prep">Surface prep ($)</label>
                   <input type="number" class="input" id="paintPrep" placeholder="0" min="0" step="0.01" />
                   <small style="color: var(--ink-3); font-size: 11px;" data-i18n="painting.prepHelp">Sanding, patching, caulking, masking</small>
+                  <small class="pricing-hint" data-hint-id="paintPrep"></small>
                 </div>
               </div>
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="painting.trim">Trim and detail work ($)</label>
                   <input type="number" class="input" id="paintTrim" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="paintTrim"></small>
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -4660,10 +4712,12 @@
                 <div>
                   <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
                   <input type="number" class="input" id="paintingFlatMaterial" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="paintingFlatMaterial"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
                   <input type="number" class="input" id="paintingFlatRate" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="paintingFlatRate"></small>
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -4704,10 +4758,12 @@
                 <div>
                   <label class="label" data-i18n="flooring.materialRate">Material cost per sq ft ($)</label>
                   <input type="number" class="input" id="floorMaterialRate" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="floorMaterialRate"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="flooring.installRate">Installation rate per sq ft ($)</label>
                   <input type="number" class="input" id="floorInstallRate" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="floorInstallRate"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="flooring.waste">Waste factor (%)</label>
@@ -4719,16 +4775,19 @@
                 <div>
                   <label class="label" data-i18n="flooring.tearOut">Tear-out and disposal ($)</label>
                   <input type="number" class="input" id="floorTearOut" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="floorTearOut"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="flooring.subfloor">Subfloor prep ($)</label>
                   <input type="number" class="input" id="floorSubfloorPrep" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="floorSubfloorPrep"></small>
                 </div>
               </div>
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="flooring.transitions">Transitions and finish work ($)</label>
                   <input type="number" class="input" id="floorTransitions" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="floorTransitions"></small>
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -4762,10 +4821,12 @@
                 <div>
                   <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
                   <input type="number" class="input" id="flooringFlatMaterial" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="flooringFlatMaterial"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
                   <input type="number" class="input" id="flooringFlatRate" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="flooringFlatRate"></small>
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -4806,25 +4867,30 @@
                 <div>
                   <label class="label" data-i18n="roofing.materialRate">Material cost per square ($)</label>
                   <input type="number" class="input" id="roofMaterialRate" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="roofMaterialRate"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="roofing.laborRate">Labor per square ($)</label>
                   <input type="number" class="input" id="roofLaborRate" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="roofLaborRate"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="roofing.tearOff">Tear-off per square ($)</label>
                   <input type="number" class="input" id="roofTearOffRate" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="roofTearOffRate"></small>
                 </div>
               </div>
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="roofing.disposal">Disposal / dump fees ($)</label>
                   <input type="number" class="input" id="roofDisposal" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="roofDisposal"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="roofing.accessories">Underlayment, flashing, accessories ($)</label>
                   <input type="number" class="input" id="roofAccessories" placeholder="0" min="0" step="0.01" />
                   <small style="color: var(--ink-3); font-size: 11px;" data-i18n="roofing.accessoriesHelp">Ice & water shield, drip edge, ridge vent, flashing</small>
+                  <small class="pricing-hint" data-hint-id="roofAccessories"></small>
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -4857,10 +4923,12 @@
                 <div>
                   <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
                   <input type="number" class="input" id="roofingFlatMaterial" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="roofingFlatMaterial"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
                   <input type="number" class="input" id="roofingFlatRate" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="roofingFlatRate"></small>
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -4883,10 +4951,12 @@
                 <div>
                   <label class="label" data-i18n="gutter.linearFt">Linear feet</label>
                   <input type="number" class="input" id="gutterLinearFt" placeholder="0" min="0" step="0.1" />
+                  <small class="pricing-hint" data-hint-id="gutterLinearFt"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="gutter.rate">Rate per linear foot ($)</label>
                   <input type="number" class="input" id="gutterRate" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="gutterRate"></small>
                 </div>
               </div>
               <div class="field-row cols-2">
@@ -4916,6 +4986,7 @@
                 <div>
                   <label class="label" data-i18n="gutter.downspoutRate">Rate per downspout ($)</label>
                   <input type="number" class="input" id="gutterDownspoutRate" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="gutterDownspoutRate"></small>
                 </div>
               </div>
               <div class="field-row cols-2">
@@ -4926,12 +4997,14 @@
                 <div>
                   <label class="label" data-i18n="gutter.guardRate">Guard rate per ft ($)</label>
                   <input type="number" class="input" id="gutterGuardRate" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="gutterGuardRate"></small>
                 </div>
               </div>
               <div class="field-row cols-2">
                 <div>
                   <label class="label" data-i18n="gutter.disposal">Tear-off &amp; disposal of old gutters ($)</label>
                   <input type="number" class="input" id="gutterDisposal" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="gutterDisposal"></small>
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -4964,10 +5037,12 @@
                 <div>
                   <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
                   <input type="number" class="input" id="guttersFlatMaterial" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="guttersFlatMaterial"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
                   <input type="number" class="input" id="guttersFlatRate" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="guttersFlatRate"></small>
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -5008,10 +5083,12 @@
                 <div>
                   <label class="label" data-i18n="siding.materialRate">Material cost per sq ft ($)</label>
                   <input type="number" class="input" id="sidingMaterialRate" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="sidingMaterialRate"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="siding.installRate">Installation rate per sq ft ($)</label>
                   <input type="number" class="input" id="sidingInstallRate" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="sidingInstallRate"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="siding.waste">Waste factor (%)</label>
@@ -5023,10 +5100,12 @@
                 <div>
                   <label class="label" data-i18n="siding.tearOff">Tear-off &amp; disposal of old siding ($)</label>
                   <input type="number" class="input" id="sidingTearOff" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="sidingTearOff"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="siding.trim">Trim, flashing &amp; accessories ($)</label>
                   <input type="number" class="input" id="sidingTrim" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="sidingTrim"></small>
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -5059,10 +5138,12 @@
                 <div>
                   <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
                   <input type="number" class="input" id="sidingFlatMaterial" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="sidingFlatMaterial"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
                   <input type="number" class="input" id="sidingFlatRate" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="sidingFlatRate"></small>
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -5081,10 +5162,12 @@
               <div>
                 <label class="label" data-i18n="framing.rate">Rate per sq ft ($)</label>
                 <input type="number" class="input" id="framingRate" placeholder="0" min="0" step="0.01" />
+                <small class="pricing-hint" data-hint-id="framingRate"></small>
               </div>
               <div>
                 <label class="label" data-i18n="framing.lumber">Lumber &amp; materials ($)</label>
                 <input type="number" class="input" id="framingLumber" placeholder="0" min="0" step="0.01" />
+                <small class="pricing-hint" data-hint-id="framingLumber"></small>
               </div>
             </div>
             <div class="trucking-subtotal">
@@ -5108,6 +5191,7 @@
                 <div>
                   <label class="label" data-i18n="windows.disposal">Tear-off &amp; disposal of old windows ($)</label>
                   <input type="number" class="input" id="windowDisposal" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="windowDisposal"></small>
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -5142,10 +5226,12 @@
                 <div>
                   <label class="label" data-i18n="flat.materialCost">Material cost ($)</label>
                   <input type="number" class="input" id="windowsFlatMaterial" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="windowsFlatMaterial"></small>
                 </div>
                 <div>
                   <label class="label" data-i18n="flat.flatRate">Flat rate ($)</label>
                   <input type="number" class="input" id="windowsFlatRate" placeholder="0" min="0" step="0.01" />
+                  <small class="pricing-hint" data-hint-id="windowsFlatRate"></small>
                 </div>
               </div>
               <div class="trucking-subtotal">
@@ -5188,20 +5274,24 @@
               <div id="drywallHangRateField">
                 <label class="label" id="drywallHangRateLabel" data-i18n="drywall.hangRate.sqft">Hang rate ($/sq ft)</label>
                 <input type="number" class="input" id="drywallHangRate" placeholder="0" min="0" step="0.01" />
+                <small class="pricing-hint" data-hint-id="drywallHangRate"></small>
               </div>
               <div id="drywallFinishRateField">
                 <label class="label" id="drywallFinishRateLabel" data-i18n="drywall.finishRate.sqft">Finish rate ($/sq ft)</label>
                 <input type="number" class="input" id="drywallFinishRate" placeholder="0" min="0" step="0.01" />
+                <small class="pricing-hint" data-hint-id="drywallFinishRate"></small>
               </div>
             </div>
             <div class="field-row cols-2 hidden" id="drywallFlatRow">
               <div id="drywallHangFlatField">
                 <label class="label" data-i18n="drywall.hangFlat">Hang flat price ($)</label>
                 <input type="number" class="input" id="drywallHangFlat" placeholder="0" min="0" step="0.01" />
+                <small class="pricing-hint" data-hint-id="drywallHangFlat"></small>
               </div>
               <div id="drywallFinishFlatField">
                 <label class="label" data-i18n="drywall.finishFlat">Finish flat price ($)</label>
                 <input type="number" class="input" id="drywallFinishFlat" placeholder="0" min="0" step="0.01" />
+                <small class="pricing-hint" data-hint-id="drywallFinishFlat"></small>
               </div>
             </div>
             <div class="field-row cols-2" id="drywallFinishLevelRow">
@@ -8844,6 +8934,129 @@ const I18N = {
     'profile.account.email': 'Email',
     'profile.account.memberSince': 'Member since',
 
+    // Pricing hints — typical national US ranges. Disclaimer sits above
+    // the active pricing panel; individual hints sit under each priced input.
+    'hint.disclaimer': 'Pricing recommendations below are typical national ranges — adjust for your market, experience, and material costs.',
+    // Hourly
+    'hint.hourly.rate.plumbing':    'Typical: $75–150/hr. Emergency / after-hours often 50–100% higher.',
+    'hint.hourly.rate.electrical':  'Typical: $75–150/hr. Master electricians and panel work bill at the higher end.',
+    'hint.hourly.rate.hvac':        'Typical: $75–200/hr (diagnostic + labor combined).',
+    'hint.hourly.rate.general':     'Typical: $50–100/hr for handyman / general contracting.',
+    'hint.hourly.rate.roofing':     'Typical: $40–80/hr per worker. Most roofing is bid by the square instead.',
+    'hint.hourly.rate.landscaping': 'Typical: $50–100/hr per crew member.',
+    'hint.hourly.rate.default':     'Most skilled trades: $60–125/hr. Specialty / licensed trades go higher.',
+    'hint.hourly.materials':        'Estimate materials at your retail cost. Many contractors mark up 15–30% over wholesale.',
+    // Flat
+    'hint.flat.price':              'Include labor, materials, cleanup, and any disposal fees. Quote the all-in number.',
+    // Trucking
+    'hint.trucking.rate.load': 'Typical: $250–500 per load (dump truck within 20 miles).',
+    'hint.trucking.rate.hour': 'Typical: $75–125/hr (dump truck + operator); $80–140/hr for flatbed.',
+    'hint.trucking.rate.yard': 'Typical: $50–150 per cubic yard (mixed construction debris).',
+    'hint.trucking.rate.ton':  'Typical: $80–200 per ton, depending on material.',
+    'hint.trucking.rate.mile': 'Typical: $3–6 per mile for short haul; less for long-distance freight.',
+    'hint.trucking.disposal':  'Landfill / dump fees: $30–100 per yard depending on local rates.',
+    // Logistics
+    'hint.logistics.rate.pallet':    'Typical: $15–30 per pallet per month for warehouse storage.',
+    'hint.logistics.rate.palletDay': 'Typical: $0.50–2.00 per pallet per day.',
+    'hint.logistics.rate.pound':     'Typical: $0.15–0.50 per pound (varies heavily by freight class).',
+    'hint.logistics.rate.cwt':       'Typical: $15–40 per CWT (hundredweight).',
+    'hint.logistics.rate.cubicFoot': 'Typical: $0.50–2.00 per cubic foot per month.',
+    'hint.logistics.rate.piece':     'Typical: $1–10 per piece, depending on size and handling.',
+    'hint.logistics.rate.hour':      'Typical: $80–150/hr for labor.',
+    'hint.logistics.rate.mile':      'Typical: $2–5 per mile for last-mile delivery.',
+    'hint.logistics.rate.flat':      'Set the flat rate to cover labor + handling for this scope.',
+    'hint.logistics.accessorial':    'Lift gate $50–100, residential delivery $50–100, hazmat handling $200+, waiting time $50–100/hr.',
+    // Painting
+    'hint.painting.rate':  'Typical: $0.50–1.50/sqft per coat for interior labor. Exterior or high ceilings run higher.',
+    'hint.painting.cost':  'Paint: $25–60/gallon, covers ~350 sqft per coat. Add primer + supplies (rollers, tape, drop cloths).',
+    'hint.painting.prep':  'Typical: $0.30–0.80/sqft for sanding, patching, caulking, masking.',
+    'hint.painting.trim':  'Typical: $1–3/linear ft for trim work, or $50–100/door.',
+    // Flooring (material)
+    'hint.flooring.material.laminate':   'Material: $2–5/sqft (laminate).',
+    'hint.flooring.material.vinyl':      'Material: $3–7/sqft (LVP / luxury vinyl plank).',
+    'hint.flooring.material.hardwood':   'Material: $5–12/sqft (solid hardwood; exotics run higher).',
+    'hint.flooring.material.engineered': 'Material: $4–9/sqft (engineered hardwood).',
+    'hint.flooring.material.tile':       'Material: $3–15/sqft (porcelain or ceramic — premium tile much higher).',
+    'hint.flooring.material.carpet':     'Material: $2–5/sqft including pad.',
+    // Flooring (install)
+    'hint.flooring.install.default':  'Install labor: $2–4/sqft for laminate, vinyl, engineered.',
+    'hint.flooring.install.hardwood': 'Install labor: $4–8/sqft (nail-down hardwood).',
+    'hint.flooring.install.tile':     'Install labor: $5–10/sqft; more for mosaic or herringbone patterns.',
+    'hint.flooring.install.carpet':   'Install labor: $1–2/sqft (carpet).',
+    'hint.flooring.tearOut':          'Typical: $1–3/sqft to remove and dispose of existing flooring.',
+    'hint.flooring.subfloor':         'Typical: $1–4/sqft if leveling or repair is needed.',
+    'hint.flooring.transitions':      'Transitions, T-molding, quarter-round: usually a flat $100–400 per job.',
+    // Roofing (material — per square = 100 sqft)
+    'hint.roofing.material.shingles': 'Material: $100–200/square (3-tab) or $200–400/square (architectural asphalt).',
+    'hint.roofing.material.metal':    'Material: $300–700/square (standing-seam steel or aluminum).',
+    'hint.roofing.material.tile':     'Material: $400–800/square (concrete tile); $800–1,500/square (clay).',
+    'hint.roofing.material.flat':     'Material: $150–350/square (TPO / EPDM / modified bitumen membrane).',
+    'hint.roofing.material.shake':    'Material: $400–700/square (cedar shake or shingle).',
+    // Roofing (labor)
+    'hint.roofing.labor.standard':    'Labor: $200–400/square (asphalt installation).',
+    'hint.roofing.labor.premium':     'Labor: $400–700/square (metal, tile, or shake — more skilled labor).',
+    'hint.roofing.tearOff':           'Tear-off: $100–200/square for one layer. Add 30–50% per additional layer.',
+    'hint.roofing.disposal':          'Typical: $300–800 for disposal on an average residence.',
+    'hint.roofing.accessories':       'Underlayment, drip edge, ice & water shield, ridge vent: typically $200–500 total.',
+    // Gutters
+    'hint.gutter.linearFt':       'Average 1-story home: 150–200 linear ft. 2-story adds roughly 30%.',
+    'hint.gutter.rate.aluminum':  'Typical: $8–12/ft installed (aluminum K-style — most common residential).',
+    'hint.gutter.rate.seamless':  'Typical: $8–12/ft (seamless aluminum K-style — run on-site).',
+    'hint.gutter.rate.halfRound': 'Typical: $10–14/ft (half-round adds ~20% over K-style).',
+    'hint.gutter.rate.vinyl':     'Typical: $4–6/ft (vinyl is DIY-grade — uncommon for paid installs).',
+    'hint.gutter.rate.steel':     'Typical: $10–14/ft (steel — heavier and more durable than aluminum).',
+    'hint.gutter.rate.copper':    'Typical: $25–40/ft (copper is premium, lasts 50+ years).',
+    'hint.gutter.downspoutRate':  'Typical: $50–100 per downspout installed (aluminum, 10 ft).',
+    'hint.gutter.guardRate':      'Typical: $7–12/ft for gutter guards (mesh or solid screens).',
+    'hint.gutter.disposal':       'Typical: $1–2/ft for tear-off and disposal of old gutters.',
+    // Siding (material)
+    'hint.siding.material.vinyl':        'Material: $2–5/sqft (vinyl — the volume entry tier).',
+    'hint.siding.material.aluminum':     'Material: $3–6/sqft (aluminum).',
+    'hint.siding.material.fiberCement':  'Material: $4–9/sqft (Hardie board and similar fiber cement).',
+    'hint.siding.material.wood':         'Material: $4–10/sqft (cedar, redwood — premium look).',
+    'hint.siding.material.engineered':   'Material: $3–7/sqft (engineered wood — LP SmartSide and similar).',
+    'hint.siding.material.steel':        'Material: $4–10/sqft (steel siding).',
+    // Siding (install)
+    'hint.siding.install.standard':      'Install labor: $2–5/sqft for vinyl, aluminum, steel.',
+    'hint.siding.install.premium':       'Install labor: $4–7/sqft for fiber cement and wood (heavier, more skill).',
+    'hint.siding.tearOff':               'Typical: $1–3/sqft for existing siding removal and disposal.',
+    'hint.siding.trim':                  'Trim, J-channel, flashing typically run 10–20% of material cost.',
+    // Framing
+    'hint.framing.rate':   'Typical: $5–12/sqft labor only (interior partitions). Exterior / structural runs higher.',
+    'hint.framing.lumber': 'Typical: $2–5/sqft of framed area for 2×4 SPF studs (varies with lumber market).',
+    // Windows
+    'hint.windows.disposal': 'Tear-off and disposal of old windows: typically $30–50 per window.',
+    // Drywall
+    'hint.drywall.hang.sheet':   'Typical: $30–50 per sheet hung (residential, 1/2" board).',
+    'hint.drywall.hang.sqft':    'Typical: $1–2/sqft for hanging labor.',
+    'hint.drywall.hang.flat':    'Typical: $25–50 per sheet equivalent. Roll labor + screws + cutoffs into the flat number.',
+    'hint.drywall.finish.sheet4': 'Typical: $25–40 per sheet for Level 4 finish (standard paint-ready).',
+    'hint.drywall.finish.sheet5': 'Typical: $50–80 per sheet for Level 5 (critical lighting, glossy paint).',
+    'hint.drywall.finish.sqft4':  'Typical: $0.80–1.50/sqft for Level 4 finish (standard paint-ready).',
+    'hint.drywall.finish.sqft5':  'Typical: $1.50–2.50/sqft for Level 5 (critical lighting, glossy paint).',
+    'hint.drywall.finish.flat':   'Typical: $0.80–2.00/sqft equivalent depending on finish level.',
+    // Flat-rate sub-mode (per specialty trade) — typical totals for a "typical" job
+    'hint.trucking.flatMaterial':  'Usually $0 — trucking is a service trade. Use this if you are invoicing for hauled material itself.',
+    'hint.trucking.flatRate':      'Typical: $400–1,200 per day for a single dump truck + operator including disposal.',
+    'hint.logistics.flatMaterial': 'Usually $0 — logistics is a service trade.',
+    'hint.logistics.flatRate':     'Set this to cover labor, equipment, and accessorials for the full scope.',
+    'hint.painting.flatMaterial':  'Typical: $400–1,200 paint + supplies for a 1,500 sqft interior repaint.',
+    'hint.painting.flatRate':      'Typical: $1,500–4,000 labor for a 1,500 sqft interior repaint.',
+    'hint.flooring.flatMaterial.default': 'Typical: $1,500–5,000 for 1,000 sqft of mid-range flooring + underlayment.',
+    'hint.flooring.flatMaterial.premium': 'Typical: $5,000–12,000 for 1,000 sqft of hardwood or tile.',
+    'hint.flooring.flatRate':      'Typical: $2,500–6,000 labor for 1,000 sqft installed including tear-out and prep.',
+    'hint.roofing.flatMaterial.default': 'Typical: $2,000–6,000 for 20–25 squares of asphalt material.',
+    'hint.roofing.flatMaterial.premium': 'Typical: $7,000–20,000 for 20–25 squares of metal, tile, or shake.',
+    'hint.roofing.flatRate':       'Typical: $6,000–14,000 labor for an average single-story residence (tear-off + install + disposal).',
+    'hint.gutter.flatMaterial.default': 'Typical: $200–600 for aluminum K-style gutters + downspouts on a single-story home.',
+    'hint.gutter.flatMaterial.copper':  'Typical: $4,000–8,000 for copper gutters + downspouts on a single-story home.',
+    'hint.gutter.flatRate':        'Typical: $1,500–4,000 installed for 150–200 ft of aluminum K-style with downspouts.',
+    'hint.siding.flatMaterial.default': 'Typical: $3,000–7,500 for 1,500 sqft of vinyl, aluminum, or steel siding.',
+    'hint.siding.flatMaterial.premium': 'Typical: $6,000–13,500 for 1,500 sqft of fiber cement or wood siding.',
+    'hint.siding.flatRate':        'Typical: $6,000–14,000 labor for 1,500 sqft installed including tear-off and trim.',
+    'hint.windows.flatMaterial':   'Typical: $5,000–10,000 for 10 standard vinyl insert windows.',
+    'hint.windows.flatRate':       'Typical: $1,500–3,000 labor for installing 10 standard insert windows.',
+
     // Help / FAQ tab
     'nav.help': 'Help',
     'topbar.helpHtml': 'Help <em>center</em>',
@@ -10118,6 +10331,128 @@ const I18N = {
     'profile.account.email': 'Correo',
     'profile.account.memberSince': 'Miembro desde',
 
+    // Sugerencias de precios — rangos típicos nacionales (EE. UU.).
+    'hint.disclaimer': 'Las recomendaciones de precios son rangos típicos a nivel nacional — ajusta según tu mercado, experiencia y costos de materiales.',
+    // Por hora
+    'hint.hourly.rate.plumbing':    'Típico: $75–150/hr. Emergencias y fuera de horario suelen costar 50–100% más.',
+    'hint.hourly.rate.electrical':  'Típico: $75–150/hr. Maestros eléctricos y trabajo de panel cobran en el rango alto.',
+    'hint.hourly.rate.hvac':        'Típico: $75–200/hr (diagnóstico + mano de obra combinados).',
+    'hint.hourly.rate.general':     'Típico: $50–100/hr para mantenimiento general / contratista general.',
+    'hint.hourly.rate.roofing':     'Típico: $40–80/hr por trabajador. La mayoría de los techos se cobran por cuadro.',
+    'hint.hourly.rate.landscaping': 'Típico: $50–100/hr por miembro de la cuadrilla.',
+    'hint.hourly.rate.default':     'Oficios calificados: $60–125/hr. Oficios con licencia o especializados cobran más.',
+    'hint.hourly.materials':        'Cotiza los materiales a precio de menudeo. Muchos contratistas marcan 15–30% sobre mayoreo.',
+    // Precio fijo
+    'hint.flat.price':              'Incluye mano de obra, materiales, limpieza y desecho. Cotiza el precio total.',
+    // Acarreo
+    'hint.trucking.rate.load': 'Típico: $250–500 por carga (camión de volteo en un radio de 20 millas).',
+    'hint.trucking.rate.hour': 'Típico: $75–125/hr (camión + operador); $80–140/hr para plataforma.',
+    'hint.trucking.rate.yard': 'Típico: $50–150 por yarda cúbica (escombro mixto de obra).',
+    'hint.trucking.rate.ton':  'Típico: $80–200 por tonelada según el material.',
+    'hint.trucking.rate.mile': 'Típico: $3–6 por milla para acarreo corto; menos para flete largo.',
+    'hint.trucking.disposal':  'Costos de vertedero: $30–100 por yarda según las tarifas locales.',
+    // Logística
+    'hint.logistics.rate.pallet':    'Típico: $15–30 por tarima al mes para almacenaje.',
+    'hint.logistics.rate.palletDay': 'Típico: $0.50–2.00 por tarima por día.',
+    'hint.logistics.rate.pound':     'Típico: $0.15–0.50 por libra (varía mucho según la clase de flete).',
+    'hint.logistics.rate.cwt':       'Típico: $15–40 por CWT (quintal).',
+    'hint.logistics.rate.cubicFoot': 'Típico: $0.50–2.00 por pie cúbico al mes.',
+    'hint.logistics.rate.piece':     'Típico: $1–10 por pieza, según tamaño y manejo.',
+    'hint.logistics.rate.hour':      'Típico: $80–150/hr de mano de obra.',
+    'hint.logistics.rate.mile':      'Típico: $2–5 por milla para entrega de última milla.',
+    'hint.logistics.rate.flat':      'Fija el precio para cubrir mano de obra + manejo de este alcance.',
+    'hint.logistics.accessorial':    'Plataforma elevadora $50–100, entrega residencial $50–100, hazmat $200+, tiempo de espera $50–100/hr.',
+    // Pintura
+    'hint.painting.rate':  'Típico: $0.50–1.50/pie² por mano de pintura interior. Exterior o techos altos cobran más.',
+    'hint.painting.cost':  'Pintura: $25–60/galón, cubre ~350 pies² por mano. Suma primer + materiales (rodillos, masking, plásticos).',
+    'hint.painting.prep':  'Típico: $0.30–0.80/pie² para lijado, resanado, sellado y enmascarado.',
+    'hint.painting.trim':  'Típico: $1–3/pie lineal para molduras, o $50–100 por puerta.',
+    // Pisos (material)
+    'hint.flooring.material.laminate':   'Material: $2–5/pie² (laminado).',
+    'hint.flooring.material.vinyl':      'Material: $3–7/pie² (LVP / piso vinílico).',
+    'hint.flooring.material.hardwood':   'Material: $5–12/pie² (madera maciza; exóticas cobran más).',
+    'hint.flooring.material.engineered': 'Material: $4–9/pie² (madera ingenierizada).',
+    'hint.flooring.material.tile':       'Material: $3–15/pie² (porcelanato o cerámica — premium mucho más).',
+    'hint.flooring.material.carpet':     'Material: $2–5/pie² incluyendo el bajo-alfombra.',
+    // Pisos (instalación)
+    'hint.flooring.install.default':  'Mano de obra: $2–4/pie² para laminado, vinílico, ingenierizado.',
+    'hint.flooring.install.hardwood': 'Mano de obra: $4–8/pie² (madera maciza clavada).',
+    'hint.flooring.install.tile':     'Mano de obra: $5–10/pie²; más para mosaico o patrones tipo herringbone.',
+    'hint.flooring.install.carpet':   'Mano de obra: $1–2/pie² (alfombra).',
+    'hint.flooring.tearOut':          'Típico: $1–3/pie² para quitar y desechar el piso existente.',
+    'hint.flooring.subfloor':         'Típico: $1–4/pie² si hay que nivelar o reparar el contrapiso.',
+    'hint.flooring.transitions':      'Transiciones, T-molding y cuarto de redondo: por lo general $100–400 fijos por trabajo.',
+    // Techos (material — por cuadro = 100 pies²)
+    'hint.roofing.material.shingles': 'Material: $100–200/cuadro (3 pestañas) o $200–400/cuadro (asfáltica arquitectónica).',
+    'hint.roofing.material.metal':    'Material: $300–700/cuadro (acero o aluminio standing-seam).',
+    'hint.roofing.material.tile':     'Material: $400–800/cuadro (teja de concreto); $800–1,500/cuadro (teja de barro).',
+    'hint.roofing.material.flat':     'Material: $150–350/cuadro (membrana TPO / EPDM / asfáltica modificada).',
+    'hint.roofing.material.shake':    'Material: $400–700/cuadro (tablilla o shake de cedro).',
+    // Techos (mano de obra)
+    'hint.roofing.labor.standard':    'Mano de obra: $200–400/cuadro (instalación asfáltica).',
+    'hint.roofing.labor.premium':     'Mano de obra: $400–700/cuadro (metal, teja o shake — más calificada).',
+    'hint.roofing.tearOff':           'Demolición: $100–200/cuadro por una capa. Suma 30–50% por cada capa extra.',
+    'hint.roofing.disposal':          'Típico: $300–800 de desecho en una residencia promedio.',
+    'hint.roofing.accessories':       'Bajoteja, goterón, capa contra hielo, ventilación de cumbrera: $200–500 total.',
+    // Canaletas
+    'hint.gutter.linearFt':       'Casa promedio de 1 piso: 150–200 pies lineales. 2 pisos suma ~30%.',
+    'hint.gutter.rate.aluminum':  'Típico: $8–12/pie instalado (aluminio estilo K — el más común residencial).',
+    'hint.gutter.rate.seamless':  'Típico: $8–12/pie (aluminio estilo K sin costura — hecho en sitio).',
+    'hint.gutter.rate.halfRound': 'Típico: $10–14/pie (media caña suma ~20% sobre estilo K).',
+    'hint.gutter.rate.vinyl':     'Típico: $4–6/pie (vinilo es nivel DIY — poco común en instalaciones pagadas).',
+    'hint.gutter.rate.steel':     'Típico: $10–14/pie (acero — más pesado y durable que aluminio).',
+    'hint.gutter.rate.copper':    'Típico: $25–40/pie (cobre es premium, dura 50+ años).',
+    'hint.gutter.downspoutRate':  'Típico: $50–100 por bajante instalada (aluminio, 10 pies).',
+    'hint.gutter.guardRate':      'Típico: $7–12/pie para guarda-canaletas (malla o pantalla sólida).',
+    'hint.gutter.disposal':       'Típico: $1–2/pie para retirar y desechar canaletas viejas.',
+    // Revestimiento (material)
+    'hint.siding.material.vinyl':        'Material: $2–5/pie² (vinilo — el nivel de entrada).',
+    'hint.siding.material.aluminum':     'Material: $3–6/pie² (aluminio).',
+    'hint.siding.material.fiberCement':  'Material: $4–9/pie² (Hardie board y similares de fibrocemento).',
+    'hint.siding.material.wood':         'Material: $4–10/pie² (cedro, redwood — apariencia premium).',
+    'hint.siding.material.engineered':   'Material: $3–7/pie² (madera ingenierizada — LP SmartSide y similares).',
+    'hint.siding.material.steel':        'Material: $4–10/pie² (acero).',
+    // Revestimiento (instalación)
+    'hint.siding.install.standard':      'Mano de obra: $2–5/pie² para vinilo, aluminio y acero.',
+    'hint.siding.install.premium':       'Mano de obra: $4–7/pie² para fibrocemento y madera (más pesado, más técnica).',
+    'hint.siding.tearOff':               'Típico: $1–3/pie² para retirar y desechar el revestimiento existente.',
+    'hint.siding.trim':                  'Molduras, J-channel y flashing suelen ser 10–20% del costo del material.',
+    // Armazón
+    'hint.framing.rate':   'Típico: $5–12/pie² solo mano de obra (muros interiores). Exterior / portante cobra más.',
+    'hint.framing.lumber': 'Típico: $2–5/pie² armado para vigas 2×4 SPF (varía con el mercado de madera).',
+    // Ventanas
+    'hint.windows.disposal': 'Retiro y desecho de ventanas viejas: por lo general $30–50 por ventana.',
+    // Tablaroca
+    'hint.drywall.hang.sheet':   'Típico: $30–50 por hoja colgada (residencial, tablero 1/2").',
+    'hint.drywall.hang.sqft':    'Típico: $1–2/pie² de mano de obra para colgar.',
+    'hint.drywall.hang.flat':    'Típico: $25–50 equivalente por hoja. Incluye mano de obra, tornillería y recortes.',
+    'hint.drywall.finish.sheet4': 'Típico: $25–40 por hoja para acabado Nivel 4 (estándar listo para pintar).',
+    'hint.drywall.finish.sheet5': 'Típico: $50–80 por hoja para Nivel 5 (luz crítica, pintura brillante).',
+    'hint.drywall.finish.sqft4':  'Típico: $0.80–1.50/pie² para acabado Nivel 4 (estándar listo para pintar).',
+    'hint.drywall.finish.sqft5':  'Típico: $1.50–2.50/pie² para Nivel 5 (luz crítica, pintura brillante).',
+    'hint.drywall.finish.flat':   'Típico: $0.80–2.00/pie² equivalente según el nivel de acabado.',
+    // Precio fijo (por oficio especializado) — totales típicos para un trabajo "típico"
+    'hint.trucking.flatMaterial':  'Normalmente $0 — el acarreo es un servicio. Úsalo si vas a facturar el material transportado.',
+    'hint.trucking.flatRate':      'Típico: $400–1,200 por día por un camión de volteo + operador incluyendo desecho.',
+    'hint.logistics.flatMaterial': 'Normalmente $0 — la logística es un servicio.',
+    'hint.logistics.flatRate':     'Define el precio para cubrir mano de obra, equipo y cargos accesoriales del alcance completo.',
+    'hint.painting.flatMaterial':  'Típico: $400–1,200 en pintura y materiales para repintar 1,500 pies² de interior.',
+    'hint.painting.flatRate':      'Típico: $1,500–4,000 de mano de obra para repintar 1,500 pies² de interior.',
+    'hint.flooring.flatMaterial.default': 'Típico: $1,500–5,000 para 1,000 pies² de piso de gama media + bajopiso.',
+    'hint.flooring.flatMaterial.premium': 'Típico: $5,000–12,000 para 1,000 pies² de madera maciza o loseta.',
+    'hint.flooring.flatRate':      'Típico: $2,500–6,000 de mano de obra para 1,000 pies² instalados incluyendo demolición y preparación.',
+    'hint.roofing.flatMaterial.default': 'Típico: $2,000–6,000 para 20–25 cuadros de material asfáltico.',
+    'hint.roofing.flatMaterial.premium': 'Típico: $7,000–20,000 para 20–25 cuadros de metal, teja o shake.',
+    'hint.roofing.flatRate':       'Típico: $6,000–14,000 de mano de obra para una residencia promedio de un piso (demolición + instalación + desecho).',
+    'hint.gutter.flatMaterial.default': 'Típico: $200–600 en canaletas de aluminio estilo K + bajantes para una casa de un piso.',
+    'hint.gutter.flatMaterial.copper':  'Típico: $4,000–8,000 en canaletas de cobre + bajantes para una casa de un piso.',
+    'hint.gutter.flatRate':        'Típico: $1,500–4,000 instalado para 150–200 pies de aluminio estilo K con bajantes.',
+    'hint.siding.flatMaterial.default': 'Típico: $3,000–7,500 para 1,500 pies² de vinilo, aluminio o acero.',
+    'hint.siding.flatMaterial.premium': 'Típico: $6,000–13,500 para 1,500 pies² de fibrocemento o madera.',
+    'hint.siding.flatRate':        'Típico: $6,000–14,000 de mano de obra para 1,500 pies² instalados incluyendo demolición y molduras.',
+    'hint.windows.flatMaterial':   'Típico: $5,000–10,000 para 10 ventanas de vinilo tipo insert estándar.',
+    'hint.windows.flatRate':       'Típico: $1,500–3,000 de mano de obra para instalar 10 ventanas tipo insert estándar.',
+
     // Ayuda / FAQ
     'nav.help': 'Ayuda',
     'topbar.helpHtml': 'Centro de <em>ayuda</em>',
@@ -10481,6 +10816,9 @@ function applyLanguage() {
       && clientsSubView === 'detail') {
     applyClientType(activeClientData.type || 'person');
   }
+  // Re-render pricing hints in the new language (only the currently-active
+  // panel has visible elements; other modes' selectors return nothing).
+  if (typeof refreshPricingHints === 'function') refreshPricingHints(pricingMode);
   // Pin quote-internal labels to the quote's content language (must run last
   // so it can override anything the refresh helpers above wrote)
   applyQuoteContentLang();
@@ -12193,6 +12531,7 @@ function setActiveTrade(newIndex) {
   refreshAllSubtotals();
   renderTradeTabs();
   updateJobDescriptionPlaceholder(name);
+  refreshPricingHints(saved.mode);
 }
 
 // ============================================================================
@@ -12714,6 +13053,8 @@ function hideAllPricingPanels() {
   });
   const empty = document.getElementById('pricingEmptyState');
   if (empty) empty.classList.remove('hidden');
+  const disclaimer = document.getElementById('pricingHintDisclaimer');
+  if (disclaimer) disclaimer.classList.add('hidden');
 }
 
 function updateActionsRowVisibility() {
@@ -12758,6 +13099,7 @@ function setPricingMode(mode) {
   document.getElementById('framingPanel').classList.toggle('hidden', mode !== 'framing');
   document.getElementById('windowsPanel').classList.toggle('hidden', mode !== 'windows');
   document.getElementById('drywallPanel').classList.toggle('hidden', mode !== 'drywall');
+  refreshPricingHints(mode);
 }
 
 function applyPricingStructure(trade, structure) {
@@ -12781,6 +13123,7 @@ function bindSubstructToggle(trade) {
       applyPricingStructure(trade, btn.dataset.substruct);
       saveActiveTradeState();
       updateFlatSubtotal(trade);
+      if (typeof refreshPricingHints === 'function') refreshPricingHints(trade);
     };
   });
 }
@@ -12886,6 +13229,8 @@ function bindTruckingInputs() {
   ['truckCount','truckRate','truckQty','disposalFee'].forEach(id => {
     document.getElementById(id).addEventListener('input', updateTruckSubtotal);
   });
+  const bm = document.getElementById('billingMethod');
+  if (bm) bm.addEventListener('change', () => refreshPricingHints('trucking'));
   updateTruckSubtotal();
 }
 
@@ -12920,6 +13265,7 @@ function bindLogisticsInputs() {
     daysField.classList.toggle('hidden', method !== 'palletDay');
     refreshLogisticsQtyLabel();
     updateLogisticsSubtotal();
+    refreshPricingHints('logistics');
   });
   refreshLogisticsQtyLabel();
   updateLogisticsSubtotal();
@@ -12936,6 +13282,8 @@ function bindFlooringInputs() {
   ['floorArea','floorMaterialRate','floorInstallRate','floorWasteFactor','floorTearOut','floorSubfloorPrep','floorTransitions'].forEach(id => {
     document.getElementById(id).addEventListener('input', updateFlooringSubtotal);
   });
+  const mat = document.getElementById('floorMaterialType');
+  if (mat) mat.addEventListener('change', () => refreshPricingHints('flooring'));
   updateFlooringSubtotal();
 }
 
@@ -12943,12 +13291,18 @@ function bindRoofingInputs() {
   ['roofSquares','roofMaterialRate','roofLaborRate','roofTearOffRate','roofDisposal','roofAccessories'].forEach(id => {
     document.getElementById(id).addEventListener('input', updateRoofingSubtotal);
   });
+  const mat = document.getElementById('roofMaterialType');
+  if (mat) mat.addEventListener('change', () => refreshPricingHints('roofing'));
   updateRoofingSubtotal();
 }
 
 function bindGutterInputs() {
   ['gutterLinearFt','gutterRate','gutterDownspoutCount','gutterDownspoutRate','gutterGuardFt','gutterGuardRate','gutterDisposal'].forEach(id => {
     document.getElementById(id).addEventListener('input', updateGutterSubtotal);
+  });
+  ['gutterMaterial','gutterStyle'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', () => refreshPricingHints('gutters'));
   });
   updateGutterSubtotal();
 }
@@ -12957,6 +13311,8 @@ function bindSidingInputs() {
   ['sidingArea','sidingMaterialRate','sidingInstallRate','sidingWasteFactor','sidingTearOff','sidingTrim'].forEach(id => {
     document.getElementById(id).addEventListener('input', updateSidingSubtotal);
   });
+  const mat = document.getElementById('sidingMaterial');
+  if (mat) mat.addEventListener('change', () => refreshPricingHints('siding'));
   updateSidingSubtotal();
 }
 
@@ -13295,6 +13651,7 @@ function renderDrywallFields() {
   finishLabel.textContent = t(`drywall.finishRate.${unitKey}`);
 
   updateDrywallSubtotal();
+  if (typeof refreshPricingHints === 'function') refreshPricingHints('drywall');
 }
 
 // Pure subtotal math, factored out for harness testing without the DOM.
@@ -13349,7 +13706,10 @@ function bindDrywallInputs() {
   ['drywallSheetCount','drywallArea','drywallHangRate','drywallFinishRate','drywallHangFlat','drywallFinishFlat'].forEach(id => {
     document.getElementById(id).addEventListener('input', updateDrywallSubtotal);
   });
-  document.getElementById('drywallFinishLevel').addEventListener('change', updateDrywallSubtotal);
+  document.getElementById('drywallFinishLevel').addEventListener('change', () => {
+    updateDrywallSubtotal();
+    refreshPricingHints('drywall');
+  });
   renderDrywallFields();
 }
 
@@ -13398,6 +13758,233 @@ function bindDrawer() {
   document.getElementById('drawerBackdrop').addEventListener('click', closeDrawer);
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeDrawer();
+  });
+}
+
+// === Pricing hints ===
+// Conditional helper text under priced inputs. Each entry is a function
+// that reads the current panel state (active trade + relevant dropdowns)
+// and returns an i18n key. Render fn calls t() to get the localized string.
+// Numbers are typical national US ranges based on widely-published contractor
+// pricing data (HomeAdvisor / Angi / FixR cross-referenced). Frame as "typical"
+// not "what you should charge" — disclaimer above the panel makes that explicit.
+const PRICING_HINTS = {
+  hourly: {
+    rate: (s) => {
+      const trade = s.activeTradeName;
+      if (trade === 'Plumbing') return 'hint.hourly.rate.plumbing';
+      if (trade === 'Electrical') return 'hint.hourly.rate.electrical';
+      if (trade === 'HVAC') return 'hint.hourly.rate.hvac';
+      if (trade === 'General') return 'hint.hourly.rate.general';
+      if (trade === 'Roofing') return 'hint.hourly.rate.roofing';
+      if (trade === 'Landscaping') return 'hint.hourly.rate.landscaping';
+      return 'hint.hourly.rate.default';
+    },
+    materials: () => 'hint.hourly.materials',
+  },
+  flat: {
+    flatPrice: () => 'hint.flat.price',
+  },
+  trucking: {
+    truckRate: (s) => {
+      const m = s.billingMethod || 'load';
+      if (m === 'load') return 'hint.trucking.rate.load';
+      if (m === 'hour') return 'hint.trucking.rate.hour';
+      if (m === 'yard') return 'hint.trucking.rate.yard';
+      if (m === 'ton')  return 'hint.trucking.rate.ton';
+      if (m === 'mile') return 'hint.trucking.rate.mile';
+      return 'hint.trucking.rate.load';
+    },
+    disposalFee: () => 'hint.trucking.disposal',
+    truckingFlatMaterial: () => 'hint.trucking.flatMaterial',
+    truckingFlatRate:     () => 'hint.trucking.flatRate',
+  },
+  logistics: {
+    logisticsRate: (s) => {
+      const m = s.logisticsBillingMethod || 'pallet';
+      if (m === 'pallet')     return 'hint.logistics.rate.pallet';
+      if (m === 'palletDay')  return 'hint.logistics.rate.palletDay';
+      if (m === 'pound')      return 'hint.logistics.rate.pound';
+      if (m === 'cwt')        return 'hint.logistics.rate.cwt';
+      if (m === 'cubicFoot')  return 'hint.logistics.rate.cubicFoot';
+      if (m === 'piece')      return 'hint.logistics.rate.piece';
+      if (m === 'hour')       return 'hint.logistics.rate.hour';
+      if (m === 'mile')       return 'hint.logistics.rate.mile';
+      if (m === 'flat')       return 'hint.logistics.rate.flat';
+      return 'hint.logistics.rate.pallet';
+    },
+    accessorialFees: () => 'hint.logistics.accessorial',
+    logisticsFlatMaterial: () => 'hint.logistics.flatMaterial',
+    logisticsFlatRate:     () => 'hint.logistics.flatRate',
+  },
+  painting: {
+    paintRate: () => 'hint.painting.rate',
+    paintCost: () => 'hint.painting.cost',
+    paintPrep: () => 'hint.painting.prep',
+    paintTrim: () => 'hint.painting.trim',
+    paintingFlatMaterial: () => 'hint.painting.flatMaterial',
+    paintingFlatRate:     () => 'hint.painting.flatRate',
+  },
+  flooring: {
+    floorMaterialRate: (s) => {
+      const m = s.floorMaterialType || 'Laminate';
+      if (m === 'Laminate')   return 'hint.flooring.material.laminate';
+      if (m === 'Vinyl/LVP')  return 'hint.flooring.material.vinyl';
+      if (m === 'Hardwood')   return 'hint.flooring.material.hardwood';
+      if (m === 'Engineered') return 'hint.flooring.material.engineered';
+      if (m === 'Tile')       return 'hint.flooring.material.tile';
+      if (m === 'Carpet')     return 'hint.flooring.material.carpet';
+      return 'hint.flooring.material.laminate';
+    },
+    floorInstallRate: (s) => {
+      const m = s.floorMaterialType || 'Laminate';
+      if (m === 'Hardwood')   return 'hint.flooring.install.hardwood';
+      if (m === 'Tile')       return 'hint.flooring.install.tile';
+      if (m === 'Carpet')     return 'hint.flooring.install.carpet';
+      return 'hint.flooring.install.default';
+    },
+    floorTearOut: () => 'hint.flooring.tearOut',
+    floorSubfloorPrep: () => 'hint.flooring.subfloor',
+    floorTransitions: () => 'hint.flooring.transitions',
+    flooringFlatMaterial: (s) => {
+      const m = s.floorMaterialType || 'Laminate';
+      if (m === 'Hardwood' || m === 'Tile') return 'hint.flooring.flatMaterial.premium';
+      return 'hint.flooring.flatMaterial.default';
+    },
+    flooringFlatRate: () => 'hint.flooring.flatRate',
+  },
+  roofing: {
+    roofMaterialRate: (s) => {
+      const m = s.roofMaterialType || 'Asphalt shingles';
+      if (m === 'Asphalt shingles') return 'hint.roofing.material.shingles';
+      if (m === 'Metal')            return 'hint.roofing.material.metal';
+      if (m === 'Tile')             return 'hint.roofing.material.tile';
+      if (m === 'Flat/Membrane')    return 'hint.roofing.material.flat';
+      if (m === 'Wood shake')       return 'hint.roofing.material.shake';
+      return 'hint.roofing.material.shingles';
+    },
+    roofLaborRate: (s) => {
+      const m = s.roofMaterialType || 'Asphalt shingles';
+      if (m === 'Metal' || m === 'Tile' || m === 'Wood shake') return 'hint.roofing.labor.premium';
+      return 'hint.roofing.labor.standard';
+    },
+    roofTearOffRate: () => 'hint.roofing.tearOff',
+    roofDisposal: () => 'hint.roofing.disposal',
+    roofAccessories: () => 'hint.roofing.accessories',
+    roofingFlatMaterial: (s) => {
+      const m = s.roofMaterialType || 'Asphalt shingles';
+      if (m === 'Metal' || m === 'Tile' || m === 'Wood shake') return 'hint.roofing.flatMaterial.premium';
+      return 'hint.roofing.flatMaterial.default';
+    },
+    roofingFlatRate: () => 'hint.roofing.flatRate',
+  },
+  gutters: {
+    gutterLinearFt: () => 'hint.gutter.linearFt',
+    gutterRate: (s) => {
+      const mat = s.gutterMaterial || 'Aluminum';
+      const style = s.gutterStyle || 'K-style';
+      if (mat === 'Copper') return 'hint.gutter.rate.copper';
+      if (mat === 'Steel')  return 'hint.gutter.rate.steel';
+      if (mat === 'Vinyl')  return 'hint.gutter.rate.vinyl';
+      if (style === 'Half-round') return 'hint.gutter.rate.halfRound';
+      if (style === 'Seamless')   return 'hint.gutter.rate.seamless';
+      return 'hint.gutter.rate.aluminum';
+    },
+    gutterDownspoutRate: () => 'hint.gutter.downspoutRate',
+    gutterGuardRate: () => 'hint.gutter.guardRate',
+    gutterDisposal: () => 'hint.gutter.disposal',
+    guttersFlatMaterial: (s) => {
+      const mat = s.gutterMaterial || 'Aluminum';
+      if (mat === 'Copper') return 'hint.gutter.flatMaterial.copper';
+      return 'hint.gutter.flatMaterial.default';
+    },
+    guttersFlatRate: () => 'hint.gutter.flatRate',
+  },
+  siding: {
+    sidingMaterialRate: (s) => {
+      const m = s.sidingMaterial || 'Vinyl';
+      if (m === 'Vinyl')         return 'hint.siding.material.vinyl';
+      if (m === 'Aluminum')      return 'hint.siding.material.aluminum';
+      if (m === 'Fiber cement')  return 'hint.siding.material.fiberCement';
+      if (m === 'Wood')          return 'hint.siding.material.wood';
+      if (m === 'Engineered wood') return 'hint.siding.material.engineered';
+      if (m === 'Steel')         return 'hint.siding.material.steel';
+      return 'hint.siding.material.vinyl';
+    },
+    sidingInstallRate: (s) => {
+      const m = s.sidingMaterial || 'Vinyl';
+      if (m === 'Fiber cement' || m === 'Wood') return 'hint.siding.install.premium';
+      return 'hint.siding.install.standard';
+    },
+    sidingTearOff: () => 'hint.siding.tearOff',
+    sidingTrim: () => 'hint.siding.trim',
+    sidingFlatMaterial: (s) => {
+      const m = s.sidingMaterial || 'Vinyl';
+      if (m === 'Fiber cement' || m === 'Wood') return 'hint.siding.flatMaterial.premium';
+      return 'hint.siding.flatMaterial.default';
+    },
+    sidingFlatRate: () => 'hint.siding.flatRate',
+  },
+  framing: {
+    framingRate: () => 'hint.framing.rate',
+    framingLumber: () => 'hint.framing.lumber',
+  },
+  windows: {
+    windowDisposal: () => 'hint.windows.disposal',
+    windowsFlatMaterial: () => 'hint.windows.flatMaterial',
+    windowsFlatRate:     () => 'hint.windows.flatRate',
+  },
+  drywall: {
+    drywallHangRate: (s) => {
+      const u = s.drywallUnit || 'sqft';
+      return u === 'sheet' ? 'hint.drywall.hang.sheet' : 'hint.drywall.hang.sqft';
+    },
+    drywallFinishRate: (s) => {
+      const u = s.drywallUnit || 'sqft';
+      const level = s.drywallFinishLevel || '4';
+      if (u === 'sheet') {
+        return level === '5' ? 'hint.drywall.finish.sheet5' : 'hint.drywall.finish.sheet4';
+      }
+      return level === '5' ? 'hint.drywall.finish.sqft5' : 'hint.drywall.finish.sqft4';
+    },
+    drywallHangFlat: () => 'hint.drywall.hang.flat',
+    drywallFinishFlat: () => 'hint.drywall.finish.flat',
+  },
+};
+
+// Read the dropdown values + active trade name that hint functions
+// might consult. Centralized so individual hint fns stay declarative.
+function readHintState(mode) {
+  const get = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
+  const activeTradeName = (activeTradeIndex >= 0 && selectedTrades[activeTradeIndex])
+    ? tradeNameOf(selectedTrades[activeTradeIndex]) : '';
+  const s = { activeTradeName };
+  if (mode === 'trucking')  s.billingMethod = get('billingMethod');
+  if (mode === 'logistics') s.logisticsBillingMethod = get('logisticsBillingMethod');
+  if (mode === 'flooring')  s.floorMaterialType = get('floorMaterialType');
+  if (mode === 'roofing')   s.roofMaterialType = get('roofMaterialType');
+  if (mode === 'gutters')   { s.gutterMaterial = get('gutterMaterial'); s.gutterStyle = get('gutterStyle'); }
+  if (mode === 'siding')    s.sidingMaterial = get('sidingMaterial');
+  if (mode === 'drywall')   { s.drywallUnit = currentDrywallUnit(); s.drywallFinishLevel = get('drywallFinishLevel'); }
+  return s;
+}
+
+// Render every visible hint for the given pricing mode. Called from
+// setPricingMode() on panel switch + from every dropdown change handler
+// for the dropdowns that affect hint output. Disclaimer is shown only
+// when a real pricing mode is active (not the empty-state placeholder).
+function refreshPricingHints(mode) {
+  const disclaimer = document.getElementById('pricingHintDisclaimer');
+  if (disclaimer) {
+    const showDisclaimer = !!mode && selectedTrades.length > 0;
+    disclaimer.classList.toggle('hidden', !showDisclaimer);
+  }
+  const fields = PRICING_HINTS[mode] || {};
+  const state = readHintState(mode);
+  document.querySelectorAll('.pricing-hint[data-hint-id]').forEach(el => {
+    const id = el.getAttribute('data-hint-id');
+    const fn = fields[id];
+    el.textContent = fn ? t(fn(state)) : '';
   });
 }
 
