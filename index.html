@@ -8701,6 +8701,7 @@ const I18N = {
     'auth.tryFree.starting': 'Starting…',
     'auth.tryFree.failed': 'Could not start: ',
     'auth.guest.signupPrompt': 'Sign up free to unlock 2 more quotes — your quote is saved.',
+    'auth.guest.exportPrompt': 'Create a free account to download or send this quote — it only takes a moment and your quote is saved.',
     'auth.guest.back': 'Back to my quote',
     'auth.signup.creating': 'Creating account…',
     'auth.signup.checkEmail': '✓ Account created — check your email to confirm, then sign in.',
@@ -10103,6 +10104,7 @@ const I18N = {
     'auth.tryFree.starting': 'Iniciando…',
     'auth.tryFree.failed': 'No se pudo iniciar: ',
     'auth.guest.signupPrompt': 'Regístrate gratis para desbloquear 2 cotizaciones más — tu cotización está guardada.',
+    'auth.guest.exportPrompt': 'Crea una cuenta gratis para descargar o enviar esta cotización — toma un momento y tu cotización queda guardada.',
     'auth.guest.back': 'Volver a mi cotización',
     'auth.signup.creating': 'Creando cuenta…',
     'auth.signup.checkEmail': '✓ Cuenta creada — revisa tu correo para confirmar, luego inicia sesión.',
@@ -15063,13 +15065,13 @@ function freeQuoteLimit() {
 }
 
 // Guests hitting any gate should be asked to sign up, not to buy Pro.
-function promptGuestSignup() {
+function promptGuestSignup(msgKey) {
   document.getElementById('appContainer').classList.add('hidden');
   document.getElementById('authScreen').classList.remove('hidden');
   setAuthMode('signup');
   const back = document.getElementById('guestBackLink');
   if (back) back.classList.remove('hidden');
-  authStatus(t('auth.guest.signupPrompt'), false);
+  authStatus(t(msgKey || 'auth.guest.signupPrompt'), false);
 }
 
 function guestBackToApp() {
@@ -19977,6 +19979,9 @@ function maybeShowOnboarding() {
 // (bypass/dev session has profileCache === null and is localhost-only).
 // ============================================================================
 function requireVerifiedEmail() {
+  // Guests have no email address, so the verify modal is a dead end for them.
+  // Send them to signup instead — this covers all 8 export call sites.
+  if (guestMode) { promptGuestSignup('auth.guest.exportPrompt'); return false; }
   if (!profileCache) return true;
   if (profileCache.plan && profileCache.plan !== 'free') return true;
   if (profileCache.email_verified_by_us === true) return true;
@@ -20053,6 +20058,7 @@ async function verifyModalResendHandler() {
 function refreshVerifyReminder() {
   const el = document.getElementById('verifyReminder');
   if (!el) return;
+  if (guestMode) { el.classList.add('hidden'); return; }
   if (!profileCache) { el.classList.add('hidden'); return; }
   const isPro = !!(profileCache.plan && profileCache.plan !== 'free');
   const isVerified = profileCache.email_verified_by_us === true;
