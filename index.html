@@ -4097,6 +4097,7 @@
         <button type="button" class="auth-link" id="forgotLink" data-i18n="auth.forgot.link">Forgot password?</button>
         <button type="button" class="auth-link" id="magicLink" data-i18n="auth.magic.link">Email me a link instead</button>
       </div>
+      <button class="auth-btn" id="tryFreeBtn" data-i18n="auth.tryFree.btn">Try it free — no signup</button>
     </div>
 
     <div id="authSignupMode" class="hidden">
@@ -4127,6 +4128,7 @@
     </div>
 
     <div class="auth-status hidden" id="authStatus"></div>
+    <button type="button" class="auth-link hidden" id="guestBackLink" data-i18n="auth.guest.back">Back to my quote</button>
 
     <button class="auth-btn-dev hidden" id="authBypassBtn" data-i18n="auth.bypassBtn">Skip auth (dev only)</button>
   </div>
@@ -8695,6 +8697,11 @@ const I18N = {
     'auth.signup.title': 'Create your account',
     'auth.signup.sub': 'Start drafting quotes in minutes.',
     'auth.signup.btn': 'Create account',
+    'auth.tryFree.btn': 'Try it free — no signup',
+    'auth.tryFree.starting': 'Starting…',
+    'auth.tryFree.failed': 'Could not start: ',
+    'auth.guest.signupPrompt': 'Sign up free to unlock 2 more quotes — your quote is saved.',
+    'auth.guest.back': 'Back to my quote',
     'auth.signup.creating': 'Creating account…',
     'auth.signup.checkEmail': '✓ Account created — check your email to confirm, then sign in.',
     'auth.signup.success': '✓ Account created!',
@@ -10092,6 +10099,11 @@ const I18N = {
     'auth.signup.title': 'Crea tu cuenta',
     'auth.signup.sub': 'Empieza a generar cotizaciones en minutos.',
     'auth.signup.btn': 'Crear cuenta',
+    'auth.tryFree.btn': 'Pruébalo gratis — sin registro',
+    'auth.tryFree.starting': 'Iniciando…',
+    'auth.tryFree.failed': 'No se pudo iniciar: ',
+    'auth.guest.signupPrompt': 'Regístrate gratis para desbloquear 2 cotizaciones más — tu cotización está guardada.',
+    'auth.guest.back': 'Volver a mi cotización',
     'auth.signup.creating': 'Creando cuenta…',
     'auth.signup.checkEmail': '✓ Cuenta creada — revisa tu correo para confirmar, luego inicia sesión.',
     'auth.signup.success': '✓ ¡Cuenta creada!',
@@ -15045,6 +15057,26 @@ function updateFramingSubtotal() {
   document.getElementById('framingSubtotal').textContent = fmt(sub);
 }
 
+// True when the current session is a Supabase anonymous (pre-signup) user.
+function freeQuoteLimit() {
+  return guestMode ? 1 : 3;
+}
+
+// Guests hitting any gate should be asked to sign up, not to buy Pro.
+function promptGuestSignup() {
+  document.getElementById('appContainer').classList.add('hidden');
+  document.getElementById('authScreen').classList.remove('hidden');
+  setAuthMode('signup');
+  const back = document.getElementById('guestBackLink');
+  if (back) back.classList.remove('hidden');
+  authStatus(t('auth.guest.signupPrompt'), false);
+}
+
+function guestBackToApp() {
+  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('appContainer').classList.remove('hidden');
+}
+
 function updateUsageDisplay() {
   if (typeof refreshVerifyReminder === 'function') refreshVerifyReminder();
   const labelEl = document.querySelector('.usage-label');
@@ -15065,7 +15097,7 @@ function updateUsageDisplay() {
   if (suffixEl) { suffixEl.setAttribute('data-i18n', 'sidebar.quotesSuffix'); suffixEl.textContent = t('sidebar.quotesSuffix'); }
   if (upgradeBtn) upgradeBtn.classList.remove('hidden');
   document.getElementById('quoteUsed').textContent = quoteUsed;
-  const pct = Math.min(100, (quoteUsed / 3) * 100);
+  const pct = Math.min(100, (quoteUsed / freeQuoteLimit()) * 100);
   document.getElementById('usageBar').style.width = pct + '%';
 }
 
@@ -18010,6 +18042,7 @@ function renderUpgradePrice() {
 }
 
 function openUpgradeModal() {
+  if (guestMode) { promptGuestSignup(); return; }
   upgradeInterval = 'monthly';
   document.querySelectorAll('#upgradeIntervalToggle button').forEach(b => b.classList.toggle('active', b.dataset.interval === 'monthly'));
   renderUpgradePrice();
@@ -22295,6 +22328,7 @@ async function refreshQuoteUsedFromServer() {
 
 let authMode = 'signin';
 let authInRecovery = false;
+let guestMode = false;
 
 function authV(id) { const el = document.getElementById(id); return el ? el.value : ''; }
 
@@ -22322,6 +22356,20 @@ function setAuthMode(mode) {
   if (status) { status.classList.add('hidden'); status.classList.remove('error'); }
 }
 
+async function handleTryFree() {
+  const btn = document.getElementById('tryFreeBtn');
+  btn.disabled = true; btn.textContent = t('auth.tryFree.starting');
+  try {
+    const { error } = await sb.auth.signInAnonymously();
+    if (error) throw error;
+    // onAuthStateChange -> updateAuthUI swaps to the app
+  } catch (e) {
+    authStatus(t('auth.tryFree.failed') + (e.message || String(e)), true);
+  } finally {
+    btn.disabled = false; btn.textContent = t('auth.tryFree.btn');
+  }
+}
+
 async function handleSignUp() {
   const email = authV('signupEmail').trim();
   const pw = authV('signupPassword');
@@ -22332,16 +22380,37 @@ async function handleSignUp() {
   const btn = document.getElementById('signupBtn');
   btn.disabled = true; btn.textContent = t('auth.signup.creating');
   try {
-    const { data, error } = await sb.auth.signUp({
-      email, password: pw,
-      options: { emailRedirectTo: window.location.origin },
-    });
-    if (error) throw error;
-    if (data && data.session) {
+    const { data: { session: cur } } = await sb.auth.getSession();
+    const converting = !!(cur && cur.user && cur.user.is_anonymous === true);
+
+    if (converting) {
+      // Link an email identity to the existing anonymous user. This KEEPS the
+      // same user id and profiles row, so quotes_used carries over and the
+      // free limit rises from 1 to 3, leaving 2 more. Calling signUp() here
+      // would mint a second user and orphan the guest's quote.
+      const { error } = await sb.auth.updateUser({ email, password: pw });
+      if (error) throw error;
+      guestMode = false;
+      const back = document.getElementById('guestBackLink');
+      if (back) back.classList.add('hidden');
       authStatus(t('auth.signup.success'), false);
+      guestBackToApp();
+      try { await refreshQuoteUsedFromServer(); } catch (e2) {}
+      try { await loadProfileCache(); } catch (e2) {}
+      updateUsageDisplay();
       showToast(t('verify.signup.nudge'));
     } else {
-      authStatus(t('auth.signup.checkEmail'), false);
+      const { data, error } = await sb.auth.signUp({
+        email, password: pw,
+        options: { emailRedirectTo: window.location.origin },
+      });
+      if (error) throw error;
+      if (data && data.session) {
+        authStatus(t('auth.signup.success'), false);
+        showToast(t('verify.signup.nudge'));
+      } else {
+        authStatus(t('auth.signup.checkEmail'), false);
+      }
     }
   } catch (e) {
     authStatus(t('auth.signup.failed') + (e.message || String(e)), true);
@@ -22454,6 +22523,10 @@ async function initAuth() {
   document.getElementById('signinPassword').addEventListener('keydown', e => { if (e.key === 'Enter') handleSignInPassword(); });
   // Sign up
   document.getElementById('signupBtn').onclick = handleSignUp;
+  const tryFreeBtn = document.getElementById('tryFreeBtn');
+  if (tryFreeBtn) tryFreeBtn.onclick = handleTryFree;
+  const guestBack = document.getElementById('guestBackLink');
+  if (guestBack) guestBack.onclick = guestBackToApp;
   document.getElementById('signupPasswordConfirm').addEventListener('keydown', e => { if (e.key === 'Enter') handleSignUp(); });
   // Forgot password
   document.getElementById('forgotLink').onclick = () => setAuthMode('forgot');
@@ -22495,6 +22568,7 @@ function updateAuthUI(session) {
   const authScreen = document.getElementById('authScreen');
   const appContainer = document.getElementById('appContainer');
   if (session) {
+    guestMode = !!(session.user && session.user.is_anonymous === true);
     authScreen.classList.add('hidden');
     appContainer.classList.remove('hidden');
     // Real Supabase session has an access_token; dev bypass is just { bypass: true }.
@@ -22502,11 +22576,12 @@ function updateAuthUI(session) {
       refreshQuoteUsedFromServer();
       refreshClientsLookupCache();
       loadJobs();
-      loadProfileCache().then(() => { updateUsageDisplay(); maybeShowOnboarding(); }).catch(e => console.warn('profile load on auth:', e));
+      loadProfileCache().then(() => { updateUsageDisplay(); if (!guestMode) maybeShowOnboarding(); }).catch(e => console.warn('profile load on auth:', e));
     }
   } else {
     authScreen.classList.remove('hidden');
     appContainer.classList.add('hidden');
+    guestMode = false;
     if (typeof setAuthMode === 'function') setAuthMode('signin');
   }
 }
