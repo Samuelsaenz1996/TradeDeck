@@ -3613,6 +3613,63 @@
   .auth-status.error { background: rgba(179, 58, 42, 0.08); color: var(--bad); }
   .auth-tabs { display: flex; width: 100%; margin-bottom: 20px; }
   .auth-tabs button { flex: 1; }
+
+  /* Prominent "Try it free" CTA above the sign-in / sign-up tabs.
+     This is the primary lead-magnet action — accent gradient + lift shadow
+     to pull the eye before users start typing into the sign-in form. */
+  .auth-cta-wrap {
+    margin-bottom: 4px;
+  }
+  .auth-btn-cta {
+    background: linear-gradient(135deg, var(--accent) 0%, #E6741F 100%);
+    color: #FFFFFF;
+    padding: 14px 16px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(196, 90, 26, 0.28), 0 1px 3px rgba(196, 90, 26, 0.18);
+    transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+  }
+  .auth-btn-cta:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--accent) 0%, #E6741F 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(196, 90, 26, 0.36), 0 2px 5px rgba(196, 90, 26, 0.22);
+    filter: brightness(1.04);
+  }
+  .auth-btn-cta:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(196, 90, 26, 0.22);
+  }
+  .auth-cta-sub {
+    display: block;
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--ink-3);
+    margin-top: 6px;
+    letter-spacing: 0.02em;
+  }
+  .auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 18px 0 14px;
+    color: var(--ink-3);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+  .auth-divider::before,
+  .auth-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
   .auth-links {
     display: flex;
     justify-content: space-between;
@@ -4082,6 +4139,12 @@
       <div class="brand-mark">M</div>
       <div class="brand-name">My<em>TradeDeck</em></div>
     </div>
+    <div class="auth-cta-wrap" id="authTryFreeCta">
+      <button class="auth-btn auth-btn-cta" id="tryFreeBtn" data-i18n="auth.tryFree.btn">✨ Try it free — no signup</button>
+      <small class="auth-cta-sub" data-i18n="auth.tryFree.sub">No credit card. Start drafting a quote in 10 seconds.</small>
+      <div class="auth-divider"><span data-i18n="auth.or">or</span></div>
+    </div>
+
     <div class="pricing-toggle auth-tabs" id="authTabs" role="group" aria-label="Sign in or sign up">
       <button data-authtab="signin" class="active" type="button" data-i18n="auth.tab.signin">Sign in</button>
       <button data-authtab="signup" type="button" data-i18n="auth.tab.signup">Sign up</button>
@@ -4097,7 +4160,6 @@
         <button type="button" class="auth-link" id="forgotLink" data-i18n="auth.forgot.link">Forgot password?</button>
         <button type="button" class="auth-link" id="magicLink" data-i18n="auth.magic.link">Email me a link instead</button>
       </div>
-      <button class="auth-btn" id="tryFreeBtn" data-i18n="auth.tryFree.btn">Try it free — no signup</button>
     </div>
 
     <div id="authSignupMode" class="hidden">
@@ -8697,9 +8759,11 @@ const I18N = {
     'auth.signup.title': 'Create your account',
     'auth.signup.sub': 'Start drafting quotes in minutes.',
     'auth.signup.btn': 'Create account',
-    'auth.tryFree.btn': 'Try it free — no signup',
+    'auth.tryFree.btn': '✨ Try it free — no signup',
+    'auth.tryFree.sub': 'No credit card. Start drafting a quote in 10 seconds.',
     'auth.tryFree.starting': 'Starting…',
     'auth.tryFree.failed': 'Could not start: ',
+    'auth.or': 'or',
     'auth.guest.signupPrompt': 'Sign up free to unlock 2 more quotes — your quote is saved.',
     'auth.guest.exportPrompt': 'Create a free account to download or send this quote — it only takes a moment and your quote is saved.',
     'auth.guest.back': 'Back to my quote',
@@ -10100,9 +10164,11 @@ const I18N = {
     'auth.signup.title': 'Crea tu cuenta',
     'auth.signup.sub': 'Empieza a generar cotizaciones en minutos.',
     'auth.signup.btn': 'Crear cuenta',
-    'auth.tryFree.btn': 'Pruébalo gratis — sin registro',
+    'auth.tryFree.btn': '✨ Pruébalo gratis — sin registro',
+    'auth.tryFree.sub': 'Sin tarjeta de crédito. Empieza tu cotización en 10 segundos.',
     'auth.tryFree.starting': 'Iniciando…',
     'auth.tryFree.failed': 'No se pudo iniciar: ',
+    'auth.or': 'o',
     'auth.guest.signupPrompt': 'Regístrate gratis para desbloquear 2 cotizaciones más — tu cotización está guardada.',
     'auth.guest.exportPrompt': 'Crea una cuenta gratis para descargar o enviar esta cotización — toma un momento y tu cotización queda guardada.',
     'auth.guest.back': 'Volver a mi cotización',
@@ -22355,6 +22421,13 @@ function setAuthMode(mode) {
   });
   const tabs = document.getElementById('authTabs');
   if (tabs) tabs.classList.toggle('hidden', mode !== 'signin' && mode !== 'signup');
+  const ctaWrap = document.getElementById('authTryFreeCta');
+  if (ctaWrap) {
+    // Hide in forgot/recovery modes AND when the user is already a guest
+    // (already-trying-free doesn't need the CTA).
+    const hide = guestMode || (mode !== 'signin' && mode !== 'signup');
+    ctaWrap.classList.toggle('hidden', hide);
+  }
   document.querySelectorAll('#authTabs button').forEach(b => {
     b.classList.toggle('active', b.dataset.authtab === mode);
   });
