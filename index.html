@@ -468,31 +468,336 @@
   }
   .textarea { min-height: 90px; line-height: 1.5; }
 
-  /* === Trade Selector === */
+  /* === Trade Selector ===
+     Tiles read left-to-right like a row of labelled marks, not a grid of
+     buttons: the icon is a quiet 20px glyph in the ink-3 ramp, and only the
+     selected tile earns accent colour. Auto-fit keeps the row count sensible
+     from a phone up to a wide desktop without media-query steps. */
   .trades-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
     gap: 8px;
   }
   .trade-chip {
-    padding: 12px 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 12px;
     border: 1px solid var(--line);
     border-radius: var(--radius);
     background: var(--surface);
-    text-align: center;
+    text-align: left;
     cursor: pointer;
-    transition: all 0.12s;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
+    color: var(--ink-2);
+    transition: border-color 0.12s, background 0.12s, color 0.12s, box-shadow 0.12s;
   }
-  .trade-chip:hover { border-color: var(--ink-3); }
+  .trade-chip-icon {
+    font-size: 20px;
+    line-height: 0;
+    color: var(--ink-3);
+    transition: color 0.12s;
+  }
+  .trade-chip-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .trade-chip:hover {
+    border-color: var(--ink-3);
+    background: var(--surface-2);
+    color: var(--ink);
+  }
+  .trade-chip:hover .trade-chip-icon { color: var(--ink-2); }
+  .trade-chip:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  /* Selected: accent tint rather than a solid ink slab. A full-black tile for
+     each of 15 trades turned the grid into a checkerboard once more than two
+     were picked. */
   .trade-chip.active {
-    border-color: var(--ink);
-    background: var(--ink);
-    color: var(--bg);
-    box-shadow: var(--shadow-md);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    font-weight: 600;
+    box-shadow: inset 0 0 0 1px var(--accent);
   }
-  .trade-emoji { display: block; font-size: 22px; margin-bottom: 4px; }
+  .trade-chip.active .trade-chip-icon { color: var(--accent); }
+
+  /* ======================================================================
+     Pricing panel — the grouped, guided replacement for the flat grid of
+     number boxes. Scoped to #formCard so other screens keep their current
+     look until this pattern is rolled out to them.
+     ====================================================================== */
+
+  /* All-caps micro-labels on ten adjacent money fields read as a tax form.
+     Inside the quote builder, labels are sentence case at a readable size;
+     the uppercase treatment is kept for section-level labels only. */
+  #formCard .pp .label {
+    text-transform: none;
+    letter-spacing: -0.005em;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-2);
+    margin-bottom: 5px;
+  }
+
+  .pp-group {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .pp-group-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .pp-group-num {
+    display: inline-grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--ink-2);
+    border: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .pp-group-title {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .pp-group-hint {
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-top: 2px;
+    line-height: 1.45;
+  }
+
+  /* Money input: the $ and the unit live inside the box so the number the
+     contractor types is unambiguous at a glance. */
+  .money-wrap { position: relative; display: block; }
+  .money-wrap .input {
+    padding-left: 24px;
+    font-variant-numeric: tabular-nums;
+  }
+  .money-wrap.has-unit .input { padding-right: 56px; }
+  .money-sign,
+  .money-unit {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 13px;
+    color: var(--ink-3);
+    pointer-events: none;
+  }
+  .money-sign { left: 11px; }
+  .money-unit { right: 11px; font-size: 12px; }
+  .unit-wrap .input {
+    font-variant-numeric: tabular-nums;
+    padding-right: 60px;
+  }
+
+  /* A field holding a suggested value rather than one the contractor typed.
+     Muted until touched, so nothing on screen claims to be their price when
+     it is really ours. */
+  .input.is-suggested { color: var(--ink-3); font-style: italic; }
+
+  /* Typical-range row: the guidance that used to sit in 11px grey text
+     BELOW the field, moved above it and made actionable. */
+  .range-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+    font-size: 12px;
+    color: var(--ink-3);
+    flex-wrap: wrap;
+  }
+  .range-row-label { white-space: nowrap; }
+  .range-row-val { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .range-apply {
+    padding: 2px 8px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent-ink);
+    white-space: nowrap;
+    transition: background 0.12s, border-color 0.12s;
+  }
+  .range-apply:hover { background: var(--accent-soft); border-color: var(--accent-2); }
+  .range-apply:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  /* Where the typed value sits against the typical band. Reads as
+     "low / typical / high" without a number the user has to interpret. */
+  .range-track {
+    position: relative;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--line-2);
+    margin: 7px 0 0;
+    overflow: visible;
+  }
+  .range-track-band {
+    position: absolute;
+    top: -1px;
+    bottom: -1px;
+    background: var(--accent-2);
+    opacity: 0.35;
+    border-radius: 2px;
+  }
+  .range-track-pin {
+    position: absolute;
+    top: 50%;
+    width: 9px;
+    height: 9px;
+    margin-left: -4.5px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--surface);
+    transform: translateY(-50%);
+    transition: left 0.12s ease-out;
+  }
+  .range-track-pin.is-out { background: var(--warn); }
+  .range-note { font-size: 11px; color: var(--ink-3); margin-top: 6px; }
+  .range-note.is-warn { color: var(--warn); }
+
+  /* Area calculator — a small popover that turns wall dimensions into a
+     square-foot figure, so nobody has to do arithmetic on paper first. */
+  .calc-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent-ink);
+  }
+  .calc-trigger:hover { background: var(--accent-soft); border-color: var(--accent-2); }
+  .calc-pop {
+    position: absolute;
+    z-index: 40;
+    top: calc(100% + 6px);
+    left: 0;
+    width: min(380px, calc(100vw - 48px));
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 14px;
+  }
+  .calc-pop[hidden] { display: none; }
+  .calc-pop-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .calc-pop-sub { font-size: 11px; color: var(--ink-3); margin-bottom: 10px; }
+  .calc-seg {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .calc-seg .input { padding: 7px 9px; font-size: 13px; }
+  .calc-seg-x { font-size: 11px; color: var(--ink-3); text-align: center; }
+  .calc-del {
+    width: 26px;
+    height: 26px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-sm);
+    color: var(--ink-3);
+    font-size: 14px;
+  }
+  .calc-del:hover { background: var(--surface-2); color: var(--bad); }
+  .calc-add {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-ink);
+    padding: 4px 0;
+  }
+  .calc-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-top: 1px solid var(--line);
+    margin-top: 10px;
+    padding-top: 10px;
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+  .calc-total-val {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .calc-actions { display: flex; gap: 8px; margin-top: 10px; }
+
+  /* Live breakdown — replaces the single bottom-right subtotal. Showing the
+     arithmetic is what makes the number trustworthy. */
+  .pp-summary {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    padding: 14px 16px;
+  }
+  .pp-sum-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+    padding: 4px 0;
+    color: var(--ink-2);
+  }
+  .pp-sum-row .pp-sum-calc {
+    color: var(--ink-3);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+  .pp-sum-amt { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pp-sum-row.is-muted { color: var(--ink-3); }
+  .pp-sum-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-top: 1px solid var(--line);
+    margin-top: 8px;
+    padding-top: 10px;
+  }
+  .pp-sum-total-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-2);
+  }
+  .pp-sum-total-amt {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .pp-sum-empty { font-size: 12px; color: var(--ink-3); }
+
+  @media (max-width: 640px) {
+    .pp-group { padding: 13px; }
+    .calc-pop { left: auto; right: 0; }
+  }
 
   /* === Pricing Mode Toggle === */
   .pricing-toggle {
@@ -1848,7 +2153,8 @@
     border-color: var(--ink);
     color: #fff;
   }
-  .job-trade-pill-emoji { font-size: 14px; line-height: 1; }
+  .job-trade-pill-icon { font-size: 15px; line-height: 0; color: var(--ink-3); }
+  .job-trade-pill.is-selected .job-trade-pill-icon { color: currentColor; }
 
   /* Tiny client-initial avatar for job rows */
   .job-row-client {
@@ -5144,57 +5450,175 @@
               <button data-substruct="flat-rate" type="button"
                       data-i18n="substruct.flat">Flat rate</button>
             </div>
-            <div class="per-unit-fields" id="sidingPerUnitFields">
-              <div class="field-row cols-2">
-                <div>
-                  <label class="label" data-i18n="siding.area">Wall area (sq ft)</label>
-                  <input type="number" class="input" id="sidingArea" placeholder="0" min="0" step="0.1" />
+            <div class="per-unit-fields pp" id="sidingPerUnitFields">
+
+              <!-- 1. What's being covered -->
+              <div class="pp-group">
+                <div class="pp-group-head">
+                  <span class="pp-group-num">1</span>
+                  <div>
+                    <div class="pp-group-title" data-i18n="siding.g1.title">What are you covering?</div>
+                    <div class="pp-group-hint" data-i18n="siding.g1.hint">The wall area and the material. Everything below is priced from these two.</div>
+                  </div>
                 </div>
-                <div>
-                  <label class="label" data-i18n="siding.material">Siding material</label>
-                  <select class="select" id="sidingMaterial">
-                    <option value="Vinyl" data-i18n="siding.materials.vinyl">Vinyl</option>
-                    <option value="Aluminum" data-i18n="siding.materials.aluminum">Aluminum</option>
-                    <option value="Fiber cement" data-i18n="siding.materials.fiberCement">Fiber cement</option>
-                    <option value="Wood" data-i18n="siding.materials.wood">Wood</option>
-                    <option value="Engineered wood" data-i18n="siding.materials.engineered">Engineered wood</option>
-                    <option value="Steel" data-i18n="siding.materials.steel">Steel</option>
-                    <option value="Other" data-i18n="siding.materials.other">Other</option>
-                  </select>
+                <div class="field-row cols-2" style="margin-bottom:0;">
+                  <div style="position:relative;">
+                    <div class="range-row">
+                      <span class="label" style="margin:0;" data-i18n="siding.area">Wall area (sq ft)</span>
+                      <button type="button" class="calc-trigger" id="sidingAreaCalcBtn"
+                              aria-expanded="false" aria-controls="sidingAreaCalc">
+                        <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2.5" width="16" height="19" rx="2"/><path d="M8 6.5h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M16 15v3M8 18.5h6"/></svg>
+                        <span data-i18n="siding.area.calc">Measure it</span>
+                      </button>
+                    </div>
+                    <div class="unit-wrap" style="position:relative;">
+                      <input type="number" class="input" id="sidingArea" placeholder="0" min="0" step="0.1" />
+                      <span class="money-unit" data-i18n="unit.sqft">sq ft</span>
+                    </div>
+                    <div class="range-note" id="sidingAreaNote"></div>
+
+                    <!-- Area calculator popover -->
+                    <div class="calc-pop" id="sidingAreaCalc" hidden role="dialog"
+                         data-i18n-aria="siding.calc.aria" aria-label="Wall area calculator">
+                      <div class="calc-pop-title" data-i18n="siding.calc.title">Wall area</div>
+                      <div class="calc-pop-sub" data-i18n="siding.calc.sub">Add each wall as length × height. Subtract windows and doors below.</div>
+                      <div id="sidingCalcWalls"></div>
+                      <button type="button" class="calc-add" id="sidingCalcAddWall" data-i18n="siding.calc.addWall">+ Add another wall</button>
+                      <div class="calc-pop-sub" style="margin:10px 0 6px;" data-i18n="siding.calc.openings">Openings to subtract</div>
+                      <div id="sidingCalcOpenings"></div>
+                      <button type="button" class="calc-add" id="sidingCalcAddOpening" data-i18n="siding.calc.addOpening">+ Add a window or door</button>
+                      <div class="calc-total">
+                        <span data-i18n="siding.calc.total">Total area</span>
+                        <span class="calc-total-val" id="sidingCalcTotal">0 sq ft</span>
+                      </div>
+                      <div class="calc-actions">
+                        <button type="button" class="btn btn-primary" id="sidingCalcApply" style="flex:1;" data-i18n="siding.calc.apply">Use this area</button>
+                        <button type="button" class="btn btn-ghost" id="sidingCalcCancel" data-i18n="modal.cancel">Cancel</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="label" data-i18n="siding.material">Siding material</label>
+                    <select class="select" id="sidingMaterial">
+                      <option value="Vinyl" data-i18n="siding.materials.vinyl">Vinyl</option>
+                      <option value="Aluminum" data-i18n="siding.materials.aluminum">Aluminum</option>
+                      <option value="Fiber cement" data-i18n="siding.materials.fiberCement">Fiber cement</option>
+                      <option value="Wood" data-i18n="siding.materials.wood">Wood</option>
+                      <option value="Engineered wood" data-i18n="siding.materials.engineered">Engineered wood</option>
+                      <option value="Steel" data-i18n="siding.materials.steel">Steel</option>
+                      <option value="Other" data-i18n="siding.materials.other">Other</option>
+                    </select>
+                    <div class="range-note" id="sidingMaterialNote"></div>
+                  </div>
                 </div>
               </div>
-              <div class="field-row cols-3">
-                <div>
-                  <label class="label" data-i18n="siding.materialRate">Material cost per sq ft ($)</label>
-                  <input type="number" class="input" id="sidingMaterialRate" placeholder="0" min="0" step="0.01" />
-                  <small class="pricing-hint" data-hint-id="sidingMaterialRate"></small>
+
+              <!-- 2. Rates -->
+              <div class="pp-group">
+                <div class="pp-group-head">
+                  <span class="pp-group-num">2</span>
+                  <div>
+                    <div class="pp-group-title" data-i18n="siding.g2.title">Your rates</div>
+                    <div class="pp-group-hint" data-i18n="siding.g2.hint">We've filled in typical rates for this material. Replace them with yours — these are national ranges, not your market.</div>
+                  </div>
                 </div>
-                <div>
-                  <label class="label" data-i18n="siding.installRate">Installation rate per sq ft ($)</label>
-                  <input type="number" class="input" id="sidingInstallRate" placeholder="0" min="0" step="0.01" />
-                  <small class="pricing-hint" data-hint-id="sidingInstallRate"></small>
-                </div>
-                <div>
-                  <label class="label" data-i18n="siding.waste">Waste factor (%)</label>
-                  <input type="number" class="input" id="sidingWasteFactor" placeholder="0" min="0" step="0.1" />
-                  <small style="color: var(--ink-3); font-size: 11px;" data-i18n="siding.wasteHelp">Typically 10%</small>
+                <div class="field-row cols-2" style="margin-bottom:0;">
+                  <div>
+                    <label class="label" data-i18n="siding.materialRate">Material cost</label>
+                    <div class="range-row">
+                      <span class="range-row-label" data-i18n="common.typical">Typical</span>
+                      <span class="range-row-val" id="sidingMaterialRateRange">—</span>
+                      <button type="button" class="range-apply" data-apply-target="sidingMaterialRate"></button>
+                    </div>
+                    <div class="money-wrap has-unit">
+                      <span class="money-sign">$</span>
+                      <input type="number" class="input" id="sidingMaterialRate" placeholder="0" min="0" step="0.01" />
+                      <span class="money-unit" data-i18n="unit.perSqft">/sq ft</span>
+                    </div>
+                    <div class="range-track" id="sidingMaterialRateTrack" aria-hidden="true">
+                      <span class="range-track-band"></span><span class="range-track-pin"></span>
+                    </div>
+                    <div class="range-note" id="sidingMaterialRateNote"></div>
+                  </div>
+                  <div>
+                    <label class="label" data-i18n="siding.installRate">Installation labor</label>
+                    <div class="range-row">
+                      <span class="range-row-label" data-i18n="common.typical">Typical</span>
+                      <span class="range-row-val" id="sidingInstallRateRange">—</span>
+                      <button type="button" class="range-apply" data-apply-target="sidingInstallRate"></button>
+                    </div>
+                    <div class="money-wrap has-unit">
+                      <span class="money-sign">$</span>
+                      <input type="number" class="input" id="sidingInstallRate" placeholder="0" min="0" step="0.01" />
+                      <span class="money-unit" data-i18n="unit.perSqft">/sq ft</span>
+                    </div>
+                    <div class="range-track" id="sidingInstallRateTrack" aria-hidden="true">
+                      <span class="range-track-band"></span><span class="range-track-pin"></span>
+                    </div>
+                    <div class="range-note" id="sidingInstallRateNote"></div>
+                  </div>
                 </div>
               </div>
-              <div class="field-row cols-2">
-                <div>
-                  <label class="label" data-i18n="siding.tearOff">Tear-off &amp; disposal of old siding ($)</label>
-                  <input type="number" class="input" id="sidingTearOff" placeholder="0" min="0" step="0.01" />
-                  <small class="pricing-hint" data-hint-id="sidingTearOff"></small>
+
+              <!-- 3. Extras -->
+              <div class="pp-group">
+                <div class="pp-group-head">
+                  <span class="pp-group-num">3</span>
+                  <div>
+                    <div class="pp-group-title" data-i18n="siding.g3.title">Extras &amp; allowances</div>
+                    <div class="pp-group-hint" data-i18n="siding.g3.hint">Set to zero anything this job doesn't include.</div>
+                  </div>
                 </div>
-                <div>
-                  <label class="label" data-i18n="siding.trim">Trim, flashing &amp; accessories ($)</label>
-                  <input type="number" class="input" id="sidingTrim" placeholder="0" min="0" step="0.01" />
-                  <small class="pricing-hint" data-hint-id="sidingTrim"></small>
+                <div class="field-row cols-3" style="margin-bottom:0;">
+                  <div>
+                    <label class="label" data-i18n="siding.tearOff">Tear-off &amp; disposal</label>
+                    <div class="range-row">
+                      <span class="range-row-label" data-i18n="common.suggested">Suggested</span>
+                      <span class="range-row-val" id="sidingTearOffSuggest">—</span>
+                      <button type="button" class="range-apply" data-apply-target="sidingTearOff"></button>
+                    </div>
+                    <div class="money-wrap">
+                      <span class="money-sign">$</span>
+                      <input type="number" class="input" id="sidingTearOff" placeholder="0" min="0" step="0.01" />
+                    </div>
+                    <div class="range-note" data-i18n="siding.tearOff.note">$1–3 per sq ft of existing siding removed.</div>
+                  </div>
+                  <div>
+                    <label class="label" data-i18n="siding.trim">Trim, flashing &amp; accessories</label>
+                    <div class="range-row">
+                      <span class="range-row-label" data-i18n="common.suggested">Suggested</span>
+                      <span class="range-row-val" id="sidingTrimSuggest">—</span>
+                      <button type="button" class="range-apply" data-apply-target="sidingTrim"></button>
+                    </div>
+                    <div class="money-wrap">
+                      <span class="money-sign">$</span>
+                      <input type="number" class="input" id="sidingTrim" placeholder="0" min="0" step="0.01" />
+                    </div>
+                    <div class="range-note" data-i18n="siding.trim.note">Usually 10–20% of material cost.</div>
+                  </div>
+                  <div>
+                    <label class="label" data-i18n="siding.waste">Waste factor</label>
+                    <div class="range-row">
+                      <span class="range-row-label" data-i18n="common.typical">Typical</span>
+                      <span class="range-row-val">10%</span>
+                      <button type="button" class="range-apply" data-apply-target="sidingWasteFactor" data-apply-value="10"></button>
+                    </div>
+                    <div class="unit-wrap" style="position:relative;">
+                      <input type="number" class="input" id="sidingWasteFactor" placeholder="0" min="0" step="0.1" />
+                      <span class="money-unit">%</span>
+                    </div>
+                    <div class="range-note" data-i18n="siding.waste.note">Offcuts and breakage. Raise it for complex walls.</div>
+                  </div>
                 </div>
               </div>
-              <div class="trucking-subtotal">
-                <span class="trucking-subtotal-label" data-i18n="liveSubtotal">Live subtotal</span>
-                <span class="trucking-subtotal-amt" id="sidingSubtotal">$0.00</span>
+
+              <!-- Live breakdown -->
+              <div class="pp-summary">
+                <div id="sidingBreakdown"></div>
+                <div class="pp-sum-total">
+                  <span class="pp-sum-total-label" data-i18n="liveSubtotal">Live subtotal</span>
+                  <span class="pp-sum-total-amt" id="sidingSubtotal">$0.00</span>
+                </div>
               </div>
             </div>
             <div class="flat-rate-fields hidden" id="sidingFlatRateFields">
@@ -8082,11 +8506,50 @@ const I18N = {
     'siding.materials.steel': 'Steel',
     'siding.materials.other': 'Other',
     'siding.materialRate': 'Material cost per sq ft ($)',
-    'siding.installRate': 'Installation rate per sq ft ($)',
-    'siding.waste': 'Waste factor (%)',
+    'siding.installRate': 'Installation labor',
+    'siding.waste': 'Waste factor',
     'siding.wasteHelp': 'Typically 10%',
-    'siding.tearOff': 'Tear-off & disposal of old siding ($)',
-    'siding.trim': 'Trim, flashing & accessories ($)',
+    'siding.tearOff': 'Tear-off & disposal',
+    'siding.trim': 'Trim, flashing & accessories',
+    // Siding — guided pricing panel
+    'siding.g1.title': 'What are you covering?',
+    'siding.g1.hint': 'The wall area and the material. Everything below is priced from these two.',
+    'siding.g2.title': 'Your rates',
+    'siding.g2.hint': "We've filled in typical rates for this material. Replace them with yours — these are national ranges, not your market.",
+    'siding.g3.title': 'Extras & allowances',
+    'siding.g3.hint': "Set to zero anything this job doesn't include.",
+    'siding.area.calc': 'Measure it',
+    'siding.area.empty': 'Enter the area, or measure it wall by wall.',
+    'siding.tearOff.note': '$1–3 per sq ft of existing siding removed.',
+    'siding.trim.note': 'Usually 10–20% of material cost.',
+    'siding.waste.note': 'Offcuts and breakage. Raise it for complex walls.',
+    'siding.note.high': 'Above the typical range — fine if your market or scope calls for it.',
+    'siding.note.low': 'Below the typical range — check this covers your costs.',
+    'siding.suggest.needArea': 'Enter area first',
+    'siding.calc.aria': 'Wall area calculator',
+    'siding.calc.title': 'Wall area',
+    'siding.calc.sub': 'Add each wall as length × height. Subtract windows and doors below.',
+    'siding.calc.addWall': '+ Add another wall',
+    'siding.calc.openings': 'Openings to subtract',
+    'siding.calc.addOpening': '+ Add a window or door',
+    'siding.calc.total': 'Total area',
+    'siding.calc.apply': 'Use this area',
+    'siding.calc.length': 'Length (ft)',
+    'siding.calc.width': 'Width (ft)',
+    'siding.calc.height': 'Height (ft)',
+    'siding.sum.materials': 'Siding material',
+    'siding.sum.labor': 'Installation labor',
+    'siding.sum.waste': 'Waste allowance',
+    'siding.sum.tearOff': 'Tear-off & disposal',
+    'siding.sum.trim': 'Trim & flashing',
+    'siding.sum.empty': 'Enter an area and your rates to see the breakdown.',
+    'unit.sqft': 'sq ft',
+    'unit.perSqft': '/sq ft',
+    'unit.perSqftShort': '/sq ft',
+    'common.typical': 'Typical',
+    'common.suggested': 'Suggested',
+    'common.use': 'Use',
+    'common.remove': 'Remove',
     // Framing
     'framing.area': 'Framing area (sq ft)',
     'framing.rate': 'Rate per sq ft ($)',
@@ -9487,11 +9950,50 @@ const I18N = {
     'siding.materials.steel': 'Acero',
     'siding.materials.other': 'Otro',
     'siding.materialRate': 'Costo de material por pie² ($)',
-    'siding.installRate': 'Tarifa de instalación por pie² ($)',
-    'siding.waste': 'Factor de desperdicio (%)',
+    'siding.installRate': 'Mano de obra de instalación',
+    'siding.waste': 'Factor de desperdicio',
     'siding.wasteHelp': 'Generalmente 10%',
-    'siding.tearOff': 'Retiro y desecho del revestimiento viejo ($)',
-    'siding.trim': 'Molduras, flashing y accesorios ($)',
+    'siding.tearOff': 'Retiro y desecho',
+    'siding.trim': 'Molduras, flashing y accesorios',
+    // Revestimiento — panel de precios guiado
+    'siding.g1.title': '¿Qué va a cubrir?',
+    'siding.g1.hint': 'El área de pared y el material. Todo lo de abajo se calcula a partir de estos dos.',
+    'siding.g2.title': 'Sus tarifas',
+    'siding.g2.hint': 'Llenamos tarifas típicas para este material. Reemplácelas con las suyas — son rangos nacionales, no los de su mercado.',
+    'siding.g3.title': 'Extras y provisiones',
+    'siding.g3.hint': 'Ponga en cero lo que este trabajo no incluya.',
+    'siding.area.calc': 'Medir',
+    'siding.area.empty': 'Escriba el área, o mídala pared por pared.',
+    'siding.tearOff.note': '$1–3 por pie² de revestimiento existente retirado.',
+    'siding.trim.note': 'Generalmente 10–20% del costo del material.',
+    'siding.waste.note': 'Recortes y roturas. Súbalo para paredes complicadas.',
+    'siding.note.high': 'Por encima del rango típico — está bien si su mercado o el alcance lo justifica.',
+    'siding.note.low': 'Por debajo del rango típico — revise que cubra sus costos.',
+    'siding.suggest.needArea': 'Escriba el área primero',
+    'siding.calc.aria': 'Calculadora de área de pared',
+    'siding.calc.title': 'Área de pared',
+    'siding.calc.sub': 'Agregue cada pared como largo × alto. Reste ventanas y puertas abajo.',
+    'siding.calc.addWall': '+ Agregar otra pared',
+    'siding.calc.openings': 'Aberturas a restar',
+    'siding.calc.addOpening': '+ Agregar ventana o puerta',
+    'siding.calc.total': 'Área total',
+    'siding.calc.apply': 'Usar esta área',
+    'siding.calc.length': 'Largo (pies)',
+    'siding.calc.width': 'Ancho (pies)',
+    'siding.calc.height': 'Alto (pies)',
+    'siding.sum.materials': 'Material del revestimiento',
+    'siding.sum.labor': 'Mano de obra de instalación',
+    'siding.sum.waste': 'Provisión por desperdicio',
+    'siding.sum.tearOff': 'Retiro y desecho',
+    'siding.sum.trim': 'Molduras y flashing',
+    'siding.sum.empty': 'Escriba un área y sus tarifas para ver el desglose.',
+    'unit.sqft': 'pies²',
+    'unit.perSqft': '/pie²',
+    'unit.perSqftShort': '/pie²',
+    'common.typical': 'Típico',
+    'common.suggested': 'Sugerido',
+    'common.use': 'Usar',
+    'common.remove': 'Quitar',
     // Armazón (Framing)
     'framing.area': 'Área de la estructura (pies²)',
     'framing.rate': 'Tarifa por pie² ($)',
@@ -10976,6 +11478,52 @@ const TRADES = [
   { emoji: '⬜', name: 'Drywall' },
 ];
 
+// Line-icon artwork for each trade. Drawn on the same 24x24 grid and stroke
+// weight as .ui-icon so a trade mark sits level with every other icon in the
+// product. `emoji` above is kept for older saved records and plain-text
+// surfaces (PDF summaries, SMS) that can't render an SVG.
+const TRADE_ICON_PATHS = {
+  // Pipe wrench on a run of pipe.
+  'Plumbing': '<path d="M14.5 4.5a3.5 3.5 0 0 0-4.9 4.4L4 14.5V20h5.5l5.6-5.6a3.5 3.5 0 0 0 4.4-4.9l-2.4 2.4-2.6-.8-.8-2.6z"/><path d="M7 17h.01"/>',
+  // Bolt.
+  'Electrical': '<path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12z"/>',
+  // Fan blades in a housing.
+  'HVAC': '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="1.6"/><path d="M12 10.4V4.2M13.4 12.9l5.3 3.1M10.6 12.9l-5.3 3.1"/>',
+  // Pitched roof over a wall line.
+  'Roofing': '<path d="M2 12 12 4l10 8"/><path d="M5 11v9h14v-9"/><path d="M9.5 20v-5h5v5"/>',
+  // Claw hammer.
+  'General': '<path d="M14.5 6.5 20 12l-2 2-5.5-5.5"/><path d="M12.5 8.5 4 17v3h3l8.5-8.5"/><path d="M11 5c1.8-1.6 4.3-1.6 6 .2l-2.6 2.4C13.6 6.6 12.4 6.2 11 7z"/>',
+  // Paint roller and handle.
+  'Painting': '<rect x="3" y="4" width="13" height="5" rx="1.5"/><path d="M16 6.5h3a1.5 1.5 0 0 1 1.5 1.5v2.5a1.5 1.5 0 0 1-1.5 1.5h-7"/><rect x="9.5" y="12" width="4" height="8" rx="1.5"/>',
+  // Plank floor in perspective.
+  'Flooring': '<rect x="2.5" y="5.5" width="19" height="13" rx="1.5"/><path d="M2.5 10h19M2.5 14h19"/><path d="M9 5.5V10M15 10v4M9 14v4.5"/>',
+  // Leaf on a stem.
+  'Landscaping': '<path d="M11 20c0-6 3-10 9-11 0 7-3.5 10.5-9 11z"/><path d="M4 20c4.5 0 6.5-2 7-4"/><path d="M4 11c3.5 0 5.5 1.3 6.3 3.3"/>',
+  // Box truck.
+  'Hauling & Trucking': '<path d="M2 6.5h11v10H2z"/><path d="M13 10h4l3 3.2v3.3h-7z"/><circle cx="6.5" cy="18.5" r="1.9"/><circle cx="16.5" cy="18.5" r="1.9"/>',
+  // Stacked carton with tape seam.
+  'Logistics': '<path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/>',
+  // Gutter channel with a downspout.
+  'Gutters': '<path d="M3 6v4a2 2 0 0 0 2 2h9"/><path d="M3 6h11"/><path d="M14 12h3v9"/><path d="M17 21h3"/><path d="M7 15.5v2M10.5 16.5v2"/>',
+  // Running bond brick courses.
+  'Siding': '<rect x="2.5" y="5" width="19" height="14" rx="1.5"/><path d="M2.5 9.7h19M2.5 14.3h19"/><path d="M9 5v4.7M15 9.7v4.6M9 14.3V19"/>',
+  // Stud wall framing.
+  'Framing': '<path d="M3 4v16M21 4v16M3 4h18"/><path d="M9 4v16M15 4v16"/><path d="M3 12h18"/>',
+  // Double-hung window.
+  'Windows': '<rect x="3.5" y="3.5" width="17" height="17" rx="1.5"/><path d="M12 3.5v17M3.5 12h17"/>',
+  // Drywall sheet with a taped joint.
+  'Drywall': '<rect x="3" y="3.5" width="18" height="17" rx="1.5"/><path d="M13 3.5v17"/><path d="M6.5 8h3.5M6.5 12h3.5"/>',
+};
+
+// Returns the trade's mark as inline SVG, falling back to a neutral square so
+// a trade added to TRADES without artwork still renders something aligned.
+function tradeIcon(name) {
+  const paths = TRADE_ICON_PATHS[name] || '<rect x="4" y="4" width="16" height="16" rx="2"/>';
+  return '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+       + 'stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+       + paths + '</svg>';
+}
+
 const TRADE_DESC_EXAMPLES = {
   Plumbing: 'e.g. Replace 50ft of cast iron drain line under the kitchen, install new cleanouts, repair drywall after.',
   Electrical: 'e.g. Replace a faulty panel subfeed, install new GFCI outlets in the kitchen, and upgrade lighting to LED fixtures.',
@@ -11390,7 +11938,7 @@ function renderJobDetailTradesGrid(selectedTrades) {
               class="job-trade-pill${isOn ? ' is-selected' : ''}"
               data-trade="${escapeHtml(td.name)}"
               aria-pressed="${isOn ? 'true' : 'false'}">
-              <span class="job-trade-pill-emoji" aria-hidden="true">${td.emoji}</span>
+              <span class="job-trade-pill-icon" aria-hidden="true">${tradeIcon(td.name)}</span>
               <span>${escapeHtml(tradeDisplay(td.name))}</span>
             </button>`;
   }).join('');
@@ -13062,7 +13610,11 @@ function renderTrades() {
     const chip = document.createElement('button');
     const isSelected = activeNames.includes(trade.name);
     chip.className = 'trade-chip' + (isSelected ? ' active' : '');
-    chip.innerHTML = `<span class="trade-emoji">${trade.emoji}</span>${tradeDisplay(trade.name)}`;
+    chip.innerHTML = `<span class="trade-chip-icon" aria-hidden="true">${tradeIcon(trade.name)}</span>`
+                   + `<span class="trade-chip-name">${tradeDisplay(trade.name)}</span>`;
+    // Longer names ellipsize in the tile; keep the full name reachable.
+    chip.title = tradeDisplay(trade.name);
+    chip.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
     chip.onclick = () => {
       const emojiTrade = `${trade.emoji} ${trade.name}`;
       const existingIndex = selectedTrades.indexOf(emojiTrade);
@@ -13409,10 +13961,42 @@ function bindGutterInputs() {
 
 function bindSidingInputs() {
   ['sidingArea','sidingMaterialRate','sidingInstallRate','sidingWasteFactor','sidingTearOff','sidingTrim'].forEach(id => {
-    document.getElementById(id).addEventListener('input', updateSidingSubtotal);
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', () => {
+      // Typing in a field makes it the contractor's number, not our suggestion.
+      sidingMarkSuggested(id, false);
+      updateSidingSubtotal();
+    });
   });
+
   const mat = document.getElementById('sidingMaterial');
-  if (mat) mat.addEventListener('change', () => refreshPricingHints('siding'));
+  if (mat) mat.addEventListener('change', () => {
+    refreshPricingHints('siding');
+    // Re-seed rates for the new material, but only where the contractor
+    // hasn't entered their own.
+    sidingApplyDefaults(false);
+    updateSidingSubtotal();
+  });
+
+  // Quick-fill chips ("Use $3.50").
+  const panel = document.getElementById('sidingPerUnitFields');
+  if (panel) panel.addEventListener('click', (e) => {
+    const btn = e.target.closest('.range-apply');
+    if (!btn) return;
+    const target = btn.dataset.applyTarget;
+    const val = btn.dataset.applyValue;
+    if (!target || val === '' || val == null) return;
+    const el = document.getElementById(target);
+    if (!el) return;
+    el.value = val;
+    sidingMarkSuggested(target, false);
+    updateSidingSubtotal();
+    el.focus();
+  });
+
+  bindSidingCalc();
+  sidingApplyDefaults(false);
   updateSidingSubtotal();
 }
 
@@ -14281,7 +14865,8 @@ function renderFollowupTrades() {
   TRADES.forEach((trade) => {
     const chip = document.createElement('button');
     chip.className = 'trade-chip' + (trade.name === activeName ? ' active' : '');
-    chip.innerHTML = `<span class="trade-emoji">${trade.emoji}</span>${tradeDisplay(trade.name)}`;
+    chip.innerHTML = `<span class="trade-chip-icon" aria-hidden="true">${tradeIcon(trade.name)}</span>`
+                   + `<span class="trade-chip-name">${tradeDisplay(trade.name)}</span>`;
     chip.onclick = () => {
       grid.querySelectorAll('.trade-chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
@@ -15126,6 +15711,157 @@ function updateGutterSubtotal() {
   document.getElementById('gutterSubtotal').textContent = fmt(sub);
 }
 
+// ---------------------------------------------------------------------------
+// Siding guided pricing
+//
+// The same national ranges the prose hints already quote, as numbers so the
+// UI can seed a value, draw a position marker and flag an outlier. Keeping
+// them next to the hint strings would be neater, but those are translated
+// and these must not be.
+// ---------------------------------------------------------------------------
+const SIDING_RANGES = {
+  'Vinyl':           { material: [2, 5],  install: [2, 5] },
+  'Aluminum':        { material: [3, 6],  install: [2, 5] },
+  'Fiber cement':    { material: [4, 9],  install: [4, 7] },
+  'Wood':            { material: [4, 10], install: [4, 7] },
+  'Engineered wood': { material: [3, 7],  install: [2, 5] },
+  'Steel':           { material: [4, 10], install: [2, 5] },
+  'Other':           { material: [3, 7],  install: [3, 6] },
+};
+const SIDING_TEAROFF_PER_SQFT = 2;   // midpoint of the $1–3/sqft range
+const SIDING_TRIM_PCT = 0.15;        // midpoint of "10–20% of material cost"
+const SIDING_DEFAULT_WASTE = 10;
+
+function sidingRanges() {
+  const m = (document.getElementById('sidingMaterial') || {}).value || 'Vinyl';
+  return SIDING_RANGES[m] || SIDING_RANGES['Vinyl'];
+}
+// Midpoint, rounded to a figure a contractor would actually quote.
+function midOf(range) { return Math.round(((range[0] + range[1]) / 2) * 4) / 4; }
+
+// A field is "suggested" until the contractor edits it. Tracked on the element
+// so it survives re-render but never reaches saved state — what gets saved is
+// only ever the value in the box.
+function sidingMarkSuggested(id, on) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.dataset.suggested = on ? '1' : '';
+  el.classList.toggle('is-suggested', !!on);
+}
+function sidingIsSuggested(id) {
+  const el = document.getElementById(id);
+  return !!(el && el.dataset.suggested);
+}
+
+// Seeds the rate fields for the chosen material. Only ever overwrites a field
+// the contractor hasn't touched, so changing material after typing your own
+// rate leaves your rate alone.
+function sidingApplyDefaults(force) {
+  const r = sidingRanges();
+  [['sidingMaterialRate', midOf(r.material)], ['sidingInstallRate', midOf(r.install)]]
+    .forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (force || el.value === '' || sidingIsSuggested(id)) {
+        el.value = val;
+        sidingMarkSuggested(id, true);
+      }
+    });
+  const waste = document.getElementById('sidingWasteFactor');
+  if (waste && (force || waste.value === '' || sidingIsSuggested('sidingWasteFactor'))) {
+    waste.value = SIDING_DEFAULT_WASTE;
+    sidingMarkSuggested('sidingWasteFactor', true);
+  }
+}
+
+// Draws the typical band and where the typed value sits on it.
+function sidingPaintTrack(trackId, noteId, value, range) {
+  const track = document.getElementById(trackId);
+  const note = document.getElementById(noteId);
+  if (!track) return;
+  const band = track.querySelector('.range-track-band');
+  const pin = track.querySelector('.range-track-pin');
+  // Scale runs from 0 to 1.6x the top of the typical band, so a value a bit
+  // over the range still lands on screen instead of pinning to the edge.
+  const scaleMax = range[1] * 1.6;
+  const pct = (v) => Math.max(0, Math.min(100, (v / scaleMax) * 100));
+  band.style.left = pct(range[0]) + '%';
+  band.style.width = (pct(range[1]) - pct(range[0])) + '%';
+  const hasVal = value > 0;
+  pin.style.display = hasVal ? 'block' : 'none';
+  pin.style.left = pct(value) + '%';
+  const out = hasVal && (value < range[0] || value > range[1]);
+  pin.classList.toggle('is-out', out);
+  if (note) {
+    if (out && value > range[1]) {
+      note.textContent = t('siding.note.high');
+      note.className = 'range-note is-warn';
+    } else if (out) {
+      note.textContent = t('siding.note.low');
+      note.className = 'range-note is-warn';
+    } else {
+      note.textContent = '';
+      note.className = 'range-note';
+    }
+  }
+}
+
+// Refreshes every piece of guidance around the siding fields: the printed
+// ranges, the quick-fill chips, the two tracks and the derived suggestions.
+function refreshSidingGuidance() {
+  const r = sidingRanges();
+  const area = parseFloat((document.getElementById('sidingArea') || {}).value) || 0;
+  const matRate = parseFloat((document.getElementById('sidingMaterialRate') || {}).value) || 0;
+  const instRate = parseFloat((document.getElementById('sidingInstallRate') || {}).value) || 0;
+
+  const money = (n) => '$' + Number(n).toLocaleString('en-US',
+    { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 });
+
+  const setRange = (spanId, range) => {
+    const el = document.getElementById(spanId);
+    if (el) el.textContent = money(range[0]) + '–' + money(range[1]) + t('unit.perSqftShort');
+  };
+  setRange('sidingMaterialRateRange', r.material);
+  setRange('sidingInstallRateRange', r.install);
+
+  // Derived suggestions — both depend on figures entered above them, so they
+  // stay blank with an explanation until those exist.
+  const tearSuggest = area > 0 ? Math.round(area * SIDING_TEAROFF_PER_SQFT) : 0;
+  const trimSuggest = (area > 0 && matRate > 0) ? Math.round(area * matRate * SIDING_TRIM_PCT) : 0;
+  const setSuggest = (spanId, val, targetId) => {
+    const el = document.getElementById(spanId);
+    const btn = document.querySelector(`.range-apply[data-apply-target="${targetId}"]`);
+    if (el) el.textContent = val > 0 ? fmt(val) : t('siding.suggest.needArea');
+    if (btn) {
+      btn.dataset.applyValue = val > 0 ? String(val) : '';
+      btn.textContent = t('common.use') + ' ' + fmt(val);
+      // Hidden when there's nothing to suggest, or the field already holds it.
+      const cur = parseFloat((document.getElementById(targetId) || {}).value);
+      btn.hidden = !(val > 0) || cur === val;
+    }
+  };
+  setSuggest('sidingTearOffSuggest', tearSuggest, 'sidingTearOff');
+  setSuggest('sidingTrimSuggest', trimSuggest, 'sidingTrim');
+
+  // Quick-fill chips for the two rates.
+  [['sidingMaterialRate', midOf(r.material)], ['sidingInstallRate', midOf(r.install)],
+   ['sidingWasteFactor', SIDING_DEFAULT_WASTE]].forEach(([target, val]) => {
+    const btn = document.querySelector(`.range-apply[data-apply-target="${target}"]`);
+    if (!btn) return;
+    btn.dataset.applyValue = String(val);
+    btn.textContent = t('common.use') + ' ' +
+      (target === 'sidingWasteFactor' ? val + '%' : money(val));
+    const cur = parseFloat((document.getElementById(target) || {}).value);
+    btn.hidden = (cur === val);
+  });
+
+  sidingPaintTrack('sidingMaterialRateTrack', 'sidingMaterialRateNote', matRate, r.material);
+  sidingPaintTrack('sidingInstallRateTrack', 'sidingInstallRateNote', instRate, r.install);
+
+  const areaNote = document.getElementById('sidingAreaNote');
+  if (areaNote) areaNote.textContent = area > 0 ? '' : t('siding.area.empty');
+}
+
 function updateSidingSubtotal() {
   const area = parseFloat(document.getElementById('sidingArea').value) || 0;
   const materialRate = parseFloat(document.getElementById('sidingMaterialRate').value) || 0;
@@ -15135,6 +15871,133 @@ function updateSidingSubtotal() {
   const trim = parseFloat(document.getElementById('sidingTrim').value) || 0;
   const sub = (area * (materialRate + installRate) * (1 + waste / 100)) + tearOff + trim;
   document.getElementById('sidingSubtotal').textContent = fmt(sub);
+
+  // Itemised breakdown. Same arithmetic as above and as the generated quote —
+  // shown line by line so the number can be checked rather than trusted.
+  const box = document.getElementById('sidingBreakdown');
+  if (box) {
+    const base = area * (materialRate + installRate);
+    const wasteCost = base * (waste / 100);
+    const n = (v) => Number(v).toLocaleString('en-US', { maximumFractionDigits: 2 });
+    const rows = [];
+    if (base > 0) {
+      rows.push({ label: t('siding.sum.materials'), calc: `${n(area)} × ${fmt(materialRate)}`, amt: area * materialRate });
+      rows.push({ label: t('siding.sum.labor'), calc: `${n(area)} × ${fmt(installRate)}`, amt: area * installRate });
+    }
+    if (wasteCost > 0) rows.push({ label: t('siding.sum.waste'), calc: `${n(waste)}%`, amt: wasteCost, muted: true });
+    if (tearOff > 0) rows.push({ label: t('siding.sum.tearOff'), calc: '', amt: tearOff });
+    if (trim > 0) rows.push({ label: t('siding.sum.trim'), calc: '', amt: trim });
+
+    box.innerHTML = rows.length
+      ? rows.map(r => `<div class="pp-sum-row${r.muted ? ' is-muted' : ''}">`
+          + `<span>${escapeHtml(r.label)}${r.calc ? ` <span class="pp-sum-calc">${escapeHtml(r.calc)}</span>` : ''}</span>`
+          + `<span class="pp-sum-amt">${fmt(r.amt)}</span></div>`).join('')
+      : `<div class="pp-sum-empty">${escapeHtml(t('siding.sum.empty'))}</div>`;
+  }
+
+  refreshSidingGuidance();
+}
+
+// --- Area calculator -------------------------------------------------------
+// Local to the popover; nothing here touches quote state until "Use this area".
+let sidingCalcWalls = [{ l: '', h: '' }];
+let sidingCalcOpenings = [{ l: '', h: '', qty: '1' }];
+
+function sidingCalcRender() {
+  const wallsBox = document.getElementById('sidingCalcWalls');
+  const openBox = document.getElementById('sidingCalcOpenings');
+  if (!wallsBox || !openBox) return;
+
+  wallsBox.innerHTML = sidingCalcWalls.map((w, i) => `
+    <div class="calc-seg" data-kind="wall" data-i="${i}">
+      <input type="number" class="input" data-f="l" min="0" step="0.1"
+             placeholder="${escapeHtml(t('siding.calc.length'))}" value="${escapeHtml(w.l)}" />
+      <input type="number" class="input" data-f="h" min="0" step="0.1"
+             placeholder="${escapeHtml(t('siding.calc.height'))}" value="${escapeHtml(w.h)}" />
+      <button type="button" class="calc-del" data-del="wall" data-i="${i}"
+              aria-label="${escapeHtml(t('common.remove'))}"${sidingCalcWalls.length === 1 ? ' style="visibility:hidden;"' : ''}>×</button>
+    </div>`).join('');
+
+  openBox.innerHTML = sidingCalcOpenings.map((o, i) => `
+    <div class="calc-seg" data-kind="opening" data-i="${i}">
+      <input type="number" class="input" data-f="l" min="0" step="0.1"
+             placeholder="${escapeHtml(t('siding.calc.width'))}" value="${escapeHtml(o.l)}" />
+      <input type="number" class="input" data-f="h" min="0" step="0.1"
+             placeholder="${escapeHtml(t('siding.calc.height'))}" value="${escapeHtml(o.h)}" />
+      <button type="button" class="calc-del" data-del="opening" data-i="${i}"
+              aria-label="${escapeHtml(t('common.remove'))}"${sidingCalcOpenings.length === 1 ? ' style="visibility:hidden;"' : ''}>×</button>
+    </div>`).join('');
+
+  const totalEl = document.getElementById('sidingCalcTotal');
+  if (totalEl) {
+    const total = sidingCalcTotal();
+    totalEl.textContent = total.toLocaleString('en-US', { maximumFractionDigits: 1 }) + ' ' + t('unit.sqft');
+  }
+}
+
+function sidingCalcTotal() {
+  const num = (v) => parseFloat(v) || 0;
+  const gross = sidingCalcWalls.reduce((s, w) => s + num(w.l) * num(w.h), 0);
+  const holes = sidingCalcOpenings.reduce((s, o) => s + num(o.l) * num(o.h), 0);
+  return Math.max(0, gross - holes);
+}
+
+function bindSidingCalc() {
+  const btn = document.getElementById('sidingAreaCalcBtn');
+  const pop = document.getElementById('sidingAreaCalc');
+  if (!btn || !pop) return;
+
+  const close = () => { pop.hidden = true; btn.setAttribute('aria-expanded', 'false'); };
+  const open = () => {
+    pop.hidden = false;
+    btn.setAttribute('aria-expanded', 'true');
+    sidingCalcRender();
+    const first = pop.querySelector('input');
+    if (first) first.focus();
+  };
+
+  btn.addEventListener('click', (e) => { e.stopPropagation(); pop.hidden ? open() : close(); });
+  pop.addEventListener('click', (e) => e.stopPropagation());
+  document.addEventListener('click', () => { if (!pop.hidden) close(); });
+  pop.addEventListener('keydown', (e) => { if (e.key === 'Escape') { close(); btn.focus(); } });
+
+  pop.addEventListener('input', (e) => {
+    const seg = e.target.closest('.calc-seg');
+    if (!seg) return;
+    const list = seg.dataset.kind === 'wall' ? sidingCalcWalls : sidingCalcOpenings;
+    const row = list[parseInt(seg.dataset.i, 10)];
+    if (row) row[e.target.dataset.f] = e.target.value;
+    const totalEl = document.getElementById('sidingCalcTotal');
+    if (totalEl) totalEl.textContent = sidingCalcTotal().toLocaleString('en-US', { maximumFractionDigits: 1 }) + ' ' + t('unit.sqft');
+  });
+
+  pop.addEventListener('click', (e) => {
+    const del = e.target.closest('[data-del]');
+    if (del) {
+      const i = parseInt(del.dataset.i, 10);
+      if (del.dataset.del === 'wall' && sidingCalcWalls.length > 1) sidingCalcWalls.splice(i, 1);
+      if (del.dataset.del === 'opening' && sidingCalcOpenings.length > 1) sidingCalcOpenings.splice(i, 1);
+      sidingCalcRender();
+    }
+  });
+
+  document.getElementById('sidingCalcAddWall').addEventListener('click', () => {
+    sidingCalcWalls.push({ l: '', h: '' }); sidingCalcRender();
+  });
+  document.getElementById('sidingCalcAddOpening').addEventListener('click', () => {
+    sidingCalcOpenings.push({ l: '', h: '', qty: '1' }); sidingCalcRender();
+  });
+  document.getElementById('sidingCalcCancel').addEventListener('click', close);
+  document.getElementById('sidingCalcApply').addEventListener('click', () => {
+    const total = sidingCalcTotal();
+    const areaEl = document.getElementById('sidingArea');
+    if (areaEl) {
+      areaEl.value = Math.round(total * 10) / 10;
+      sidingMarkSuggested('sidingArea', false);
+      updateSidingSubtotal();
+    }
+    close();
+  });
 }
 
 function updateFramingSubtotal() {
