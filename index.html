@@ -475,13 +475,16 @@
      from a phone up to a wide desktop without media-query steps. */
   .trades-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 8px;
   }
   .trade-chip {
     display: flex;
     align-items: center;
     gap: 10px;
+    /* Grid items default to min-width:auto, which lets a long trade name set
+       the column's minimum and push the grid wider than the viewport. */
+    min-width: 0;
     padding: 11px 12px;
     border: 1px solid var(--line);
     border-radius: var(--radius);
@@ -4101,8 +4104,16 @@
     .quote-header, .quote-grid, .quote-footer-grid { grid-template-columns: 1fr; }
     .quote-header { flex-direction: column; gap: 16px; }
     .quote-meta { text-align: left; }
-    .trades-grid { grid-template-columns: repeat(3, 1fr); }
+    /* minmax(0, 1fr), not 1fr: a plain fr track floors at min-content, so the
+       longest trade name widened its column and scrolled the page sideways. */
+    .trades-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .field-row.cols-2, .field-row.cols-3, .field-row.cols-4 { grid-template-columns: 1fr; }
+  }
+
+  /* On a phone, three columns leave ~110px per tile and most names truncate.
+     Two columns fit the longest name without an ellipsis. */
+  @media (max-width: 560px) {
+    .trades-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
   @media (max-width: 640px) {
