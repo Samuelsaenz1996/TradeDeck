@@ -751,6 +751,34 @@
   }
   .calc-actions { display: flex; gap: 8px; margin-top: 10px; }
 
+  /* Saved-rates bar. Quiet by default — it's an offer, not an alert, and it
+     only exists while the boxes differ from what the contractor has stored. */
+  .rate-save-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 9px 12px;
+    margin-bottom: 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+  }
+  .rate-save-text { font-size: 12px; color: var(--ink-2); }
+  .rate-save-btn {
+    padding: 5px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-ink);
+    white-space: nowrap;
+  }
+  .rate-save-btn:hover:not(:disabled) { background: var(--accent-soft); border-color: var(--accent-2); }
+  .rate-save-btn:disabled { opacity: 0.55; cursor: default; }
+
   /* Live breakdown — replaces the single bottom-right subtotal. Showing the
      arithmetic is what makes the number trustworthy. */
   .pp-summary {
@@ -8557,6 +8585,12 @@ const I18N = {
     'unit.sqft': 'sq ft',
     'unit.perSqft': '/sq ft',
     'unit.perSqftShort': '/sq ft',
+    'rates.differ': 'These differ from your saved rates for this material.',
+    'rates.none': 'Save these so your next quote starts with your numbers.',
+    'rates.save': 'Save as my rates',
+    'rates.update': 'Update my rates',
+    'rates.saved': 'Saved. Your next quote will start with these.',
+    'rates.saveFailed': "Couldn't save your rates.",
     'common.typical': 'Typical',
     'common.suggested': 'Suggested',
     'common.use': 'Use',
@@ -10001,6 +10035,12 @@ const I18N = {
     'unit.sqft': 'pies²',
     'unit.perSqft': '/pie²',
     'unit.perSqftShort': '/pie²',
+    'rates.differ': 'Estas son distintas a sus tarifas guardadas para este material.',
+    'rates.none': 'Guárdelas para que su próxima cotización empiece con sus números.',
+    'rates.save': 'Guardar como mis tarifas',
+    'rates.update': 'Actualizar mis tarifas',
+    'rates.saved': 'Guardado. Su próxima cotización empezará con estas.',
+    'rates.saveFailed': 'No se pudieron guardar sus tarifas.',
     'common.typical': 'Típico',
     'common.suggested': 'Sugerido',
     'common.use': 'Usar',
@@ -13052,6 +13092,158 @@ const PRICING_INPUTS_BY_MODE = {
 // buildContextForTradeState fallback `|| 0`) treats '' as 0, so totals
 // and prompts are unaffected. Select/method/unit defaults and meaningful
 // non-zero defaults (paintCoats: '2') keep their real values.
+// ---------------------------------------------------------------------------
+// Saved rates
+//
+// A contractor's per-unit rates barely change between jobs — they're theirs,
+// not the job's. Re-asking for them on every quote is what made quote #10 cost
+// the same effort as quote #1. These are the fields worth remembering: rates
+// and factors, never quantities, areas or anything else specific to one job.
+// ---------------------------------------------------------------------------
+const RATE_FIELDS_BY_MODE = {
+  hourly:    ['rate'],
+  trucking:  ['truckRate'],
+  logistics: ['logisticsRate'],
+  painting:  ['paintRate', 'paintCost'],
+  flooring:  ['floorMaterialRate', 'floorInstallRate', 'floorWasteFactor'],
+  roofing:   ['roofMaterialRate', 'roofLaborRate', 'roofTearOffRate'],
+  gutters:   ['gutterRate', 'gutterDownspoutRate', 'gutterGuardRate'],
+  siding:    ['sidingMaterialRate', 'sidingInstallRate', 'sidingWasteFactor'],
+  framing:   ['framingRate'],
+  drywall:   ['drywallHangRate', 'drywallFinishRate'],
+  // flat: a flat price is the job's, not a standing rate.
+  // windows: per-row fields have no global IDs after the row-repeater refactor.
+};
+
+// Rates that depend on which material was picked are stored per material —
+// a vinyl rate and a fiber cement rate are different numbers.
+const RATE_VARIANT_SELECT = {
+  siding:   'sidingMaterial',
+  flooring: 'floorMaterialType',
+  roofing:  'roofMaterialType',
+  gutters:  'gutterMaterial',
+};
+
+let savedRates = {};  // mirrors profiles.saved_rates; {} until the profile loads
+
+function rateVariantFor(mode) {
+  const selId = RATE_VARIANT_SELECT[mode];
+  if (!selId) return '_';
+  const el = document.getElementById(selId);
+  return (el && el.value) || '_';
+}
+
+function savedRatesFor(mode) {
+  const byVariant = savedRates && savedRates[mode];
+  if (!byVariant) return null;
+  const r = byVariant[rateVariantFor(mode)];
+  return (r && Object.keys(r).length) ? r : null;
+}
+
+// Reads what's currently in the rate boxes. Returns null if the contractor
+// hasn't filled any in, so we never save a row of zeroes over good rates.
+function currentRatesFor(mode) {
+  const fields = RATE_FIELDS_BY_MODE[mode] || [];
+  const out = {};
+  let any = false;
+  fields.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const v = parseFloat(el.value);
+    if (!isNaN(v) && el.value !== '') { out[id] = v; any = true; }
+  });
+  return any ? out : null;
+}
+
+function savedRatesDiffer(mode) {
+  const cur = currentRatesFor(mode);
+  if (!cur) return false;
+  const saved = savedRatesFor(mode) || {};
+  return Object.keys(cur).some(k => Number(saved[k]) !== Number(cur[k]));
+}
+
+// Fills rate fields from the contractor's own saved rates. Only touches fields
+// that are empty or still carrying a suggested default, so a rate typed for
+// this particular job is never overwritten.
+function applySavedRates(mode) {
+  const saved = savedRatesFor(mode);
+  if (!saved) return false;
+  let applied = false;
+  (RATE_FIELDS_BY_MODE[mode] || []).forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (saved[id] == null) return;
+    const isSuggested = !!el.dataset.suggested;
+    if (el.value === '' || isSuggested) {
+      el.value = saved[id];
+      // A saved rate is the contractor's own number, not our suggestion.
+      el.dataset.suggested = '';
+      el.classList.remove('is-suggested');
+      applied = true;
+    }
+  });
+  return applied;
+}
+
+async function persistSavedRates(mode) {
+  const cur = currentRatesFor(mode);
+  if (!cur) return false;
+  const variant = rateVariantFor(mode);
+  const next = JSON.parse(JSON.stringify(savedRates || {}));
+  next[mode] = next[mode] || {};
+  next[mode][variant] = cur;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const user = session && session.user;
+    if (!user) return false;
+    const { error } = await sb.from('profiles')
+      .update({ saved_rates: next })
+      .eq('user_id', user.id);
+    if (error) {
+      // Most likely the saved_rates column hasn't been migrated yet. Keep the
+      // quote working and say nothing alarming.
+      console.warn('persistSavedRates error:', error);
+      return false;
+    }
+    savedRates = next;
+    return true;
+  } catch (e) {
+    console.warn('persistSavedRates threw:', e);
+    return false;
+  }
+}
+
+// A quiet bar at the top of the active pricing panel: appears only when what's
+// in the boxes differs from what's saved, and disappears once saved. Injected
+// rather than hand-placed so every trade gets it, not just the rebuilt ones.
+function renderRateSaveBar(mode) {
+  const panel = document.getElementById(`${mode}PerUnitFields`)
+             || document.getElementById('hourlyFields');
+  if (!panel || !(RATE_FIELDS_BY_MODE[mode] || []).length) return;
+  let bar = panel.querySelector('.rate-save-bar');
+  if (!savedRatesDiffer(mode)) { if (bar) bar.remove(); return; }
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.className = 'rate-save-bar';
+    bar.innerHTML = `<span class="rate-save-text"></span>`
+                  + `<button type="button" class="rate-save-btn"></button>`;
+    panel.insertBefore(bar, panel.firstChild);
+    bar.querySelector('.rate-save-btn').addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      btn.disabled = true;
+      const ok = await persistSavedRates(mode);
+      btn.disabled = false;
+      if (ok) { showToast(t('rates.saved')); renderRateSaveBar(mode); }
+      else showToast(t('rates.saveFailed'), true);
+    });
+  }
+  const has = !!savedRatesFor(mode);
+  bar.querySelector('.rate-save-text').textContent =
+    has ? t('rates.differ') : t('rates.none');
+  bar.querySelector('.rate-save-btn').textContent =
+    has ? t('rates.update') : t('rates.save');
+}
+
 const PRICING_DEFAULTS = {
   hourly:    { hours: '', rate: '', materials: '' },
   flat:      { flatPrice: '', flatIncludes: '' },
@@ -13142,9 +13334,15 @@ function restorePricingInputs(snapshot) {
     // saved quote's own rates are left exactly as they were.
     ['sidingArea','sidingMaterialRate','sidingInstallRate','sidingWasteFactor','sidingTearOff','sidingTrim']
       .forEach(id => sidingMarkSuggested(id, false));
+    // The contractor's own rates win over the national typical defaults.
+    applySavedRates(mode);
     sidingApplyDefaults(false);
     updateSidingSubtotal();
+  } else {
+    // Every other trade still fills empty rate boxes from saved rates.
+    applySavedRates(mode);
   }
+  renderRateSaveBar(mode);
   if (mode === 'drywall') {
     applyDrywallScope(snapshot.drywallScope || 'both');
     applyDrywallUnit(snapshot.drywallUnit || 'sqft');
@@ -13995,16 +14193,23 @@ function bindSidingInputs() {
       // Typing in a field makes it the contractor's number, not our suggestion.
       sidingMarkSuggested(id, false);
       updateSidingSubtotal();
+      renderRateSaveBar('siding');
     });
   });
 
   const mat = document.getElementById('sidingMaterial');
   if (mat) mat.addEventListener('change', () => {
     refreshPricingHints('siding');
-    // Re-seed rates for the new material, but only where the contractor
-    // hasn't entered their own.
+    // Changing material changes which saved rates apply, so clear the
+    // suggested marks and let saved-then-typical re-seed for the new one.
+    ['sidingMaterialRate','sidingInstallRate'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.dataset.suggested) el.value = '';
+    });
+    applySavedRates('siding');
     sidingApplyDefaults(false);
     updateSidingSubtotal();
+    renderRateSaveBar('siding');
   });
 
   // Quick-fill chips ("Use $3.50").
@@ -20707,6 +20912,9 @@ async function loadProfileData(opts) {
   setVal('profileBusinessAddress', p.business_address);
   setVal('profileLicenseNumber', p.license_number);
   setVal('profileDefaultDeposit', p.default_deposit_percent);
+  // Standing rates. Absent until the saved_rates migration runs; an empty
+  // object just means the panel falls back to the national typical values.
+  savedRates = (p.saved_rates && typeof p.saved_rates === 'object') ? p.saved_rates : {};
   // Seed the warranty draft from saved data on a fresh load only. On a
   // language toggle (langRefresh) keep the draft so unsaved edits survive.
   if (!langRefresh) {
