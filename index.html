@@ -11421,6 +11421,13 @@ function applyLanguage() {
   // Re-render pricing hints in the new language (only the currently-active
   // panel has visible elements; other modes' selectors return nothing).
   if (typeof refreshPricingHints === 'function') refreshPricingHints(pricingMode);
+  // The siding panel writes several strings from JS rather than data-i18n —
+  // the typical-range units, the "enter area first" placeholder, the breakdown
+  // row labels and the out-of-range notes. The sweep above can't reach those,
+  // so they'd stay in the previous language until the next keystroke.
+  if (pricingMode === 'siding' && typeof updateSidingSubtotal === 'function') {
+    updateSidingSubtotal();
+  }
   // Pin quote-internal labels to the quote's content language (must run last
   // so it can override anything the refresh helpers above wrote)
   applyQuoteContentLang();
