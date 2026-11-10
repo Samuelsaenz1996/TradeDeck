@@ -8505,7 +8505,7 @@ const I18N = {
     'siding.materials.engineered': 'Engineered wood',
     'siding.materials.steel': 'Steel',
     'siding.materials.other': 'Other',
-    'siding.materialRate': 'Material cost per sq ft ($)',
+    'siding.materialRate': 'Material cost',
     'siding.installRate': 'Installation labor',
     'siding.waste': 'Waste factor',
     'siding.wasteHelp': 'Typically 10%',
@@ -9949,7 +9949,7 @@ const I18N = {
     'siding.materials.engineered': 'Madera ingenierizada',
     'siding.materials.steel': 'Acero',
     'siding.materials.other': 'Otro',
-    'siding.materialRate': 'Costo de material por pie² ($)',
+    'siding.materialRate': 'Costo de material',
     'siding.installRate': 'Mano de obra de instalación',
     'siding.waste': 'Factor de desperdicio',
     'siding.wasteHelp': 'Generalmente 10%',
@@ -13116,6 +13116,16 @@ function restorePricingInputs(snapshot) {
       customInput.classList.toggle('hidden', unitSel.value !== 'custom');
     }
     updateFlatSubtotal(trade);
+  }
+  if (mode === 'siding') {
+    // restorePricingInputs has just written the snapshot (or blanks) over the
+    // siding fields, so any "suggested" marks from a previous trade selection
+    // are stale. Clear them, then re-seed only the fields still empty — a
+    // saved quote's own rates are left exactly as they were.
+    ['sidingArea','sidingMaterialRate','sidingInstallRate','sidingWasteFactor','sidingTearOff','sidingTrim']
+      .forEach(id => sidingMarkSuggested(id, false));
+    sidingApplyDefaults(false);
+    updateSidingSubtotal();
   }
   if (mode === 'drywall') {
     applyDrywallScope(snapshot.drywallScope || 'both');
