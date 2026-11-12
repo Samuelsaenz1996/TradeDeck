@@ -5967,6 +5967,10 @@
             <span class="topbar-meta" id="quoteMetaLine"></span>
           </div>
           <div class="right">
+            <button class="action-btn" id="quoteShareBtn" onclick="shareQuoteLink()">
+              <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
+              <span id="quoteShareBtnText" data-i18n="quote.shareLink">Share link</span>
+            </button>
             <button class="action-btn" onclick="downloadPdf()" data-i18n="quote.downloadPdf">Download PDF</button>
             <button class="action-btn" onclick="sendQuoteEmail()" data-i18n="quote.email">Email</button>
             <button class="action-btn" onclick="sendQuoteText()" data-i18n="quote.text">Text</button>
@@ -8689,6 +8693,12 @@ const I18N = {
     'quote.copy': 'Copy quote',
     'quote.email': 'Email',
     'quote.text': 'Text',
+    'quote.shareLink': 'Share link',
+    'share.message': 'Here\'s your quote. You can read it and accept it from this link:',
+    'share.copyPrompt': 'Copy this link and send it to your customer:',
+    'toast.shareCopied': 'Link copied. Send it to your customer.',
+    'toast.shareFailed': "Couldn't create the share link.",
+    'toast.shareNeedsSave': 'Generate the quote first, then share it.',
     'quote.downloadPdf': 'Download PDF',
     'quote.convertInvoice': '→ Convert to invoice',
     'quote.viewInvoice': '→ View invoice',
@@ -10139,6 +10149,12 @@ const I18N = {
     'quote.copy': 'Copiar cotización',
     'quote.email': 'Correo',
     'quote.text': 'SMS',
+    'quote.shareLink': 'Compartir enlace',
+    'share.message': 'Aquí está su cotización. Puede leerla y aceptarla desde este enlace:',
+    'share.copyPrompt': 'Copie este enlace y envíeselo a su cliente:',
+    'toast.shareCopied': 'Enlace copiado. Envíeselo a su cliente.',
+    'toast.shareFailed': 'No se pudo crear el enlace.',
+    'toast.shareNeedsSave': 'Genere la cotización primero, luego compártala.',
     'quote.downloadPdf': 'Descargar PDF',
     'quote.convertInvoice': '→ Convertir a factura',
     'quote.viewInvoice': '→ Ver factura',
@@ -18334,6 +18350,65 @@ async function sendQuoteText() {
   setTimeout(() => {
     window.location.href = `sms:?body=${encodeURIComponent(shortMsg)}`;
   }, 800);
+}
+
+// Mint (or re-fetch) the public link for the current quote and hand it to the
+// contractor. Native share sheet where there is one — on a phone that opens
+// Messages and WhatsApp, which is how these actually get sent — clipboard
+// everywhere else.
+async function shareQuoteLink() {
+  if (!currentQuote || !currentQuote.id) { showToast(t('toast.shareNeedsSave'), true); return; }
+  const btn = document.getElementById('quoteShareBtn');
+  if (btn) btn.disabled = true;
+  try {
+    // Flush pending inline edits first: the customer must open what the
+    // contractor last saw, not the version from before their last tweak.
+    clearTimeout(quotesSaveTimer);
+    await saveCurrentQuoteEdits().catch(e => console.warn('flush before share:', e));
+
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session || !session.access_token) { showToast(t('toast.shareFailed'), true); return; }
+
+    const resp = await fetch('/api/quote/create-share-link', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ quote_id: currentQuote.id }),
+    });
+    const out = await resp.json().catch(() => ({}));
+    if (!resp.ok || !out.url) {
+      console.warn('create-share-link failed:', resp.status, out);
+      showToast(t('toast.shareFailed'), true);
+      return;
+    }
+
+    currentQuote.shareUrl = out.url;
+
+    const shareText = t('share.message').replace('{name}', currentQuote.clientName || '');
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: t('quote.label'), text: shareText, url: out.url });
+        return;                       // the sheet is the confirmation
+      } catch (e) {
+        if (e && e.name === 'AbortError') return;   // user dismissed; say nothing
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(out.url);
+      showToast(t('toast.shareCopied'));
+    } catch (e) {
+      // Clipboard blocked (http, or permission denied): show the link so it
+      // can still be copied by hand rather than failing silently.
+      window.prompt(t('share.copyPrompt'), out.url);
+    }
+  } catch (e) {
+    console.warn('shareQuoteLink threw:', e);
+    showToast(t('toast.shareFailed'), true);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
 
 async function convertToInvoice() {
