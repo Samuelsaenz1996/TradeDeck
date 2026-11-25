@@ -976,6 +976,52 @@
   }
   .price-how-opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+  /* ======================================================================
+     Screen tips
+     ======================================================================
+     The guided tour covers the quote form, which is where the work happens.
+     Every other screen gets one card on first arrival saying what it's for —
+     no overlay, no steps, nothing to click through. It dismisses and never
+     returns.
+     ====================================================================== */
+  .screen-tip {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 16px;
+    margin: 0 0 16px;
+    border: 1px solid var(--accent);
+    border-left-width: 3px;
+    border-radius: var(--radius);
+    background: var(--accent-soft);
+    animation: screenTipIn 0.28s ease both;
+  }
+  @keyframes screenTipIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .screen-tip { animation: none; }
+  }
+  .screen-tip-icon { color: var(--accent-ink); line-height: 0; margin-top: 1px; flex: 0 0 auto; }
+  .screen-tip-body { flex: 1 1 auto; min-width: 0; }
+  .screen-tip-title {
+    font-size: 13.5px; font-weight: 650; color: var(--accent-ink);
+    letter-spacing: -0.005em; margin: 0 0 3px;
+  }
+  .screen-tip-text {
+    font-size: 13px; line-height: 1.5; color: var(--ink-2); margin: 0;
+  }
+  .screen-tip-close {
+    flex: 0 0 auto; background: none; border: none; cursor: pointer;
+    color: var(--ink-3); line-height: 0; padding: 2px; border-radius: 4px;
+    margin: -2px -4px 0 0;
+  }
+  .screen-tip-close:hover { color: var(--ink); background: var(--surface-2); }
+  .screen-tip-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (max-width: 560px) {
+    .screen-tip { padding: 12px 13px; gap: 10px; }
+    .screen-tip-text { font-size: 12.5px; }
+  }
+
   /* Welcome card — shown on the quotes list before anything is highlighted.
      This one IS centred and blocking, because at this point there is nothing
      on screen worth interacting with: the list is empty. */
@@ -8834,6 +8880,18 @@ const I18N = {
     'tour.s4.text': 'Name and address go on the finished quote. Clients you add here are saved, so the next quote for them is two taps.',
     'tour.s5.title': 'Then we write it',
     'tour.s5.text': "Hit generate and you get a finished quote — scope, line items, totals and terms — ready to send before you leave the driveway.",
+    // One card on first arrival at each screen the tour doesn't cover
+    'tip.dismiss': 'Dismiss',
+    'tip.clients.title': "You don't have to add anyone here",
+    'tip.clients.text': "Put a client's name on a quote and they show up on this list by themselves — with every quote, job and invoice you've done for them already attached.",
+    'tip.jobs.title': 'Where accepted quotes end up',
+    'tip.jobs.text': 'A quote your customer accepts becomes a job here on its own. Change its status as the work moves, and the list always tells you what is still open.',
+    'tip.invoices.title': 'Never retype an invoice',
+    'tip.invoices.text': 'Start one from a finished quote and the line items, totals and client details come across already filled in. Send it and the customer can pay from their phone.',
+    'tip.payments.title': 'Nothing to fill in here',
+    'tip.payments.text': "This adds itself up as your invoices get paid. The number worth watching is outstanding — work you've earned and haven't collected.",
+    'tip.followups.title': 'Most jobs are lost to silence',
+    'tip.followups.text': 'Pick a quote that has gone quiet and we write the nudge for you — text or email, English or Spanish. Takes about ten seconds.',
     // Pricing method, in the contractor's words rather than ours
     'priceHow.pricedBy': 'Priced',
     'priceHow.unit.sqft': 'By the square foot',
@@ -10315,6 +10373,18 @@ const I18N = {
     'tour.s4.text': 'El nombre y la dirección salen en la cotización final. Los clientes que agregue aquí se guardan, y la próxima cotización le toma dos toques.',
     'tour.s5.title': 'Y nosotros la escribimos',
     'tour.s5.text': 'Presione generar y recibe una cotización terminada — alcance, partidas, totales y términos — lista para enviar antes de irse.',
+    // Una tarjeta la primera vez que llega a cada pantalla
+    'tip.dismiss': 'Cerrar',
+    'tip.clients.title': 'No tiene que agregar a nadie aquí',
+    'tip.clients.text': 'Ponga el nombre del cliente en una cotización y aparece solo en esta lista — con cada cotización, trabajo y factura que le ha hecho ya adjuntos.',
+    'tip.jobs.title': 'Aquí llegan las cotizaciones aceptadas',
+    'tip.jobs.text': 'Una cotización que el cliente acepta se vuelve trabajo aquí sola. Cambie su estado según avanza el trabajo y la lista siempre le dice qué sigue abierto.',
+    'tip.invoices.title': 'Nunca vuelva a escribir una factura',
+    'tip.invoices.text': 'Empiécela desde una cotización terminada y las partidas, los totales y los datos del cliente pasan ya llenos. Envíela y el cliente paga desde su teléfono.',
+    'tip.payments.title': 'Aquí no hay nada que llenar',
+    'tip.payments.text': 'Esto se suma solo cuando le pagan las facturas. El número que vale la pena ver es lo pendiente — trabajo que ya ganó y no ha cobrado.',
+    'tip.followups.title': 'La mayoría de los trabajos se pierden por silencio',
+    'tip.followups.text': 'Elija una cotización que se quedó callada y nosotros escribimos el recordatorio — mensaje o correo, en inglés o español. Toma unos diez segundos.',
     // Forma de cobrar, en las palabras del contratista
     'priceHow.pricedBy': 'Se cobra',
     'priceHow.unit.sqft': 'Por pie cuadrado',
@@ -11680,6 +11750,7 @@ function applyLanguage() {
   if (typeof refreshTopbarForCurrentView === 'function') refreshTopbarForCurrentView();
   // Pricing-method labels are written by JS, so the data-i18n sweep misses them.
   if (typeof refreshAllPriceHow === 'function') refreshAllPriceHow();
+  if (typeof refreshScreenTips === 'function') refreshScreenTips();
   // Logistics qty label: re-trigger labelling logic since current map keys use t()
   if (typeof refreshLogisticsQtyLabel === 'function') refreshLogisticsQtyLabel();
   // Surcharge label (only relevant when Priority/Emergency selected)
@@ -15232,6 +15303,9 @@ function switchView(view) {
   if (view === 'help') {
     renderHelpFaqs();
   }
+
+  // After the view's own render, so the tip sits above finished content.
+  if (typeof maybeShowScreenTip === 'function') maybeShowScreenTip(view);
 }
 
 function renderFollowupTrades() {
@@ -21462,6 +21536,95 @@ function refreshTopPriceHow() {
 function initPriceHow() {
   Object.keys(PRICE_HOW).forEach(id => buildPriceHow(document.getElementById(id)));
   buildTopPriceHow();
+}
+
+// ---------------------------------------------------------------------------
+// Screen tips
+//
+// One card, once, on first arrival at a screen the tour doesn't cover. It says
+// what the screen is for in a sentence and gets out of the way. Seen state is
+// per screen, so a contractor who only ever uses Quotes and Invoices never
+// sees the other three.
+// ---------------------------------------------------------------------------
+const TIPS_KEY = 'mtd_screen_tips_v1';
+const SCREEN_TIPS = {
+  clients:   { into: 'clientsView',   title: 'tip.clients.title',   text: 'tip.clients.text' },
+  jobs:      { into: 'jobsView',      title: 'tip.jobs.title',      text: 'tip.jobs.text' },
+  invoices:  { into: 'invoicesView',  title: 'tip.invoices.title',  text: 'tip.invoices.text' },
+  payments:  { into: 'paymentsView',  title: 'tip.payments.title',  text: 'tip.payments.text' },
+  followups: { into: 'followupView',  title: 'tip.followups.title', text: 'tip.followups.text' },
+};
+
+function tipsSeen() {
+  try { return JSON.parse(localStorage.getItem(TIPS_KEY) || '{}') || {}; }
+  catch (e) { return {}; }
+}
+function markTipSeen(view) {
+  try {
+    const seen = tipsSeen();
+    seen[view] = 1;
+    localStorage.setItem(TIPS_KEY, JSON.stringify(seen));
+  } catch (e) {}
+}
+
+function dismissScreenTip(view) {
+  const card = document.querySelector(`.screen-tip[data-tip="${view}"]`);
+  if (card) card.remove();
+}
+
+// Leaving a screen takes its tip with it: hidden views keep their DOM, so
+// without this the card is still sitting there when they come back.
+function pruneScreenTips(view) {
+  document.querySelectorAll('.screen-tip').forEach(card => {
+    if (card.dataset.tip !== view) card.remove();
+  });
+}
+
+function maybeShowScreenTip(view) {
+  pruneScreenTips(view);
+  const spec = SCREEN_TIPS[view];
+  if (!spec) return;
+  if (tipsSeen()[view]) return;
+  // Don't stack a tip under the guided tour or the welcome card.
+  if (document.querySelector('.tour-card, .tour-welcome')) return;
+  const host = document.getElementById(spec.into);
+  if (!host || host.classList.contains('hidden')) return;
+  if (host.querySelector('.screen-tip')) return;
+
+  const card = document.createElement('div');
+  card.className = 'screen-tip';
+  card.dataset.tip = view;
+  card.setAttribute('role', 'note');
+  card.innerHTML =
+      '<span class="screen-tip-icon" aria-hidden="true">'
+    +   '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">'
+    +     '<path d="M12 2a7 7 0 0 0-4 12.7V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.3A7 7 0 0 0 12 2Z"/><path d="M10 22h4"/>'
+    +   '</svg></span>'
+    + '<div class="screen-tip-body">'
+    +   '<p class="screen-tip-title"></p><p class="screen-tip-text"></p>'
+    + '</div>'
+    + '<button type="button" class="screen-tip-close">'
+    +   '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+    + '</button>';
+  card.querySelector('.screen-tip-title').textContent = t(spec.title);
+  card.querySelector('.screen-tip-text').textContent = t(spec.text);
+  const close = card.querySelector('.screen-tip-close');
+  close.setAttribute('aria-label', t('tip.dismiss'));
+  close.addEventListener('click', () => dismissScreenTip(view));
+
+  host.insertBefore(card, host.firstChild);
+  markTipSeen(view);
+}
+
+// A tip on screen when the language changes should change with it.
+function refreshScreenTips() {
+  document.querySelectorAll('.screen-tip').forEach(card => {
+    const spec = SCREEN_TIPS[card.dataset.tip];
+    if (!spec) return;
+    card.querySelector('.screen-tip-title').textContent = t(spec.title);
+    card.querySelector('.screen-tip-text').textContent = t(spec.text);
+    card.querySelector('.screen-tip-close').setAttribute('aria-label', t('tip.dismiss'));
+  });
 }
 
 function refreshAllPriceHow() {
