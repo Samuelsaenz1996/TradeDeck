@@ -915,6 +915,57 @@
     .tour-card { width: calc(100vw - 24px); padding: 14px 15px 12px; }
   }
 
+  /* Welcome card — shown on the quotes list before anything is highlighted.
+     This one IS centred and blocking, because at this point there is nothing
+     on screen worth interacting with: the list is empty. */
+  .tour-welcome-backdrop {
+    position: fixed; inset: 0; z-index: 9000;
+    background: rgba(16, 20, 28, 0.55);
+    display: grid; place-items: center; padding: 20px;
+    opacity: 0; transition: opacity 0.22s ease;
+  }
+  .tour-welcome-backdrop.is-on { opacity: 1; }
+  .tour-welcome-backdrop.hidden { display: none; }
+  .tour-welcome {
+    width: min(440px, 100%);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 28px 28px 22px;
+    transform: translateY(6px);
+    transition: transform 0.22s ease;
+  }
+  .tour-welcome-backdrop.is-on .tour-welcome { transform: translateY(0); }
+  .tour-welcome-mark {
+    width: 40px; height: 40px; border-radius: 11px;
+    background: var(--accent-soft); color: var(--accent);
+    display: grid; place-items: center; margin-bottom: 14px;
+  }
+  .tour-welcome h3 {
+    margin: 0 0 7px; font-size: 21px; font-weight: 700;
+    letter-spacing: -0.02em; text-wrap: balance;
+  }
+  .tour-welcome p { margin: 0 0 16px; font-size: 14.5px; color: var(--ink-2); line-height: 1.55; }
+  .tour-welcome-list { list-style: none; margin: 0 0 20px; padding: 0; display: grid; gap: 9px; }
+  .tour-welcome-list li {
+    display: flex; gap: 10px; align-items: flex-start;
+    font-size: 14px; color: var(--ink-2); line-height: 1.45;
+  }
+  .tour-welcome-list .n {
+    flex-shrink: 0; width: 20px; height: 20px; margin-top: 1px;
+    border-radius: 50%; background: var(--surface-2); border: 1px solid var(--line);
+    color: var(--ink-2); font-family: var(--mono); font-size: 10px; font-weight: 600;
+    display: grid; place-items: center;
+  }
+  .tour-welcome-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .tour-welcome-actions .tour-btn-primary { padding: 10px 18px; font-size: 14px; }
+
+  @media (max-width: 560px) {
+    .tour-welcome { padding: 22px 20px 18px; }
+    .tour-welcome h3 { font-size: 19px; }
+  }
+
   /* === Pricing Mode Toggle === */
   .pricing-toggle {
     display: inline-flex;
@@ -8675,6 +8726,13 @@ const I18N = {
     'unit.sqft': 'sq ft',
     'unit.perSqft': '/sq ft',
     'unit.perSqftShort': '/sq ft',
+    'tour.welcome.title': 'Quotes, without the paperwork',
+    'tour.welcome.text': 'MyTradeDeck turns a few details about the job into a finished quote you can send to your customer.',
+    'tour.welcome.l1': 'Tell us the trade and describe the work in your own words.',
+    'tour.welcome.l2': 'Put in your rates — we suggest typical ones so nothing starts blank.',
+    'tour.welcome.l3': 'Get back a professional quote with scope, line items and totals.',
+    'tour.welcome.go': 'Create your first quote',
+    'tour.welcome.skip': "I'll look around",
     'tour.stepOf': 'Step {n} of {total}',
     'tour.next': 'Next',
     'tour.back': 'Back',
@@ -10135,6 +10193,13 @@ const I18N = {
     'unit.sqft': 'pies²',
     'unit.perSqft': '/pie²',
     'unit.perSqftShort': '/pie²',
+    'tour.welcome.title': 'Cotizaciones, sin el papeleo',
+    'tour.welcome.text': 'MyTradeDeck convierte unos cuantos datos del trabajo en una cotización terminada que puede enviarle a su cliente.',
+    'tour.welcome.l1': 'Díganos el oficio y describa el trabajo con sus palabras.',
+    'tour.welcome.l2': 'Ponga sus tarifas — sugerimos las típicas para que nada empiece en blanco.',
+    'tour.welcome.l3': 'Reciba una cotización profesional con alcance, partidas y totales.',
+    'tour.welcome.go': 'Crear mi primera cotización',
+    'tour.welcome.skip': 'Prefiero explorar',
     'tour.stepOf': 'Paso {n} de {total}',
     'tour.next': 'Siguiente',
     'tour.back': 'Atrás',
@@ -20619,6 +20684,9 @@ function enterComposeMode() {
   selectedClientIdForQuote = null;
   selectedJobIdForQuote = null;
   switchQuotesSubView('compose');
+  // First time into the form: walk the fields. Now the elements are actually
+  // on screen, which they are not on the quotes list.
+  maybeStartTourOnCompose();
 }
 
 // Fetch all clients into clientsLookupCache and rebuild the
@@ -21196,11 +21264,21 @@ function buildTourChrome() {
   return tourEls;
 }
 
+// A selector can match an element inside a hidden view — the quote form lives
+// in the DOM even while the quotes list is showing — which would put the ring
+// at 0x0 on something nobody can see.
+function tourVisible(el) {
+  if (!el) return false;
+  if (el.offsetParent === null && getComputedStyle(el).position !== 'fixed') return false;
+  const r = el.getBoundingClientRect();
+  return r.width > 1 && r.height > 1;
+}
+
 function positionTour() {
   if (!tourEls) return;
   const step = TOUR_STEPS[tourIndex];
   const target = document.querySelector(step.el);
-  if (!target) { endTour(); return; }
+  if (!tourVisible(target)) { endTour(); return; }
 
   const r = target.getBoundingClientRect();
   const pad = 6;
@@ -21272,8 +21350,10 @@ function moveTour(delta) {
 }
 
 function startTour(fromStart) {
-  // Only runs where the quote form actually exists.
-  if (!document.querySelector('#tradesGrid')) return;
+  // Only runs where the quote form is actually on screen, not merely in the
+  // DOM behind a hidden view.
+  if (!tourVisible(document.querySelector('#tradesGrid'))) return;
+  dismissTourWelcome();
   buildTourChrome();
   tourIndex = fromStart === false ? tourIndex : 0;
   document.body.classList.add('tour-active');
@@ -21313,14 +21393,95 @@ function replayTour() {
   startTour(true);
 }
 
+// --- Stage one: what this thing does -----------------------------------
+// A new account lands on an empty quotes list. Highlighting form fields there
+// would be pointing at a screen they haven't opened yet, so the first thing
+// they get is a plain explanation and one button into the form.
+let tourWelcomeEl = null;
+
+function buildTourWelcome() {
+  if (tourWelcomeEl) return tourWelcomeEl;
+  const back = document.createElement('div');
+  back.className = 'tour-welcome-backdrop hidden';
+  back.setAttribute('role', 'dialog');
+  back.setAttribute('aria-modal', 'true');
+  back.innerHTML =
+      '<div class="tour-welcome">'
+    +   '<div class="tour-welcome-mark" aria-hidden="true">'
+    +     '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5h11l5 5v10H4z"/><path d="M15 4.5v5h5"/><path d="M8 13h8M8 16.5h5"/></svg>'
+    +   '</div>'
+    +   '<h3></h3><p></p>'
+    +   '<ul class="tour-welcome-list">'
+    +     '<li><span class="n">1</span><span data-w="l1"></span></li>'
+    +     '<li><span class="n">2</span><span data-w="l2"></span></li>'
+    +     '<li><span class="n">3</span><span data-w="l3"></span></li>'
+    +   '</ul>'
+    +   '<div class="tour-welcome-actions">'
+    +     '<button type="button" class="tour-skip" data-w="skip"></button>'
+    +     '<button type="button" class="tour-btn tour-btn-primary" data-w="go"></button>'
+    +   '</div>'
+    + '</div>';
+  document.body.appendChild(back);
+
+  back.querySelector('[data-w="skip"]').addEventListener('click', () => {
+    markTourSeen();
+    dismissTourWelcome();
+  });
+  back.querySelector('[data-w="go"]').addEventListener('click', () => {
+    dismissTourWelcome();
+    // Open the quote form, then walk the fields once it's on screen.
+    const newBtn = document.getElementById('quotesNewBtn');
+    if (newBtn) newBtn.click();
+    setTimeout(() => startTour(true), 420);
+  });
+  back.addEventListener('keydown', (e) => { if (e.key === 'Escape') { markTourSeen(); dismissTourWelcome(); } });
+
+  tourWelcomeEl = back;
+  return back;
+}
+
+function showTourWelcome() {
+  const back = buildTourWelcome();
+  const card = back.querySelector('.tour-welcome');
+  card.querySelector('h3').textContent = t('tour.welcome.title');
+  card.querySelector('p').textContent = t('tour.welcome.text');
+  ['l1', 'l2', 'l3'].forEach(k =>
+    card.querySelector(`[data-w="${k}"]`).textContent = t(`tour.welcome.${k}`));
+  card.querySelector('[data-w="skip"]').textContent = t('tour.welcome.skip');
+  card.querySelector('[data-w="go"]').textContent = t('tour.welcome.go');
+  back.classList.remove('hidden');
+  requestAnimationFrame(() => back.classList.add('is-on'));
+  const go = card.querySelector('[data-w="go"]');
+  if (go) go.focus();
+}
+
+function dismissTourWelcome() {
+  if (!tourWelcomeEl) return;
+  tourWelcomeEl.classList.remove('is-on');
+  setTimeout(() => { if (tourWelcomeEl) tourWelcomeEl.classList.add('hidden'); }, 230);
+}
+
 function maybeStartTour() {
   if (tourSeen()) return;
   if (typeof guestMode !== 'undefined' && guestMode) return;
-  if (!document.querySelector('#tradesGrid')) return;
-  // After the profile card, not on top of it.
+  // Not on top of the profile card.
   const backdrop = document.getElementById('onboardingBackdrop');
   if (backdrop && !backdrop.classList.contains('hidden')) return;
-  setTimeout(() => startTour(true), 450);
+  // Quote form already open (they went straight there): walk the fields.
+  if (tourVisible(document.querySelector('#tradesGrid'))) {
+    setTimeout(() => startTour(true), 350);
+    return;
+  }
+  // Otherwise explain what the product does first.
+  setTimeout(showTourWelcome, 400);
+}
+
+// Pressing New Quote for the first time starts the field walkthrough, whether
+// they got there from the welcome card or on their own.
+function maybeStartTourOnCompose() {
+  if (tourSeen()) return;
+  if (typeof guestMode !== 'undefined' && guestMode) return;
+  setTimeout(() => startTour(true), 420);
 }
 
 function maybeShowOnboarding() {
