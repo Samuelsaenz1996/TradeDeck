@@ -16954,6 +16954,12 @@ async function generateQuote() {
     showToast(t('toast.quoteDrafted'));
     completeProgress('generateProgress');
     setTimeout(() => hideProgress('generateProgress'), 600);
+    // Activation. This is the conversion worth optimising toward: a signup
+    // that never reaches here is the pattern every existing user followed.
+    // Valued at the quote total so Google learns which clicks lead to
+    // bigger jobs, not just more accounts.
+    trackConversion('quote_generated',
+      currentQuote && typeof currentQuote.total === 'number' ? currentQuote.total : undefined);
     persistGeneratedQuote().catch(e => console.warn('persist failed:', e));
   } catch (e) {
     console.error(e);
@@ -18068,6 +18074,10 @@ async function sendQuoteEmail() {
         title: subject,
         text: message,
       });
+      // The share sheet completed. An AbortError below means the
+      // contractor dismissed it, which is not a send.
+      trackConversion('quote_sent',
+        currentQuote && typeof currentQuote.total === 'number' ? currentQuote.total : undefined);
       return;
     } catch (e) {
       if (e.name === 'AbortError') return;
@@ -18085,6 +18095,10 @@ async function sendQuoteEmail() {
   setTimeout(() => {
     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(fallbackBody)}`;
   }, 800);
+  // Fallback path: the PDF downloaded and the mail client opened. We can't
+  // see whether they pressed send, so this is the closest honest signal.
+  trackConversion('quote_sent',
+    currentQuote && typeof currentQuote.total === 'number' ? currentQuote.total : undefined);
 }
 
 async function sendQuoteText() {
@@ -18116,6 +18130,8 @@ async function sendQuoteText() {
         title: `Quote ${id}`,
         text: shortMsg,
       });
+      trackConversion('quote_sent',
+        currentQuote && typeof currentQuote.total === 'number' ? currentQuote.total : undefined);
       return;
     } catch (e) {
       if (e.name === 'AbortError') return;
@@ -18129,6 +18145,8 @@ async function sendQuoteText() {
   setTimeout(() => {
     window.location.href = `sms:?body=${encodeURIComponent(shortMsg)}`;
   }, 800);
+  trackConversion('quote_sent',
+    currentQuote && typeof currentQuote.total === 'number' ? currentQuote.total : undefined);
 }
 
 async function convertToInvoice() {
@@ -23395,6 +23413,10 @@ async function handleSignUp() {
         options: { emailRedirectTo: window.location.origin },
       });
       if (error) throw error;
+      // Fired on either branch: Supabase returns a session when email
+      // confirmation is off and no session when a confirmation mail was
+      // sent. Both mean the account was created, which is what we bought.
+      trackConversion('signup');
       if (data && data.session) {
         authStatus(t('auth.signup.success'), false);
         showToast(t('verify.signup.nudge'));
@@ -23590,5 +23612,71 @@ initAuth();
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
+
+<!-- ===================================================================
+     Google Ads conversion tracking
+     ===================================================================
+     Inert until ADS_ID is filled in below, so this is safe to merge and
+     deploy before the Google Ads account exists. With ADS_ID empty, no
+     network request is made and trackConversion() returns silently.
+
+     TO TURN ON:
+       1. Google Ads -> Goals -> Conversions -> New conversion action
+          -> Website, entered manually. Create three actions:
+               Signup                 (what you buy)
+               Quote generated        (activation — the one that matters)
+               Quote sent             (intent to win work)
+       2. Each action gives a send_to value like AW-1234567890/AbC-D_efGh.
+          Put the AW- number in ADS_ID and each full value in LABELS.
+       3. Deploy. Use Google Tag Assistant to confirm the events fire.
+
+     Why these three, and why fired from success paths rather than button
+     clicks: a click fires whether or not the thing worked, so optimising
+     on it teaches Google to find people who fail. Each call below sits
+     after the operation has actually succeeded.
+     =================================================================== -->
+<script>
+  // Fill these in from the Google Ads conversion actions. Empty = disabled.
+  const ADS_ID = '';            // e.g. 'AW-1234567890'
+  const ADS_LABELS = {
+    signup:         '',         // e.g. 'AW-1234567890/AbC-D_efGh'
+    quote_generated: '',
+    quote_sent:     '',
+  };
+
+  // Load gtag only when configured. No ADS_ID means no third-party script
+  // on the page at all, which also keeps the site fast for everyone else.
+  if (ADS_ID) {
+    const s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(ADS_ID);
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { window.dataLayer.push(arguments); };
+    window.gtag('js', new Date());
+    window.gtag('config', ADS_ID);
+  }
+
+  // Records one conversion. Safe to call unconditionally: it is a no-op
+  // when tracking is off, when the label is missing, or when an ad
+  // blocker has stopped gtag from loading. Tracking must never be able
+  // to break a quote.
+  window.trackConversion = function (name, value) {
+    try {
+      if (!ADS_ID) return;
+      const sendTo = ADS_LABELS[name];
+      if (!sendTo) return;
+      if (typeof window.gtag !== 'function') return;
+      const payload = { send_to: sendTo };
+      if (typeof value === 'number' && isFinite(value) && value > 0) {
+        payload.value = value;
+        payload.currency = 'USD';
+      }
+      window.gtag('event', 'conversion', payload);
+    } catch (e) {
+      console.warn('trackConversion failed:', e);
+    }
+  };
+</script>
 </body>
 </html>
