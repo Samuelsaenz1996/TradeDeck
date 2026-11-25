@@ -2,5 +2,11 @@
   "rewrites": [
     { "source": "/verify", "destination": "/verify.html" },
     { "source": "/q/:token", "destination": "/api/q/:token" }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/keepalive",
+      "schedule": "17 9 * * *"
+    }
   ]
 }
