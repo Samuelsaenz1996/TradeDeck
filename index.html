@@ -5033,7 +5033,7 @@
           <textarea class="textarea" id="jobDesc" placeholder="e.g. Replace 50ft of cast iron drain line under the kitchen, install new cleanouts, repair drywall after."></textarea>
         </div>
 
-        <div class="field">
+        <div class="field" id="pricingSection">
           <label class="label" data-i18n="form.pricingApproach">What you're charging</label>
           <div class="pricing-toggle" id="pricingToggle">
             <button data-mode="framing" class="framing-only hidden" data-i18n="form.framing">Per area</button>
@@ -21661,9 +21661,11 @@ const TOUR_STEPS = [
     text: 'tour.s2.text',
   },
   {
-    // The pricing panel only exists once a trade is chosen; falls back to the
-    // empty-state card before that.
-    el: '#sidingPerUnitFields, #pricingEmptyState',
+    // The whole pricing block, not one trade's panel: which panel is open
+    // depends on the trade, and a multi-selector here resolved in document
+    // order — which meant it kept picking the empty state that had just been
+    // hidden by choosing a trade.
+    el: '#pricingSection',
     title: 'tour.s3.title',
     text: 'tour.s3.text',
   },
@@ -21683,6 +21685,7 @@ let tourIndex = 0;
 let tourEls = null;
 let tourKeyHandler = null;
 let tourReflow = null;
+let tourRecovering = false;   // guards positionTour → renderTourStep → positionTour
 
 function tourSeen() {
   try { return localStorage.getItem(TOUR_KEY) === 'done'; }
@@ -21736,11 +21739,40 @@ function tourVisible(el) {
   return r.width > 1 && r.height > 1;
 }
 
+// Half the form doesn't exist until a trade is picked — the job description
+// and the pricing fields are hidden on an untouched quote. The tour used to
+// end itself the moment it hit one of those, which meant a contractor who
+// pressed Next before choosing a trade watched the whole thing vanish. So the
+// step list is whatever is actually on screen right now, recomputed on every
+// move: pick a trade mid-tour and the skipped steps come back.
+function tourStepVisible(i) {
+  const step = TOUR_STEPS[i];
+  return !!step && tourVisible(document.querySelector(step.el));
+}
+
+function visibleTourSteps() {
+  return TOUR_STEPS.map((_, i) => i).filter(tourStepVisible);
+}
+
 function positionTour() {
   if (!tourEls) return;
   const step = TOUR_STEPS[tourIndex];
   const target = document.querySelector(step.el);
-  if (!tourVisible(target)) { endTour(); return; }
+  if (!tourVisible(target)) {
+    // The target went away under us (a trade was deselected, a panel closed).
+    // Move to a step that is still there rather than killing the tour; only
+    // give up when nothing is left to point at.
+    if (tourRecovering) return;
+    const steps = visibleTourSteps();
+    if (!steps.length) { endTour(); return; }
+    tourRecovering = true;
+    try {
+      tourIndex = steps.find(i => i > tourIndex);
+      if (tourIndex === undefined) tourIndex = steps[steps.length - 1];
+      renderTourStep();
+    } finally { tourRecovering = false; }
+    return;
+  }
 
   const r = target.getBoundingClientRect();
   const pad = 6;
@@ -21778,21 +21810,26 @@ function positionTour() {
 function renderTourStep() {
   const { card } = buildTourChrome();
   const step = TOUR_STEPS[tourIndex];
+  // Count only the steps this contractor can actually see, so "Step 2 of 3"
+  // never promises a step that isn't coming.
+  const steps = visibleTourSteps();
+  const here = Math.max(0, steps.indexOf(tourIndex));
+  const total = Math.max(steps.length, 1);
   card.querySelector('.tour-step').textContent =
-    t('tour.stepOf').replace('{n}', tourIndex + 1).replace('{total}', TOUR_STEPS.length);
+    t('tour.stepOf').replace('{n}', here + 1).replace('{total}', total);
   card.querySelector('.tour-title').textContent = t(step.title);
   card.querySelector('.tour-text').textContent = t(step.text);
   card.querySelector('.tour-skip').textContent = t('tour.skip');
 
   const back = card.querySelector('[data-tour="back"]');
   back.textContent = t('tour.back');
-  back.style.display = tourIndex === 0 ? 'none' : '';
+  back.style.display = here === 0 ? 'none' : '';
   card.querySelector('[data-tour="next"]').textContent =
-    tourIndex === TOUR_STEPS.length - 1 ? t('tour.done') : t('tour.next');
+    here >= total - 1 ? t('tour.done') : t('tour.next');
 
   const dots = card.querySelector('.tour-dots');
-  dots.innerHTML = TOUR_STEPS.map((_, i) =>
-    `<span class="tour-dot${i === tourIndex ? ' is-on' : (i < tourIndex ? ' is-done' : '')}"></span>`).join('');
+  dots.innerHTML = steps.map((_, i) =>
+    `<span class="tour-dot${i === here ? ' is-on' : (i < here ? ' is-done' : '')}"></span>`).join('');
 
   const target = document.querySelector(step.el);
   if (target && target.scrollIntoView) {
@@ -21804,10 +21841,17 @@ function renderTourStep() {
 }
 
 function moveTour(delta) {
-  const next = tourIndex + delta;
+  const steps = visibleTourSteps();
+  if (!steps.length) { endTour(); return; }
+  const here = steps.indexOf(tourIndex);
+  // If the current step just disappeared, treat the move as being from the
+  // nearest one that's still there.
+  const from = here >= 0 ? here
+    : Math.max(0, steps.filter(i => i < tourIndex).length - (delta > 0 ? 0 : 1));
+  const next = from + delta;
   if (next < 0) return;
-  if (next >= TOUR_STEPS.length) { endTour(); return; }
-  tourIndex = next;
+  if (next >= steps.length) { endTour(); return; }
+  tourIndex = steps[next];
   renderTourStep();
 }
 
@@ -21817,7 +21861,10 @@ function startTour(fromStart) {
   if (!tourVisible(document.querySelector('#tradesGrid'))) return;
   dismissTourWelcome();
   buildTourChrome();
-  tourIndex = fromStart === false ? tourIndex : 0;
+  const steps = visibleTourSteps();
+  if (!steps.length) return;
+  tourIndex = fromStart === false ? tourIndex : steps[0];
+  if (!tourStepVisible(tourIndex)) tourIndex = steps[0];
   document.body.classList.add('tour-active');
   renderTourStep();
 

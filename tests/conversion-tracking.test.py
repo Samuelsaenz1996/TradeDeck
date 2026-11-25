@@ -7,9 +7,20 @@ i = src.index('// Fill these in from the Google Ads conversion actions')
 block = src[i:src.index('</script>', i)]
 
 def page(ads_id, label):
-    b = block.replace("const ADS_ID = '';", f"const ADS_ID = '{ads_id}';")
-    b = b.replace("signup:         '',", f"signup:         '{label}',")
-    b = b.replace("quote_generated: '',", f"quote_generated: '{label}-gen',")
+    """Rewrite whatever ID and labels are currently shipped to test values.
+
+    The live conversion IDs were filled in after this suite was written, so
+    matching on empty strings silently stopped neutralising anything. Match on
+    the shape of the line instead, and assert the swap actually happened.
+    """
+    b = re.sub(r"const ADS_ID = '[^']*';", f"const ADS_ID = '{ads_id}';", block)
+    assert f"const ADS_ID = '{ads_id}'" in b, 'ADS_ID line no longer matches'
+    b = re.sub(r"(signup:\s*)'[^']*'", lambda m: m.group(1) + f"'{label}'", b)
+    b = re.sub(r"(quote_generated:\s*)'[^']*'",
+               lambda m: m.group(1) + f"'{label}-gen'", b)
+    # quote_sent is left empty on purpose: the suite checks an unlabelled
+    # action stays silent.
+    b = re.sub(r"(quote_sent:\s*)'[^']*'", lambda m: m.group(1) + "''", b)
     return f"""<!doctype html><html><head><meta charset=utf-8></head><body>
 <script>window.__requests=[];</script><script>{b}</script></body></html>"""
 
