@@ -802,6 +802,119 @@
     .calc-pop { left: auto; right: 0; }
   }
 
+  /* ======================================================================
+     Guided first run
+     ======================================================================
+     A spotlight that walks a new contractor to their first finished quote.
+     Deliberately non-blocking: the page stays usable underneath, because a
+     contractor who wants to skip ahead and type should be able to. The
+     backdrop is four panels around the target rather than one overlay with
+     a hole, so the highlighted control keeps receiving clicks.
+     ====================================================================== */
+  .tour-pane {
+    position: fixed;
+    background: rgba(16, 20, 28, 0.55);
+    z-index: 9000;
+    opacity: 0;
+    transition: opacity 0.25s ease, top 0.3s cubic-bezier(.4,0,.2,1),
+                left 0.3s cubic-bezier(.4,0,.2,1), width 0.3s cubic-bezier(.4,0,.2,1),
+                height 0.3s cubic-bezier(.4,0,.2,1);
+    pointer-events: auto;
+  }
+  .tour-active .tour-pane { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    .tour-pane { transition: opacity 0.15s linear; }
+  }
+
+  /* Ring around the live element. Pointer-events off so the control beneath
+     stays clickable — the whole point of not using a modal. */
+  .tour-ring {
+    position: fixed;
+    z-index: 9001;
+    border-radius: 10px;
+    box-shadow: 0 0 0 2px var(--accent), 0 0 0 6px rgba(37, 99, 235, 0.18);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s ease, top 0.3s cubic-bezier(.4,0,.2,1),
+                left 0.3s cubic-bezier(.4,0,.2,1), width 0.3s cubic-bezier(.4,0,.2,1),
+                height 0.3s cubic-bezier(.4,0,.2,1);
+  }
+  .tour-active .tour-ring { opacity: 1; }
+
+  .tour-card {
+    position: fixed;
+    z-index: 9002;
+    width: min(330px, calc(100vw - 32px));
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 16px 18px 14px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.22s ease, transform 0.22s ease,
+                top 0.3s cubic-bezier(.4,0,.2,1), left 0.3s cubic-bezier(.4,0,.2,1);
+  }
+  .tour-active .tour-card { opacity: 1; transform: translateY(0); }
+
+  .tour-step {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .tour-title {
+    font-size: 16px;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    margin: 4px 0 5px;
+    text-wrap: balance;
+  }
+  .tour-text { font-size: 13.5px; color: var(--ink-2); line-height: 1.5; }
+
+  .tour-dots { display: flex; gap: 5px; }
+  .tour-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--line-2);
+    transition: background 0.2s, width 0.2s;
+  }
+  .tour-dot.is-on { background: var(--accent); width: 16px; border-radius: 3px; }
+  .tour-dot.is-done { background: var(--accent-2); }
+
+  .tour-actions {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; margin-top: 14px;
+  }
+  .tour-btns { display: flex; gap: 6px; }
+  .tour-btn {
+    padding: 6px 13px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink-2);
+  }
+  .tour-btn:hover { background: var(--surface-2); color: var(--ink); }
+  .tour-btn-primary {
+    background: var(--ink); color: var(--bg); border-color: var(--ink);
+  }
+  .tour-btn-primary:hover { background: var(--ink-2); border-color: var(--ink-2); color: var(--bg); }
+  .tour-skip {
+    background: none; border: none; padding: 6px 2px;
+    font-size: 12.5px; color: var(--ink-3); font-weight: 500;
+  }
+  .tour-skip:hover { color: var(--ink-2); text-decoration: underline; }
+  .tour-btn:focus-visible, .tour-skip:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+
+  @media (max-width: 560px) {
+    .tour-card { width: calc(100vw - 24px); padding: 14px 15px 12px; }
+  }
+
   /* === Pricing Mode Toggle === */
   .pricing-toggle {
     display: inline-flex;
@@ -7859,6 +7972,11 @@
           <input type="search" class="input help-search-input" id="helpSearchInput"
                  data-i18n-placeholder="help.searchPlaceholder"
                  placeholder="Search help..." />
+          <button type="button" class="btn btn-ghost" id="helpReplayTourBtn"
+                  style="margin-top:12px;display:inline-flex;align-items:center;gap:7px;">
+            <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4"/><path d="M3 4v5h5"/></svg>
+            <span data-i18n="tour.replay">Show me how quoting works</span>
+          </button>
         </div>
 
         <div class="card help-chips-card">
@@ -8557,6 +8675,22 @@ const I18N = {
     'unit.sqft': 'sq ft',
     'unit.perSqft': '/sq ft',
     'unit.perSqftShort': '/sq ft',
+    'tour.stepOf': 'Step {n} of {total}',
+    'tour.next': 'Next',
+    'tour.back': 'Back',
+    'tour.done': 'Got it',
+    'tour.skip': 'Skip',
+    'tour.replay': 'Show me how quoting works',
+    'tour.s1.title': 'Start with the trade',
+    'tour.s1.text': "Pick the work you're quoting. We'll set up the right pricing fields for it — siding asks about wall area, roofing asks about squares.",
+    'tour.s2.title': 'Describe the job in plain words',
+    'tour.s2.text': "Write it how you'd say it to the customer. No format to follow — we turn it into a professional scope of work.",
+    'tour.s3.title': 'Your rates go here',
+    'tour.s3.text': "We fill in typical rates so nothing starts at zero. Type over them with yours — these are national ranges, not your market.",
+    'tour.s4.title': "Who it's for",
+    'tour.s4.text': 'Name and address go on the finished quote. Clients you add here are saved, so the next quote for them is two taps.',
+    'tour.s5.title': 'Then we write it',
+    'tour.s5.text': "Hit generate and you get a finished quote — scope, line items, totals and terms — ready to send before you leave the driveway.",
     'common.typical': 'Typical',
     'common.suggested': 'Suggested',
     'common.use': 'Use',
@@ -10001,6 +10135,22 @@ const I18N = {
     'unit.sqft': 'pies²',
     'unit.perSqft': '/pie²',
     'unit.perSqftShort': '/pie²',
+    'tour.stepOf': 'Paso {n} de {total}',
+    'tour.next': 'Siguiente',
+    'tour.back': 'Atrás',
+    'tour.done': 'Entendido',
+    'tour.skip': 'Saltar',
+    'tour.replay': 'Muéstrame cómo funciona',
+    'tour.s1.title': 'Empiece por el oficio',
+    'tour.s1.text': 'Elija el trabajo que va a cotizar. Preparamos los campos de precio correctos: revestimiento pregunta por área de pared, techado por cuadros.',
+    'tour.s2.title': 'Describa el trabajo con sus palabras',
+    'tour.s2.text': 'Escríbalo como se lo diría al cliente. No hay formato que seguir — nosotros lo convertimos en un alcance de trabajo profesional.',
+    'tour.s3.title': 'Aquí van sus tarifas',
+    'tour.s3.text': 'Llenamos tarifas típicas para que nada empiece en cero. Escriba las suyas encima — son rangos nacionales, no los de su mercado.',
+    'tour.s4.title': 'Para quién es',
+    'tour.s4.text': 'El nombre y la dirección salen en la cotización final. Los clientes que agregue aquí se guardan, y la próxima cotización le toma dos toques.',
+    'tour.s5.title': 'Y nosotros la escribimos',
+    'tour.s5.text': 'Presione generar y recibe una cotización terminada — alcance, partidas, totales y términos — lista para enviar antes de irse.',
     'common.typical': 'Típico',
     'common.suggested': 'Sugerido',
     'common.use': 'Usar',
@@ -14435,6 +14585,17 @@ function bindNav() {
   document.getElementById('navProfile').onclick = () => { switchView('profile'); closeDrawer(); };
   const navHelpEl = document.getElementById('navHelp');
   if (navHelpEl) navHelpEl.onclick = () => { switchView('help'); closeDrawer(); };
+
+  // Replaying the walkthrough needs the quote form on screen, so send them
+  // there first rather than highlighting elements that aren't rendered.
+  const replayBtn = document.getElementById('helpReplayTourBtn');
+  if (replayBtn) replayBtn.onclick = () => {
+    switchView('quotes');
+    closeDrawer();
+    const newBtn = document.getElementById('quotesNewBtn');
+    if (newBtn) newBtn.click();
+    setTimeout(replayTour, 500);
+  };
   bindDrawer();
   bindHelp();
 }
@@ -20893,6 +21054,10 @@ function closeOnboardingModal() {
   if (!backdrop) return;
   backdrop.classList.remove('visible');
   setTimeout(() => backdrop.classList.add('hidden'), 130);
+  // The profile card is the only thing standing between a new account and an
+  // empty form, so the walkthrough picks up where it leaves off — whether they
+  // filled it in or chose "Finish later".
+  setTimeout(maybeStartTour, 200);
 }
 
 async function saveOnboardingHandler() {
@@ -20940,12 +21105,235 @@ async function saveOnboardingHandler() {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Guided first run
+//
+// Every account so far has signed up, looked once, and never come back. The
+// first run drops a contractor on an empty quote form with fifteen trade tiles
+// and no indication of what to do. This walks them to a finished quote.
+//
+// Deliberately NOT a modal: the backdrop is four panels around the highlighted
+// element, so the control stays clickable and someone who wants to get on with
+// it can. Completion lives in localStorage rather than the database, so this
+// ships without waiting on a migration.
+// ---------------------------------------------------------------------------
+const TOUR_KEY = 'mtd_tour_v1';
+
+const TOUR_STEPS = [
+  {
+    el: '#tradesGrid',
+    title: 'tour.s1.title',
+    text: 'tour.s1.text',
+  },
+  {
+    el: '#jobDesc',
+    title: 'tour.s2.title',
+    text: 'tour.s2.text',
+  },
+  {
+    // The pricing panel only exists once a trade is chosen; falls back to the
+    // empty-state card before that.
+    el: '#sidingPerUnitFields, #pricingEmptyState',
+    title: 'tour.s3.title',
+    text: 'tour.s3.text',
+  },
+  {
+    el: '#clientName',
+    title: 'tour.s4.title',
+    text: 'tour.s4.text',
+  },
+  {
+    el: '#generateBtn',
+    title: 'tour.s5.title',
+    text: 'tour.s5.text',
+  },
+];
+
+let tourIndex = 0;
+let tourEls = null;
+let tourKeyHandler = null;
+let tourReflow = null;
+
+function tourSeen() {
+  try { return localStorage.getItem(TOUR_KEY) === 'done'; }
+  catch (e) { return false; }   // private window: show it, don't crash
+}
+function markTourSeen() {
+  try { localStorage.setItem(TOUR_KEY, 'done'); } catch (e) {}
+}
+
+function buildTourChrome() {
+  if (tourEls) return tourEls;
+  const mk = (cls) => { const d = document.createElement('div'); d.className = cls; return d; };
+  const panes = ['top', 'right', 'bottom', 'left'].map(() => mk('tour-pane'));
+  const ring = mk('tour-ring');
+  const card = mk('tour-card');
+  card.setAttribute('role', 'dialog');
+  card.setAttribute('aria-live', 'polite');
+  card.innerHTML =
+      '<div class="tour-step"></div>'
+    + '<div class="tour-title"></div>'
+    + '<div class="tour-text"></div>'
+    + '<div class="tour-actions">'
+    +   '<button type="button" class="tour-skip"></button>'
+    +   '<div style="display:flex;align-items:center;gap:10px;">'
+    +     '<div class="tour-dots"></div>'
+    +     '<div class="tour-btns">'
+    +       '<button type="button" class="tour-btn" data-tour="back"></button>'
+    +       '<button type="button" class="tour-btn tour-btn-primary" data-tour="next"></button>'
+    +     '</div>'
+    +   '</div>'
+    + '</div>';
+  panes.concat([ring, card]).forEach(el => document.body.appendChild(el));
+
+  card.querySelector('.tour-skip').addEventListener('click', endTour);
+  card.querySelector('[data-tour="back"]').addEventListener('click', () => moveTour(-1));
+  card.querySelector('[data-tour="next"]').addEventListener('click', () => moveTour(1));
+  // Clicking the dimmed area leaves the tour, like any overlay.
+  panes.forEach(p => p.addEventListener('click', endTour));
+
+  tourEls = { panes, ring, card };
+  return tourEls;
+}
+
+function positionTour() {
+  if (!tourEls) return;
+  const step = TOUR_STEPS[tourIndex];
+  const target = document.querySelector(step.el);
+  if (!target) { endTour(); return; }
+
+  const r = target.getBoundingClientRect();
+  const pad = 6;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const box = {
+    top: Math.max(0, r.top - pad),
+    left: Math.max(0, r.left - pad),
+    w: Math.min(vw, r.width + pad * 2),
+    h: Math.min(vh, r.height + pad * 2),
+  };
+
+  const [top, right, bottom, left] = tourEls.panes;
+  const set = (el, s) => Object.assign(el.style, s);
+  set(top,    { top: '0px', left: '0px', width: vw + 'px', height: box.top + 'px' });
+  set(bottom, { top: (box.top + box.h) + 'px', left: '0px', width: vw + 'px',
+                height: Math.max(0, vh - box.top - box.h) + 'px' });
+  set(left,   { top: box.top + 'px', left: '0px', width: box.left + 'px', height: box.h + 'px' });
+  set(right,  { top: box.top + 'px', left: (box.left + box.w) + 'px',
+                width: Math.max(0, vw - box.left - box.w) + 'px', height: box.h + 'px' });
+
+  set(tourEls.ring, { top: box.top + 'px', left: box.left + 'px',
+                      width: box.w + 'px', height: box.h + 'px' });
+
+  // Card goes below the target, or above when there isn't room.
+  const card = tourEls.card;
+  const cw = card.offsetWidth || 330;
+  const ch = card.offsetHeight || 150;
+  let cTop = box.top + box.h + 12;
+  if (cTop + ch > vh - 12) cTop = Math.max(12, box.top - ch - 12);
+  let cLeft = box.left;
+  if (cLeft + cw > vw - 12) cLeft = Math.max(12, vw - cw - 12);
+  set(card, { top: cTop + 'px', left: cLeft + 'px' });
+}
+
+function renderTourStep() {
+  const { card } = buildTourChrome();
+  const step = TOUR_STEPS[tourIndex];
+  card.querySelector('.tour-step').textContent =
+    t('tour.stepOf').replace('{n}', tourIndex + 1).replace('{total}', TOUR_STEPS.length);
+  card.querySelector('.tour-title').textContent = t(step.title);
+  card.querySelector('.tour-text').textContent = t(step.text);
+  card.querySelector('.tour-skip').textContent = t('tour.skip');
+
+  const back = card.querySelector('[data-tour="back"]');
+  back.textContent = t('tour.back');
+  back.style.display = tourIndex === 0 ? 'none' : '';
+  card.querySelector('[data-tour="next"]').textContent =
+    tourIndex === TOUR_STEPS.length - 1 ? t('tour.done') : t('tour.next');
+
+  const dots = card.querySelector('.tour-dots');
+  dots.innerHTML = TOUR_STEPS.map((_, i) =>
+    `<span class="tour-dot${i === tourIndex ? ' is-on' : (i < tourIndex ? ' is-done' : '')}"></span>`).join('');
+
+  const target = document.querySelector(step.el);
+  if (target && target.scrollIntoView) {
+    target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+  // Let the smooth scroll settle before measuring, or the ring lands wrong.
+  setTimeout(positionTour, 320);
+  positionTour();
+}
+
+function moveTour(delta) {
+  const next = tourIndex + delta;
+  if (next < 0) return;
+  if (next >= TOUR_STEPS.length) { endTour(); return; }
+  tourIndex = next;
+  renderTourStep();
+}
+
+function startTour(fromStart) {
+  // Only runs where the quote form actually exists.
+  if (!document.querySelector('#tradesGrid')) return;
+  buildTourChrome();
+  tourIndex = fromStart === false ? tourIndex : 0;
+  document.body.classList.add('tour-active');
+  renderTourStep();
+
+  tourKeyHandler = (e) => {
+    if (e.key === 'Escape') { endTour(); }
+    else if (e.key === 'ArrowRight') { moveTour(1); }
+    else if (e.key === 'ArrowLeft') { moveTour(-1); }
+  };
+  document.addEventListener('keydown', tourKeyHandler);
+  tourReflow = () => positionTour();
+  window.addEventListener('resize', tourReflow);
+  window.addEventListener('scroll', tourReflow, true);
+}
+
+function endTour() {
+  markTourSeen();
+  document.body.classList.remove('tour-active');
+  if (tourKeyHandler) { document.removeEventListener('keydown', tourKeyHandler); tourKeyHandler = null; }
+  if (tourReflow) {
+    window.removeEventListener('resize', tourReflow);
+    window.removeEventListener('scroll', tourReflow, true);
+    tourReflow = null;
+  }
+  // Leave the nodes in place but inert; rebuilding them on replay is wasteful.
+  setTimeout(() => {
+    if (!tourEls || document.body.classList.contains('tour-active')) return;
+    tourEls.panes.concat([tourEls.ring, tourEls.card])
+      .forEach(el => { el.style.top = '-9999px'; el.style.left = '-9999px'; });
+  }, 260);
+}
+
+// Replayable from Help, so it isn't a one-shot that can never be seen again.
+function replayTour() {
+  tourIndex = 0;
+  startTour(true);
+}
+
+function maybeStartTour() {
+  if (tourSeen()) return;
+  if (typeof guestMode !== 'undefined' && guestMode) return;
+  if (!document.querySelector('#tradesGrid')) return;
+  // After the profile card, not on top of it.
+  const backdrop = document.getElementById('onboardingBackdrop');
+  if (backdrop && !backdrop.classList.contains('hidden')) return;
+  setTimeout(() => startTour(true), 450);
+}
+
 function maybeShowOnboarding() {
   if (onboardingShown) return;
   // No profileCache → no real session (bypass or pre-auth). Skip.
   if (!profileCache) return;
   const first = (profileCache.first_name || '').trim();
-  if (first) return;
+  if (first) {
+    // Returning account with a profile already filled in: no card to show, but
+    // they may still never have seen the walkthrough.
+    maybeStartTour();
+    return;
+  }
   onboardingShown = true;
   openOnboardingModal();
 }
