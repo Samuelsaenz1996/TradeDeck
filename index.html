@@ -915,6 +915,113 @@
     .tour-card { width: calc(100vw - 24px); padding: 14px 15px 12px; }
   }
 
+  /* ======================================================================
+     Pricing method, collapsed
+     ======================================================================
+     Every trade used to open with a toggle asking the contractor to classify
+     their pricing before seeing a single field — and for most trades there
+     were two such toggles, both using our words ("per-unit", "flat rate")
+     rather than theirs. Each trade now opens in the way that work is normally
+     sold, and the alternatives sit behind one quiet line.
+     ====================================================================== */
+  .price-how {
+    margin: 2px 0 14px;
+  }
+  .price-how-summary {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12.5px; font-weight: 500; color: var(--ink-3);
+    background: none; border: none; padding: 4px 0;
+    cursor: pointer; text-align: left;
+  }
+  .price-how-label { color: var(--ink-3); }
+  .price-how-summary:hover { color: var(--ink-2); }
+  .price-how-summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  .price-how-caret { transition: transform 0.18s ease; line-height: 0; }
+  .price-how.is-open .price-how-caret { transform: rotate(180deg); }
+
+  .price-how-current {
+    font-size: 12.5px; color: var(--ink-2); font-weight: 600;
+  }
+
+  .price-how-options {
+    display: none;
+    gap: 8px;
+    margin-top: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  }
+  .price-how.is-open .price-how-options { display: grid; }
+
+  .price-how-opt {
+    text-align: left;
+    padding: 11px 13px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    transition: border-color 0.12s, background 0.12s;
+    cursor: pointer;
+  }
+  .price-how-opt:hover { border-color: var(--ink-3); background: var(--surface-2); }
+  .price-how-opt.is-on {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    box-shadow: inset 0 0 0 1px var(--accent);
+  }
+  .price-how-opt-title {
+    display: block; font-size: 13.5px; font-weight: 600; color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+  .price-how-opt.is-on .price-how-opt-title { color: var(--accent-ink); }
+  .price-how-opt-sub {
+    display: block; font-size: 12px; color: var(--ink-3); margin-top: 2px; line-height: 1.4;
+  }
+  .price-how-opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ======================================================================
+     Screen tips
+     ======================================================================
+     The guided tour covers the quote form, which is where the work happens.
+     Every other screen gets one card on first arrival saying what it's for —
+     no overlay, no steps, nothing to click through. It dismisses and never
+     returns.
+     ====================================================================== */
+  .screen-tip {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 16px;
+    margin: 0 0 16px;
+    border: 1px solid var(--accent);
+    border-left-width: 3px;
+    border-radius: var(--radius);
+    background: var(--accent-soft);
+    animation: screenTipIn 0.28s ease both;
+  }
+  @keyframes screenTipIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .screen-tip { animation: none; }
+  }
+  .screen-tip-icon { color: var(--accent-ink); line-height: 0; margin-top: 1px; flex: 0 0 auto; }
+  .screen-tip-body { flex: 1 1 auto; min-width: 0; }
+  .screen-tip-title {
+    font-size: 13.5px; font-weight: 650; color: var(--accent-ink);
+    letter-spacing: -0.005em; margin: 0 0 3px;
+  }
+  .screen-tip-text {
+    font-size: 13px; line-height: 1.5; color: var(--ink-2); margin: 0;
+  }
+  .screen-tip-close {
+    flex: 0 0 auto; background: none; border: none; cursor: pointer;
+    color: var(--ink-3); line-height: 0; padding: 2px; border-radius: 4px;
+    margin: -2px -4px 0 0;
+  }
+  .screen-tip-close:hover { color: var(--ink); background: var(--surface-2); }
+  .screen-tip-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (max-width: 560px) {
+    .screen-tip { padding: 12px 13px; gap: 10px; }
+    .screen-tip-text { font-size: 12.5px; }
+  }
+
   /* Welcome card — shown on the quotes list before anything is highlighted.
      This one IS centred and blocking, because at this point there is nothing
      on screen worth interacting with: the list is empty. */
@@ -4926,8 +5033,8 @@
           <textarea class="textarea" id="jobDesc" placeholder="e.g. Replace 50ft of cast iron drain line under the kitchen, install new cleanouts, repair drywall after."></textarea>
         </div>
 
-        <div class="field">
-          <label class="label" data-i18n="form.pricingApproach">Pricing approach</label>
+        <div class="field" id="pricingSection">
+          <label class="label" data-i18n="form.pricingApproach">What you're charging</label>
           <div class="pricing-toggle" id="pricingToggle">
             <button data-mode="framing" class="framing-only hidden" data-i18n="form.framing">Per area</button>
             <button data-mode="hourly" class="active" data-i18n="form.hourly">Hourly</button>
@@ -8416,7 +8523,31 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 // ============================================================================
 // i18n
 // ============================================================================
-let tdLang = (localStorage.getItem('tdLang') === 'es') ? 'es' : 'en';
+// Language on first load, in priority order:
+//   1. ?lang=es on the URL — Spanish ads land here, so the whole site and the
+//      walkthrough are already in Spanish before the page paints.
+//   2. What they chose last time.
+//   3. The browser's own language, which catches every Spanish speaker who
+//      arrives some other way.
+// A URL parameter also writes the choice, so it survives the next visit.
+let tdLang = (function initialLang() {
+  try {
+    const p = new URLSearchParams(window.location.search).get('lang');
+    if (p === 'es' || p === 'en') {
+      try { localStorage.setItem('tdLang', p); } catch (e) {}
+      return p;
+    }
+  } catch (e) {}
+  try {
+    const saved = localStorage.getItem('tdLang');
+    if (saved === 'es' || saved === 'en') return saved;
+  } catch (e) {}
+  try {
+    const nav = (navigator.languages && navigator.languages[0]) || navigator.language || '';
+    if (/^es\b/i.test(nav)) return 'es';
+  } catch (e) {}
+  return 'en';
+})();
 
 const I18N = {
   en: {
@@ -8520,7 +8651,7 @@ const I18N = {
     'form.jobDesc': 'Job description',
     'form.pricingEmpty': 'Select a trade to set up pricing for this job.',
     'form.jobDescPlaceholderGeneric': 'Describe the work for this quote...',
-    'form.pricingApproach': 'Pricing approach',
+    'form.pricingApproach': "What you're charging",
     'form.hourly': 'Hourly',
     'form.flat': 'Flat rate',
     'form.framing': 'Per area',
@@ -8749,6 +8880,32 @@ const I18N = {
     'tour.s4.text': 'Name and address go on the finished quote. Clients you add here are saved, so the next quote for them is two taps.',
     'tour.s5.title': 'Then we write it',
     'tour.s5.text': "Hit generate and you get a finished quote — scope, line items, totals and terms — ready to send before you leave the driveway.",
+    // One card on first arrival at each screen the tour doesn't cover
+    'tip.dismiss': 'Dismiss',
+    'tip.clients.title': "You don't have to add anyone here",
+    'tip.clients.text': "Put a client's name on a quote and they show up on this list by themselves — with every quote, job and invoice you've done for them already attached.",
+    'tip.jobs.title': 'Where accepted quotes end up',
+    'tip.jobs.text': 'A quote your customer accepts becomes a job here on its own. Change its status as the work moves, and the list always tells you what is still open.',
+    'tip.invoices.title': 'Never retype an invoice',
+    'tip.invoices.text': 'Start one from a finished quote and the line items, totals and client details come across already filled in. Send it and the customer can pay from their phone.',
+    'tip.payments.title': 'Nothing to fill in here',
+    'tip.payments.text': "This adds itself up as your invoices get paid. The number worth watching is outstanding — work you've earned and haven't collected.",
+    'tip.followups.title': 'Most jobs are lost to silence',
+    'tip.followups.text': 'Pick a quote that has gone quiet and we write the nudge for you — text or email, English or Spanish. Takes about ten seconds.',
+    // Pricing method, in the contractor's words rather than ours
+    'priceHow.pricedBy': 'Priced',
+    'priceHow.unit.sqft': 'By the square foot',
+    'priceHow.unit.square': 'By the roofing square',
+    'priceHow.unit.linft': 'By the linear foot',
+    'priceHow.unit.load': 'By the load',
+    'priceHow.unit.item': 'By the item',
+    'priceHow.unit.window': 'By the window',
+    'priceHow.unit.sub': 'Enter your rate — we do the math',
+    'priceHow.hourly': 'By the hour',
+    'priceHow.hourly.sub': 'Your hourly rate × hours on the job',
+    'priceHow.flat': 'One price for the whole job',
+    'priceHow.flat.sub': 'You already know the number — just type it',
+    'priceHow.change': 'Price this job differently',
     'common.typical': 'Typical',
     'common.suggested': 'Suggested',
     'common.use': 'Use',
@@ -9987,7 +10144,7 @@ const I18N = {
     'form.jobDesc': 'Descripción del trabajo',
     'form.pricingEmpty': 'Elige un oficio para configurar el precio de este trabajo.',
     'form.jobDescPlaceholderGeneric': 'Describe el trabajo para esta cotización...',
-    'form.pricingApproach': 'Forma de cobro',
+    'form.pricingApproach': 'Cuánto va a cobrar',
     'form.hourly': 'Por hora',
     'form.flat': 'Precio fijo',
     'form.framing': 'Por área',
@@ -10216,6 +10373,32 @@ const I18N = {
     'tour.s4.text': 'El nombre y la dirección salen en la cotización final. Los clientes que agregue aquí se guardan, y la próxima cotización le toma dos toques.',
     'tour.s5.title': 'Y nosotros la escribimos',
     'tour.s5.text': 'Presione generar y recibe una cotización terminada — alcance, partidas, totales y términos — lista para enviar antes de irse.',
+    // Una tarjeta la primera vez que llega a cada pantalla
+    'tip.dismiss': 'Cerrar',
+    'tip.clients.title': 'No tiene que agregar a nadie aquí',
+    'tip.clients.text': 'Ponga el nombre del cliente en una cotización y aparece solo en esta lista — con cada cotización, trabajo y factura que le ha hecho ya adjuntos.',
+    'tip.jobs.title': 'Aquí llegan las cotizaciones aceptadas',
+    'tip.jobs.text': 'Una cotización que el cliente acepta se vuelve trabajo aquí sola. Cambie su estado según avanza el trabajo y la lista siempre le dice qué sigue abierto.',
+    'tip.invoices.title': 'Nunca vuelva a escribir una factura',
+    'tip.invoices.text': 'Empiécela desde una cotización terminada y las partidas, los totales y los datos del cliente pasan ya llenos. Envíela y el cliente paga desde su teléfono.',
+    'tip.payments.title': 'Aquí no hay nada que llenar',
+    'tip.payments.text': 'Esto se suma solo cuando le pagan las facturas. El número que vale la pena ver es lo pendiente — trabajo que ya ganó y no ha cobrado.',
+    'tip.followups.title': 'La mayoría de los trabajos se pierden por silencio',
+    'tip.followups.text': 'Elija una cotización que se quedó callada y nosotros escribimos el recordatorio — mensaje o correo, en inglés o español. Toma unos diez segundos.',
+    // Forma de cobrar, en las palabras del contratista
+    'priceHow.pricedBy': 'Se cobra',
+    'priceHow.unit.sqft': 'Por pie cuadrado',
+    'priceHow.unit.square': 'Por cuadro de techo',
+    'priceHow.unit.linft': 'Por pie lineal',
+    'priceHow.unit.load': 'Por viaje',
+    'priceHow.unit.item': 'Por pieza',
+    'priceHow.unit.window': 'Por ventana',
+    'priceHow.unit.sub': 'Ponga su tarifa — nosotros hacemos las cuentas',
+    'priceHow.hourly': 'Por hora',
+    'priceHow.hourly.sub': 'Su tarifa por hora × las horas del trabajo',
+    'priceHow.flat': 'Un solo precio por todo el trabajo',
+    'priceHow.flat.sub': 'Ya sabe el número — solo escríbalo',
+    'priceHow.change': 'Cobrar este trabajo de otra forma',
     'common.typical': 'Típico',
     'common.suggested': 'Sugerido',
     'common.use': 'Usar',
@@ -11565,6 +11748,9 @@ function applyLanguage() {
   }
   // Update topbar to current view
   if (typeof refreshTopbarForCurrentView === 'function') refreshTopbarForCurrentView();
+  // Pricing-method labels are written by JS, so the data-i18n sweep misses them.
+  if (typeof refreshAllPriceHow === 'function') refreshAllPriceHow();
+  if (typeof refreshScreenTips === 'function') refreshScreenTips();
   // Logistics qty label: re-trigger labelling logic since current map keys use t()
   if (typeof refreshLogisticsQtyLabel === 'function') refreshLogisticsQtyLabel();
   // Surcharge label (only relevant when Priority/Emergency selected)
@@ -13452,6 +13638,9 @@ function init() {
     bindFlatRateInputs(trade);
     updateFlatSubtotal(trade);
   });
+  // Must run after bindSubstructToggle: the collapsed control clicks the real
+  // buttons, so their handlers have to be attached first.
+  initPriceHow();
   bindFollowupSourcePills();
   renderFollowupScenarios('quote');
   bindFollowupChannelToggle();
@@ -13995,6 +14184,7 @@ function setPricingMode(mode) {
   document.getElementById('windowsPanel').classList.toggle('hidden', mode !== 'windows');
   document.getElementById('drywallPanel').classList.toggle('hidden', mode !== 'drywall');
   refreshPricingHints(mode);
+  if (typeof refreshTopPriceHow === 'function') refreshTopPriceHow();
 }
 
 function applyPricingStructure(trade, structure) {
@@ -14008,6 +14198,9 @@ function applyPricingStructure(trade, structure) {
   const flat = document.getElementById(`${trade}FlatRateFields`);
   if (perUnit) perUnit.classList.toggle('hidden', structure !== 'per-unit');
   if (flat) flat.classList.toggle('hidden', structure !== 'flat-rate');
+  // Single chokepoint for structure changes, so the collapsed control follows
+  // restores and programmatic switches as well as clicks.
+  if (toggle && typeof refreshPriceHow === 'function') refreshPriceHow(toggle);
 }
 
 function bindSubstructToggle(trade) {
@@ -15110,6 +15303,9 @@ function switchView(view) {
   if (view === 'help') {
     renderHelpFaqs();
   }
+
+  // After the view's own render, so the tip sits above finished content.
+  if (typeof maybeShowScreenTip === 'function') maybeShowScreenTip(view);
 }
 
 function renderFollowupTrades() {
@@ -21174,6 +21370,272 @@ async function saveOnboardingHandler() {
 }
 
 // ---------------------------------------------------------------------------
+// Pricing method, collapsed
+//
+// A contractor shouldn't have to classify their pricing model before seeing a
+// field. Each trade is sold a normal way — siding by the square foot, gutters
+// by the linear foot — so that is what opens, and the alternatives sit behind
+// one line. The underlying toggles still drive everything; they're just no
+// longer the first thing in the way.
+//
+// Labels are what a contractor would say out loud, not our data model.
+// ---------------------------------------------------------------------------
+const PRICE_HOW = {
+  truckingSubstructToggle:  { unit: 'priceHow.unit.load',   flat: 'priceHow.flat' },
+  logisticsSubstructToggle: { unit: 'priceHow.unit.item',   flat: 'priceHow.flat' },
+  paintingSubstructToggle:  { unit: 'priceHow.unit.sqft',   flat: 'priceHow.flat' },
+  flooringSubstructToggle:  { unit: 'priceHow.unit.sqft',   flat: 'priceHow.flat' },
+  roofingSubstructToggle:   { unit: 'priceHow.unit.square', flat: 'priceHow.flat' },
+  guttersSubstructToggle:   { unit: 'priceHow.unit.linft',  flat: 'priceHow.flat' },
+  sidingSubstructToggle:    { unit: 'priceHow.unit.sqft',   flat: 'priceHow.flat' },
+  windowsSubstructToggle:   { unit: 'priceHow.unit.window', flat: 'priceHow.flat' },
+};
+
+// Wraps one existing toggle in the collapsed control. The original buttons are
+// kept and still clicked programmatically, so none of the panel logic changes.
+function buildPriceHow(toggle) {
+  if (!toggle || toggle.dataset.howWrapped) return;
+  const map = PRICE_HOW[toggle.id];
+  if (!map) return;
+  const unitBtn = toggle.querySelector('[data-substruct="per-unit"]');
+  const flatBtn = toggle.querySelector('[data-substruct="flat-rate"]');
+  if (!unitBtn || !flatBtn) return;
+
+  toggle.dataset.howWrapped = '1';
+  toggle.style.display = 'none';          // keep it working, stop it shouting
+
+  const wrap = document.createElement('div');
+  wrap.className = 'price-how';
+  wrap.dataset.for = toggle.id;
+  wrap.innerHTML =
+      '<button type="button" class="price-how-summary" aria-expanded="false">'
+    +   '<span class="price-how-label"></span>'
+    +   '<span class="price-how-current"></span>'
+    +   '<span class="price-how-caret" aria-hidden="true">'
+    +     '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>'
+    +   '</span>'
+    + '</button>'
+    + '<div class="price-how-options">'
+    +   '<button type="button" class="price-how-opt" data-pick="per-unit">'
+    +     '<span class="price-how-opt-title"></span><span class="price-how-opt-sub"></span></button>'
+    +   '<button type="button" class="price-how-opt" data-pick="flat-rate">'
+    +     '<span class="price-how-opt-title"></span><span class="price-how-opt-sub"></span></button>'
+    + '</div>';
+  toggle.parentNode.insertBefore(wrap, toggle.nextSibling);
+
+  wrap.querySelector('.price-how-summary').addEventListener('click', () => {
+    const open = wrap.classList.toggle('is-open');
+    wrap.querySelector('.price-how-summary').setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  wrap.querySelectorAll('.price-how-opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const pick = opt.dataset.pick;
+      (pick === 'flat-rate' ? flatBtn : unitBtn).click();   // reuse the real handler
+      wrap.classList.remove('is-open');
+      wrap.querySelector('.price-how-summary').setAttribute('aria-expanded', 'false');
+      refreshPriceHow(toggle);
+    });
+  });
+
+  refreshPriceHow(toggle);
+}
+
+function refreshPriceHow(toggle) {
+  const wrap = document.querySelector(`.price-how[data-for="${toggle.id}"]`);
+  const map = PRICE_HOW[toggle.id];
+  if (!wrap || !map) return;
+  const flatActive = !!toggle.querySelector('[data-substruct="flat-rate"].active');
+
+  wrap.querySelector('.price-how-label').textContent = t('priceHow.pricedBy');
+  wrap.querySelector('.price-how-current').textContent =
+    flatActive ? t(map.flat) : t(map.unit);
+
+  const opts = wrap.querySelectorAll('.price-how-opt');
+  const set = (el, title, sub, on) => {
+    el.querySelector('.price-how-opt-title').textContent = t(title);
+    el.querySelector('.price-how-opt-sub').textContent = t(sub);
+    el.classList.toggle('is-on', on);
+  };
+  set(opts[0], map.unit, 'priceHow.unit.sub', !flatActive);
+  set(opts[1], map.flat, 'priceHow.flat.sub', flatActive);
+}
+
+// The generic trades (Plumbing, Electrical, HVAC, General, Landscaping) have
+// the same problem one level up: Hourly | Flat rate as the first thing on
+// screen. Same treatment, same words.
+function buildTopPriceHow() {
+  const toggle = document.getElementById('pricingToggle');
+  if (!toggle || toggle.dataset.howWrapped) return;
+  const hourlyBtn = toggle.querySelector('[data-mode="hourly"]');
+  const flatBtn = toggle.querySelector('[data-mode="flat"]');
+  if (!hourlyBtn || !flatBtn) return;
+
+  toggle.dataset.howWrapped = '1';
+  const wrap = document.createElement('div');
+  wrap.className = 'price-how';
+  wrap.dataset.for = 'pricingToggle';
+  wrap.innerHTML =
+      '<button type="button" class="price-how-summary" aria-expanded="false">'
+    +   '<span class="price-how-label"></span><span class="price-how-current"></span>'
+    +   '<span class="price-how-caret" aria-hidden="true">'
+    +     '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>'
+    +   '</span></button>'
+    + '<div class="price-how-options">'
+    +   '<button type="button" class="price-how-opt" data-pick="hourly">'
+    +     '<span class="price-how-opt-title"></span><span class="price-how-opt-sub"></span></button>'
+    +   '<button type="button" class="price-how-opt" data-pick="flat">'
+    +     '<span class="price-how-opt-title"></span><span class="price-how-opt-sub"></span></button>'
+    + '</div>';
+  toggle.parentNode.insertBefore(wrap, toggle.nextSibling);
+
+  wrap.querySelector('.price-how-summary').addEventListener('click', () => {
+    const open = wrap.classList.toggle('is-open');
+    wrap.querySelector('.price-how-summary').setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  wrap.querySelectorAll('.price-how-opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      (opt.dataset.pick === 'flat' ? flatBtn : hourlyBtn).click();
+      wrap.classList.remove('is-open');
+      refreshTopPriceHow();
+    });
+  });
+  refreshTopPriceHow();
+}
+
+function refreshTopPriceHow() {
+  const toggle = document.getElementById('pricingToggle');
+  const wrap = document.querySelector('.price-how[data-for="pricingToggle"]');
+  if (!toggle || !wrap) return;
+
+  // Two options collapse cleanly; three don't. Framing can sit on Hourly or
+  // Flat with "Per area" still offered, so there the original toggle stays and
+  // this control steps aside.
+  const framingBtn = document.querySelector('#pricingToggle .framing-only');
+  const framingVisible = !!framingBtn && !framingBtn.classList.contains('hidden');
+  const generic = (pricingMode === 'hourly' || pricingMode === 'flat') && !framingVisible;
+
+  wrap.style.display = generic ? '' : 'none';
+  // setPricingMode has already set the toggle's display; only the generic case
+  // takes it over.
+  if (generic) toggle.style.display = 'none';
+  if (!generic) return;
+
+  const isFlat = pricingMode === 'flat';
+  wrap.querySelector('.price-how-label').textContent = t('priceHow.pricedBy');
+  wrap.querySelector('.price-how-current').textContent = t(isFlat ? 'priceHow.flat' : 'priceHow.hourly');
+  const opts = wrap.querySelectorAll('.price-how-opt');
+  const set = (el, title, sub, on) => {
+    el.querySelector('.price-how-opt-title').textContent = t(title);
+    el.querySelector('.price-how-opt-sub').textContent = t(sub);
+    el.classList.toggle('is-on', on);
+  };
+  set(opts[0], 'priceHow.hourly', 'priceHow.hourly.sub', !isFlat);
+  set(opts[1], 'priceHow.flat', 'priceHow.flat.sub', isFlat);
+}
+
+function initPriceHow() {
+  Object.keys(PRICE_HOW).forEach(id => buildPriceHow(document.getElementById(id)));
+  buildTopPriceHow();
+}
+
+// ---------------------------------------------------------------------------
+// Screen tips
+//
+// One card, once, on first arrival at a screen the tour doesn't cover. It says
+// what the screen is for in a sentence and gets out of the way. Seen state is
+// per screen, so a contractor who only ever uses Quotes and Invoices never
+// sees the other three.
+// ---------------------------------------------------------------------------
+const TIPS_KEY = 'mtd_screen_tips_v1';
+const SCREEN_TIPS = {
+  clients:   { into: 'clientsView',   title: 'tip.clients.title',   text: 'tip.clients.text' },
+  jobs:      { into: 'jobsView',      title: 'tip.jobs.title',      text: 'tip.jobs.text' },
+  invoices:  { into: 'invoicesView',  title: 'tip.invoices.title',  text: 'tip.invoices.text' },
+  payments:  { into: 'paymentsView',  title: 'tip.payments.title',  text: 'tip.payments.text' },
+  followups: { into: 'followupView',  title: 'tip.followups.title', text: 'tip.followups.text' },
+};
+
+function tipsSeen() {
+  try { return JSON.parse(localStorage.getItem(TIPS_KEY) || '{}') || {}; }
+  catch (e) { return {}; }
+}
+function markTipSeen(view) {
+  try {
+    const seen = tipsSeen();
+    seen[view] = 1;
+    localStorage.setItem(TIPS_KEY, JSON.stringify(seen));
+  } catch (e) {}
+}
+
+function dismissScreenTip(view) {
+  const card = document.querySelector(`.screen-tip[data-tip="${view}"]`);
+  if (card) card.remove();
+}
+
+// Leaving a screen takes its tip with it: hidden views keep their DOM, so
+// without this the card is still sitting there when they come back.
+function pruneScreenTips(view) {
+  document.querySelectorAll('.screen-tip').forEach(card => {
+    if (card.dataset.tip !== view) card.remove();
+  });
+}
+
+function maybeShowScreenTip(view) {
+  pruneScreenTips(view);
+  const spec = SCREEN_TIPS[view];
+  if (!spec) return;
+  if (tipsSeen()[view]) return;
+  // Don't stack a tip under the guided tour or the welcome card.
+  if (document.querySelector('.tour-card, .tour-welcome')) return;
+  const host = document.getElementById(spec.into);
+  if (!host || host.classList.contains('hidden')) return;
+  if (host.querySelector('.screen-tip')) return;
+
+  const card = document.createElement('div');
+  card.className = 'screen-tip';
+  card.dataset.tip = view;
+  card.setAttribute('role', 'note');
+  card.innerHTML =
+      '<span class="screen-tip-icon" aria-hidden="true">'
+    +   '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">'
+    +     '<path d="M12 2a7 7 0 0 0-4 12.7V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.3A7 7 0 0 0 12 2Z"/><path d="M10 22h4"/>'
+    +   '</svg></span>'
+    + '<div class="screen-tip-body">'
+    +   '<p class="screen-tip-title"></p><p class="screen-tip-text"></p>'
+    + '</div>'
+    + '<button type="button" class="screen-tip-close">'
+    +   '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+    + '</button>';
+  card.querySelector('.screen-tip-title').textContent = t(spec.title);
+  card.querySelector('.screen-tip-text').textContent = t(spec.text);
+  const close = card.querySelector('.screen-tip-close');
+  close.setAttribute('aria-label', t('tip.dismiss'));
+  close.addEventListener('click', () => dismissScreenTip(view));
+
+  host.insertBefore(card, host.firstChild);
+  markTipSeen(view);
+}
+
+// A tip on screen when the language changes should change with it.
+function refreshScreenTips() {
+  document.querySelectorAll('.screen-tip').forEach(card => {
+    const spec = SCREEN_TIPS[card.dataset.tip];
+    if (!spec) return;
+    card.querySelector('.screen-tip-title').textContent = t(spec.title);
+    card.querySelector('.screen-tip-text').textContent = t(spec.text);
+    card.querySelector('.screen-tip-close').setAttribute('aria-label', t('tip.dismiss'));
+  });
+}
+
+function refreshAllPriceHow() {
+  Object.keys(PRICE_HOW).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) refreshPriceHow(el);
+  });
+  refreshTopPriceHow();
+}
+
+// ---------------------------------------------------------------------------
 // Guided first run
 //
 // Every account so far has signed up, looked once, and never come back. The
@@ -21199,9 +21661,11 @@ const TOUR_STEPS = [
     text: 'tour.s2.text',
   },
   {
-    // The pricing panel only exists once a trade is chosen; falls back to the
-    // empty-state card before that.
-    el: '#sidingPerUnitFields, #pricingEmptyState',
+    // The whole pricing block, not one trade's panel: which panel is open
+    // depends on the trade, and a multi-selector here resolved in document
+    // order — which meant it kept picking the empty state that had just been
+    // hidden by choosing a trade.
+    el: '#pricingSection',
     title: 'tour.s3.title',
     text: 'tour.s3.text',
   },
@@ -21221,6 +21685,7 @@ let tourIndex = 0;
 let tourEls = null;
 let tourKeyHandler = null;
 let tourReflow = null;
+let tourRecovering = false;   // guards positionTour → renderTourStep → positionTour
 
 function tourSeen() {
   try { return localStorage.getItem(TOUR_KEY) === 'done'; }
@@ -21274,11 +21739,40 @@ function tourVisible(el) {
   return r.width > 1 && r.height > 1;
 }
 
+// Half the form doesn't exist until a trade is picked — the job description
+// and the pricing fields are hidden on an untouched quote. The tour used to
+// end itself the moment it hit one of those, which meant a contractor who
+// pressed Next before choosing a trade watched the whole thing vanish. So the
+// step list is whatever is actually on screen right now, recomputed on every
+// move: pick a trade mid-tour and the skipped steps come back.
+function tourStepVisible(i) {
+  const step = TOUR_STEPS[i];
+  return !!step && tourVisible(document.querySelector(step.el));
+}
+
+function visibleTourSteps() {
+  return TOUR_STEPS.map((_, i) => i).filter(tourStepVisible);
+}
+
 function positionTour() {
   if (!tourEls) return;
   const step = TOUR_STEPS[tourIndex];
   const target = document.querySelector(step.el);
-  if (!tourVisible(target)) { endTour(); return; }
+  if (!tourVisible(target)) {
+    // The target went away under us (a trade was deselected, a panel closed).
+    // Move to a step that is still there rather than killing the tour; only
+    // give up when nothing is left to point at.
+    if (tourRecovering) return;
+    const steps = visibleTourSteps();
+    if (!steps.length) { endTour(); return; }
+    tourRecovering = true;
+    try {
+      tourIndex = steps.find(i => i > tourIndex);
+      if (tourIndex === undefined) tourIndex = steps[steps.length - 1];
+      renderTourStep();
+    } finally { tourRecovering = false; }
+    return;
+  }
 
   const r = target.getBoundingClientRect();
   const pad = 6;
@@ -21316,21 +21810,26 @@ function positionTour() {
 function renderTourStep() {
   const { card } = buildTourChrome();
   const step = TOUR_STEPS[tourIndex];
+  // Count only the steps this contractor can actually see, so "Step 2 of 3"
+  // never promises a step that isn't coming.
+  const steps = visibleTourSteps();
+  const here = Math.max(0, steps.indexOf(tourIndex));
+  const total = Math.max(steps.length, 1);
   card.querySelector('.tour-step').textContent =
-    t('tour.stepOf').replace('{n}', tourIndex + 1).replace('{total}', TOUR_STEPS.length);
+    t('tour.stepOf').replace('{n}', here + 1).replace('{total}', total);
   card.querySelector('.tour-title').textContent = t(step.title);
   card.querySelector('.tour-text').textContent = t(step.text);
   card.querySelector('.tour-skip').textContent = t('tour.skip');
 
   const back = card.querySelector('[data-tour="back"]');
   back.textContent = t('tour.back');
-  back.style.display = tourIndex === 0 ? 'none' : '';
+  back.style.display = here === 0 ? 'none' : '';
   card.querySelector('[data-tour="next"]').textContent =
-    tourIndex === TOUR_STEPS.length - 1 ? t('tour.done') : t('tour.next');
+    here >= total - 1 ? t('tour.done') : t('tour.next');
 
   const dots = card.querySelector('.tour-dots');
-  dots.innerHTML = TOUR_STEPS.map((_, i) =>
-    `<span class="tour-dot${i === tourIndex ? ' is-on' : (i < tourIndex ? ' is-done' : '')}"></span>`).join('');
+  dots.innerHTML = steps.map((_, i) =>
+    `<span class="tour-dot${i === here ? ' is-on' : (i < here ? ' is-done' : '')}"></span>`).join('');
 
   const target = document.querySelector(step.el);
   if (target && target.scrollIntoView) {
@@ -21342,10 +21841,17 @@ function renderTourStep() {
 }
 
 function moveTour(delta) {
-  const next = tourIndex + delta;
+  const steps = visibleTourSteps();
+  if (!steps.length) { endTour(); return; }
+  const here = steps.indexOf(tourIndex);
+  // If the current step just disappeared, treat the move as being from the
+  // nearest one that's still there.
+  const from = here >= 0 ? here
+    : Math.max(0, steps.filter(i => i < tourIndex).length - (delta > 0 ? 0 : 1));
+  const next = from + delta;
   if (next < 0) return;
-  if (next >= TOUR_STEPS.length) { endTour(); return; }
-  tourIndex = next;
+  if (next >= steps.length) { endTour(); return; }
+  tourIndex = steps[next];
   renderTourStep();
 }
 
@@ -21355,7 +21861,10 @@ function startTour(fromStart) {
   if (!tourVisible(document.querySelector('#tradesGrid'))) return;
   dismissTourWelcome();
   buildTourChrome();
-  tourIndex = fromStart === false ? tourIndex : 0;
+  const steps = visibleTourSteps();
+  if (!steps.length) return;
+  tourIndex = fromStart === false ? tourIndex : steps[0];
+  if (!tourStepVisible(tourIndex)) tourIndex = steps[0];
   document.body.classList.add('tour-active');
   renderTourStep();
 
